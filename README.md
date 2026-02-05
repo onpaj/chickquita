@@ -64,6 +64,8 @@ Comprehensive documentation is available in the `/docs` directory:
 - **[coding-standards.md](docs/coding-standards.md)** - Code quality guidelines
 - **[test-strategy.md](docs/test-strategy.md)** - Testing approach and coverage
 - **[ui-layout-system.md](docs/ui-layout-system.md)** - Mobile-first design system
+- **[neon-database-setup.md](docs/neon-database-setup.md)** - Neon Postgres database creation guide
+- **[database-connection-guide.md](docs/database-connection-guide.md)** - Database connection configuration
 
 ## Getting Started
 
@@ -86,6 +88,18 @@ npm run dev
 The application will start at `http://localhost:5173`
 
 ### Backend Development
+
+First, configure the database connection:
+
+```bash
+cd backend/ChickenTrack.Api
+cp .env.example .env
+# Edit .env and add your Neon connection string
+```
+
+See [database-connection-guide.md](docs/database-connection-guide.md) for detailed setup instructions.
+
+Then start the backend:
 
 ```bash
 cd backend
