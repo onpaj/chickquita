@@ -6,6 +6,7 @@ using ChickenTrack.Infrastructure;
 using ChickenTrack.Infrastructure.Data;
 using ChickenTrack.Infrastructure.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +52,38 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Serve default files (index.html) before static files
+app.UseDefaultFiles();
+
+// Serve static files with cache headers
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Cache static assets for 30 days in production
+        if (!app.Environment.IsDevelopment())
+        {
+            var path = ctx.File.PhysicalPath;
+            // Cache JS, CSS, images, fonts for 30 days
+            if (path != null && (path.EndsWith(".js") || path.EndsWith(".css") ||
+                path.EndsWith(".png") || path.EndsWith(".jpg") || path.EndsWith(".jpeg") ||
+                path.EndsWith(".svg") || path.EndsWith(".gif") || path.EndsWith(".webp") ||
+                path.EndsWith(".woff") || path.EndsWith(".woff2") || path.EndsWith(".ttf") ||
+                path.EndsWith(".eot")))
+            {
+                ctx.Context.Response.Headers.CacheControl = "public,max-age=2592000"; // 30 days
+            }
+            else if (path != null && path.EndsWith(".html"))
+            {
+                // Don't cache HTML files (especially index.html)
+                ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+                ctx.Context.Response.Headers.Pragma = "no-cache";
+                ctx.Context.Response.Headers.Expires = "0";
+            }
+        }
+    }
+});
+
 // Authentication & Authorization middleware
 app.UseAuthentication();
 
@@ -80,6 +113,10 @@ app.MapWebhooksEndpoints();
 
 // Map users endpoints
 app.MapUsersEndpoints();
+
+// SPA fallback - serve index.html for all non-API routes
+// This must come AFTER API endpoint mapping to ensure API routes take precedence
+app.MapFallbackToFile("index.html");
 
 app.Run();
 
