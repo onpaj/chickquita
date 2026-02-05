@@ -1,0 +1,466 @@
+# Technology Stack
+
+**ChickenTrack (Chickquita)** - Technology choices and architectural decisions for the mobile-first PWA.
+
+**Version:** 1.0
+**Date:** February 5, 2026
+**Status:** Approved
+
+---
+
+## Table of Contents
+
+- [Frontend Technology Stack](#frontend-technology-stack)
+- [UI Component Library & Styling](#ui-component-library--styling)
+- [PWA Stack](#pwa-stack)
+- [Backend Stack (.NET 8)](#backend-stack-net-8)
+- [Authentication Stack](#authentication-stack)
+- [Infrastructure & DevOps](#infrastructure--devops)
+
+---
+
+## Frontend Technology Stack
+
+### Core Framework & Build Tools
+
+**React 18.2+**
+- UI framework with concurrent features for better UX
+- Excellent mobile performance
+- Large ecosystem and community support
+
+**TypeScript 5.0+**
+- Strict mode enabled for maximum type safety
+- Better IDE support and refactoring
+- Catches errors at compile time
+
+**Vite 5.0+** - Build tool
+- Lightning-fast HMR (Hot Module Replacement) for development
+- Optimized production builds with automatic code splitting
+- Native ES modules support
+- Plugin ecosystem for PWA features
+- Significantly faster than webpack
+
+### Routing & Navigation
+
+**React Router 6.20+**
+- Declarative routing with data loading
+- Lazy loading for code splitting
+- Protected route wrappers for authentication
+- Navigation guards for offline mode
+- Nested routes support
+
+### State Management
+
+**Zustand 4.4+** - Client state management (preferred over Redux Toolkit)
+- Simpler API with minimal boilerplate
+- Built-in persistence middleware
+- Better DevTools integration
+- Smaller bundle size (~1KB vs ~12KB for Redux)
+- Easy integration with React Query for server state
+- No provider wrapper needed
+
+**TanStack Query 5.0+** - Server state management
+- Automatic caching and invalidation
+- Background refetching for fresh data
+- Optimistic updates for offline support
+- Request deduplication
+- Built-in loading/error states
+- Polling and real-time updates support
+
+### Forms & Validation
+
+**React Hook Form 7.48+**
+- Uncontrolled components for better performance
+- Native HTML5 validation integration
+- Easy integration with Zod schemas
+- Minimal re-renders (only affected fields)
+- Built-in error handling
+
+**Zod 3.22+** - Schema validation
+- TypeScript-first schema validation
+- Runtime type safety
+- Composable validation rules
+- Shared schemas between frontend/backend
+- Clear error messages
+
+---
+
+## UI Component Library & Styling
+
+### Component Library
+
+**Material-UI (MUI) 5.14+** - Selected over Chakra UI
+
+**Why MUI:**
+- Superior mobile touch optimization out of the box
+- Comprehensive component set (Date pickers, Autocomplete, Data grids)
+- Built-in theming with CSS-in-JS (@emotion)
+- Accessibility (WCAG 2.1 AA) compliance by default
+- Excellent TypeScript support
+- Large community and active maintenance
+- Better date/time picker components (critical for daily records)
+- Touch ripple effects built-in for better mobile feel
+
+### Styling Approach
+
+- **MUI's `sx` prop** for component-level styles
+- **Theme customization** for brand colors, spacing, breakpoints
+- **CSS modules** for complex custom components (if needed)
+- **No styled-components** library to reduce bundle size
+
+### Icons
+
+**@mui/icons-material**
+- Tree-shakeable imports
+- Consistent design language
+- 2000+ icons covering farming/agriculture themes
+- Perfect integration with MUI components
+
+### Data Visualization
+
+**Recharts 2.10+** - Selected over Chart.js
+
+**Why Recharts:**
+- Declarative API (React-like)
+- Responsive by default
+- Touch-friendly charts for mobile
+- Smaller bundle than Chart.js
+- Composable chart components
+- Good enough for MVP charts (egg cost trends, productivity graphs)
+
+---
+
+## PWA Stack
+
+### Service Worker Management
+
+**Workbox 7.0+**
+- Google's production-ready service worker library
+- Precaching strategies for static assets
+- Runtime caching with customizable strategies
+- Background sync queue with retry logic
+- Built-in Vite plugin: `vite-plugin-pwa`
+- Well-documented and battle-tested
+
+### Offline Storage
+
+**Dexie.js 3.2+** - IndexedDB wrapper
+- Clean, promise-based API
+- TypeScript support out of the box
+- Observable queries for reactivity
+- Supports complex queries and indexing
+- Built-in versioning for schema migrations
+- Better than raw IndexedDB API
+
+### Configuration
+
+**vite-plugin-pwa** configuration:
+```javascript
+{
+  registerType: 'autoUpdate',
+  workbox: {
+    globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+    runtimeCaching: [
+      // Network-first for API calls
+      // Cache-first for static assets
+      // Background sync for mutations
+    ]
+  }
+}
+```
+
+### Background Sync
+
+- **Workbox BackgroundSyncPlugin** for queued requests
+- Custom retry logic with exponential backoff
+- Conflict resolution hooks
+- Sync status indicators in UI
+- 24-hour retention for pending requests
+
+### Web App Manifest
+
+- Auto-generated by `vite-plugin-pwa`
+- Icons in multiple sizes (72, 96, 128, 192, 512px)
+- Maskable icons for Android adaptive icons
+- Screenshots for app store listings (Phase 2)
+- Theme color and display mode configuration
+
+### Push Notifications (Phase 2)
+
+- Web Push API
+- Firebase Cloud Messaging (FCM) or Azure Notification Hubs
+- Service worker notification handling
+
+---
+
+## Backend Stack (.NET 8)
+
+### Core Framework
+
+**.NET 8.0 LTS**
+- Long-term support until November 2026
+- Native AOT support for faster cold starts
+- Improved performance over .NET 6/7
+- Built-in minimal API improvements
+- Enhanced JSON serialization
+
+**ASP.NET Core 8.0**
+- **Minimal APIs** for lightweight endpoints (preferred for MVP)
+- Can migrate to Controllers if complexity grows
+- Built-in OpenAPI/Swagger support
+- Rate limiting middleware (new in .NET 7+)
+- Enhanced middleware pipeline
+
+### Data Access
+
+**Azure.Data.Tables 12.8+**
+- Official Azure Table Storage client
+- Async/await support throughout
+- Batch operations for performance
+- LINQ-like query syntax
+- Native support for partition/row keys
+
+**Note:** Entity Framework Core doesn't support Table Storage directly. EF Core can be added later for potential SQL Database migration in Phase 2+.
+
+### Validation & Mapping
+
+**FluentValidation 11.9+**
+- Fluent API for validation rules
+- Async validation support
+- Custom validators
+- Integration with ASP.NET Core (automatic validation)
+- Clear, testable validation logic
+
+**AutoMapper 12.0+**
+- DTO to Entity mapping
+- Profile-based configuration
+- Projection support for queries
+- Reduces boilerplate mapping code
+
+### Logging
+
+**Microsoft.Extensions.Logging** - Standard .NET logging
+- Built-in console and debug providers
+- Application Insights integration
+- Structured logging support
+- Log level filtering
+- Scoped logging context
+
+**Application Insights SDK**
+- Automatic request tracking
+- Exception logging
+- Performance metrics
+- Custom event tracking
+- Distributed tracing
+
+---
+
+## Authentication Stack
+
+### Future-Proof Design
+
+**ASP.NET Core Identity 8.0** - Core authentication framework
+- User management and password hashing
+- Extensible authentication schemes
+- Built-in support for external login providers
+- Custom UserStore for Azure Table Storage
+
+### Authentication Approach
+
+**MVP (Phase 1):**
+- Email + Password authentication
+- JWT Bearer tokens (access + refresh)
+- Password reset via email
+
+**Phase 2 - Federated Identity:**
+- Google OAuth 2.0 (`Microsoft.AspNetCore.Authentication.Google`)
+- Facebook OAuth 2.0 (`Microsoft.AspNetCore.Authentication.Facebook`)
+- Microsoft Identity (`Microsoft.AspNetCore.Authentication.MicrosoftAccount`)
+
+### Architecture for Future Providers
+
+**User Entity Structure:**
+- `AuthProvider` enum (Email, Google, Facebook, Microsoft)
+- `ExternalLoginId` field for provider-specific user IDs
+- Email remains primary identifier
+- Single user can have multiple auth methods linked
+
+### JWT Configuration
+
+**System.IdentityModel.Tokens.Jwt 7.0+**
+- Token generation with custom claims
+- Signature validation with RSA/HMAC
+- Expiration handling
+
+**Token Strategy:**
+- **Access token:** 15 min expiration, stored in memory
+- **Refresh token:** 30 days, HttpOnly cookie with CSRF protection
+- **Token claims:** UserId, TenantId, Email, AuthProvider
+
+---
+
+## Infrastructure & DevOps
+
+### Azure Services
+
+**Azure Container Apps** - Primary hosting
+- Managed container orchestration
+- Auto-scaling (0-N replicas)
+- HTTPS out of the box
+- Custom domain support
+- Cost-effective pay-per-use model
+- ~10-30 EUR/month estimated
+
+**Azure Table Storage** - NoSQL database
+- Cost-friendly (0.045 USD/GB/month)
+- Auto-scaling
+- Partition key = TenantId (perfect isolation)
+- Schema flexibility
+- High availability
+
+**Azure Blob Storage** - Static assets
+- CDN integration (Phase 2)
+- Image storage for future photo uploads
+- Cost-effective
+
+**Azure Application Insights** - Monitoring
+- Request tracking
+- Exception logging
+- Performance metrics
+- Custom events
+- Distributed tracing
+
+**Azure Key Vault** - Secrets management
+- JWT signing keys
+- Connection strings
+- API keys
+- Managed identities integration
+
+### Containerization
+
+**Container Strategy: Single Image Deployment**
+- Monorepo builds into one container image
+- Frontend: Built as static files, served by ASP.NET Core
+- Backend: ASP.NET Core serves both API and static SPA
+- Static files served from `wwwroot` folder
+- Simpler deployment, single service
+
+**Podman** - Container engine
+- Docker-compatible container runtime
+- Rootless containers for better security
+- Drop-in replacement for Docker CLI
+- No daemon requirement
+
+**Multi-stage Dockerfile:**
+```dockerfile
+# Stage 1: Build frontend
+FROM node:20-alpine AS frontend-build
+WORKDIR /app/frontend
+COPY src/frontend/package*.json ./
+RUN npm ci
+COPY src/frontend ./
+RUN npm run build
+
+# Stage 2: Build backend
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS backend-build
+WORKDIR /app
+COPY src/backend/*.sln ./
+COPY src/backend/**/*.csproj ./
+RUN dotnet restore
+COPY src/backend ./
+RUN dotnet publish -c Release -o /app/publish
+
+# Stage 3: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
+WORKDIR /app
+COPY --from=backend-build /app/publish ./
+COPY --from=frontend-build /app/frontend/dist ./wwwroot
+EXPOSE 80
+ENTRYPOINT ["dotnet", "ChickenTrack.Api.dll"]
+```
+
+### Container Registry
+
+**Docker Hub** - Selected over Azure Container Registry
+- Free public/private repositories
+- Simpler setup than ACR
+- `podman push docker.io/username/chickquita:latest`
+- Azure Container Apps can pull from Docker Hub
+- No additional Azure service costs
+
+### Development Mode
+
+**No Docker Compose needed** - Just one container for production
+
+**Local Development:**
+- **Frontend:** `npm run dev` (port 5173, Vite HMR)
+- **Backend:** `dotnet run` (port 5000, hot reload)
+- Frontend proxies API calls to backend in dev mode
+
+### CI/CD Pipeline
+
+**GitHub Actions** - Selected over Azure DevOps
+- Simpler integration with GitHub
+- Free for public/private repositories
+- Workflow triggers: push to main, PR creation
+- Environment-based secrets
+
+**Pipeline Stages:**
+1. **Build & Test** - Backend + Frontend tests
+2. **Lighthouse CI** - PWA performance audit
+3. **Docker Build** - Multi-stage image build
+4. **Push to Docker Hub** - Tag with git SHA
+5. **Deploy to Azure** - Container Apps deployment
+6. **Smoke Tests** - Basic health checks
+
+**Triggers:**
+- Push to `main` → Deploy to production
+- Pull request → Run tests and Lighthouse audit
+
+### Development Tools
+
+**Backend:**
+- **Rider** - JetBrains .NET IDE
+- **Azure CLI** - Resource management
+- **.NET CLI** - Project commands
+
+**Frontend:**
+- **VS Code** - Primary frontend IDE
+- Extensions: ESLint, Prettier, Volar (Vue/TS)
+
+**Containers:**
+- **Podman Desktop** - Container management UI
+- **Podman CLI** - Container operations
+
+---
+
+## Version Control
+
+**Git Strategy:**
+- **Main branch** - Production-ready code
+- **Feature branches** - `feature/123-description`
+- **Fix branches** - `fix/456-description`
+- No develop branch - trunk-based development
+- Squash merge to main via PR
+
+---
+
+## Summary
+
+This technology stack prioritizes:
+- ✅ **Mobile-first performance** - Fast load times, smooth UX
+- ✅ **Offline capabilities** - PWA with service workers and IndexedDB
+- ✅ **Developer experience** - Modern tools, fast builds, great DX
+- ✅ **Type safety** - TypeScript frontend, C# backend
+- ✅ **Cost efficiency** - Azure Table Storage, Container Apps scaling
+- ✅ **Future flexibility** - Can add federated auth, SQL database, CDN
+
+**Bundle Size Budget:**
+- Main bundle: < 150KB
+- Vendor bundle: < 200KB
+- Total: < 350KB (gzipped)
+
+**Performance Targets:**
+- Lighthouse Score: > 90 (all categories)
+- First Contentful Paint: < 1.5s
+- Time to Interactive: < 3.5s
