@@ -2,7 +2,7 @@
 
 **ChickenTrack (Chickquita)** - Technology choices and architectural decisions for the mobile-first PWA.
 
-**Version:** 1.0
+**Version:** 2.0
 **Date:** February 5, 2026
 **Status:** Approved
 
@@ -213,14 +213,27 @@
 
 ### Data Access
 
-**Azure.Data.Tables 12.8+**
-- Official Azure Table Storage client
-- Async/await support throughout
-- Batch operations for performance
-- LINQ-like query syntax
-- Native support for partition/row keys
+**Entity Framework Core 8.0+** - ORM for Neon Postgres
+- Code-First approach with migrations
+- LINQ query support
+- Change tracking and automatic updates
+- Connection pooling and retry logic
+- Global query filters for tenant isolation
+- Migration tooling via `dotnet ef`
 
-**Note:** Entity Framework Core doesn't support Table Storage directly. EF Core can be added later for potential SQL Database migration in Phase 2+.
+**Npgsql.EntityFrameworkCore.PostgreSQL 8.0+**
+- PostgreSQL provider for EF Core
+- Full support for PostgreSQL 16 features
+- JSON column support
+- Array types support
+- Async/await throughout
+
+**Database Design:**
+- Row-Level Security (RLS) for tenant isolation
+- `tenant_id` column on all tables
+- Foreign key relationships for referential integrity
+- Indexes on frequently queried columns
+- Automatic `created_at`/`updated_at` triggers
 
 ### Validation & Mapping
 
@@ -257,45 +270,74 @@
 
 ## Authentication Stack
 
-### Future-Proof Design
+### Clerk.com - Authentication Platform
 
-**ASP.NET Core Identity 8.0** - Core authentication framework
-- User management and password hashing
-- Extensible authentication schemes
-- Built-in support for external login providers
-- Custom UserStore for Azure Table Storage
+**Why Clerk:**
+- ✅ Battle-tested authentication (SOC 2 Type II certified)
+- ✅ Pre-built UI components (sign-in, sign-up, user profile)
+- ✅ Automatic token management and refresh
+- ✅ Email verification built-in
+- ✅ Password reset flows handled
+- ✅ Rate limiting managed
+- ✅ Security best practices enforced
+- ✅ Free tier: 10,000 monthly active users
 
-### Authentication Approach
+**Clerk.BackendAPI (NuGet)** - .NET integration
+- JWT token validation
+- Webhook signature verification
+- User sync capabilities
+- Middleware for ASP.NET Core
+
+**@clerk/clerk-react (npm)** - Frontend integration
+- React hooks: `useAuth()`, `useUser()`, `useSession()`
+- Pre-built components: `<SignIn />`, `<SignUp />`, `<UserButton />`
+- Automatic token refresh
+- Protected route components
+
+### Authentication Flow
 
 **MVP (Phase 1):**
-- Email + Password authentication
-- JWT Bearer tokens (access + refresh)
-- Password reset via email
+- Email + Password via Clerk hosted UI
+- JWT Bearer tokens (managed by Clerk)
+- Automatic token refresh (7 days default)
+- Password reset via Clerk
+- Email verification via Clerk
 
-**Phase 2 - Federated Identity:**
-- Google OAuth 2.0 (`Microsoft.AspNetCore.Authentication.Google`)
-- Facebook OAuth 2.0 (`Microsoft.AspNetCore.Authentication.Facebook`)
-- Microsoft Identity (`Microsoft.AspNetCore.Authentication.MicrosoftAccount`)
+**Phase 2 - Social Logins:**
+- Google OAuth (Clerk free tier)
+- Facebook OAuth (Clerk free tier)
+- GitHub OAuth (Clerk free tier)
+- Multi-factor authentication (requires Clerk Pro tier - $25/month)
 
-### Architecture for Future Providers
+### Backend Integration
 
-**User Entity Structure:**
-- `AuthProvider` enum (Email, Google, Facebook, Microsoft)
-- `ExternalLoginId` field for provider-specific user IDs
-- Email remains primary identifier
-- Single user can have multiple auth methods linked
+**JWT Validation:**
+```csharp
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = $"https://{clerkDomain}";
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = $"https://{clerkDomain}",
+            ValidateAudience = false,
+            ValidateLifetime = true
+        };
+    });
+```
 
-### JWT Configuration
+**Webhook Integration:**
+- Event: `user.created` → Create tenant in database
+- Event: `user.updated` → Update tenant information
+- Event: `user.deleted` → Soft delete tenant
+- Signature verification via Svix library
 
-**System.IdentityModel.Tokens.Jwt 7.0+**
-- Token generation with custom claims
-- Signature validation with RSA/HMAC
-- Expiration handling
-
-**Token Strategy:**
-- **Access token:** 15 min expiration, stored in memory
-- **Refresh token:** 30 days, HttpOnly cookie with CSRF protection
-- **Token claims:** UserId, TenantId, Email, AuthProvider
+**User-to-Tenant Mapping:**
+- Clerk `userId` stored as `clerk_user_id` in `tenants` table
+- Automatic tenant creation via webhook on sign-up
+- `ClerkUserId` → `TenantId` lookup on each request
+- Row-Level Security context set based on tenant
 
 ---
 
@@ -311,12 +353,15 @@
 - Cost-effective pay-per-use model
 - ~10-30 EUR/month estimated
 
-**Azure Table Storage** - NoSQL database
-- Cost-friendly (0.045 USD/GB/month)
-- Auto-scaling
-- Partition key = TenantId (perfect isolation)
-- Schema flexibility
-- High availability
+**Neon Postgres** - Serverless PostgreSQL database
+- Cost-friendly (Free tier: 0.5GB storage, 1 project)
+- Serverless auto-scaling and auto-pause
+- PostgreSQL 16 with full feature support
+- Row-Level Security (RLS) for tenant isolation
+- Automatic backups and point-in-time recovery
+- Connection pooling built-in
+- Branch database feature for dev/staging
+- Upgrade: ~$20/month for 10GB when needed
 
 **Azure Blob Storage** - Static assets
 - CDN integration (Phase 2)
@@ -331,10 +376,17 @@
 - Distributed tracing
 
 **Azure Key Vault** - Secrets management
-- JWT signing keys
-- Connection strings
+- Neon connection string
+- Clerk secret key and webhook secret
 - API keys
 - Managed identities integration
+
+**Clerk** - Authentication service
+- Hosted authentication UI
+- User management
+- JWT token issuing and validation
+- Webhook integration for user sync
+- Free tier: 10k monthly active users
 
 ### Containerization
 
@@ -452,8 +504,9 @@ This technology stack prioritizes:
 - ✅ **Offline capabilities** - PWA with service workers and IndexedDB
 - ✅ **Developer experience** - Modern tools, fast builds, great DX
 - ✅ **Type safety** - TypeScript frontend, C# backend
-- ✅ **Cost efficiency** - Azure Table Storage, Container Apps scaling
-- ✅ **Future flexibility** - Can add federated auth, SQL database, CDN
+- ✅ **Cost efficiency** - Neon Postgres free tier, Container Apps scaling
+- ✅ **Security** - Clerk authentication (SOC 2), Row-Level Security (RLS)
+- ✅ **Relational data** - PostgreSQL for complex queries and joins
 
 **Bundle Size Budget:**
 - Main bundle: < 150KB

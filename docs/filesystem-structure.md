@@ -2,7 +2,7 @@
 
 **ChickenTrack (Chickquita)** - Complete directory layout for the monorepo with vertical slice architecture.
 
-**Version:** 1.0
+**Version:** 2.0
 **Date:** February 5, 2026
 **Status:** Approved
 
@@ -131,31 +131,20 @@ ChickenTrack.Application/
 │   └── Exceptions/
 │       └── ValidationException.cs  # Validation failure exception
 └── Features/                       # Feature slices (vertical)
-    ├── Auth/
+    ├── Users/
     │   ├── Commands/
-    │   │   ├── Register/
-    │   │   │   ├── RegisterCommand.cs
-    │   │   │   ├── RegisterCommandHandler.cs
-    │   │   │   └── RegisterCommandValidator.cs
-    │   │   ├── Login/
-    │   │   │   ├── LoginCommand.cs
-    │   │   │   ├── LoginCommandHandler.cs
-    │   │   │   └── LoginCommandValidator.cs
-    │   │   ├── RefreshToken/
-    │   │   │   ├── RefreshTokenCommand.cs
-    │   │   │   └── RefreshTokenCommandHandler.cs
-    │   │   └── ForgotPassword/
-    │   │       ├── ForgotPasswordCommand.cs
-    │   │       └── ForgotPasswordCommandHandler.cs
+    │   │   └── SyncUser/
+    │   │       ├── SyncUserCommand.cs       # Clerk webhook handler
+    │   │       ├── SyncUserCommandHandler.cs
+    │   │       └── SyncUserCommandValidator.cs
     │   ├── Queries/
     │   │   └── GetCurrentUser/
     │   │       ├── GetCurrentUserQuery.cs
     │   │       └── GetCurrentUserQueryHandler.cs
     │   ├── DTOs/
-    │   │   ├── AuthResponse.cs
     │   │   ├── UserDto.cs
-    │   │   └── TokenDto.cs
-    │   └── AuthEndpoints.cs        # Minimal API endpoint registration
+    │   │   └── ClerkWebhookDto.cs
+    │   └── UsersEndpoints.cs        # Minimal API endpoint registration
     ├── Coops/
     │   ├── Commands/
     │   │   ├── CreateCoop/
@@ -276,8 +265,7 @@ ChickenTrack.Domain/
 │   └── DateRange.cs                # Start + End dates
 ├── Enums/
 │   ├── ChangeType.cs               # Adjustment, Maturation
-│   ├── PurchaseType.cs             # Krmivo, Vitamíny, Stelivo, etc.
-│   └── AuthProvider.cs             # Email, Google, Facebook, Microsoft
+│   └── PurchaseType.cs             # Krmivo, Vitamíny, Stelivo, etc.
 ├── Exceptions/                     # Domain exceptions
 │   ├── DomainException.cs          # Base domain exception
 │   ├── InvalidFlockCompositionException.cs
@@ -305,27 +293,29 @@ ChickenTrack.Domain/
 ```
 ChickenTrack.Infrastructure/
 ├── Persistence/
-│   ├── TableStorage/
-│   │   ├── TableStorageContext.cs      # Azure Table client wrapper
-│   │   ├── Repositories/               # Repository implementations
-│   │   │   ├── TenantRepository.cs
-│   │   │   ├── CoopRepository.cs
-│   │   │   ├── FlockRepository.cs
-│   │   │   ├── PurchaseRepository.cs
-│   │   │   └── DailyRecordRepository.cs
-│   │   └── Converters/                 # Entity ↔ TableEntity mapping
-│   │       ├── CoopConverter.cs        # Convert Coop to/from TableEntity
-│   │       ├── FlockConverter.cs
-│   │       └── EntityMapperBase.cs     # Shared mapping logic
-│   └── Configurations/
-│       └── TableNames.cs               # Centralized table name constants
-├── Identity/
-│   ├── ApplicationUser.cs              # Identity user entity
-│   ├── TableStorageUserStore.cs        # Custom UserStore for Table Storage
-│   └── JwtTokenService.cs              # JWT generation and validation
+│   ├── ApplicationDbContext.cs         # EF Core DbContext
+│   ├── Configurations/                 # Entity configurations (Fluent API)
+│   │   ├── TenantConfiguration.cs
+│   │   ├── CoopConfiguration.cs
+│   │   ├── FlockConfiguration.cs
+│   │   ├── FlockHistoryConfiguration.cs
+│   │   ├── PurchaseConfiguration.cs
+│   │   └── DailyRecordConfiguration.cs
+│   ├── Repositories/                   # Repository implementations
+│   │   ├── TenantRepository.cs
+│   │   ├── CoopRepository.cs
+│   │   ├── FlockRepository.cs
+│   │   ├── PurchaseRepository.cs
+│   │   └── DailyRecordRepository.cs
+│   ├── Migrations/                     # EF Core migrations
+│   │   └── YYYYMMDDHHMMSS_InitialCreate.cs
+│   └── Interceptors/
+│       └── TenantInterceptor.cs        # Auto-apply RLS context
+├── Authentication/
+│   ├── ClerkJwtValidator.cs            # Validates Clerk JWT tokens
+│   └── ClerkWebhookValidator.cs        # Validates webhook signatures
 ├── Services/                           # Service implementations
 │   ├── CurrentUserService.cs           # Resolves current user from HttpContext
-│   ├── EmailService.cs                 # Email sending (password reset)
 │   └── DateTimeService.cs              # Testable DateTime.UtcNow
 └── DependencyInjection.cs              # Infrastructure service registration
 ```
@@ -343,10 +333,10 @@ ChickenTrack.Infrastructure/
 ChickenTrack.Tests/
 ├── Application.Tests/              # Feature/slice tests
 │   ├── Features/
-│   │   ├── Auth/
-│   │   │   ├── RegisterCommandTests.cs
-│   │   │   ├── LoginCommandTests.cs
-│   │   │   └── RegisterValidatorTests.cs
+│   │   ├── Users/
+│   │   │   ├── SyncUserCommandTests.cs
+│   │   │   ├── GetCurrentUserQueryTests.cs
+│   │   │   └── SyncUserValidatorTests.cs
 │   │   ├── Coops/
 │   │   │   ├── CreateCoopCommandTests.cs
 │   │   │   ├── GetCoopsQueryTests.cs
@@ -373,21 +363,21 @@ ChickenTrack.Tests/
 │       └── EmailTests.cs
 ├── Integration.Tests/              # API + Database integration
 │   ├── Features/
-│   │   ├── Auth/
-│   │   │   └── AuthEndpointsTests.cs
+│   │   ├── Users/
+│   │   │   └── UsersEndpointsTests.cs
 │   │   ├── Coops/
 │   │   │   └── CoopsEndpointsTests.cs
 │   │   └── Flocks/
 │   │       └── FlocksEndpointsTests.cs
 │   ├── Infrastructure/
 │   │   └── Repositories/
-│   │       ├── FlockRepositoryTests.cs  # Azure Table Storage Emulator
+│   │       ├── FlockRepositoryTests.cs  # Postgres test database
 │   │       ├── CoopRepositoryTests.cs
 │   │       └── DailyRecordRepositoryTests.cs
 │   └── TestUtilities/
 │       ├── ChickenTrackWebApplicationFactory.cs  # Test server
 │       ├── IntegrationTestBase.cs
-│       ├── TableStorageFixture.cs
+│       ├── PostgresFixture.cs          # Test database setup
 │       └── AutoMoqDataAttribute.cs     # AutoFixture + Moq
 └── README.md                       # Test execution guide
 ```
@@ -443,22 +433,17 @@ src/
 ├── features/                       # Feature modules (vertical slices)
 │   ├── auth/
 │   │   ├── components/
-│   │   │   ├── LoginForm.tsx
-│   │   │   ├── RegisterForm.tsx
-│   │   │   └── PasswordResetForm.tsx
+│   │   │   ├── ProtectedRoute.tsx  # Route wrapper for auth
+│   │   │   └── UserButton.tsx      # Clerk UserButton wrapper
 │   │   ├── hooks/
-│   │   │   ├── useAuth.ts
-│   │   │   ├── useLogin.ts
-│   │   │   └── useRegister.ts
-│   │   ├── api/
-│   │   │   └── authApi.ts          # API calls for auth
+│   │   │   └── useAuth.ts          # Wraps @clerk/clerk-react hooks
 │   │   ├── types/
 │   │   │   └── auth.types.ts
 │   │   ├── pages/
-│   │   │   ├── LoginPage.tsx
-│   │   │   └── RegisterPage.tsx
+│   │   │   ├── SignInPage.tsx      # Clerk <SignIn /> component
+│   │   │   └── SignUpPage.tsx      # Clerk <SignUp /> component
 │   │   └── store/
-│   │       └── authStore.ts        # Zustand slice for auth state
+│   │       └── authStore.ts        # Optional local auth state
 │   ├── coops/
 │   │   ├── components/
 │   │   │   ├── CoopCard.tsx
@@ -570,8 +555,10 @@ src/
 │       └── config.ts               # App configuration
 ├── lib/                            # Third-party library setup
 │   ├── api/
-│   │   ├── axios.ts                # Axios instance with interceptors
+│   │   ├── axios.ts                # Axios instance with Clerk token interceptor
 │   │   └── queryClient.ts          # TanStack Query configuration
+│   ├── clerk/
+│   │   └── clerkConfig.ts          # Clerk provider configuration
 │   ├── pwa/
 │   │   ├── serviceWorker.ts        # SW registration
 │   │   ├── syncQueue.ts            # Background sync queue
@@ -617,11 +604,11 @@ tests/
 │   ├── daily-records.spec.ts
 │   ├── offline-mode.spec.ts
 │   ├── pages/                      # Page Object Models
-│   │   ├── LoginPage.ts
+│   │   ├── SignInPage.ts           # Clerk sign-in page
 │   │   ├── DashboardPage.ts
 │   │   └── FlockDetailPage.ts
 │   └── helpers/
-│       └── auth.ts                 # Auth helpers for tests
+│       └── auth.ts                 # Clerk auth helpers for tests
 └── setup.ts                        # Test environment setup
 ```
 

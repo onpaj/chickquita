@@ -1,481 +1,506 @@
 # Product Requirements Document: ChickenTrack PWA
 
-**Version:** 1.0  
-**Datum:** 4. února 2026  
-**Autor:** Ondřej (Ondra)  
-**Status:** Draft for Review
+**Version:** 2.0
+**Date:** February 5, 2026
+**Author:** Ondřej (Ondra)
+**Status:** Approved
 
 ---
 
 ## Executive Summary
 
-ChickenTrack je PWA aplikace pro sledování finanční rentability chovu slepic s multi-tenant architekturou. Aplikace je primárně navržena jako **mobile-first** řešení, které umožňuje chovatelům efektivně evidovat náklady, produkci a vypočítat ekonomickou efektivitu chovu přímo u kurníků s podporou offline režimu.
+ChickenTrack is a PWA application for tracking the financial profitability of chicken farming with multi-tenant architecture. The application is designed with a **mobile-first** approach, enabling farmers to efficiently record costs, production, and calculate economic efficiency directly at the chicken coops with offline mode support.
 
-### Klíčové hodnoty
-- 📱 **Mobile-first PWA** - optimalizováno pro použití na mobilu venku
-- 💰 **Finanční transparentnost** - přesný výpočet ceny vejce
-- 📊 **Datově řízená rozhodnutí** - statistiky a trendy
-- 🔒 **Multi-tenant** - izolace dat mezi chovateli
-- 📴 **Offline-first** - funguje i bez připojení
-
----
-
-## 1. Cíle Produktu
-
-### Primární cíle
-1. **Mobile-first PWA přístup** - aplikace primárně navržena pro použití na mobilu venku u kurníků
-2. Umožnit chovateli přesně sledovat náklady na chov
-3. Vypočítat skutečnou cenu jednoho vejce včetně všech nákladů
-4. Evidovat historický vývoj hejna a produkce
-5. Poskytovat data pro rozhodování o ekonomické udržitelnosti chovu
-
-### Metriky úspěchu
-- Denní logování produkce vajec > 90% dnů
-- Přesná evidence všech nákladů
-- User retention rate 30+ dní
-- Offline usage > 40% všech interakcí
-- Lighthouse score > 90 (všechny kategorie)
-
-### Use Case Scenario (typické použití)
-```
-07:00 - Chovatel jde ke kurníkům
-      → Otevře PWA na mobilu (instant load z cache)
-      → Quick action: "Přidat denní záznam"
-      → Vybere hejno z dropdownu
-      → Zadá počet vajec
-      → Save (funguje i offline)
-      → Data se synchronizují když se vrátí domů
-```
+### Key Values
+- 📱 **Mobile-first PWA** - optimized for mobile use outdoors
+- 💰 **Financial transparency** - precise egg cost calculation
+- 📊 **Data-driven decisions** - statistics and trends
+- 🔒 **Multi-tenant** - data isolation between farmers
+- 📴 **Offline-first** - works without connection
 
 ---
 
-## 2. Uživatelské Persony
+## 1. Product Goals
 
-### Persona 1: Hobby chovatel (Primární)
-**Profil:**
-- Věk: 35-55 let
-- Má 1-2 kurníky, celkem 5-20 slepic
-- Chov jako koníček, částečná soběstačnost
-- Technicky zdatný (smartphone každý den)
+### Primary Goals
+1. **Mobile-first PWA approach** - application primarily designed for mobile use outdoors at chicken coops
+2. Enable farmers to accurately track breeding costs
+3. Calculate the true cost of one egg including all expenses
+4. Record historical flock development and production
+5. Provide data for economic sustainability decisions
 
-**Motivace:**
-- Chce vědět, jestli se mu chov vyplací
-- Zajímá ho ekonomická stránka
-- Potřebuje jednoduchou evidenci bez zbytečné komplexity
+### Success Metrics
+- Daily egg production logging > 90% of days
+- Accurate recording of all costs
+- User retention rate 30+ days
+- Offline usage > 40% of all interactions
+- Lighthouse score > 90 (all categories)
+
+### Use Case Scenario (typical usage)
+```
+07:00 - Farmer goes to chicken coops
+      → Opens PWA on mobile (instant load from cache)
+      → Quick action: "Add daily record"
+      → Selects flock from dropdown
+      → Enters egg count
+      → Save (works offline)
+      → Data syncs when returning home
+```
+
+---
+
+## 2. User Personas
+
+### Persona 1: Hobby Breeder (Primary)
+**Profile:**
+- Age: 35-55 years
+- Has 1-2 coops, total 5-20 chickens
+- Breeding as hobby, partial self-sufficiency
+- Technically proficient (smartphone daily)
+
+**Motivation:**
+- Wants to know if breeding is profitable
+- Interested in economic aspects
+- Needs simple tracking without unnecessary complexity
 
 **Pain Points:**
-- Neví přesně, kolik ho stojí jedno vejce
-- Zapomíná zaznamenávat produkci
-- Neví, kdy obměnit hejno
+- Doesn't know exactly how much one egg costs
+- Forgets to record production
+- Doesn't know when to replace flock
 
 **Goals:**
-- Rychle zadat denní produkci (< 30 sekund)
-- Vidět ekonomiku na první pohled
-- Minimální čas strávený administrací
+- Quickly enter daily production (< 30 seconds)
+- See economics at a glance
+- Minimal time on administration
 
-### Persona 2: Semi-profesionální chovatel (Sekundární)
-**Profil:**
-- Věk: 40-65 let
-- Více kurníků, větší hejna (50+ slepic)
-- Chov jako vedlejší příjem
-- Aktivně optimalizuje náklady
+### Persona 2: Semi-professional Breeder (Secondary)
+**Profile:**
+- Age: 40-65 years
+- Multiple coops, larger flocks (50+ chickens)
+- Breeding as side income
+- Actively optimizes costs
 
-**Motivace:**
-- Potřebuje detailní statistiky a trendy
-- Porovnává produktivitu hejen
-- Plánuje expanzi nebo redukci
+**Motivation:**
+- Needs detailed statistics and trends
+- Compares flock productivity
+- Plans expansion or reduction
 
 **Pain Points:**
-- Excel tabulky jsou nepřehledné
-- Ztráta dat při havárii počítače
-- Složité sdílení s rodinou
+- Excel spreadsheets are messy
+- Data loss during computer failure
+- Difficult sharing with family
 
 **Goals:**
-- Vidět produktivitu po hejnech
-- Srovnávat různá krmiva
-- Export dat pro účetnictví
+- See productivity by flock
+- Compare different feeds
+- Export data for accounting
 
 ---
 
-## 3. Funkční Požadavky
+## 3. Functional Requirements
 
-### 3.1 Autentizace & Multi-tenancy
+### 3.1 Authentication & Multi-tenancy
 
-#### Registrace
-- **Email + heslo**
-  - Validace email formátu
-  - Heslo: min 8 znaků, 1 velké písmeno, 1 číslo
-- **Vytvoření tenantu** - automaticky pro každého uživatele
-- **Welcome email** (volitelné - Phase 2)
+#### Technology: Clerk.com
 
-#### Přihlášení
-- Email + heslo
-- **Session persistence: 30 dní** (refresh token)
-- "Zapomenutí hesla" flow:
-  - Reset link na email
-  - Platnost 24 hodin
-  - Nové heslo
+ChickenTrack uses **Clerk** for authentication management, providing:
+- Secure, battle-tested authentication
+- Pre-built UI components
+- Email + password authentication (MVP)
+- Future: Social logins (Google, Facebook)
+- Session management (7 days default)
+- Email verification
+- Password reset flows
 
-#### Bezpečnost
-- JWT token-based authentication
-- Refresh token rotation
-- Izolace dat mezi tenanty (partition key: TenantId)
-- Rate limiting na login endpoint
+#### Registration
+- **Clerk hosted sign-up UI**
+  - Email validation
+  - Password: min 8 characters, 1 uppercase, 1 number
+- **Automatic tenant creation** - each user gets their own tenant
+- Welcome email (optional - Phase 2)
+
+#### Sign-in
+- Clerk hosted sign-in UI
+- **Session persistence: 7 days** (Clerk default, configurable)
+- "Forgot password" flow:
+  - Reset link via email
+  - Valid for 24 hours
+  - New password
+
+#### Security
+- JWT token-based authentication (managed by Clerk)
+- Automatic token refresh (Clerk SDK handles)
+- Data isolation between tenants (Postgres RLS)
+- Rate limiting on auth endpoints (Clerk managed)
 - HTTPS only
 
-### 3.2 Agenda: Správa Slepic (Hierarchie)
-
-#### 3.2.1 Kurník (Coop)
-
-**Atributy:**
-- Název (povinný, max 100 znaků)
-- Lokace (text, volitelný, max 200 znaků)
-- Datum vytvoření (automaticky)
-- Status: Aktivní / Archivovaný
-
-**Operace:**
-- Vytvořit kurník
-- Upravit kurník (název, lokace)
-- Archivovat kurník (soft delete)
-- Obnovit archivovaný kurník
-- Smazat kurník (pouze pokud nemá hejna)
-
-**Business pravidla:**
-- Každý tenant může mít neomezený počet kurníků
-- Název musí být unikátní v rámci tenantu
-- Archivovaný kurník se nezobrazuje v seznamech
-
-#### 3.2.2 Hejno (Flock)
-
-**Atributy:**
-- Referenční ID/označení (povinný, max 50 znaků, např. "Hnědé 2024")
-- Datum líhnutí (povinný)
-- Kurník (vazba, povinný)
-- **Počáteční složení:**
-  - Počet slepic (povinný, >= 0)
-  - Počet kohoutů (povinný, >= 0)
-  - **Počet kuřat (povinný, >= 0)**
-- Aktuální složení (vypočítáno z historie)
-- Datum vytvoření
-- Status: Aktivní / Archivované
-
-**Operace:**
-- Vytvořit hejno
-- Upravit základní údaje (název, datum líhnutí)
-- Archivovat hejno
-- Zobrazit historii změn
-- **Převést kuřata na dospělé**
-- Manuální úprava složení
-
-**Business pravidla:**
-- Hejno musí patřit k aktivnímu kurníku
-- Označení musí být unikátní v rámci kurníku
-- Při archivaci hejna se archivují i denní záznamy
-- Minimálně jedna kategorie musí být > 0
-
-#### 3.2.3 Historie složení hejna (FlockHistory)
-
-**Atributy:**
-- Datum změny (povinný)
-- Počet slepic (povinný)
-- Počet kohoutů (povinný)
-- **Počet kuřat (povinný)**
-- Typ změny (enum):
-  - `adjustment` - ruční úprava (úhyn, prodej, nákup)
-  - `maturation` - převod kuřat na dospělé
-- Poznámka (volitelný, max 500 znaků)
-
-**Operace:**
-- Vytvořit záznam historie (automaticky při změnách)
-- Zobrazit timeline změn
-- Editovat poznámku (pouze)
-- Smazat záznam (pouze poslední)
-
-**Business pravidla:**
-- Historie je immutable (kromě poznámky)
-- První záznam = počáteční stav hejna
-- Záznamy seřazeny chronologicky
-
-#### 3.2.4 Akce: Převod kuřat (Chick Maturation)
-
-**Vstupní parametry:**
-- Hejno (vazba)
-- Datum převodu (povinný)
-- Počet kuřat k převodu (povinný, > 0)
-- Výsledné rozdělení:
-  - Počet nových slepic (povinný, >= 0)
-  - Počet nových kohoutů (povinný, >= 0)
-- Poznámka (volitelný, max 500 znaků)
-
-**Validace:**
-- Součet slepic + kohoutů = počet kuřat k převodu
-- Počet kuřat k převodu <= aktuální počet kuřat v hejnu
-- Datum převodu >= datum líhnutí
-
-**Výstup:**
-- Nový záznam v historii s typem `maturation`
-- Aktualizace aktuálního složení hejna:
-  - Kuřata: -X
-  - Slepice: +Y
-  - Kohouti: +Z
-
-**Příklad:**
-```
-Před převodem:
-- Kuřata: 20
-- Slepice: 10
-- Kohouti: 2
-
-Akce: Převést 15 kuřat → 12 slepic + 3 kohouti
-
-Po převodu:
-- Kuřata: 5 (20 - 15)
-- Slepice: 22 (10 + 12)
-- Kohouti: 5 (2 + 3)
-```
-
-#### 3.2.5 Jednotlivé slepice (volitelné - Phase 3)
-
-**Atributy:**
-- Identifikátor (jméno/číslo, max 50 znaků)
-- Vazba na hejno
-- Datum přidání
-- Datum odchodu (volitelné)
-- Poznámka (volitelný, max 500 znaků)
-
-**Operace:**
-- Přidat slepici do hejna
-- Označit jako odešlou (úhyn, prodej)
-- Zobrazit detail slepice
-
-### 3.3 Agenda: Evidence Krmiva & Nákladů
-
-#### 3.3.1 Nákup položky (Purchase)
-
-**Atributy:**
-- Typ položky (povinný, dropdown/tagy):
-  - Krmivo
-  - Vitamíny a doplňky
-  - Stelivo
-  - Hračky a vybavení
-  - Veterinární péče
-  - Jiné
-- Název položky (povinný, max 100 znaků, autocomplete z historie)
-- Datum nákupu (povinný)
-- Cena (povinný, decimální, >= 0)
-- Množství (povinný, decimální, > 0)
-- Jednotka (povinný, dropdown):
-  - kg
-  - ks
-  - l
-  - balení
-  - jiné
-- Datum spotřeby (volitelný) - pro výpočet délky spotřeby
-- Poznámka (volitelný, max 500 znaků)
-- Vazba na hejno/kurník (volitelné) - pokud je nákup specifický
-
-**Operace:**
-- Vytvořit nákup
-- Upravit nákup
-- Smazat nákup
-- Filtrovat nákupy (typ, datum, hejno)
-- Zobrazit historii nákupů
-
-**Business pravidla:**
-- Datum spotřeby >= datum nákupu
-- Autocomplete názvů z předchozích nákupů
-- Výpočet: cena za jednotku = cena / množství
-
-### 3.4 Agenda: Denní Evidence Provozu
-
-#### 3.4.1 Denní záznam (DailyRecord)
-
-**Atributy:**
-- Datum (povinný)
-- Vazba na hejno (povinný)
-- Počet snesených vajec (povinný, celé číslo, >= 0)
-- Poznámka k hejnu (volitelný, max 1000 znaků)
-
-**Operace:**
-- Vytvořit denní záznam (offline-capable)
-- Upravit denní záznam (pouze tentýž den)
-- Smazat denní záznam
-- Zobrazit historii záznamů
-- Quick add z dashboard (modal)
-
-**Business pravidla:**
-- Jeden záznam na hejno na den
-- Nelze vytvořit záznam pro budoucí datum
-- Při offline režimu: queue do background sync
-- Po úpravě složení hejna: upozornění na změnu kontextu
-
-#### 3.4.2 Výstražné události (volitelné - Phase 2)
-
-**Typy událostí:**
-- Nemoc
-- Úhyn
-- Snížená aktivita
-- Agresivní chování
-- Jiné
-
-**Atributy:**
-- Datum
-- Typ události
-- Vazba na hejno / jednotlivou slepici
-- Popis (max 1000 znaků)
-- Foto (volitelné)
-
-### 3.5 Agenda: Statistiky & Reporting
-
-#### 3.5.1 Dashboard (Přehled)
-
-**Widgety:**
-1. **Dnes:**
-   - Počet snesených vajec (celkem)
-   - Aktuální počet slepic (celkem)
-
-2. **Tento týden:**
-   - Celková produkce vajec
-   - Průměrná produkce/den
-   - Trend (↑↓)
-
-3. **Ekonomika:**
-   - Aktuální cena vejce (celkové náklady / celková produkce)
-   - Trend ceny (↑↓ oproti minulému měsíci)
-
-4. **Stav hejna:**
-   - Celkový počet: slepice / kohouti / kuřata
-   - Počet aktivních hejen
-
-**Quick actions:**
-- FAB: Přidat denní záznam
-- Přidat nákup
-- Převést kuřata
-
-#### 3.5.2 Detail: Cena vejce
-
-**Výpočet:**
-```
-Celkové náklady = Vstupní náklady + Provozní náklady
-Vstupní náklady = Cena pořízení hejna
-Provozní náklady = SUM(všechny nákupy)
-
-Celková produkce vajec = SUM(denní záznamy)
-
-Cena vejce = Celkové náklady / Celková produkce vajec
-```
-
-**Zobrazení:**
-- Hlavní metrika: **X Kč / vejce**
-- Graf: Vývoj ceny v čase (line chart)
-- Breakdown nákladů (pie chart):
-  - Krmivo: X %
-  - Vitamíny: X %
-  - Stelivo: X %
-  - Veterinární péče: X %
-  - Jiné: X %
-- Filtry:
-  - Časové období (posledních 7 dní, 30 dní, 3 měsíce, rok, custom)
-  - Hejno (všechna / specifické)
-
-**Business pravidla:**
-- Kuřata se počítají do nákladů (spotřeba krmiva)
-- Kuřata se **nepočítají** do produkce (nenesou vejce)
-- Pouze slepice přispívají k produkci
-
-#### 3.5.3 Detail: Vývoj hejna
-
-**Hierarchický přehled:**
-```
-Kurník 1 - Velký kurník
-├─ Hejno A - Hnědé 2024
-│  └─ Aktuálně: 15 slepic, 2 kohouti, 3 kuřata
-│  └─ Produktivita: 12.5 vajec/den (0.83 vejce/slepice/den)
-└─ Hejno B - Bílé 2023
-   └─ Aktuálně: 8 slepic, 1 kohout
-   └─ Produktivita: 6 vajec/den (0.75 vejce/slepice/den)
-
-Kurník 2 - Malý kurník
-└─ Hejno C - Mix 2024
-   └─ Aktuálně: 5 slepic, 1 kohout, 10 kuřat
-   └─ Produktivita: 4 vajec/den (0.80 vejce/slepice/den)
-```
-
-**Detail hejna:**
-- **Timeline změn** (vertikální osa času):
-  ```
-  04.02.2024 - Převod kuřat
-    Kuřata: 20 → 5 (-15)
-    Slepice: 10 → 22 (+12)
-    Kohouti: 2 → 5 (+3)
-    Poznámka: První převod z líhně
-
-  28.01.2024 - Úhyn
-    Kuřata: 22 → 20 (-2)
-    Poznámka: Nemoc
-
-  15.01.2024 - Založení hejna
-    Kuřata: 22
-    Poznámka: Líhnutí
-  ```
-
-- **Grafy:**
-  - Velikost hejna v čase (area chart, 3 series: slepice, kohouti, kuřata)
-  - Produktivita (vejce/slepice/den) v čase (line chart)
-
-**Produktivita:**
-```
-Produktivita = Počet vajec / Počet slepic / Počet dní
-
-Příklad:
-- Za týden: 84 vajec
-- Průměrný počet slepic: 12
-- 7 dní
-→ Produktivita = 84 / 12 / 7 = 1.0 vejce/slepice/den
-```
-
-#### 3.5.4 Exporty (nice-to-have - Phase 3)
-
-**Formáty:**
-- CSV export (všechny agendy)
-- PDF report (dashboard snapshot)
-
-**CSV obsahuje:**
-- Denní záznamy (datum, hejno, počet vajec, poznámka)
-- Nákupy (datum, typ, název, cena, množství, jednotka)
-- Historie hejna (datum, změny, důvod)
+#### Backend Integration
+- Clerk JWT validation in .NET API
+- Webhook for user sync (user.created event)
+- Tenant record creation when user signs up
+- `ClerkUserId` → `TenantId` mapping in database
 
 ---
 
-## 4. Technické Požadavky
+### 3.2 Chicken Management (Hierarchy)
+
+#### 3.2.1 Coop
+
+**Attributes:**
+- Name (required, max 100 characters)
+- Location (text, optional, max 200 characters)
+- Created date (automatic)
+- Status: Active / Archived
+
+**Operations:**
+- Create coop
+- Edit coop (name, location)
+- Archive coop (soft delete)
+- Restore archived coop
+- Delete coop (only if no flocks)
+
+**Business Rules:**
+- Each tenant can have unlimited coops
+- Name must be unique within tenant
+- Archived coop doesn't show in lists
+
+#### 3.2.2 Flock
+
+**Attributes:**
+- Reference ID/identifier (required, max 50 characters, e.g., "Browns 2024")
+- Hatch date (required)
+- Coop (reference, required)
+- **Initial composition:**
+  - Hen count (required, >= 0)
+  - Rooster count (required, >= 0)
+  - **Chick count (required, >= 0)**
+- Current composition (calculated from history)
+- Created date
+- Status: Active / Archived
+
+**Operations:**
+- Create flock
+- Edit basic info (name, hatch date)
+- Archive flock
+- View change history
+- **Convert chicks to adults**
+- Manual composition adjustment
+
+**Business Rules:**
+- Flock must belong to active coop
+- Identifier must be unique within coop
+- Archiving flock also archives daily records
+- At least one category must be > 0
+
+#### 3.2.3 Flock History
+
+**Attributes:**
+- Change date (required)
+- Hen count (required)
+- Rooster count (required)
+- **Chick count (required)**
+- Change type (enum):
+  - `adjustment` - manual adjustment (death, sale, purchase)
+  - `maturation` - chick conversion to adults
+- Notes (optional, max 500 characters)
+
+**Operations:**
+- Create history record (automatic on changes)
+- View timeline of changes
+- Edit notes (only)
+- Delete record (only latest)
+
+**Business Rules:**
+- History is immutable (except notes)
+- First record = initial flock state
+- Records sorted chronologically
+
+#### 3.2.4 Action: Chick Maturation
+
+**Input Parameters:**
+- Flock (reference)
+- Maturation date (required)
+- Chick count to convert (required, > 0)
+- Resulting split:
+  - New hen count (required, >= 0)
+  - New rooster count (required, >= 0)
+- Notes (optional, max 500 characters)
+
+**Validation:**
+- Sum of hens + roosters = chick count to convert
+- Chick count to convert <= current chicks in flock
+- Maturation date >= hatch date
+
+**Output:**
+- New history entry with type `maturation`
+- Updated current flock composition:
+  - Chicks: -X
+  - Hens: +Y
+  - Roosters: +Z
+
+**Example:**
+```
+Before conversion:
+- Chicks: 20
+- Hens: 10
+- Roosters: 2
+
+Action: Convert 15 chicks → 12 hens + 3 roosters
+
+After conversion:
+- Chicks: 5 (20 - 15)
+- Hens: 22 (10 + 12)
+- Roosters: 5 (2 + 3)
+```
+
+#### 3.2.5 Individual Chickens (optional - Phase 3)
+
+**Attributes:**
+- Identifier (name/number, max 50 characters)
+- Flock reference
+- Date added
+- Date departed (optional)
+- Notes (optional, max 500 characters)
+
+**Operations:**
+- Add chicken to flock
+- Mark as departed (death, sale)
+- View chicken details
+
+---
+
+### 3.3 Feed & Costs Management
+
+#### 3.3.1 Purchase
+
+**Attributes:**
+- Item type (required, dropdown/tags):
+  - Feed
+  - Vitamins and supplements
+  - Bedding
+  - Toys and equipment
+  - Veterinary care
+  - Other
+- Item name (required, max 100 characters, autocomplete from history)
+- Purchase date (required)
+- Price (required, decimal, >= 0)
+- Quantity (required, decimal, > 0)
+- Unit (required, dropdown):
+  - kg
+  - pcs
+  - l
+  - package
+  - other
+- Consumption date (optional) - for calculating consumption duration
+- Notes (optional, max 500 characters)
+- Flock/coop reference (optional) - if purchase is specific
+
+**Operations:**
+- Create purchase
+- Edit purchase
+- Delete purchase
+- Filter purchases (type, date, flock)
+- View purchase history
+
+**Business Rules:**
+- Consumption date >= purchase date
+- Autocomplete names from previous purchases
+- Calculation: price per unit = price / quantity
+
+---
+
+### 3.4 Daily Operations Management
+
+#### 3.4.1 Daily Record
+
+**Attributes:**
+- Date (required)
+- Flock reference (required)
+- Egg count (required, integer, >= 0)
+- Flock notes (optional, max 1000 characters)
+
+**Operations:**
+- Create daily record (offline-capable)
+- Edit daily record (same day only)
+- Delete daily record
+- View record history
+- Quick add from dashboard (modal)
+
+**Business Rules:**
+- One record per flock per day
+- Cannot create record for future date
+- In offline mode: queue to background sync
+- After flock composition change: warning about context change
+
+#### 3.4.2 Alert Events (optional - Phase 2)
+
+**Event Types:**
+- Illness
+- Death
+- Decreased activity
+- Aggressive behavior
+- Other
+
+**Attributes:**
+- Date
+- Event type
+- Flock / individual chicken reference
+- Description (max 1000 characters)
+- Photo (optional)
+
+---
+
+### 3.5 Statistics & Reporting
+
+#### 3.5.1 Dashboard (Overview)
+
+**Widgets:**
+1. **Today:**
+   - Total eggs laid
+   - Current hen count (total)
+
+2. **This Week:**
+   - Total egg production
+   - Average production/day
+   - Trend (↑↓)
+
+3. **Economics:**
+   - Current egg price (total costs / total production)
+   - Price trend (↑↓ vs last month)
+
+4. **Flock Status:**
+   - Total count: hens / roosters / chicks
+   - Active flock count
+
+**Quick Actions:**
+- FAB: Add daily record
+- Add purchase
+- Convert chicks
+
+#### 3.5.2 Detail: Egg Price
+
+**Calculation:**
+```
+Total costs = Initial costs + Operating costs
+Initial costs = Flock purchase price
+Operating costs = SUM(all purchases)
+
+Total egg production = SUM(daily records)
+
+Egg price = Total costs / Total egg production
+```
+
+**Display:**
+- Main metric: **X CZK / egg**
+- Chart: Price development over time (line chart)
+- Cost breakdown (pie chart):
+  - Feed: X %
+  - Vitamins: X %
+  - Bedding: X %
+  - Veterinary care: X %
+  - Other: X %
+- Filters:
+  - Time period (last 7 days, 30 days, 3 months, year, custom)
+  - Flock (all / specific)
+
+**Business Rules:**
+- Chicks count in costs (feed consumption)
+- Chicks **do not count** in production (don't lay eggs)
+- Only hens contribute to production
+
+#### 3.5.3 Detail: Flock Development
+
+**Hierarchical Overview:**
+```
+Coop 1 - Large Coop
+├─ Flock A - Browns 2024
+│  └─ Currently: 15 hens, 2 roosters, 3 chicks
+│  └─ Productivity: 12.5 eggs/day (0.83 eggs/hen/day)
+└─ Flock B - Whites 2023
+   └─ Currently: 8 hens, 1 rooster
+   └─ Productivity: 6 eggs/day (0.75 eggs/hen/day)
+
+Coop 2 - Small Coop
+└─ Flock C - Mix 2024
+   └─ Currently: 5 hens, 1 rooster, 10 chicks
+   └─ Productivity: 4 eggs/day (0.80 eggs/hen/day)
+```
+
+**Flock Detail:**
+- **Timeline of changes** (vertical time axis):
+  ```
+  04.02.2024 - Chick conversion
+    Chicks: 20 → 5 (-15)
+    Hens: 10 → 22 (+12)
+    Roosters: 2 → 5 (+3)
+    Notes: First batch from hatchery
+
+  28.01.2024 - Death
+    Chicks: 22 → 20 (-2)
+    Notes: Illness
+
+  15.01.2024 - Flock established
+    Chicks: 22
+    Notes: Hatched
+  ```
+
+- **Charts:**
+  - Flock size over time (area chart, 3 series: hens, roosters, chicks)
+  - Productivity (eggs/hen/day) over time (line chart)
+
+**Productivity:**
+```
+Productivity = Egg count / Hen count / Day count
+
+Example:
+- Week total: 84 eggs
+- Average hen count: 12
+- 7 days
+→ Productivity = 84 / 12 / 7 = 1.0 eggs/hen/day
+```
+
+#### 3.5.4 Exports (nice-to-have - Phase 3)
+
+**Formats:**
+- CSV export (all agendas)
+- PDF report (dashboard snapshot)
+
+**CSV Contains:**
+- Daily records (date, flock, egg count, notes)
+- Purchases (date, type, name, price, quantity, unit)
+- Flock history (date, changes, reason)
+
+---
+
+## 4. Technical Requirements
 
 ### 4.1 Architecture
 
 #### Frontend - Mobile First PWA
 
-**Technologie:**
-- **React 18+** s TypeScript
+**Technologies:**
+- **React 18+** with TypeScript
 - **Vite** - build tool (fast refresh)
 - **React Router** - routing
-- **Zustand / Redux Toolkit** - state management + persistence
+- **Zustand** - state management + persistence
 - **TanStack Query (React Query)** - server state & caching
-- **Axios** - HTTP client s interceptory
+- **Axios** - HTTP client with interceptors
 
 **PWA Stack:**
 - **Workbox** - service worker management
 - **manifest.json** - app manifest
 - **IndexedDB** - offline storage (via Dexie.js)
-- **Background Sync API** - queue pro offline requests
+- **Background Sync API** - queue for offline requests
 
 **UI Framework:**
-- **Material-UI (MUI)** nebo **Chakra UI**
+- **Material-UI (MUI)**
   - Proven mobile support
   - Touch-optimized components
   - Theming capabilities
   - Accessibility built-in
 
 **Charting:**
-- **Recharts** nebo **Chart.js**
+- **Recharts**
   - Lightweight
   - Responsive
   - Touch-friendly
@@ -499,134 +524,189 @@ Příklad:
 
 #### Backend
 
-**Technologie:**
+**Technologies:**
 - **.NET 8** Web API
-- **ASP.NET Core** Minimal APIs nebo Controllers
+- **ASP.NET Core** Minimal APIs
 - **Entity Framework Core** (Code First)
 - **AutoMapper** - DTO mapping
 - **FluentValidation** - request validation
-- **Serilog** - structured logging
-- **MediatR** - CQRS pattern (volitelné)
+- **Microsoft.Extensions.Logging** - structured logging
+- **MediatR** - CQRS pattern
 
 **Architecture Pattern:**
 - Clean Architecture / Onion Architecture
 - Dependency Injection
-- Repository + Unit of Work (volitelné)
+- Vertical Slice Architecture with CQRS
 
 **Authentication:**
-- **JWT Bearer tokens**
-- **Refresh tokens** (sliding expiration 30 dní)
-- **IdentityUser** + custom tenant claims
-- Password hashing: bcrypt nebo ASP.NET Core Identity
+- **Clerk.com** - Authentication provider
+- **JWT Bearer tokens** - Validated by .NET API
+- **Automatic token refresh** - Handled by Clerk SDK
+- Clerk webhooks for user sync
 
 **API Design:**
 - RESTful principles
 - Versioning: URL-based (`/api/v1/...`)
 - Consistent error responses
-- CORS enabled pro PWA origin
+- CORS enabled for PWA origin
 
 #### Database
 
-**Primární volba: Azure Table Storage**
+**Primary Choice: Neon Postgres (Serverless)**
 
-**Proč Table Storage:**
-- ✅ Cost-friendly (0.045 USD/GB/měsíc)
-- ✅ Scalable (auto-scaling)
-- ✅ Partition key = TenantId (perfektní izolace)
-- ✅ Schema flexibility
+**Why Neon:**
+- ✅ Cost-friendly (Free tier: 0.5GB storage)
+- ✅ Serverless (auto-scaling, auto-pause)
+- ✅ Branching for dev/staging environments
+- ✅ Connection pooling built-in
+- ✅ PostgreSQL 16 features
 - ✅ High availability
-- ⚠️ Eventual consistency (OK pro use case)
-- ⚠️ Omezené query možnosti (workaround: materialized views)
+- ✅ Fast queries with proper indexing
+- ✅ Row-Level Security (RLS) for tenant isolation
 
-**Alternativa: Azure SQL Database (Basic tier)**
-- Pro komplexnější reporting
-- Relační integrita
-- LINQ queries
-- ~5 EUR/měsíc
+**Data Model - Postgres:**
+```sql
+-- Tenants (linked to Clerk users)
+CREATE TABLE tenants (
+    id UUID PRIMARY KEY,
+    clerk_user_id TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+);
 
-**Data Model - Table Storage:**
+-- Coops
+CREATE TABLE coops (
+    id UUID PRIMARY KEY,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    name TEXT NOT NULL,
+    location TEXT,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+);
+
+-- Flocks
+CREATE TABLE flocks (
+    id UUID PRIMARY KEY,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    coop_id UUID NOT NULL REFERENCES coops(id),
+    identifier TEXT NOT NULL,
+    hatch_date DATE NOT NULL,
+    current_hens INTEGER NOT NULL,
+    current_roosters INTEGER NOT NULL,
+    current_chicks INTEGER NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+);
+
+-- Flock History
+CREATE TABLE flock_history (
+    id UUID PRIMARY KEY,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    flock_id UUID NOT NULL REFERENCES flocks(id),
+    change_date DATE NOT NULL,
+    hens INTEGER NOT NULL,
+    roosters INTEGER NOT NULL,
+    chicks INTEGER NOT NULL,
+    change_type change_type NOT NULL, -- ENUM: adjustment, maturation
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL
+);
+
+-- Purchases
+CREATE TABLE purchases (
+    id UUID PRIMARY KEY,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    flock_id UUID REFERENCES flocks(id),
+    type purchase_type NOT NULL,
+    name TEXT NOT NULL,
+    purchase_date DATE NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    quantity DECIMAL(10, 2) NOT NULL,
+    unit quantity_unit NOT NULL,
+    consumed_date DATE,
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+);
+
+-- Daily Records
+CREATE TABLE daily_records (
+    id UUID PRIMARY KEY,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    flock_id UUID NOT NULL REFERENCES flocks(id),
+    record_date DATE NOT NULL,
+    egg_count INTEGER NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL,
+    UNIQUE (flock_id, record_date)
+);
+
+-- Row-Level Security (RLS)
+ALTER TABLE coops ENABLE ROW LEVEL SECURITY;
+ALTER TABLE flocks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE flock_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_records ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation ON coops
+    USING (tenant_id = current_setting('app.current_tenant_id')::UUID);
+-- ... similar policies for other tables
 ```
-Table: Tenants
-PartitionKey: "TENANT"
-RowKey: TenantId
-Columns: Email, PasswordHash, CreatedAt
 
-Table: Coops
-PartitionKey: TenantId
-RowKey: CoopId
-Columns: Name, Location, IsActive, CreatedAt
-
-Table: Flocks
-PartitionKey: TenantId
-RowKey: FlockId
-Columns: CoopId, Identifier, HatchDate, CurrentHens, CurrentRoosters, CurrentChicks, IsActive
-
-Table: FlockHistory
-PartitionKey: TenantId_{FlockId}
-RowKey: Timestamp_Reverse (pro chronologické třídění)
-Columns: Hens, Roosters, Chicks, ChangeType, Notes
-
-Table: Purchases
-PartitionKey: TenantId
-RowKey: PurchaseId
-Columns: Type, Name, Date, Amount, Quantity, Unit, ConsumedDate, Notes, FlockId
-
-Table: DailyRecords
-PartitionKey: TenantId_{FlockId}
-RowKey: Date_Reverse
-Columns: EggCount, Notes
-```
-
-**Indexing strategie:**
-- Partition Key optimalizace (TenantId)
-- Row Key pro časové dotazy (reverse timestamp)
-- Point queries > range queries
+**Multi-tenancy Strategy:**
+- **Row-Level Security (RLS)** enforced at database level
+- Every table has `tenant_id` column
+- Postgres policies prevent cross-tenant access
+- EF Core sets RLS context per request
+- Global query filters as additional safety layer
 
 #### Hosting
 
-**Azure Container Apps** (doporučeno)
+**Azure Container Apps** (recommended)
 - ✅ Managed Kubernetes
 - ✅ Auto-scaling (0-N replicas)
 - ✅ HTTPS out of the box
 - ✅ Custom domains
 - ✅ Cost-effective (pay-per-use)
-- ~10-30 EUR/měsíc
-
-**Alternativa: Azure Web App for Containers**
-- Jednodušší setup
-- Basic tier: ~13 EUR/měsíc
+- ~10-30 EUR/month
 
 **Docker Setup:**
 - Multi-stage build (build + runtime)
 - Base image: `mcr.microsoft.com/dotnet/aspnet:8.0`
 - Build image: `mcr.microsoft.com/dotnet/sdk:8.0`
-- Node image pro React build: `node:20-alpine`
+- Node image for React build: `node:20-alpine`
 
 **CI/CD:**
-- Azure DevOps Pipelines nebo GitHub Actions
+- GitHub Actions
 - Automatic deployment on main branch
-- Preview environments pro PR (volitelné)
+- Preview environments for PR (optional)
 
-**CDN (volitelné - Phase 2):**
-- Azure CDN pro static assets
+**CDN (optional - Phase 2):**
+- Azure CDN for static assets
 - Caching strategy
 - Global distribution
 
+---
+
 ### 4.2 Offline Strategy
 
-#### Service Worker Strategie
+#### Service Worker Strategies
 
 **Static Assets: Cache-First**
 ```javascript
 // HTML, CSS, JS, fonts
 workbox.routing.registerRoute(
-  ({request}) => request.destination === 'script' || 
+  ({request}) => request.destination === 'script' ||
                   request.destination === 'style',
   new workbox.strategies.CacheFirst({
     cacheName: 'static-resources',
     plugins: [
       new workbox.expiration.ExpirationPlugin({
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 dní
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
       }),
     ],
   })
@@ -643,7 +723,7 @@ workbox.routing.registerRoute(
     plugins: [
       new workbox.expiration.ExpirationPlugin({
         maxEntries: 50,
-        maxAgeSeconds: 5 * 60, // 5 minut
+        maxAgeSeconds: 5 * 60, // 5 minutes
       }),
     ],
   }),
@@ -656,9 +736,9 @@ workbox.routing.registerRoute(
 const bgSyncPlugin = new workbox.backgroundSync.BackgroundSyncPlugin(
   'apiQueue',
   {
-    maxRetentionTime: 24 * 60, // 24 hodin
+    maxRetentionTime: 24 * 60, // 24 hours
     onSync: async ({queue}) => {
-      // Retry logika
+      // Retry logic
     }
   }
 );
@@ -680,13 +760,13 @@ const db = new Dexie('ChickenTrackDB');
 db.version(1).stores({
   // Offline queue
   pendingRequests: '++id, method, url, timestamp',
-  
+
   // Cached data
   coops: 'id, tenantId',
   flocks: 'id, coopId, tenantId',
   purchases: 'id, tenantId, date',
   dailyRecords: '[flockId+date], tenantId',
-  
+
   // Metadata
   syncStatus: 'key'
 });
@@ -694,50 +774,59 @@ db.version(1).stores({
 
 #### Conflict Resolution
 
-**Strategie: Last-Write-Wins (Simple)**
+**Strategy: Last-Write-Wins (Simple)**
 ```
-Scenario: Offline úprava hejna + online úprava hejna
-1. Offline: Změna počtu slepic na 10
-2. Online (jiné zařízení): Změna počtu slepic na 12
-3. Sync: Porovnej timestamp
-   → Novější záznam vyhrává
-4. UI: Toast notifikace "Data byla synchronizována"
+Scenario: Offline flock edit + online flock edit
+1. Offline: Change hen count to 10
+2. Online (different device): Change hen count to 12
+3. Sync: Compare timestamp
+   → Newer record wins
+4. UI: Toast notification "Data was synchronized"
 ```
 
 **Phase 2: Conflict Detection**
-- Server vrací `ETag` nebo `LastModified`
-- Client kontroluje před zápisem
-- Při konfliktu: UI s volbou (Keep mine / Take theirs / Merge)
+- Server returns `ETag` or `LastModified`
+- Client checks before write
+- On conflict: UI with choice (Keep mine / Take theirs / Merge)
+
+---
 
 ### 4.3 Security
 
 **Authentication Flow:**
 ```
-1. Login → Access Token (15 min) + Refresh Token (30 dní)
-2. API calls → Bearer Access Token in header
-3. Token expired? → Auto-refresh via Refresh Token
-4. Refresh Token expired? → Re-login required
+1. User clicks Sign In → Clerk hosted UI
+2. User enters credentials → Clerk validates
+3. Clerk issues JWT session token
+4. Frontend gets token via Clerk SDK
+5. API calls include Bearer token in Authorization header
+6. .NET API validates Clerk JWT
+7. API extracts userId, looks up tenant_id
+8. API sets RLS context for request
+9. All queries automatically filtered by tenant
 ```
 
 **Token Storage:**
-- Access Token: Memory (Zustand store)
-- Refresh Token: HttpOnly cookie (secure) nebo localStorage (s šifrováním)
+- Clerk manages token storage (secure)
+- Frontend uses Clerk hooks to get fresh tokens
+- No manual token refresh needed
 
 **API Security:**
 - HTTPS only (enforced)
 - CORS: whitelist PWA origins
 - Rate limiting:
-  - Login: 5 attempts / 15 min / IP
+  - Clerk manages auth endpoint limits
   - API: 100 requests / min / user
 - Input validation (FluentValidation)
-- SQL Injection protection (parameterized queries)
+- SQL Injection protection (EF Core parameterized queries)
 - XSS protection (sanitize inputs)
 
 **Password Requirements:**
-- Minimálně 8 znaků
-- Alespoň 1 velké písmeno
-- Alespoň 1 číslo
-- Alespoň 1 speciální znak (volitelné)
+- Managed by Clerk
+- Default: min 8 characters
+- Configurable in Clerk dashboard
+
+---
 
 ### 4.4 Monitoring & Logging
 
@@ -749,10 +838,10 @@ Scenario: Offline úprava hejna + online úprava hejna
 
 **Frontend Monitoring:**
 - Error boundary (React)
-- Sentry nebo Azure App Insights JS SDK
+- Azure App Insights JS SDK
 - Performance API (Web Vitals)
 
-**Backend Logging (Serilog):**
+**Backend Logging:**
 ```csharp
 Log.Information("User {UserId} created flock {FlockId}", userId, flockId);
 Log.Error(ex, "Failed to sync daily record {RecordId}", recordId);
@@ -767,11 +856,11 @@ Log.Error(ex, "Failed to sync daily record {RecordId}", recordId);
 
 ---
 
-## 5. UI/UX Požadavky
+## 5. UI/UX Requirements
 
 ### 5.1 Mobile-First Design Principles
 
-#### Layout Strategie
+#### Layout Strategy
 
 **Breakpoints:**
 ```css
@@ -791,7 +880,7 @@ Log.Error(ex, "Failed to sync daily record {RecordId}", recordId);
 ```
 ┌─────────────────────────┐
 │  Header                 │
-│  [Logo] [Bell] [Menu]   │
+│  [Logo] [Bell] [User]   │  ← Clerk UserButton component
 ├─────────────────────────┤
 │                         │
 │  Content Area           │
@@ -805,100 +894,113 @@ Log.Error(ex, "Failed to sync daily record {RecordId}", recordId);
 
 Bottom Nav Items:
 🏠 Dashboard
-🐔 Kurníky
-📝 Denní záznamy
-📊 Statistiky
-⋮  Menu (Nákupy, Nastavení)
+🐔 Coops
+📝 Daily Records
+📊 Statistics
+⋮  Menu (Purchases, Settings)
 ```
 
 **Floating Action Button (FAB):**
-- Primární akce: "Přidat denní záznam"
-- Pozice: Bottom-right (60dp margin)
-- Velikost: 56x56dp
-- Skok na tap (elevation animation)
+- Primary action: "Add daily record"
+- Position: Bottom-right (60dp margin)
+- Size: 56x56dp
+- Bounce on tap (elevation animation)
 
 #### Touch Optimization
 
 **Touch Target Size:**
 - Minimum: 44x44px (iOS standard)
-- Preferováno: 48x48px (Material Design)
-- Spacing mezi targets: 8px minimum
+- Preferred: 48x48px (Material Design)
+- Spacing between targets: 8px minimum
 
 **Gestures:**
-- **Swipe to refresh** (pull-to-refresh) - dashboard, seznamy
-- **Swipe to delete** - volitelně u seznamů (s undo)
-- **Long press** - kontextové menu (volitelné)
-- **Pinch to zoom** - grafy (nice-to-have)
+- **Swipe to refresh** (pull-to-refresh) - dashboard, lists
+- **Swipe to delete** - optional in lists (with undo)
+- **Long press** - context menu (optional)
+- **Pinch to zoom** - charts (nice-to-have)
 
 **Input Components:**
 
-1. **Number Inputs** (kritické pro rychlost)
+1. **Number Inputs** (critical for speed)
    ```
-   Počet vajec:
+   Egg count:
    ┌─────────────────────────┐
    │  [-]    [24]     [+]    │
    └─────────────────────────┘
-   Velká tlačítka (80x60px)
+   Large buttons (80x60px)
    ```
 
 2. **Date Pickers**
-   - Native date picker (mobile optimalizovaný)
-   - Quick shortcuts: Dnes, Včera, Před týdnem
+   - Native date picker (mobile optimized)
+   - Quick shortcuts: Today, Yesterday, Week ago
 
 3. **Dropdowns / Selects**
    - Large touch area
-   - Search/filter pro dlouhé seznamy
-   - Recent items na vrcholu
+   - Search/filter for long lists
+   - Recent items at top
 
 4. **Text Areas**
-   - Auto-expand při psaní
-   - Character counter (volitelný)
+   - Auto-expand while typing
+   - Character counter (optional)
    - Voice input button (Phase 2)
 
-#### Forms Best Practices
+---
 
-**Formulářové principy:**
-- **Max 5 polí na obrazovku** (scroll pro více)
-- **Auto-focus** na první editovatelné pole
-- **Tab/Enter navigation** mezi poli
-- **Inline validation** (real-time feedback)
-- **Sticky submit button** (vždy viditelný)
-- **Clear error messages** (co udělat pro nápravu)
+### 5.2 Internationalization (i18n)
 
-**Příklad: Quick Add Denní záznam**
+**Language Support:**
+- **Primary language: Czech (cs-CZ)**
+- **Secondary language: English (en-US)**
+- User can switch language in settings
+- Language preference stored in local storage
+- Fallback to browser language on first visit
+
+**Implementation:**
+- **react-i18next** for frontend translations
+- Translation files: `locales/cs/translation.json`, `locales/en/translation.json`
+- Date/time formatting with `date-fns` locale support
+- Currency formatting (CZK primary, EUR for international)
+
+**Translation Structure:**
+```json
+// locales/cs/translation.json
+{
+  "dashboard": {
+    "title": "Přehled",
+    "today": "Dnes",
+    "eggs": "Vajíčka",
+    "hens": "Slepice"
+  },
+  "coops": {
+    "title": "Kurníky",
+    "add": "Přidat kurník"
+  }
+}
+
+// locales/en/translation.json
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "today": "Today",
+    "eggs": "Eggs",
+    "hens": "Hens"
+  },
+  "coops": {
+    "title": "Coops",
+    "add": "Add coop"
+  }
+}
 ```
-┌─────────────────────────────┐
-│ Denní záznam                │ ← Header
-├─────────────────────────────┤
-│ Hejno: [Hnědé 2024    ▾]   │ ← Auto-selected (last used)
-│                             │
-│ Datum: [Dnes           📅]  │ ← Default today
-│                             │
-│ Počet vajec:                │
-│    [-]     [24]      [+]    │ ← Focus here
-│                             │
-│ Poznámka (volitelné):       │
-│ ┌─────────────────────────┐ │
-│ │                         │ │
-│ └─────────────────────────┘ │
-│                             │
-│ [Zrušit]        [Uložit ✓] │ ← Sticky bottom
-└─────────────────────────────┘
-```
 
-**Validation:**
-- ✅ Real-time (při změně pole)
-- ✅ Error message pod polem (červená)
-- ✅ Success indication (zelená check)
-- ✅ Disable submit dokud není validní
+---
 
-### 5.2 PWA Features - Detailní Specifikace
+### 5.3 PWA Features - Detailed Specification
 
-#### 5.2.1 Installation
+#### 5.3.1 Installation
 
-**Install Prompt Strategie:**
+**Install Prompt Strategy:**
 ```javascript
-// Trigger po 2. návštěvě nebo po 5 minutách použití
+// Trigger after 2nd visit or 5 minutes of usage
 if (visitCount >= 2 || timeSpentMinutes >= 5) {
   showInstallPrompt();
 }
@@ -917,13 +1019,13 @@ if (visitCount >= 2 || timeSpentMinutes >= 5) {
 ```
 
 **iOS Add to Home Screen Instructions:**
-- Detekce iOS Safari
-- Step-by-step guide s obrázky:
+- Detect iOS Safari
+- Step-by-step guide with images:
   1. Tap Share button (📤)
   2. Scroll & tap "Add to Home Screen"
   3. Tap "Add"
 
-#### 5.2.2 Offline Mode
+#### 5.3.2 Offline Mode
 
 **Offline Detection:**
 ```javascript
@@ -945,21 +1047,21 @@ window.addEventListener('offline', () => {
 └─────────────────────────────┘
 ```
 
-**Sync Indikátor:**
+**Sync Indicator:**
 ```
 Bottom bar:
 [3 neuložené záznamy] [Synchronizovat]
 ```
 
 **Offline Capabilities:**
-- ✅ Zobrazení všech cached dat
-- ✅ Vytváření denních záznamů
-- ✅ Vytváření nákupů
-- ✅ Úprava hejna (s conflict warning)
-- ❌ Registrace / Login (vyžaduje síť)
-- ❌ Statistiky (pokud nejsou v cache)
+- ✅ View all cached data
+- ✅ Create daily records
+- ✅ Create purchases
+- ✅ Edit flock (with conflict warning)
+- ❌ Registration / Login (requires network - Clerk)
+- ❌ Statistics (if not in cache)
 
-#### 5.2.3 Background Sync
+#### 5.3.3 Background Sync
 
 **Sync Queue Management:**
 ```javascript
@@ -975,10 +1077,10 @@ Bottom bar:
 ```
 
 **Retry Logic:**
-- Immediate retry při obnovení sítě
+- Immediate retry when network restored
 - Exponential backoff: 1s, 2s, 4s, 8s, 16s, 30s
-- Max 5 pokusů
-- Po 5 pokusech: manual retry tlačítko
+- Max 5 attempts
+- After 5 attempts: manual retry button
 
 **Success Notifications:**
 ```
@@ -997,7 +1099,7 @@ Detail:
 - Nákup krmiva: Network timeout
 ```
 
-#### 5.2.4 Manifest & Icons
+#### 5.3.4 Manifest & Icons
 
 **manifest.json:**
 ```json
@@ -1010,6 +1112,7 @@ Detail:
   "theme_color": "#FF6B35",
   "background_color": "#FFFFFF",
   "orientation": "portrait",
+  "lang": "cs-CZ",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -1046,325 +1149,6 @@ Detail:
 - App name: below logo
 - Fade-in animation (300ms)
 
-### 5.3 Klíčové Obrazovky
-
-#### 5.3.1 Dashboard (Home Screen)
-
-```
-┌─────────────────────────────┐
-│ ChickenTrack   🔔  ⋮        │ ← Header
-├─────────────────────────────┤
-│                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ 📅 Dnes                ┃ │
-│ ┃ ─────────────────────  ┃ │
-│ ┃ 🥚 Vajec: 24           ┃ │
-│ ┃ 🐔 Slepic: 32          ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ 📊 Tento týden         ┃ │
-│ ┃ ─────────────────────  ┃ │
-│ ┃ Vejce: 156 (↑ +12)    ┃ │
-│ ┃ Cena/vejce: 4.20 Kč    ┃ │
-│ ┃ Produktivita: 0.82     ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ 📈 Quick Stats         ┃ │
-│ ┃ ─────────────────────  ┃ │
-│ ┃ [Mini graf - týdenní   ┃ │
-│ ┃  produkce]             ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│                      [+] ◄── FAB
-├─────────────────────────────┤
-│ [🏠] [🐔] [📝] [📊] [⋮]     │ ← Bottom Nav
-└─────────────────────────────┘
-```
-
-**Interactions:**
-- Tap Card → Detail view
-- FAB (+) → Quick Add denní záznam (modal)
-- Pull-to-refresh → Update stats
-- Bell icon → Notifications (Phase 2)
-
-#### 5.3.2 Quick Add Modal (Bottom Sheet)
-
-```
-┌─────────────────────────────┐
-│ Denní záznam           [×]  │
-├─────────────────────────────┤
-│                             │
-│ Hejno:                      │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ Hnědé 2024          ▾  ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ Datum:                      │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ Dnes                📅 ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ Počet vajec:                │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃   [-]   [24]   [+]     ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ Poznámka (volitelně):       │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃                        ┃ │
-│ ┃                        ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃        Uložit ✓        ┃ │ ← Sticky
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-└─────────────────────────────┘
-```
-
-**UX:**
-- Animace: slide-up z bottom
-- Backdrop: semi-transparent černá
-- Tap mimo modal → Close
-- Hejno: auto-select poslední použité
-- Datum: default dnes
-- Focus: počet vajec (number input)
-- Submit: fade-out + success toast
-
-#### 5.3.3 Seznam Kurníků a Hejen
-
-```
-┌─────────────────────────────┐
-│ ← Kurníky            [+]    │
-├─────────────────────────────┤
-│ 🔍 Hledat...                │
-├─────────────────────────────┤
-│                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ 🏠 Kurník 1 - Velký    ┃ │
-│ ┃                        ┃ │
-│ ┃ Hnědé 2024             ┃ │
-│ ┃ 🐔 15s │ 2k │ 3k      ┃ │ ← slepice│kohouti│kuřata
-│ ┃ 🥚 Dnes: 12            ┃ │
-│ ┃                    [→] ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ 🏠 Kurník 2 - Malý     ┃ │
-│ ┃                        ┃ │
-│ ┃ Mix 2024               ┃ │
-│ ┃ 🐔 5s │ 1k │ 10k      ┃ │
-│ ┃ 🥚 Dnes: 4             ┃ │
-│ ┃                    [→] ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-├─────────────────────────────┤
-│ [🏠] [🐔] [📝] [📊] [⋮]     │
-└─────────────────────────────┘
-```
-
-**Interactions:**
-- Tap Card → Detail hejna
-- Swipe card left → Quick actions (Upravit, Převést kuřata)
-- [+] button → Přidat kurník / hejno
-- Pull-to-refresh
-
-#### 5.3.4 Detail Hejna
-
-```
-┌─────────────────────────────┐
-│ ← Hnědé 2024          [⋮]   │
-├─────────────────────────────┤
-│                             │
-│ 📋 Základní info            │
-│ ─────────────────────────── │
-│ Kurník: Kurník 1 - Velký    │
-│ Datum líhnutí: 15.01.2024   │
-│ Stáří: 20 dní               │
-│                             │
-│ 🐔 Aktuální složení         │
-│ ─────────────────────────── │
-│ Slepice:   15               │
-│ Kohouti:    2               │
-│ Kuřata:     3               │
-│ ─────────────────────────── │
-│ Celkem:    20               │
-│                             │
-│ 📊 Produktivita             │
-│ ─────────────────────────── │
-│ Dnes:           12 vajec    │
-│ Tento týden:    84 vajec    │
-│ Na slepici/den: 0.83        │
-│                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ Převést kuřata         ┃ │ ← Primary action
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ 📜 Historie změn            │
-│ ─────────────────────────── │
-│ ⬤ 04.02.2024 - Převod      │
-│   Kuřata: 20 → 5 (-15)     │
-│   Slepice: 10 → 22 (+12)   │
-│   [...detail]              │
-│                             │
-│ ⬤ 28.01.2024 - Úhyn        │
-│   Kuřata: 22 → 20 (-2)     │
-│   [...detail]              │
-│                             │
-├─────────────────────────────┤
-│ [🏠] [🐔] [📝] [📊] [⋮]     │
-└─────────────────────────────┘
-```
-
-**Menu (⋮):**
-- Upravit základní údaje
-- Upravit aktuální složení
-- Archivovat hejno
-- Smazat hejno
-
-#### 5.3.5 Převod Kuřat
-
-```
-┌─────────────────────────────┐
-│ ← Převod kuřat         [×]  │
-├─────────────────────────────┤
-│                             │
-│ Hejno: Hnědé 2024           │
-│ Aktuálně kuřat: 20          │
-│                             │
-│ Datum převodu:              │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ Dnes                📅 ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ Počet kuřat k převodu:      │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃   [-]   [15]   [+]     ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ Rozdělení:                  │
-│ ─────────────────────────── │
-│ Slepice:                    │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃   [-]   [12]   [+]     ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ Kohouti:                    │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃   [-]    [3]   [+]     ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ ✓ Součet = 15 kuřat         │ ← Live validation
-│                             │
-│ Poznámka (volitelně):       │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ První převod z líhně   ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃      Převést ✓         ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-└─────────────────────────────┘
-```
-
-**Validace:**
-- Real-time součet: slepice + kohouti = kuřata
-- Error: "Součet musí být 15"
-- Success: "✓ Součet = 15 kuřat" (zelená)
-
-#### 5.3.6 Statistiky - Cena Vejce
-
-```
-┌─────────────────────────────┐
-│ ← Statistiky                │
-├─────────────────────────────┤
-│                             │
-│ 💰 Cena vejce               │
-│                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃      4.20 Kč / vejce   ┃ │ ← Large
-│ ┃      ↓ -0.15 Kč        ┃ │ ← Trend
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ 📅 Období:                  │
-│ [7 dní] [30 dní] [Rok] [...│
-│                             │
-│ 📈 Vývoj v čase             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃     Line chart         ┃ │
-│ ┃     (cena/vejce)       ┃ │
-│ ┃                        ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ 💸 Breakdown nákladů        │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃   Pie chart            ┃ │
-│ ┃   Krmivo: 65%          ┃ │
-│ ┃   Stelivo: 20%         ┃ │
-│ ┃   Vitamíny: 10%        ┃ │
-│ ┃   Jiné: 5%             ┃ │
-│ ┗━━━━━━━━━━━━━━━━━━━━━━━┛ │
-│                             │
-│ 📊 Detail                   │
-│ ─────────────────────────── │
-│ Celkové náklady: 2,520 Kč   │
-│ Celková produkce: 600 vajec │
-│ Průměr/den: 24 vajec        │
-│                             │
-├─────────────────────────────┤
-│ [🏠] [🐔] [📝] [📊] [⋮]     │
-└─────────────────────────────┘
-```
-
-**Interactions:**
-- Tap okres → Change filter
-- Tap chart → Tooltip with detail
-- Scroll down → More details
-- Export button (Phase 3)
-
-### 5.4 Accessibility (A11Y)
-
-**WCAG 2.1 Level AA Compliance:**
-- ✅ Keyboard navigation (Tab, Enter, Space)
-- ✅ Screen reader support (ARIA labels)
-- ✅ Color contrast ratio ≥ 4.5:1 (text)
-- ✅ Color contrast ratio ≥ 3:1 (UI components)
-- ✅ Focus indicators (visible)
-- ✅ Touch targets ≥ 44x44px
-- ✅ No motion for critical functions (respect prefers-reduced-motion)
-
-**Screen Reader Optimizations:**
-- Semantic HTML (header, nav, main, footer, article)
-- ARIA landmarks
-- Alt text for icons/images
-- Form labels properly associated
-- Error messages announced
-
-### 5.5 Performance Optimization
-
-**Images:**
-- WebP format with fallback
-- Lazy loading (loading="lazy")
-- Responsive images (srcset)
-- Compression: < 100KB per image
-
-**Code Splitting:**
-```javascript
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Statistics = lazy(() => import('./pages/Statistics'));
-```
-
-**Bundle Size:**
-- Main bundle: < 150KB
-- Vendor bundle: < 200KB
-- Total: < 350KB (gzipped)
-
-**Critical CSS:**
-- Inline critical CSS
-- Defer non-critical CSS
-- Remove unused CSS (PurgeCSS)
-
 ---
 
 ## 6. Non-Functional Requirements
@@ -1372,7 +1156,7 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 ### 6.1 Performance
 
 **Metrics (Target):**
-- **Lighthouse Score:** > 90 (všechny kategorie)
+- **Lighthouse Score:** > 90 (all categories)
 - **First Contentful Paint:** < 1.5s (3G connection)
 - **Time to Interactive:** < 3.5s
 - **Largest Contentful Paint:** < 2.5s
@@ -1388,16 +1172,16 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 ### 6.2 Scalability
 
 **Capacity Planning:**
-- Support pro **1,000+ tenants** (Year 1)
+- Support for **1,000+ tenants** (Year 1)
 - **10,000 daily records/day** aggregate
 - **100 concurrent users**
 - **1M API requests/day**
 
 **Database Optimization:**
-- Partition key strategy (TenantId)
-- Indexing (Row key jako timestamp)
-- Query optimization (avoid full table scans)
-- Data archival strategy (> 2 roky → archive storage)
+- Row-Level Security for tenant isolation
+- Indexing on foreign keys and date columns
+- Connection pooling (Neon built-in)
+- Query optimization (EF Core query analysis)
 
 **Backend Scaling:**
 - Horizontal scaling (Azure Container Apps auto-scale)
@@ -1408,37 +1192,35 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 ### 6.3 Reliability & Availability
 
 **Uptime Target:** 99.5% (SLA)
-- Scheduled maintenance: < 4 hours/měsíc
+- Scheduled maintenance: < 4 hours/month
 - Downtime notifications: Email + in-app banner
 
 **Backup Strategy:**
-- Automated daily backups (Azure Table Storage snapshots)
-- Retention: 30 dní
-- Point-in-time recovery: < 24 hodin
+- Automated daily backups (Neon automatic backups)
+- Point-in-time recovery (Neon feature)
+- Retention: 7 days (free tier), 30 days (paid)
 
 **Disaster Recovery:**
-- RTO (Recovery Time Objective): 4 hodiny
-- RPO (Recovery Point Objective): 24 hodin
-- Failover region: West Europe → North Europe
+- RTO (Recovery Time Objective): 4 hours
+- RPO (Recovery Point Objective): 24 hours
+- Neon multi-region availability
 
 ### 6.4 Security
 
 **Compliance:**
 - GDPR compliant (EU users)
-- Data encryption at rest (Azure default)
+- Data encryption at rest (Neon default)
 - Data encryption in transit (HTTPS/TLS 1.3)
 - Regular security audits (quarterly)
 
 **Authentication:**
-- Password hashing: bcrypt (cost factor 12)
-- JWT expiration: 15 min (access), 30 dní (refresh)
-- Rate limiting:
-  - Login: 5 attempts / 15 min / IP
-  - API: 100 req / min / user
-  - Password reset: 3 attempts / 1 hour / email
+- Managed by Clerk (SOC 2 Type II certified)
+- JWT expiration: Clerk default (7 days)
+- Rate limiting: Clerk managed
+- MFA support (Phase 2 - Clerk Pro tier)
 
 **Data Privacy:**
-- Tenant data isolation (partition key)
+- Tenant data isolation (RLS policies)
 - No cross-tenant data access
 - Personal data export (GDPR right)
 - Account deletion (GDPR right to be forgotten)
@@ -1446,7 +1228,7 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 **Input Validation:**
 - Frontend: React Hook Form + Zod
 - Backend: FluentValidation
-- SQL Injection: Parameterized queries only
+- SQL Injection: EF Core parameterized queries
 - XSS: Sanitize user inputs (DOMPurify)
 
 ### 6.5 Monitoring & Logging
@@ -1455,7 +1237,7 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 - Request tracking (all API calls)
 - Exception logging (errors, warnings)
 - Custom events:
-  - User registration
+  - User registration (via Clerk webhook)
   - Daily record created
   - Chick maturation
   - Offline sync completed
@@ -1467,9 +1249,9 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 - Downtime: SMS + Email + Slack
 
 **Log Retention:**
-- Application logs: 90 dní
-- Access logs: 180 dní
-- Audit logs: 2 roky
+- Application logs: 90 days
+- Access logs: 180 days
+- Audit logs: 2 years
 
 ### 6.6 Browser & Device Support
 
@@ -1502,99 +1284,76 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 
 ### 7.1 Authentication Endpoints
 
-#### POST /api/auth/register
-**Request:**
-```json
-{
-  "email": "ondra@example.com",
-  "password": "SecurePass123"
-}
+**Note:** Most authentication is handled by Clerk. Backend only needs webhook and sync.
+
+#### POST /api/webhooks/clerk
+**Clerk Webhook (user.created event)**
+
+**Request Headers:**
 ```
-**Response (201):**
+svix-signature: v1,signature
+svix-timestamp: timestamp
+svix-id: webhook-id
+```
+
+**Request Body:**
 ```json
 {
-  "userId": "tenant_123",
-  "email": "ondra@example.com",
-  "accessToken": "eyJhbGc...",
-  "refreshToken": "eyJhbGc...",
-  "expiresIn": 900
+  "type": "user.created",
+  "data": {
+    "id": "user_2abc123",
+    "email_addresses": [
+      {
+        "email_address": "ondra@example.com"
+      }
+    ]
+  }
 }
 ```
 
-#### POST /api/auth/login
-**Request:**
+**Response (200):**
 ```json
 {
+  "message": "User synced successfully"
+}
+```
+
+#### POST /api/users/sync
+**Manual user sync (called from frontend after sign-up)**
+
+**Headers:**
+```
+Authorization: Bearer <clerk-jwt-token>
+```
+
+**Response (200):**
+```json
+{
+  "tenantId": "550e8400-e29b-41d4-a716-446655440000",
   "email": "ondra@example.com",
-  "password": "SecurePass123"
-}
-```
-**Response (200):**
-```json
-{
-  "userId": "tenant_123",
-  "email": "ondra@example.com",
-  "accessToken": "eyJhbGc...",
-  "refreshToken": "eyJhbGc...",
-  "expiresIn": 900
+  "createdAt": "2024-02-04T10:00:00Z"
 }
 ```
 
-#### POST /api/auth/refresh
-**Request:**
-```json
-{
-  "refreshToken": "eyJhbGc..."
-}
-```
-**Response (200):**
-```json
-{
-  "accessToken": "eyJhbGc...",
-  "refreshToken": "eyJhbGc...",
-  "expiresIn": 900
-}
-```
-
-#### POST /api/auth/forgot-password
-**Request:**
-```json
-{
-  "email": "ondra@example.com"
-}
-```
-**Response (200):**
-```json
-{
-  "message": "Reset link sent to email"
-}
-```
-
-#### POST /api/auth/reset-password
-**Request:**
-```json
-{
-  "token": "reset_token_123",
-  "newPassword": "NewSecurePass123"
-}
-```
-**Response (200):**
-```json
-{
-  "message": "Password reset successful"
-}
-```
+---
 
 ### 7.2 Coop Endpoints
 
 #### GET /api/coops
+**Get all coops for authenticated user**
+
+**Headers:**
+```
+Authorization: Bearer <clerk-jwt-token>
+```
+
 **Response (200):**
 ```json
 [
   {
     "id": "coop_1",
-    "name": "Kurník 1 - Velký",
-    "location": "Za domem",
+    "name": "Coop 1 - Large",
+    "location": "Behind the house",
     "isActive": true,
     "createdAt": "2024-01-01T10:00:00Z",
     "flocksCount": 2
@@ -1603,46 +1362,57 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 ```
 
 #### POST /api/coops
+**Create new coop**
+
 **Request:**
 ```json
 {
-  "name": "Kurník 2 - Malý",
-  "location": "Před domem"
+  "name": "Coop 2 - Small",
+  "location": "In front of house"
 }
 ```
+
 **Response (201):**
 ```json
 {
   "id": "coop_2",
-  "name": "Kurník 2 - Malý",
-  "location": "Před domem",
+  "name": "Coop 2 - Small",
+  "location": "In front of house",
   "isActive": true,
   "createdAt": "2024-02-04T08:00:00Z"
 }
 ```
 
 #### PUT /api/coops/{id}
+**Update coop**
+
 **Request:**
 ```json
 {
-  "name": "Kurník 2 - Upravený",
-  "location": "Vedle garáže"
+  "name": "Coop 2 - Updated",
+  "location": "Next to garage"
 }
 ```
 
 #### DELETE /api/coops/{id}
+**Delete coop (only if no active flocks)**
+
 **Response (204):** No content
+
+---
 
 ### 7.3 Flock Endpoints
 
 #### GET /api/flocks?coopId={id}
+**Get flocks for coop**
+
 **Response (200):**
 ```json
 [
   {
     "id": "flock_1",
     "coopId": "coop_1",
-    "identifier": "Hnědé 2024",
+    "identifier": "Browns 2024",
     "hatchDate": "2024-01-15",
     "currentHens": 15,
     "currentRoosters": 2,
@@ -1654,11 +1424,13 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 ```
 
 #### POST /api/flocks
+**Create new flock**
+
 **Request:**
 ```json
 {
   "coopId": "coop_1",
-  "identifier": "Bílé 2024",
+  "identifier": "Whites 2024",
   "hatchDate": "2024-02-01",
   "initialHens": 0,
   "initialRoosters": 0,
@@ -1666,31 +1438,9 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 }
 ```
 
-#### PUT /api/flocks/{id}
-**Request:**
-```json
-{
-  "identifier": "Bílé 2024 - Upravené",
-  "hatchDate": "2024-02-01"
-}
-```
-
-#### POST /api/flocks/{id}/history
-**Manuální úprava složení**
-**Request:**
-```json
-{
-  "date": "2024-02-04",
-  "hens": 16,
-  "roosters": 2,
-  "chicks": 2,
-  "changeType": "adjustment",
-  "notes": "Úhyn 1 kuřete"
-}
-```
-
 #### POST /api/flocks/{id}/mature-chicks
-**Převod kuřat**
+**Convert chicks to adult chickens**
+
 **Request:**
 ```json
 {
@@ -1698,9 +1448,10 @@ const Statistics = lazy(() => import('./pages/Statistics'));
   "chicksCount": 15,
   "resultingHens": 12,
   "resultingRoosters": 3,
-  "notes": "První převod z líhně"
+  "notes": "First batch from hatchery"
 }
 ```
+
 **Response (200):**
 ```json
 {
@@ -1715,6 +1466,8 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 ```
 
 #### GET /api/flocks/{id}/history
+**Get flock change history**
+
 **Response (200):**
 ```json
 [
@@ -1725,38 +1478,32 @@ const Statistics = lazy(() => import('./pages/Statistics'));
     "roosters": 5,
     "chicks": 5,
     "changeType": "maturation",
-    "notes": "První převod z líhně",
+    "notes": "First batch from hatchery",
     "createdAt": "2024-02-04T07:30:00Z"
-  },
-  {
-    "id": "history_122",
-    "date": "2024-01-28",
-    "hens": 10,
-    "roosters": 2,
-    "chicks": 20,
-    "changeType": "adjustment",
-    "notes": "Úhyn 2 kuřat - nemoc",
-    "createdAt": "2024-01-28T09:00:00Z"
   }
 ]
 ```
 
+---
+
 ### 7.4 Purchase Endpoints
 
 #### GET /api/purchases?from={date}&to={date}&type={type}
+**Get purchases with optional filters**
+
 **Response (200):**
 ```json
 [
   {
     "id": "purchase_1",
-    "type": "Krmivo",
-    "name": "Krmná směs A",
+    "type": "Feed",
+    "name": "Feed Mix A",
     "date": "2024-02-01",
     "amount": 250.00,
     "quantity": 25,
     "unit": "kg",
     "consumedDate": "2024-02-15",
-    "notes": "Balení 25 kg",
+    "notes": "25 kg package",
     "flockId": null,
     "createdAt": "2024-02-01T10:00:00Z"
   }
@@ -1764,36 +1511,30 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 ```
 
 #### POST /api/purchases
+**Create purchase**
+
 **Request:**
 ```json
 {
-  "type": "Vitamíny",
-  "name": "Multivitamín",
+  "type": "Vitamins",
+  "name": "Multivitamin",
   "date": "2024-02-04",
   "amount": 120.00,
   "quantity": 1,
-  "unit": "balení",
+  "unit": "package",
   "consumedDate": null,
-  "notes": "Pro celý chov",
+  "notes": "For entire farm",
   "flockId": null
 }
 ```
 
-#### PUT /api/purchases/{id}
-**Request:**
-```json
-{
-  "consumedDate": "2024-02-20",
-  "notes": "Spotřebováno dříve než plánováno"
-}
-```
-
-#### DELETE /api/purchases/{id}
-**Response (204):** No content
+---
 
 ### 7.5 Daily Record Endpoints
 
 #### GET /api/daily-records?flockId={id}&from={date}&to={date}
+**Get daily records**
+
 **Response (200):**
 ```json
 [
@@ -1802,13 +1543,15 @@ const Statistics = lazy(() => import('./pages/Statistics'));
     "flockId": "flock_1",
     "date": "2024-02-04",
     "eggCount": 12,
-    "notes": "Standardní produkce",
+    "notes": "Standard production",
     "createdAt": "2024-02-04T07:15:00Z"
   }
 ]
 ```
 
 #### POST /api/daily-records
+**Create daily record (offline-capable)**
+
 **Request:**
 ```json
 {
@@ -1818,33 +1561,14 @@ const Statistics = lazy(() => import('./pages/Statistics'));
   "notes": ""
 }
 ```
-**Response (201):**
-```json
-{
-  "id": "record_1",
-  "flockId": "flock_1",
-  "date": "2024-02-04",
-  "eggCount": 12,
-  "notes": "",
-  "createdAt": "2024-02-04T07:15:00Z"
-}
-```
 
-#### PUT /api/daily-records/{id}
-**Request:**
-```json
-{
-  "eggCount": 13,
-  "notes": "Oprava - přepočítáno"
-}
-```
-
-#### DELETE /api/daily-records/{id}
-**Response (204):** No content
+---
 
 ### 7.6 Statistics Endpoints
 
 #### GET /api/statistics/dashboard
+**Get dashboard statistics**
+
 **Response (200):**
 ```json
 {
@@ -1873,6 +1597,8 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 ```
 
 #### GET /api/statistics/egg-cost?from={date}&to={date}&flockId={id}
+**Get egg cost statistics**
+
 **Response (200):**
 ```json
 {
@@ -1881,24 +1607,14 @@ const Statistics = lazy(() => import('./pages/Statistics'));
   "totalEggs": 600,
   "costBreakdown": [
     {
-      "category": "Krmivo",
+      "category": "Feed",
       "amount": 1638.00,
       "percentage": 65
     },
     {
-      "category": "Stelivo",
+      "category": "Bedding",
       "amount": 504.00,
       "percentage": 20
-    },
-    {
-      "category": "Vitamíny",
-      "amount": 252.00,
-      "percentage": 10
-    },
-    {
-      "category": "Jiné",
-      "amount": 126.00,
-      "percentage": 5
     }
   ],
   "timeline": [
@@ -1914,38 +1630,7 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 }
 ```
 
-#### GET /api/statistics/flock-evolution/{flockId}?from={date}&to={date}
-**Response (200):**
-```json
-{
-  "flockId": "flock_1",
-  "identifier": "Hnědé 2024",
-  "timeline": [
-    {
-      "date": "2024-01-15",
-      "hens": 0,
-      "roosters": 0,
-      "chicks": 22,
-      "changeType": "adjustment",
-      "notes": "Založení hejna"
-    },
-    {
-      "date": "2024-02-04",
-      "hens": 22,
-      "roosters": 5,
-      "chicks": 5,
-      "changeType": "maturation",
-      "notes": "První převod"
-    }
-  ],
-  "productivity": [
-    {
-      "date": "2024-02-04",
-      "eggsPerHenPerDay": 0.83
-    }
-  ]
-}
-```
+---
 
 ### 7.7 Error Responses
 
@@ -1967,69 +1652,69 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 
 **Error Codes:**
 - `VALIDATION_ERROR` (400)
-- `UNAUTHORIZED` (401)
-- `FORBIDDEN` (403)
+- `UNAUTHORIZED` (401) - Clerk JWT invalid or missing
+- `FORBIDDEN` (403) - Tenant isolation violation
 - `NOT_FOUND` (404)
-- `CONFLICT` (409) - např. duplicate email
+- `CONFLICT` (409) - e.g., duplicate name
 - `RATE_LIMIT_EXCEEDED` (429)
 - `INTERNAL_SERVER_ERROR` (500)
 
 ---
 
-## 8. Fáze Vývoje (Roadmap)
+## 8. Development Phases (Roadmap)
 
-### 8.1 MVP - Phase 1 (3-4 měsíce)
+### 8.1 MVP - Phase 1 (3-4 months)
 
-**Týden 1-2: Setup & Infrastructure**
-- ✅ Azure účet + resource groups
+**Week 1-2: Setup & Infrastructure**
+- ✅ Azure account + resource groups
+- ✅ Neon Postgres setup
+- ✅ Clerk setup (free tier)
 - ✅ Docker setup (multi-stage build)
-- ✅ CI/CD pipeline (Azure DevOps / GitHub Actions)
-- ✅ .NET 8 Web API skeleton
+- ✅ CI/CD pipeline (GitHub Actions)
+- ✅ .NET 8 Web API skeleton with EF Core
 - ✅ React + Vite + PWA setup
-- ✅ Azure Table Storage connection
 
-**Týden 3-4: Authentication**
-- ✅ Registrace endpoint
-- ✅ Login endpoint (JWT + refresh tokens)
-- ✅ Zapomenutí hesla flow
-- ✅ Frontend: Login/Register screens
-- ✅ Token management (interceptors)
-- ✅ Protected routes
+**Week 3-4: Authentication (Clerk Integration)**
+- ✅ Clerk frontend integration (@clerk/clerk-react)
+- ✅ Clerk backend JWT validation
+- ✅ User sync webhook
+- ✅ Frontend: Protected routes
+- ✅ Tenant creation on sign-up
 
-**Týden 5-6: Kurníky & Hejna (CRUD)**
-- ✅ Backend: Coops API
-- ✅ Backend: Flocks API (s kuřaty)
-- ✅ Frontend: Seznam kurníků
-- ✅ Frontend: Detail hejna
-- ✅ Frontend: Formuláře (create/edit)
+**Week 5-6: Coops & Flocks (CRUD)**
+- ✅ Backend: Coops API with EF Core
+- ✅ Backend: Flocks API (with chicks)
+- ✅ Frontend: Coop list
+- ✅ Frontend: Flock detail
+- ✅ Frontend: Forms (create/edit)
 
-**Týden 7-8: Akce Převodu Kuřat**
+**Week 7-8: Chick Maturation Action**
 - ✅ Backend: Mature chicks endpoint
 - ✅ Backend: Flock history tracking
-- ✅ Frontend: Převod kuřat modal
-- ✅ Frontend: Historie změn hejna
+- ✅ Frontend: Chick maturation modal
+- ✅ Frontend: Change history timeline
 
-**Týden 9-10: Evidence Nákupů**
+**Week 9-10: Purchase Management**
 - ✅ Backend: Purchases API
-- ✅ Frontend: Seznam nákupů
-- ✅ Frontend: Přidat nákup (form)
-- ✅ Frontend: Autocomplete názvů
+- ✅ Frontend: Purchase list
+- ✅ Frontend: Add purchase (form)
+- ✅ Frontend: Name autocomplete
 
-**Týden 11-12: Denní Záznamy (Offline-First)**
+**Week 11-12: Daily Records (Offline-First)**
 - ✅ Backend: Daily records API
 - ✅ Frontend: Quick Add modal
 - ✅ Service Worker setup
 - ✅ IndexedDB integration
 - ✅ Background Sync queue
 
-**Týden 13-14: Dashboard & Statistiky**
+**Week 13-14: Dashboard & Statistics**
 - ✅ Backend: Dashboard stats endpoint
 - ✅ Backend: Egg cost calculation
 - ✅ Frontend: Dashboard widgets
-- ✅ Frontend: Statistika cena vejce
-- ✅ Základní grafy (Recharts)
+- ✅ Frontend: Egg cost statistics
+- ✅ Basic charts (Recharts)
 
-**Týden 15-16: PWA Features & Testing**
+**Week 15-16: PWA Features & Testing**
 - ✅ Manifest.json + icons
 - ✅ Install prompt
 - ✅ Offline banner
@@ -2038,278 +1723,269 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 - ✅ Lighthouse audit (score > 90)
 
 **Deliverables MVP:**
-- Funkční PWA s offline režimem
-- Multi-tenant autentizace (30 dní session)
-- CRUD Kurníky + Hejna (s kuřaty)
-- Akce převodu kuřat
-- Evidence nákupů
-- Denní záznamy (offline-capable)
-- Dashboard s přehledem
-- Statistika: cena vejce
+- Functional PWA with offline mode
+- Clerk authentication (email + password)
+- CRUD Coops + Flocks (with chicks)
+- Chick maturation action
+- Purchase management
+- Daily records (offline-capable)
+- Dashboard with overview
+- Statistics: egg cost
 - Lighthouse score > 90
 
-### 8.2 Phase 2 (2-3 měsíce)
+---
 
-**Detailní Statistiky**
-- Historie změn hejna (timeline view)
-- Vývoj velikosti hejna (grafy)
-- Produktivita (vejce/slepice/den) v čase
-- Srovnání hejen (side-by-side)
+### 8.2 Phase 2 (2-3 months)
 
-**Push Notifikace**
-- Denní připomínka (19:00): "Nezapomeň zaznamenat vejce"
-- Sync completed: "3 záznamy uloženy"
-- Kuřata ready to mature: "Kuřata jsou 6 týdnů stará"
+**Detailed Statistics**
+- Flock change history (timeline view)
+- Flock size development (charts)
+- Productivity (eggs/hen/day) over time
+- Flock comparison (side-by-side)
+
+**Push Notifications**
+- Daily reminder (19:00): "Don't forget to log eggs"
+- Sync completed: "3 records saved"
+- Chicks ready to mature: "Chicks are 6 weeks old"
 
 **UX Improvements**
-- Install prompt optimization (personalizace)
+- Install prompt optimization (personalization)
 - Onboarding tutorial (first-time user)
-- Dark mode (volitelné)
+- Dark mode (optional)
 - Swipe gestures (delete, archive)
+
+**Clerk Upgrades (Optional)**
+- Social logins (Google, Facebook) - still free tier
+- Multi-factor authentication (MFA) - requires Pro tier ($25/month)
+- Organizations (family sharing) - requires Pro tier
 
 **Performance**
 - Advanced caching strategies
 - Prefetching (anticipate user actions)
 - Image optimization (WebP + lazy loading)
 
-### 8.3 Phase 3 (2-3 měsíce)
+---
 
-**Jednotlivé Slepice (Volitelné)**
-- CRUD jednotlivé slepice
-- Vazba na hejno
-- Detail slepice (poznámky, foto)
+### 8.3 Phase 3 (2-3 months)
 
-**Exporty**
-- CSV export (všechny agendy)
+**Individual Chickens (Optional)**
+- CRUD individual chickens
+- Link to flock
+- Chicken detail (notes, photo)
+
+**Exports**
+- CSV export (all agendas)
 - PDF report (dashboard snapshot)
-- Email reports (týdenní/měsíční)
+- Email reports (weekly/monthly)
 
 **Advanced Features**
-- Voice input pro poznámky (Web Speech API)
-- Photo upload (s compression)
-- Calendar view (denní záznamy)
-- Multi-language support (EN, DE)
+- Voice input for notes (Web Speech API)
+- Photo upload (with compression)
+- Calendar view (daily records)
+- Multi-language support (full i18n)
 
 **Offline Enhancements**
 - Advanced conflict resolution (merge strategies)
 - Offline conflict UI (choose version)
 - Offline analytics (track offline usage)
 
+---
+
 ### 8.4 Future Ideas (Backlog)
 
-**Integrace**
-- Export do účetního SW (Money S3, Pohoda)
-- Integrace s e-shopy (prodej vajec)
-- API pro externí aplikace
+**Integrations**
+- Export to accounting software (Money S3, Pohoda)
+- E-commerce integration (egg sales)
+- API for external applications
 
-**Pokročilé Analytiky**
-- Machine Learning: predikce produkce
-- Anomaly detection (neobvyklý pokles produkce)
-- Optimalizace krmiva (cost/benefit analýza)
+**Advanced Analytics**
+- Machine Learning: production prediction
+- Anomaly detection (unusual production decrease)
+- Feed optimization (cost/benefit analysis)
 
-**Communita**
-- Sdílení statistik (anonymizované)
-- Benchmark s ostatními chovateli
-- Diskuzní fórum
+**Community**
+- Share statistics (anonymized)
+- Benchmark with other farmers
+- Discussion forum
 
 ---
 
-## 9. Otevřené Otázky k Diskusi
+## 9. Open Questions for Discussion
 
-### 9.1 Uživatelské Role
-**Otázka:** Bude jen jeden uživatel = jeden tenant, nebo plánuješ sdílení farmy mezi více uživateli (např. rodina)?
+### 9.1 Currency
+**Question:** CZK only? Or multi-currency?
 
-**Možnosti:**
-- **A) Single-user:** Jednodušší, každý má svůj účet
-- **B) Multi-user:** Jeden účet, více členů rodiny (role: owner, editor, viewer)
-- **C) Hybrid:** Možnost pozvat další uživatele (optional feature)
+**Options:**
+- **A) CZK only:** Simpler, targeting Czech market
+- **B) Multi-currency:** EUR, USD, CZK (select on registration)
 
-**Dopad:**
-- Multi-user vyžaduje:
-  - Role-based access control (RBAC)
-  - Invite system (email invites)
-  - Permission management
-  - Audit log (kdo co změnil)
+**Recommendation:** Start with CZK only, Phase 2 multi-currency
 
-### 9.2 Měna
-**Otázka:** CZK? Nebo multi-currency?
+### 9.2 Quantity Units
+**Question:** Preferred units for feed (kg, pcs, liters)? Or optional?
 
-**Možnosti:**
-- **A) CZK only:** Jednodušší, cílíme na český trh
-- **B) Multi-currency:** EUR, USD, CZK (select při registraci)
+**Options:**
+- **A) Predefined:** kg, pcs, l, package (dropdown)
+- **B) Custom:** User can add own units
+- **C) Hybrid:** Predefined + custom option
 
-**Dopad:**
-- Multi-currency vyžaduje:
-  - Currency field v DB
-  - Formátování čísel podle locale
-  - Kurzové přepočty (volitelné)
+**Recommendation:** Start with predefined (A), Phase 2 custom
 
-**Doporučení:** Start s CZK only, Phase 2 multi-currency
+### 9.3 Photos
+**Question:** Want to add photos of chickens/coops/flocks?
 
-### 9.3 Jednotky Množství
-**Otázka:** Máš preferované jednotky pro krmivo (kg, ks, litry)? Nebo volitelné?
+**Options:**
+- **A) No photos:** Text data only (simpler, less storage)
+- **B) Phase 2:** Add photo support later
+- **C) MVP:** Basic photo upload (compress + Azure Blob Storage)
 
-**Možnosti:**
-- **A) Predefined:** kg, ks, l, balení (dropdown)
-- **B) Custom:** Uživatel může přidat vlastní jednotky
-- **C) Hybrid:** Predefined + možnost custom
-
-**Doporučení:** Start s predefined (A), Phase 2 custom
-
-### 9.4 Offline Capabilities
-**Otázka:** Jak důležité je plně funkční offline používání? Nebo stačí cache pro zobrazení dat?
-
-**Možnosti:**
-- **A) Read-only offline:** Cache pro zobrazení, zápis vyžaduje síť
-- **B) Full offline:** Všechny CRUD operace offline + background sync (MVP)
-- **C) Selective offline:** Jen denní záznamy offline, zbytek online
-
-**Aktuální návrh:** Full offline pro denní záznamy (B), read-only pro zbytek
-
-### 9.5 Fotografie
-**Otázka:** Chtěl bys možnost přidávat foto slepic/kurníků/hejen?
-
-**Možnosti:**
-- **A) No photos:** Jen text data (jednodušší, menší storage)
-- **B) Phase 2:** Přidat foto support později
-- **C) MVP:** Základní foto upload (compress + Azure Blob Storage)
-
-**Dopad:**
-- Photos vyžadují:
+**Impact:**
+- Photos require:
   - Azure Blob Storage (cost)
   - Image compression (client-side)
   - Thumbnail generation
   - Offline sync complexity
 
-**Doporučení:** Phase 2 nebo 3
+**Recommendation:** Phase 2 or 3
 
-### 9.6 Plemeno/Barva
-**Otázka:** Evidovat plemeno nebo barvu slepic?
+### 9.4 Breed/Color
+**Question:** Record breed or chicken color?
 
-**Možnosti:**
-- **A) No breeding info:** Jen počty
-- **B) Breed field:** Dropdown s plemeny (Leghorn, Rhode Island Red, atd.)
-- **C) Custom tags:** Volné tagy (barva, plemeno, atd.)
+**Options:**
+- **A) No breeding info:** Just counts
+- **B) Breed field:** Dropdown with breeds (Leghorn, Rhode Island Red, etc.)
+- **C) Custom tags:** Free tags (color, breed, etc.)
 
-**Doporučení:** Phase 2, custom tags v poznámkách hejna (interim)
+**Recommendation:** Phase 2, custom tags in flock notes (interim)
 
-### 9.7 Prodej Vajec (ROI)
-**Otázka:** Plánuješ evidovat i příjmy z prodeje vajec pro ROI výpočet?
+### 9.5 Egg Sales (ROI)
+**Question:** Plan to track income from egg sales for ROI calculation?
 
-**Možnosti:**
-- **A) Costs only:** Jen náklady → cena vejce
-- **B) Income tracking:** Příjmy z prodeje → ROI, zisk/ztráta
+**Options:**
+- **A) Costs only:** Just costs → egg price
+- **B) Income tracking:** Sales income → ROI, profit/loss
 - **C) Hybrid:** Start costs only, Phase 2 income
 
-**Dopad:**
-- Income tracking vyžaduje:
-  - Sales agenda (datum, počet, cena, kupující)
+**Impact:**
+- Income tracking requires:
+  - Sales agenda (date, count, price, buyer)
   - Profit/loss calculations
   - ROI dashboard
-  - Tax reporting (volitelné)
+  - Tax reporting (optional)
 
-**Doporučení:** Start costs only (A), Phase 2 income (B)
+**Recommendation:** Start costs only (A), Phase 2 income (B)
 
-### 9.8 Notifikace
-**Otázka:** Push notifikace na připomenutí denního záznamu?
+### 9.6 Notifications
+**Question:** Push notifications for daily record reminder?
 
-**Možnosti:**
-- **A) No notifications:** Uživatel musí pamatovat
-- **B) Phase 2:** Push notifikace (19:00 denně)
-- **C) MVP:** Email reminders (jednodušší)
+**Options:**
+- **A) No notifications:** User must remember
+- **B) Phase 2:** Push notifications (19:00 daily)
+- **C) MVP:** Email reminders (simpler)
 
-**Doporučení:** Phase 2 push notifikace
+**Recommendation:** Phase 2 push notifications
 
-### 9.9 Datový Model - Vstupní Náklady
-**Otázka:** Jak evidovat vstupní náklady (nákup slepic/kuřat)?
+### 9.7 Initial Costs Data Model
+**Question:** How to track initial costs (purchasing chickens/chicks)?
 
-**Možnosti:**
-- **A) Ignorovat:** Předpokládat líhnutí, vstupní náklad = 0
-- **B) Purchase type:** Typ "Nákup zvířat" v Purchase agenda
-- **C) Flock initial cost:** Pole "Vstupní náklad" při zakládání hejna
+**Options:**
+- **A) Ignore:** Assume hatching, initial cost = 0
+- **B) Purchase type:** Type "Animal purchase" in Purchase agenda
+- **C) Flock initial cost:** "Initial cost" field when creating flock
 
-**Doporučení:** B - Purchase type "Nákup zvířat"
+**Recommendation:** B - Purchase type "Animal purchase"
 
-### 9.10 Historická Data
-**Otázka:** Potřebuješ import historických dat (migrace z Excelu)?
+### 9.8 Historical Data
+**Question:** Need to import historical data (migration from Excel)?
 
-**Možnosti:**
+**Options:**
 - **A) No import:** Start from scratch
-- **B) CSV import:** Jednoduchý import z CSV
-- **C) Excel import:** Automatický parsing Excel souborů
+- **B) CSV import:** Simple import from CSV
+- **C) Excel import:** Automatic Excel file parsing
 
-**Doporučení:** Phase 2 - CSV import
+**Recommendation:** Phase 2 - CSV import
 
 ---
 
-## 10. Rizika & Mitigation
+## 10. Risks & Mitigation
 
-### 10.1 Technická Rizika
+### 10.1 Technical Risks
 
-**1. Offline Sync Konflikty**
-- **Riziko:** Ztráta dat při konfliktním merge
+**1. Offline Sync Conflicts**
+- **Risk:** Data loss during conflict merge
 - **Mitigation:**
-  - Last-write-wins pro MVP (simple)
-  - Toast notifikace po syncu
+  - Last-write-wins for MVP (simple)
+  - Toast notification after sync
   - Phase 2: Conflict detection UI
 
-**2. Azure Table Storage Limitace**
-- **Riziko:** Omezené query možnosti, eventual consistency
+**2. Clerk Vendor Lock-in**
+- **Risk:** Dependent on Clerk service
 - **Mitigation:**
-  - Partition key design (TenantId)
-  - Materialized views pro complex queries
-  - Fallback na Azure SQL pokud potřeba
+  - Clerk has good SLA (99.99% uptime)
+  - Can migrate to another provider (OpenID Connect standard)
+  - User data synced to own database
 
-**3. PWA Install Rate**
-- **Riziko:** Uživatelé nenainstalují PWA (50%+ bounce)
+**3. Neon Free Tier Limits**
+- **Risk:** 0.5GB storage limit, 1 project
+- **Mitigation:**
+  - Monitor storage usage
+  - Upgrade to paid tier when needed (~$20/month for 10GB)
+  - Optimize queries to reduce storage
+
+**4. PWA Install Rate**
+- **Risk:** Users don't install PWA (50%+ bounce)
 - **Mitigation:**
   - Aggressive install prompts
   - Education (benefits highlight)
-  - Fallback: Funguje i v browseru
+  - Fallback: Works in browser too
 
-**4. Battery Drain (Offline Sync)**
-- **Riziko:** Background sync drains battery
+**5. Battery Drain (Offline Sync)**
+- **Risk:** Background sync drains battery
 - **Mitigation:**
   - Throttle sync attempts
   - Use Workbox exponential backoff
   - Respect battery saver mode
 
-### 10.2 Business Rizika
+---
+
+### 10.2 Business Risks
 
 **1. Low User Adoption**
-- **Riziko:** Cílová skupina nepřijme aplikaci
+- **Risk:** Target audience doesn't adopt app
 - **Mitigation:**
-  - MVP validace s beta testery (5-10 chovatelů)
-  - Iterativní development based on feedback
-  - Freemium model (zdarma, later paid pro)
+  - MVP validation with beta testers (5-10 farmers)
+  - Iterative development based on feedback
+  - Freemium model (free, later paid pro)
 
-**2. Konkurence**
-- **Riziko:** Existující řešení (Excel, jiné apps)
+**2. Competition**
+- **Risk:** Existing solutions (Excel, other apps)
 - **Mitigation:**
   - USP: Offline-first, mobile-optimized, ROI focus
-  - Differentiace: Czech market, specific use case
+  - Differentiation: Czech market, specific use case
   - Community building
 
 **3. Scaling Costs**
-- **Riziko:** Azure náklady rostou s users
+- **Risk:** Azure costs grow with users
 - **Mitigation:**
-  - Cost-effective storage (Table Storage)
-  - Auto-scaling s limity
+  - Cost-effective storage (Neon free tier)
+  - Auto-scaling with limits
   - Pricing model: Freemium → Paid tiers
 
-### 10.3 UX Rizika
+---
+
+### 10.3 UX Risks
 
 **1. Complexity Creep**
-- **Riziko:** Feature bloat → ztráta simplicity
+- **Risk:** Feature bloat → loss of simplicity
 - **Mitigation:**
   - Strict scope per phase
-  - User testing každé nové featury
+  - User testing for each new feature
   - "One main action per screen" rule
 
 **2. Offline Confusion**
-- **Riziko:** Uživatelé nerozumí offline režimu
+- **Risk:** Users don't understand offline mode
 - **Mitigation:**
-  - Clear UI indikátory
+  - Clear UI indicators
   - Onboarding tutorial (first use)
   - Help/FAQ section
 
@@ -2346,71 +2022,101 @@ const Statistics = lazy(() => import('./pages/Statistics'));
 
 ---
 
-## 12. Závěr & Next Steps
+## 12. Conclusion & Next Steps
 
-### 12.1 Shrnutí
+### 12.1 Summary
 
-ChickenTrack je **mobile-first PWA** aplikace pro sledování finanční rentability chovu slepic s důrazem na:
-- ✅ **Offline-first přístup** (důležité pro použití u kurníků)
-- ✅ **Multi-tenant architektura** (izolace dat)
-- ✅ **Rychlé logování** (denní záznamy < 30 sekund)
-- ✅ **Ekonomická transparentnost** (přesný výpočet ceny vejce)
-- ✅ **Cost-effective hosting** (Azure Table Storage + Container Apps)
+ChickenTrack is a **mobile-first PWA** application for tracking chicken farming financial profitability with focus on:
+- ✅ **Offline-first approach** (important for use at coops)
+- ✅ **Multi-tenant architecture** (data isolation)
+- ✅ **Fast logging** (daily records < 30 seconds)
+- ✅ **Economic transparency** (precise egg cost calculation)
+- ✅ **Modern auth** (Clerk - battle-tested, secure)
+- ✅ **Cost-effective hosting** (Neon Postgres + Azure Container Apps)
 
-### 12.2 Next Steps
+### 12.2 Technology Stack Summary
 
-**1. Upřesnění otevřených otázek (Priorita: HIGH)**
-- Odpověz na 10 otázek v sekci 9
-- Upřesnění scope MVP
+**Frontend:**
+- React 18 + TypeScript + Vite
+- Material-UI (MUI)
+- TanStack Query + Zustand
+- Clerk React SDK
+- Workbox PWA
 
-**2. Design Mockupy (Priorita: MEDIUM)**
-- Wireframes klíčových obrazovek (Figma)
+**Backend:**
+- .NET 8 Web API
+- Entity Framework Core
+- Clerk JWT validation
+- Clean Architecture + CQRS
+
+**Database:**
+- Neon Postgres (serverless)
+- Row-Level Security (RLS)
+- Automatic backups
+
+**Hosting:**
+- Azure Container Apps
+- Docker multi-stage build
+- GitHub Actions CI/CD
+
+### 12.3 Next Steps
+
+**1. Finalize Open Questions (Priority: HIGH)**
+- Answer 8 questions in Section 9
+- Clarify MVP scope
+
+**2. Design Mockups (Priority: MEDIUM)**
+- Wireframes for key screens (Figma)
 - User flow diagrams
 - Design system (colors, typography, spacing)
 
-**3. Backend API Contract (Priorita: HIGH)**
-- Finalizace API endpointů
-- OpenAPI/Swagger spec
-- Request/Response examples
-
-**4. Database Schema (Priorita: HIGH)**
-- Finální Table Storage schema
-- Partition key/Row key strategie
-- Indexing plan
-
-**5. Development Kickoff (Priorita: HIGH)**
+**3. Setup Development Environment (Priority: HIGH)**
+- Setup Neon Postgres
+- Setup Clerk account
 - Setup Azure resource groups
-- Init Git repositories (frontend + backend)
+- Init Git repositories (monorepo)
 - CI/CD pipeline setup
-- Sprint planning (2-week sprints)
+
+**4. Sprint Planning (Priority: HIGH)**
+- 2-week sprints
+- First sprint: Infrastructure + Clerk integration
+- Iterative development based on roadmap
 
 ---
 
-## 13. Kontakt & Revize
+## 13. Contact & Revisions
 
-**Dokument:** ChickenTrack PRD v1.0  
-**Autor:** Ondřej (Ondra)  
-**Datum:** 4. února 2026  
-**Status:** Draft for Review
+**Document:** ChickenTrack PRD v2.0
+**Author:** Ondřej (Ondra)
+**Date:** February 5, 2026
+**Status:** Approved
 
-**Next Review:** Po zodpovězení otevřených otázek  
+**Next Review:** After Phase 1 MVP completion
 **Approvers:** Ondřej (Product Owner + Developer)
 
 ---
 
-**Změnový Log:**
-- v1.0 (2024-02-04): Initial draft
+**Change Log:**
+- v2.0 (2026-02-05): Major update
+  - Translated to English
+  - Updated authentication: Clerk.com instead of custom JWT
+  - Updated database: Neon Postgres instead of Azure Table Storage
+  - Added Row-Level Security (RLS) for multi-tenancy
+  - Updated all API endpoints
+  - Added internationalization (i18n) section
+  - Maintained offline-first PWA architecture
+- v1.0 (2024-02-04): Initial draft (Czech)
   - Executive summary
-  - Funkční požadavky (včetně kuřat + akce převodu)
-  - Technické požadavky (mobile-first PWA)
-  - UI/UX specifikace
+  - Functional requirements (including chicks + maturation action)
+  - Technical requirements (mobile-first PWA)
+  - UI/UX specification
   - API endpoints
-  - Roadmap (3 fáze)
-  - Otevřené otázky (10)
+  - Roadmap (3 phases)
+  - Open questions (10)
 
 ---
 
-**Přílohy:**
+**Attachments:**
 - [TBD] Wireframes (Figma link)
 - [TBD] User Flows
 - [TBD] OpenAPI Spec

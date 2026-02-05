@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**IMPORTANT: All documentation and source code MUST be in English. The application UI is in Czech (primary language) with English as a switchable option for users.**
+
 ## Project Overview
 
 **ChickenTrack** (Chickquita) is a mobile-first Progressive Web Application (PWA) for tracking the financial profitability of chicken farming. The application features:
@@ -9,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Multi-tenant architecture with isolated data per farmer
 - Offline-first design for use outdoors at chicken coops
 - Real-time cost tracking and egg price calculation
-- Flock management including chicks maturation tracking
+- Flock management including chick maturation tracking
 
 ## Tech Stack
 
@@ -17,11 +19,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **React 18+** with TypeScript
 - **Vite** as build tool
 - **React Router** for routing
-- **Zustand** or **Redux Toolkit** for state management
+- **Zustand** for state management
 - **TanStack Query (React Query)** for server state and caching
-- **Material-UI (MUI)** or **Chakra UI** for component library
+- **Material-UI (MUI)** for component library
 - **React Hook Form** + **Zod** for forms and validation
-- **Recharts** or **Chart.js** for data visualization
+- **Recharts** for data visualization
+- **react-i18next** for internationalization (Czech primary, English secondary)
 
 ### PWA Stack
 - **Workbox** for service worker management
@@ -31,34 +34,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Backend
 - **.NET 8** Web API
-- **ASP.NET Core** (Minimal APIs or Controllers)
+- **ASP.NET Core** (Minimal APIs)
 - **Entity Framework Core** (Code First)
 - **AutoMapper** for DTO mapping
 - **FluentValidation** for request validation
-- **Serilog** for structured logging
+- **Microsoft.Extensions.Logging** for structured logging
+- **MediatR** for CQRS pattern
+
+### Authentication
+- **Clerk.com** for authentication management
+- Hosted UI components for sign-in/sign-up
+- JWT token validation in .NET API
+- Webhook integration for user sync
+- Email + password authentication (MVP)
+- Future: Social logins, MFA (requires Clerk Pro tier)
 
 ### Database
-- **Azure Table Storage** (primary) for cost-efficiency and scalability
-- Partition key: TenantId for data isolation
-- Row key: Reverse timestamp for chronological queries
+- **Neon Postgres** (serverless) for primary data storage
+- **Row-Level Security (RLS)** for tenant isolation
+- Partition strategy: `tenant_id` column on all tables
+- PostgreSQL 16 features
+- Automatic backups and point-in-time recovery
 
 ### Hosting
 - **Azure Container Apps** (recommended) or **Azure Web App for Containers**
 - **Docker** multi-stage builds
-- **Azure CDN** for static assets (Phase 2)
+- **GitHub Actions** for CI/CD
+- Single container deployment (frontend + backend)
 
 ## Architecture Principles
 
 ### Clean Architecture
 - Onion/Clean Architecture pattern
 - Dependency Injection throughout
-- CQRS pattern with MediatR (optional)
-- Repository + Unit of Work pattern (optional)
+- CQRS pattern with MediatR
+- Vertical Slice Architecture for features
 
 ### Multi-tenancy
-- Every user gets their own tenant on registration
-- All data partitioned by TenantId
-- JWT tokens include tenant claims
+- Every user gets their own tenant on registration (via Clerk webhook)
+- All data partitioned by `tenant_id` (UUID)
+- Row-Level Security (RLS) enforced at database level
+- EF Core global query filters as additional safety layer
 - No cross-tenant data access allowed
 
 ### Offline-First Strategy
@@ -72,16 +88,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Hierarchy
 ```
-Tenant (User Account)
-└── Coop (Kurník)
-    └── Flock (Hejno)
-        ├── FlockHistory (Historie změn složení)
-        ├── DailyRecord (Denní záznamy vajec)
+Tenant (User Account - linked to Clerk user)
+└── Coop (Chicken coop)
+    └── Flock (Group of chickens)
+        ├── FlockHistory (Composition change history)
+        ├── DailyRecord (Daily egg production records)
         └── Individual Chickens (Phase 3)
 ```
 
 ### Key Concepts
-- **Flock Composition**: Hens (slepice), Roosters (kohouti), Chicks (kuřata)
+- **Flock Composition**: Hens, Roosters, Chicks
 - **Chick Maturation**: Converting chicks to adult hens/roosters with historical tracking
 - **Purchases**: Feed, supplements, bedding, veterinary care, equipment
 - **Daily Records**: Egg count per flock per day (offline-capable)
@@ -89,12 +105,14 @@ Tenant (User Account)
 
 ## Development Commands
 
-### Frontend (when created)
+### Frontend
 ```bash
+cd src/frontend
+
 # Install dependencies
 npm install
 
-# Development server
+# Development server (with Vite HMR)
 npm run dev
 
 # Build for production
@@ -110,8 +128,10 @@ npm run lint
 npm run test
 ```
 
-### Backend (when created)
+### Backend
 ```bash
+cd src/backend
+
 # Restore packages
 dotnet restore
 
@@ -119,28 +139,107 @@ dotnet restore
 dotnet build
 
 # Run locally
-dotnet run --project src/ChickenTrack.Api
+dotnet run --project ChickenTrack.Api
 
 # Run tests
 dotnet test
 
-# Create migration (EF Core)
-dotnet ef migrations add <MigrationName> --project src/ChickenTrack.Infrastructure
+# Create EF Core migration
+dotnet ef migrations add <MigrationName> \
+  --project ChickenTrack.Infrastructure \
+  --startup-project ChickenTrack.Api
 
-# Update database
-dotnet ef database update --project src/ChickenTrack.Infrastructure
+# Apply migrations to database
+dotnet ef database update \
+  --project ChickenTrack.Infrastructure \
+  --startup-project ChickenTrack.Api
 ```
 
 ### Docker
 ```bash
-# Build image
-docker build -t chickentrack .
+# Build image (multi-stage: frontend + backend)
+docker build -t chickquita .
 
-# Run container
-docker run -p 8080:80 chickentrack
+# Run container locally
+docker run -p 8080:80 chickquita
 
-# Build and run with docker-compose
+# Build and run with docker-compose (if using)
 docker-compose up --build
+```
+
+## Authentication Flow (Clerk)
+
+### User Sign-Up Flow
+1. User accesses `/sign-up` → Clerk hosted UI
+2. User enters email + password → Clerk validates and creates account
+3. Clerk sends verification email
+4. User verifies email → Clerk webhook fires `user.created` event
+5. Backend receives webhook → Creates `Tenant` record in Neon
+6. Links `ClerkUserId` → `TenantId` in database
+7. User redirected to dashboard
+
+### User Sign-In Flow
+1. User accesses `/sign-in` → Clerk hosted UI
+2. User enters credentials → Clerk validates
+3. Clerk issues JWT session token (7 days default)
+4. Frontend receives token via `@clerk/clerk-react` hooks
+5. All API calls include `Authorization: Bearer <token>`
+6. Backend validates Clerk JWT
+7. Backend extracts `ClerkUserId`, looks up `TenantId`
+8. Backend sets RLS context: `SET app.current_tenant_id = <tenant_id>`
+9. All queries automatically filtered by tenant via RLS policies
+
+### Frontend Integration
+```tsx
+// Use Clerk hooks for authentication
+import { useAuth, useUser } from '@clerk/clerk-react';
+
+function MyComponent() {
+  const { isSignedIn, getToken } = useAuth();
+  const { user } = useUser();
+
+  // Make API call with Clerk token
+  const fetchData = async () => {
+    const token = await getToken();
+    const response = await fetch('/api/coops', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  };
+}
+```
+
+## Database Design
+
+### Neon Postgres Schema
+
+All tables include:
+- `id` (UUID, primary key)
+- `tenant_id` (UUID, foreign key to tenants)
+- `created_at` (TIMESTAMPTZ)
+- `updated_at` (TIMESTAMPTZ)
+
+**Key Tables:**
+- `tenants` - User accounts (linked to Clerk via `clerk_user_id`)
+- `coops` - Chicken coops
+- `flocks` - Chicken flocks with composition (hens, roosters, chicks)
+- `flock_history` - Immutable history of flock composition changes
+- `purchases` - Cost tracking (feed, bedding, etc.)
+- `daily_records` - Daily egg production (offline-capable)
+
+### Row-Level Security (RLS)
+
+Every table has RLS policy:
+```sql
+CREATE POLICY tenant_isolation ON coops
+  USING (tenant_id = current_setting('app.current_tenant_id')::UUID);
+```
+
+Backend sets context before each query:
+```csharp
+await Database.ExecuteSqlRawAsync(
+    "SELECT set_tenant_context({0})",
+    currentUser.TenantId
+);
 ```
 
 ## API Design Standards
@@ -152,10 +251,10 @@ docker-compose up --build
 - CORS enabled for PWA origin
 
 ### Authentication
-- JWT Bearer tokens (15 min expiration)
-- Refresh tokens (30 days sliding expiration)
-- Rate limiting on auth endpoints:
-  - Login: 5 attempts / 15 min / IP
+- JWT Bearer tokens (managed by Clerk)
+- Automatic token refresh (Clerk SDK)
+- Rate limiting on API endpoints:
+  - Auth webhooks: Clerk managed
   - API: 100 requests / min / user
 
 ### Standard Error Format
@@ -204,14 +303,36 @@ docker-compose up --build
 3. **Offline mode**: Automatic queue + sync when online
 4. **Chick maturation**: Validation that hens + roosters = chicks converted
 
+## Internationalization (i18n)
+
+### Language Support
+- **Primary language**: Czech (cs-CZ)
+- **Secondary language**: English (en-US)
+- User can switch language in settings
+- Translation files: `src/frontend/src/locales/{cs|en}/translation.json`
+
+### Implementation
+```tsx
+import { useTranslation } from 'react-i18next';
+
+function MyComponent() {
+  const { t } = useTranslation();
+
+  return (
+    <h1>{t('dashboard.title')}</h1> // "Přehled" in Czech, "Dashboard" in English
+  );
+}
+```
+
 ## Security Considerations
 
-- Password hashing: bcrypt (cost factor 12)
+- Authentication: Managed by Clerk (SOC 2 Type II certified)
 - HTTPS/TLS 1.3 required
 - Input validation on both frontend (Zod) and backend (FluentValidation)
-- Parameterized queries only (prevent SQL injection)
+- Parameterized queries only via EF Core (prevent SQL injection)
 - XSS protection via DOMPurify for user inputs
 - GDPR compliance for EU users
+- Row-Level Security (RLS) for tenant data isolation
 
 ## Testing Strategy
 
@@ -224,7 +345,7 @@ docker-compose up --build
 ### Backend
 - Unit tests for domain logic
 - Integration tests for API endpoints
-- Repository tests (if using repository pattern)
+- Repository tests with EF Core
 - Validation tests for FluentValidation rules
 
 ### PWA Testing
@@ -235,20 +356,22 @@ docker-compose up --build
 
 ## Important Notes
 
-### Language
-- PRD and documentation in **Czech** (Čeština)
-- Code, comments, and variable names in **English**
-- UI text in Czech (with i18n support planned for Phase 2/3)
+### Language Requirements
+- **All code, comments, and documentation**: English
+- **Variable names, function names, class names**: English
+- **Commit messages**: English
+- **UI text**: Czech (primary), with i18n support for English
+- **User-facing content**: Czech by default, switchable to English
 
 ### Data Model Specifics
-- **Chicks (kuřata)** are counted in costs but NOT in egg production
-- Only **hens (slepice)** contribute to egg count
+- **Chicks** are counted in costs (feed consumption)
+- **Chicks do NOT count** in egg production (only hens lay eggs)
 - Flock history is immutable except for notes field
 - First history entry = initial flock composition
 
 ### Phase 1 MVP Scope
 Focus only on:
-1. Authentication (JWT + refresh tokens)
+1. Authentication (Clerk email + password)
 2. Coops and Flocks CRUD (including chicks)
 3. Chick maturation action with history
 4. Purchases tracking
@@ -260,53 +383,189 @@ Focus only on:
 ## Development Workflow
 
 1. Feature branches from `main`
-2. Conventional commits preferred
+2. Conventional commits preferred (in English)
 3. PR required for merge to main
 4. CI/CD pipeline runs tests and Lighthouse
 5. Deploy to Azure Container Apps on merge
 
-## File Structure (Target)
+## File Structure
 
 ```
-/
-├── src/
-│   ├── frontend/          # React PWA
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   ├── pages/
-│   │   │   ├── hooks/
-│   │   │   ├── services/
-│   │   │   ├── store/
-│   │   │   └── utils/
-│   │   ├── public/
-│   │   └── package.json
-│   └── backend/           # .NET API
-│       ├── ChickenTrack.Api/
-│       ├── ChickenTrack.Core/
-│       ├── ChickenTrack.Infrastructure/
-│       └── ChickenTrack.Tests/
+chickquita/
 ├── docs/
-│   └── ChickenTrack_PRD.md
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
+│   ├── ChickenTrack_PRD.md          # Product requirements (English)
+│   ├── technology-stack.md          # Tech stack documentation
+│   ├── filesystem-structure.md      # Project structure
+│   └── migration-clerk-neon.md      # Migration guide
+├── src/
+│   ├── backend/                     # .NET 8 API
+│   │   ├── ChickenTrack.Api/       # Entry point, endpoints
+│   │   ├── ChickenTrack.Application/ # Features (CQRS + MediatR)
+│   │   ├── ChickenTrack.Domain/    # Entities, value objects
+│   │   └── ChickenTrack.Infrastructure/ # EF Core, Clerk integration
+│   └── frontend/                    # React PWA
+│       ├── src/
+│       │   ├── features/            # Feature modules
+│       │   ├── shared/              # Shared components
+│       │   ├── lib/                 # Third-party setup (Clerk, API)
+│       │   └── locales/             # i18n translations (cs, en)
+│       └── public/                  # Static assets, manifest.json
+├── Dockerfile                       # Multi-stage build
+├── .github/workflows/               # CI/CD pipelines
+└── README.md                        # Project overview
 ```
 
-## Azure Resources
+## Azure & External Services
 
+### Neon Postgres
+- Database: `chickquita`
+- Connection string stored in Azure Key Vault
+- Free tier: 0.5GB storage, 1 project
+- Upgrade to paid when needed (~$20/month for 10GB)
+
+### Clerk
+- Application name: `ChickenTrack`
+- Plan: Free tier (10k MAU)
+- Features: Email/password, hosted UI
+- Publishable Key: Frontend env var
+- Secret Key: Backend env var (Azure Key Vault)
+- Webhook: `POST /api/webhooks/clerk` for user sync
+
+### Azure Resources
 - Resource Group: `chickquita-rg`
-- Table Storage: For all application data
 - Container Apps: For hosting the application
 - Application Insights: For monitoring and logging
-- CDN: For static assets (Phase 2)
+- Key Vault: For secrets (Neon connection string, Clerk keys)
 
 ## Monitoring
 
 - **Application Insights** for telemetry
-- Structured logging with Serilog
+- Structured logging with Microsoft.Extensions.Logging
 - Custom events for business metrics:
-  - User registration
+  - User registration (via Clerk webhook)
   - Daily record created
   - Chick maturation
   - Offline sync completed
 - Alert on error rate > 5% or response time > 1s (p95)
+
+## Common Patterns
+
+### Backend - Creating a New Feature
+
+1. **Domain Entity** (`ChickenTrack.Domain/Entities/`)
+```csharp
+public class Flock
+{
+    public Guid Id { get; private set; }
+    public Guid TenantId { get; private set; }
+    // ... properties
+
+    public void MatureChicks(int count, int hens, int roosters)
+    {
+        // Domain logic here
+    }
+}
+```
+
+2. **Command/Query** (`ChickenTrack.Application/Features/Flocks/Commands/`)
+```csharp
+public record MatureChicksCommand : IRequest<Result<FlockDto>>
+{
+    public Guid FlockId { get; init; }
+    public int ChicksCount { get; init; }
+    // ...
+}
+```
+
+3. **Handler** (same directory)
+```csharp
+public class MatureChicksCommandHandler : IRequestHandler<MatureChicksCommand, Result<FlockDto>>
+{
+    private readonly ApplicationDbContext _context;
+    private readonly ICurrentUserService _currentUser;
+
+    public async Task<Result<FlockDto>> Handle(...)
+    {
+        // Implementation
+    }
+}
+```
+
+4. **Endpoint** (`ChickenTrack.Application/Features/Flocks/FlocksEndpoints.cs`)
+```csharp
+public static class FlocksEndpoints
+{
+    public static RouteGroupBuilder MapFlocksEndpoints(this RouteGroupBuilder group)
+    {
+        group.MapPost("/{id}/mature-chicks", async (Guid id, MatureChicksCommand cmd, IMediator mediator) =>
+        {
+            cmd.FlockId = id;
+            var result = await mediator.Send(cmd);
+            return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+        });
+
+        return group;
+    }
+}
+```
+
+### Frontend - Creating a New Feature
+
+1. **API Client** (`src/features/flocks/api/flocksApi.ts`)
+```typescript
+export const flocksApi = {
+  matureChicks: async (flockId: string, data: MatureChicksDto): Promise<FlockDto> => {
+    const response = await apiClient.post(`/flocks/${flockId}/mature-chicks`, data);
+    return response.data;
+  },
+};
+```
+
+2. **Hook** (`src/features/flocks/hooks/useMatureChicks.ts`)
+```typescript
+export function useMatureChicks() {
+  return useMutation({
+    mutationFn: ({ flockId, data }: { flockId: string; data: MatureChicksDto }) =>
+      flocksApi.matureChicks(flockId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['flocks'] });
+    },
+  });
+}
+```
+
+3. **Component** (`src/features/flocks/components/MatureChicksModal.tsx`)
+```tsx
+export function MatureChicksModal({ flock, open, onClose }: Props) {
+  const { t } = useTranslation();
+  const { mutate, isPending } = useMatureChicks();
+
+  const onSubmit = (data: FormData) => {
+    mutate({ flockId: flock.id, data });
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>{t('flocks.matureChicks.title')}</DialogTitle>
+      {/* Form implementation */}
+    </Dialog>
+  );
+}
+```
+
+## IMPORTANT REMINDERS
+
+1. **Always write code and documentation in English**
+2. **Use Clerk for all authentication** - don't implement custom auth
+3. **Use EF Core** for database access - no raw SQL unless necessary
+4. **Set RLS context** before queries in backend
+5. **Use global query filters** in EF Core as safety layer
+6. **Offline-first** - ensure daily records work offline
+7. **Mobile-first** - design for mobile, enhance for desktop
+8. **i18n ready** - use translation keys, not hardcoded Czech text
+9. **Type-safe** - use TypeScript strict mode, C# nullable reference types
+10. **Test critical flows** - especially offline sync and tenant isolation
+
+---
+
+For detailed technical specifications, see `/docs/ChickenTrack_PRD.md`
