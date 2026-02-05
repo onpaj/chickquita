@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <InternalsVisibleTo>ChickenTrack.Api.Tests</InternalsVisibleTo>
   </PropertyGroup>
 
   <ItemGroup>

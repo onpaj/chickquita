@@ -1,5 +1,7 @@
+using ChickenTrack.Api.Endpoints;
 using ChickenTrack.Application;
 using ChickenTrack.Application.Interfaces;
+using ChickenTrack.Infrastructure;
 using ChickenTrack.Infrastructure.Data;
 using ChickenTrack.Infrastructure.Repositories;
 using MediatR;
@@ -15,31 +17,8 @@ builder.Services.AddSwaggerGen();
 // Register Application layer services (MediatR, AutoMapper, FluentValidation)
 builder.Services.AddApplicationServices();
 
-// Configure Entity Framework Core with PostgreSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-    options.UseNpgsql(connectionString, npgsqlOptions =>
-    {
-        npgsqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 3,
-            maxRetryDelay: TimeSpan.FromSeconds(5),
-            errorCodesToAdd: null
-        );
-    });
-
-    // Enable sensitive data logging in development
-    if (builder.Environment.IsDevelopment())
-    {
-        options.EnableSensitiveDataLogging();
-        options.EnableDetailedErrors();
-    }
-});
-
-// Register repositories
-builder.Services.AddScoped<ITenantRepository, TenantRepository>();
+// Register Infrastructure layer services (DbContext, Repositories, Services)
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Configure CORS for development only
 if (builder.Environment.IsDevelopment())
@@ -87,4 +66,10 @@ app.MapGet("/ping", async (IMediator mediator) =>
     .WithOpenApi()
     .Produces<object>(200);
 
+// Map webhook endpoints
+app.MapWebhooksEndpoints();
+
 app.Run();
+
+// Make Program accessible for integration tests
+public partial class Program { }
