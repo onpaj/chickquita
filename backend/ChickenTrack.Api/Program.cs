@@ -1,6 +1,8 @@
+using ChickenTrack.Application;
 using ChickenTrack.Application.Interfaces;
 using ChickenTrack.Infrastructure.Data;
 using ChickenTrack.Infrastructure.Repositories;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register Application layer services (MediatR, AutoMapper, FluentValidation)
+builder.Services.AddApplicationServices();
 
 // Configure Entity Framework Core with PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -69,6 +74,16 @@ app.UseHttpsRedirection();
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
     .WithName("HealthCheck")
+    .WithOpenApi()
+    .Produces<object>(200);
+
+// MediatR test endpoint (can be removed after verification)
+app.MapGet("/ping", async (IMediator mediator) =>
+    {
+        var result = await mediator.Send(new ChickenTrack.Application.Features.System.PingQuery());
+        return Results.Ok(new { message = result });
+    })
+    .WithName("Ping")
     .WithOpenApi()
     .Produces<object>(200);
 
