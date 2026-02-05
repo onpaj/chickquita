@@ -1,0 +1,101 @@
+{
+  "common": {
+    "appName": "ChickenTrack",
+    "loading": "Načítání...",
+    "save": "Uložit",
+    "cancel": "Zrušit",
+    "delete": "Smazat",
+    "edit": "Upravit",
+    "add": "Přidat",
+    "back": "Zpět",
+    "confirm": "Potvrdit",
+    "search": "Hledat",
+    "filter": "Filtrovat",
+    "close": "Zavřít",
+    "error": "Chyba",
+    "success": "Úspěch"
+  },
+  "auth": {
+    "signIn": "Přihlásit se",
+    "signUp": "Registrovat se",
+    "signOut": "Odhlásit se",
+    "email": "E-mail",
+    "password": "Heslo",
+    "welcome": "Vítejte v ChickenTrack"
+  },
+  "dashboard": {
+    "title": "Přehled",
+    "totalEggs": "Celkem vajec",
+    "totalCosts": "Celkové náklady",
+    "eggCost": "Cena za vejce",
+    "activeFlocks": "Aktivní hejna"
+  },
+  "coops": {
+    "title": "Kurníky",
+    "addCoop": "Přidat kurník",
+    "editCoop": "Upravit kurník",
+    "deleteCoop": "Smazat kurník",
+    "coopName": "Název kurníku",
+    "coopDescription": "Popis"
+  },
+  "flocks": {
+    "title": "Hejna",
+    "addFlock": "Přidat hejno",
+    "editFlock": "Upravit hejno",
+    "deleteFlock": "Smazat hejno",
+    "flockName": "Název hejna",
+    "hens": "Slepice",
+    "roosters": "Kohouti",
+    "chicks": "Kuřata",
+    "matureChicks": {
+      "title": "Převést kuřata na dospělé",
+      "chicksCount": "Počet kuřat",
+      "toHens": "Na slepice",
+      "toRoosters": "Na kohouty"
+    }
+  },
+  "purchases": {
+    "title": "Nákupy",
+    "addPurchase": "Přidat nákup",
+    "category": "Kategorie",
+    "amount": "Částka",
+    "date": "Datum",
+    "description": "Popis",
+    "categories": {
+      "feed": "Krmivo",
+      "bedding": "Podestýlka",
+      "veterinary": "Veterinární péče",
+      "equipment": "Vybavení",
+      "other": "Ostatní"
+    }
+  },
+  "dailyRecords": {
+    "title": "Denní záznamy",
+    "addRecord": "Přidat záznam",
+    "eggCount": "Počet vajec",
+    "date": "Datum",
+    "notes": "Poznámky"
+  },
+  "settings": {
+    "title": "Nastavení",
+    "language": "Jazyk",
+    "profile": "Profil",
+    "theme": "Vzhled"
+  },
+  "validation": {
+    "required": "Toto pole je povinné",
+    "invalidEmail": "Neplatná e-mailová adresa",
+    "minLength": "Minimální délka je {{count}} znaků",
+    "maxLength": "Maximální délka je {{count}} znaků",
+    "min": "Minimální hodnota je {{count}}",
+    "max": "Maximální hodnota je {{count}}",
+    "positiveNumber": "Musí být kladné číslo"
+  },
+  "errors": {
+    "generic": "Něco se pokazilo",
+    "network": "Chyba sítě",
+    "notFound": "Nenalezeno",
+    "unauthorized": "Neautorizováno",
+    "forbidden": "Zakázáno"
+  }
+}

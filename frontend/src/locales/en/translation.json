@@ -1,0 +1,101 @@
+{
+  "common": {
+    "appName": "ChickenTrack",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "back": "Back",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "close": "Close",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "welcome": "Welcome to ChickenTrack"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalEggs": "Total Eggs",
+    "totalCosts": "Total Costs",
+    "eggCost": "Egg Cost",
+    "activeFlocks": "Active Flocks"
+  },
+  "coops": {
+    "title": "Coops",
+    "addCoop": "Add Coop",
+    "editCoop": "Edit Coop",
+    "deleteCoop": "Delete Coop",
+    "coopName": "Coop Name",
+    "coopDescription": "Description"
+  },
+  "flocks": {
+    "title": "Flocks",
+    "addFlock": "Add Flock",
+    "editFlock": "Edit Flock",
+    "deleteFlock": "Delete Flock",
+    "flockName": "Flock Name",
+    "hens": "Hens",
+    "roosters": "Roosters",
+    "chicks": "Chicks",
+    "matureChicks": {
+      "title": "Mature Chicks to Adults",
+      "chicksCount": "Number of Chicks",
+      "toHens": "To Hens",
+      "toRoosters": "To Roosters"
+    }
+  },
+  "purchases": {
+    "title": "Purchases",
+    "addPurchase": "Add Purchase",
+    "category": "Category",
+    "amount": "Amount",
+    "date": "Date",
+    "description": "Description",
+    "categories": {
+      "feed": "Feed",
+      "bedding": "Bedding",
+      "veterinary": "Veterinary Care",
+      "equipment": "Equipment",
+      "other": "Other"
+    }
+  },
+  "dailyRecords": {
+    "title": "Daily Records",
+    "addRecord": "Add Record",
+    "eggCount": "Egg Count",
+    "date": "Date",
+    "notes": "Notes"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "profile": "Profile",
+    "theme": "Theme"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "minLength": "Minimum length is {{count}} characters",
+    "maxLength": "Maximum length is {{count}} characters",
+    "min": "Minimum value is {{count}}",
+    "max": "Maximum value is {{count}}",
+    "positiveNumber": "Must be a positive number"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "network": "Network error",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden"
+  }
+}
