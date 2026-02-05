@@ -1661,158 +1661,682 @@ Authorization: Bearer <clerk-jwt-token>
 
 ---
 
-## 8. Development Phases (Roadmap)
+## 8. Development Milestones
 
-### 8.1 MVP - Phase 1 (3-4 months)
+**Approach:** Value-driven incremental delivery. Each milestone represents a single complete user action that can be deployed to production and provides immediate value. Milestones build progressively toward the full application.
 
-**Week 1-2: Setup & Infrastructure**
-- ✅ Azure account + resource groups
-- ✅ Neon Postgres setup
-- ✅ Clerk setup (free tier)
-- ✅ Docker setup (multi-stage build)
-- ✅ CI/CD pipeline (GitHub Actions)
-- ✅ .NET 8 Web API skeleton with EF Core
-- ✅ React + Vite + PWA setup
+### Milestone Dependency Map
 
-**Week 3-4: Authentication (Clerk Integration)**
-- ✅ Clerk frontend integration (@clerk/clerk-react)
-- ✅ Clerk backend JWT validation
-- ✅ User sync webhook
-- ✅ Frontend: Protected routes
-- ✅ Tenant creation on sign-up
+```
+Foundation:
+M1 (Auth) → M2 (Coops) → M3 (Flocks)
+                             ↓
+Core Value Loop:            M4 (Daily Records) ──→ M6 (Egg Cost Dashboard)
+                             ↓                       ↑
+                            M5 (Purchases) ─────────┘
 
-**Week 5-6: Coops & Flocks (CRUD)**
-- ✅ Backend: Coops API with EF Core
-- ✅ Backend: Flocks API (with chicks)
-- ✅ Frontend: Coop list
-- ✅ Frontend: Flock detail
-- ✅ Frontend: Forms (create/edit)
+Advanced Flock Management:
+M3 (Flocks) → M7 (Edit Composition) → M8 (Mature Chicks) → M9 (History View)
 
-**Week 7-8: Chick Maturation Action**
-- ✅ Backend: Mature chicks endpoint
-- ✅ Backend: Flock history tracking
-- ✅ Frontend: Chick maturation modal
-- ✅ Frontend: Change history timeline
-
-**Week 9-10: Purchase Management**
-- ✅ Backend: Purchases API
-- ✅ Frontend: Purchase list
-- ✅ Frontend: Add purchase (form)
-- ✅ Frontend: Name autocomplete
-
-**Week 11-12: Daily Records (Offline-First)**
-- ✅ Backend: Daily records API
-- ✅ Frontend: Quick Add modal
-- ✅ Service Worker setup
-- ✅ IndexedDB integration
-- ✅ Background Sync queue
-
-**Week 13-14: Dashboard & Statistics**
-- ✅ Backend: Dashboard stats endpoint
-- ✅ Backend: Egg cost calculation
-- ✅ Frontend: Dashboard widgets
-- ✅ Frontend: Egg cost statistics
-- ✅ Basic charts (Recharts)
-
-**Week 15-16: PWA Features & Testing**
-- ✅ Manifest.json + icons
-- ✅ Install prompt
-- ✅ Offline banner
-- ✅ Mobile testing (real devices)
-- ✅ Performance optimization
-- ✅ Lighthouse audit (score > 90)
-
-**Deliverables MVP:**
-- Functional PWA with offline mode
-- Clerk authentication (email + password)
-- CRUD Coops + Flocks (with chicks)
-- Chick maturation action
-- Purchase management
-- Daily records (offline-capable)
-- Dashboard with overview
-- Statistics: egg cost
-- Lighthouse score > 90
+Enhanced UX:
+M4 (Daily Records) → M10 (Offline Mode)
+M6 (Dashboard) → M11 (Statistics)
+M10 (Offline) → M12 (PWA Install)
+```
 
 ---
 
-### 8.2 Phase 2 (2-3 months)
+### M1: User Authentication
 
-**Detailed Statistics**
-- Flock change history (timeline view)
-- Flock size development (charts)
-- Productivity (eggs/hen/day) over time
-- Flock comparison (side-by-side)
+**Value Delivered:** Users can create accounts and securely access the application
+
+**User Story:** As a farmer, I want to sign up and sign in securely, so that my farm data is private and accessible only to me.
+
+**Acceptance Criteria:**
+- ✅ User can sign up with email/password via Clerk hosted UI
+- ✅ User receives verification email and can verify account
+- ✅ User can sign in with verified credentials
+- ✅ Backend creates tenant record via Clerk webhook
+- ✅ Protected routes redirect unauthenticated users to sign-in
+- ✅ User can sign out
+- ✅ JWT tokens work for API authentication
+- ✅ App is deployable to Azure with Clerk configured
+
+**Technical Scope:**
+- **Frontend:**
+  - @clerk/clerk-react integration
+  - Sign-in/sign-up pages (Clerk hosted UI)
+  - Protected route middleware with React Router
+  - Basic empty dashboard shell (landing page after login)
+  - Clerk UserButton component in header
+- **Backend:**
+  - Clerk JWT validation middleware
+  - Webhook endpoint: POST /api/webhooks/clerk
+  - Tenant creation logic (ClerkUserId → TenantId mapping)
+  - RLS context setting per request
+- **Infrastructure:**
+  - Clerk account setup (free tier)
+  - Environment variables in Azure (Clerk keys)
+  - Database: `tenants` table with RLS policies
+  - CI/CD: GitHub Actions deployment pipeline
+  - Docker multi-stage build (frontend + backend)
+
+**Dependencies:** None (first milestone)
+
+**Out of Scope:**
+- Social logins (Google, Facebook)
+- MFA (requires Clerk Pro)
+- Password reset UI customization
+- User profile editing
+
+---
+
+### M2: Coop Management
+
+**Value Delivered:** Users can organize their chicken coops
+
+**User Story:** As a farmer, I want to create and manage coops, so that I can organize my flocks by location.
+
+**Acceptance Criteria:**
+- ✅ User can create a coop (name, optional location)
+- ✅ User sees list of their coops on Coops page
+- ✅ User can edit coop details (name, location)
+- ✅ User can archive a coop (soft delete)
+- ✅ User can delete empty coops (validation: no active flocks)
+- ✅ Tenant isolation verified (users only see their own coops)
+- ✅ Mobile-responsive forms and list view
+- ✅ Form validation (name required, max length)
+
+**Technical Scope:**
+- **Frontend:**
+  - Coops list page with bottom navigation
+  - Create/edit form modal (Material-UI Dialog)
+  - React Hook Form + Zod validation
+  - Empty state UI ("No coops yet - Add your first coop")
+  - TanStack Query for data fetching and caching
+- **Backend:**
+  - CQRS handlers: CreateCoopCommand, UpdateCoopCommand, DeleteCoopCommand, GetCoopsQuery
+  - EF Core repository with RLS
+  - FluentValidation for request validation
+  - Endpoint: GET /api/coops, POST /api/coops, PUT /api/coops/{id}, DELETE /api/coops/{id}
+- **Database:**
+  - `coops` table with RLS policy
+  - Indexes on tenant_id
+
+**Dependencies:** M1 (requires authentication)
+
+**Out of Scope:**
+- Coop photos
+- Location map integration
+- Sharing coops with other users
+- Coop statistics (egg production per coop)
+
+---
+
+### M3: Basic Flock Creation
+
+**Value Delivered:** Users can create flocks with initial composition
+
+**User Story:** As a farmer, I want to create a flock with its initial composition (hens, roosters, chicks), so that I can start tracking my chickens.
+
+**Acceptance Criteria:**
+- ✅ User can create a flock (identifier, hatch date, coop, initial counts)
+- ✅ User sees list of flocks within a coop
+- ✅ User can view flock details (current composition)
+- ✅ User can edit basic flock info (identifier, hatch date)
+- ✅ User can archive a flock
+- ✅ Initial flock history record created automatically
+- ✅ Validation: At least one animal type > 0
+- ✅ Validation: Identifier unique within coop
+
+**Technical Scope:**
+- **Frontend:**
+  - Flock list view (within coop detail page)
+  - Create flock form (identifier, hatch date, coop selector, initial counts)
+  - Flock detail page showing current composition
+  - Number input components with +/- buttons
+  - Material-UI cards for flock display
+- **Backend:**
+  - CQRS handlers: CreateFlockCommand, UpdateFlockCommand, GetFlocksQuery, GetFlockByIdQuery
+  - Automatic creation of first flock_history record (type: "initial")
+  - Endpoints: GET /api/flocks?coopId={id}, POST /api/flocks, PUT /api/flocks/{id}, GET /api/flocks/{id}
+- **Database:**
+  - `flocks` table with RLS
+  - `flock_history` table with RLS
+  - Indexes on tenant_id, coop_id, flock_id
+
+**Dependencies:** M2 (requires coops to exist)
+
+**Out of Scope:**
+- Editing flock composition (M7)
+- Chick maturation (M8)
+- History timeline view (M9)
+- Breed/color tracking
+
+---
+
+### M4: Daily Egg Records
+
+**Value Delivered:** Users can record daily egg production
+
+**User Story:** As a farmer, I want to quickly record how many eggs each flock produced today, so that I can track production over time.
+
+**Acceptance Criteria:**
+- ✅ User can create a daily record (flock, date, egg count)
+- ✅ User can access quick-add via FAB button on dashboard
+- ✅ User can view daily records list (filtered by flock/date range)
+- ✅ User can edit daily record (same day only)
+- ✅ User can delete daily record
+- ✅ Validation: One record per flock per day
+- ✅ Validation: Cannot create future-dated records
+- ✅ Validation: Egg count >= 0
+- ✅ Mobile-optimized quick-add flow (< 30 seconds)
+
+**Technical Scope:**
+- **Frontend:**
+  - FAB button on dashboard (Material-UI Fab)
+  - Quick-add modal (flock dropdown, date picker, egg count input)
+  - Daily records list page
+  - Date shortcuts (Today, Yesterday)
+  - Large touch-friendly number input (80x60px buttons)
+- **Backend:**
+  - CQRS handlers: CreateDailyRecordCommand, UpdateDailyRecordCommand, DeleteDailyRecordCommand, GetDailyRecordsQuery
+  - Validation: Unique constraint on (flock_id, record_date)
+  - Endpoints: POST /api/daily-records, GET /api/daily-records, PUT /api/daily-records/{id}, DELETE /api/daily-records/{id}
+- **Database:**
+  - `daily_records` table with RLS
+  - Unique index on (flock_id, record_date)
+  - Index on record_date for range queries
+
+**Dependencies:** M3 (requires flocks to record against)
+
+**Out of Scope:**
+- Offline mode (M10)
+- Notes field
+- Photo attachments
+- Bulk record creation
+
+---
+
+### M5: Purchase Tracking
+
+**Value Delivered:** Users can track all chicken-related expenses
+
+**User Story:** As a farmer, I want to record my purchases (feed, bedding, vitamins), so that I can calculate my total costs.
+
+**Acceptance Criteria:**
+- ✅ User can create a purchase (type, name, date, price, quantity, unit)
+- ✅ User sees list of purchases (with filters: type, date range)
+- ✅ User can edit purchase details
+- ✅ User can delete a purchase
+- ✅ Purchase name autocomplete from history
+- ✅ Purchase types: Feed, Vitamins, Bedding, Toys, Veterinary, Other
+- ✅ Units: kg, pcs, l, package, other
+- ✅ Optional flock/coop assignment
+
+**Technical Scope:**
+- **Frontend:**
+  - Purchase list page with filters
+  - Create/edit purchase form (type dropdown, name autocomplete, date, price, quantity, unit)
+  - Type-based icons and color coding
+  - Purchase summary card (total spent this month)
+  - Material-UI Autocomplete for name field
+- **Backend:**
+  - CQRS handlers: CreatePurchaseCommand, UpdatePurchaseCommand, DeletePurchaseCommand, GetPurchasesQuery
+  - Autocomplete endpoint: GET /api/purchases/names?query={text}
+  - Endpoints: GET /api/purchases, POST /api/purchases, PUT /api/purchases/{id}, DELETE /api/purchases/{id}
+- **Database:**
+  - `purchases` table with RLS
+  - Enums: purchase_type, quantity_unit
+  - Indexes on tenant_id, purchase_date, type
+
+**Dependencies:** M3 (optional flock reference)
+
+**Out of Scope:**
+- Receipt photo uploads
+- Recurring purchases
+- Budget tracking
+- Supplier management
+
+---
+
+### M6: Egg Cost Calculation Dashboard
+
+**Value Delivered:** Users can see the true cost per egg
+
+**User Story:** As a farmer, I want to see how much one egg costs me (including all expenses), so that I can make informed decisions about profitability.
+
+**Acceptance Criteria:**
+- ✅ Dashboard shows current egg cost (CZK/egg)
+- ✅ Dashboard shows today's totals (eggs, hens)
+- ✅ Dashboard shows weekly production summary
+- ✅ Dashboard shows flock status (total animals, active flocks)
+- ✅ Calculation: Total costs / Total eggs produced
+- ✅ Trend indicators (↑↓ vs previous period)
+- ✅ Chicks count in costs but NOT in production
+- ✅ Empty state UI (no data yet)
+
+**Technical Scope:**
+- **Frontend:**
+  - Dashboard widgets (Material-UI Grid)
+  - Egg cost card (large metric display)
+  - Today's summary card
+  - Weekly summary card
+  - Flock status card
+  - Trend arrows with color coding
+- **Backend:**
+  - Statistics endpoint: GET /api/statistics/dashboard
+  - Egg cost calculation query:
+    - Total costs = SUM(purchases.amount)
+    - Total eggs = SUM(daily_records.egg_count)
+    - Cost per egg = Total costs / Total eggs
+  - Performance: Optimize with database aggregation
+- **Database:**
+  - No new tables, uses existing data
+  - Consider materialized view for performance (future)
+
+**Dependencies:** M4 (daily records) + M5 (purchases)
+
+**Out of Scope:**
+- Detailed cost breakdown charts (M11)
+- Historical cost trends (M11)
+- Flock comparison (M11)
+- Export reports
+
+---
+
+### M7: Flock Composition Editing
+
+**Value Delivered:** Users can manually adjust flock composition
+
+**User Story:** As a farmer, I want to record when chickens die, are sold, or are purchased, so that my flock counts stay accurate.
+
+**Acceptance Criteria:**
+- ✅ User can adjust flock composition (hens, roosters, chicks)
+- ✅ User provides reason for change (notes)
+- ✅ New flock history record created (type: "adjustment")
+- ✅ Validation: Cannot reduce counts below zero
+- ✅ UI shows before/after comparison
+- ✅ Confirmation dialog for destructive changes
+
+**Technical Scope:**
+- **Frontend:**
+  - "Edit Composition" button on flock detail page
+  - Adjustment form (current counts → new counts)
+  - Delta display (+/- indicators)
+  - Notes field (required for adjustments)
+  - Confirmation dialog with summary
+- **Backend:**
+  - CQRS handler: AdjustFlockCompositionCommand
+  - Creates flock_history record (type: "adjustment")
+  - Updates flock current counts
+  - Endpoint: POST /api/flocks/{id}/adjust
+- **Database:**
+  - Uses existing tables (flocks, flock_history)
+
+**Dependencies:** M3 (requires flocks)
+
+**Out of Scope:**
+- Batch adjustments
+- Undo functionality
+- Reasons dropdown (free-text only)
+
+---
+
+### M8: Chick Maturation
+
+**Value Delivered:** Users can convert chicks to adult chickens
+
+**User Story:** As a farmer, I want to record when my chicks mature into adult hens and roosters, so that my production calculations are accurate.
+
+**Acceptance Criteria:**
+- ✅ User can mature chicks (select count, split into hens/roosters)
+- ✅ Validation: hens + roosters = chicks to mature
+- ✅ Validation: chicks to mature <= current chicks in flock
+- ✅ Validation: maturation date >= hatch date
+- ✅ New flock history record created (type: "maturation")
+- ✅ Flock counts updated automatically
+- ✅ UI shows calculation preview
+
+**Technical Scope:**
+- **Frontend:**
+  - "Mature Chicks" button on flock detail page
+  - Maturation form (chicks count, split into hens/roosters, date, notes)
+  - Real-time validation with error messages
+  - Preview of resulting composition
+- **Backend:**
+  - CQRS handler: MatureChicksCommand
+  - Business logic:
+    - Validate sum (hens + roosters = chicks)
+    - Validate availability (chicks <= current)
+    - Update flock: chicks -= X, hens += Y, roosters += Z
+    - Create history record (type: "maturation")
+  - Endpoint: POST /api/flocks/{id}/mature-chicks
+- **Database:**
+  - Uses existing tables (flocks, flock_history)
+
+**Dependencies:** M3 (requires flocks with chicks)
+
+**Out of Scope:**
+- Automatic maturation reminders
+- Age-based suggestions
+- Mortality rate tracking during maturation
+
+---
+
+### M9: Flock History View
+
+**Value Delivered:** Users can see complete flock composition history
+
+**User Story:** As a farmer, I want to see the full timeline of my flock's changes (deaths, maturations, purchases), so that I understand how my flock evolved.
+
+**Acceptance Criteria:**
+- ✅ User can view flock history timeline
+- ✅ Timeline shows all composition changes chronologically
+- ✅ Each entry shows: date, change type, counts, delta, notes
+- ✅ Visual indicators for change types (icons, colors)
+- ✅ User can edit notes on history entries
+- ✅ Entries sorted newest first
+
+**Technical Scope:**
+- **Frontend:**
+  - Flock history page (accessible from flock detail)
+  - Vertical timeline component (Material-UI Timeline)
+  - Change type icons (initial, adjustment, maturation)
+  - Delta displays (+/- with color coding)
+  - Expandable notes section
+  - Edit notes inline
+- **Backend:**
+  - Query: GET /api/flocks/{id}/history
+  - Returns all flock_history records sorted by change_date DESC
+  - Update endpoint: PATCH /api/flock-history/{id}/notes
+- **Database:**
+  - Uses existing flock_history table
+  - Index on (flock_id, change_date)
+
+**Dependencies:** M3 (initial history) + M7 (adjustments) + M8 (maturations)
+
+**Out of Scope:**
+- Charts of flock size over time (M11)
+- Comparison between flocks (M11)
+- Export history as CSV
+
+---
+
+### M10: Offline Egg Recording
+
+**Value Delivered:** Users can record eggs without internet connection
+
+**User Story:** As a farmer, I want to record egg production even when I'm outdoors without internet, so that I never miss a day of logging.
+
+**Acceptance Criteria:**
+- ✅ Service worker caches app assets (HTML, CSS, JS)
+- ✅ User can create daily records while offline
+- ✅ Records queued in IndexedDB
+- ✅ Background sync triggers when online
+- ✅ Offline indicator banner shown
+- ✅ Sync status indicator (pending count)
+- ✅ Manual sync button
+- ✅ Toast notification on successful sync
+
+**Technical Scope:**
+- **Frontend:**
+  - Workbox service worker configuration
+  - Cache-first strategy for static assets (30 days)
+  - Network-first for API GET requests (5 min cache)
+  - IndexedDB integration (Dexie.js)
+  - Background Sync API for POST requests
+  - Offline banner component (persistent)
+  - Sync queue UI (bottom bar with pending count)
+- **Backend:**
+  - No changes required (existing endpoints handle sync)
+  - Idempotency considerations for daily records
+- **Infrastructure:**
+  - Service worker registration in index.html
+  - Workbox webpack plugin configuration
+
+**Dependencies:** M4 (daily records to sync)
+
+**Out of Scope:**
+- Offline mode for purchases (POST)
+- Offline mode for flock edits (complex conflict resolution)
+- Advanced conflict resolution (last-write-wins only)
+
+---
+
+### M11: Statistics Dashboard
+
+**Value Delivered:** Users can analyze trends and productivity
+
+**User Story:** As a farmer, I want to see charts and trends of my production and costs, so that I can optimize my operation.
+
+**Acceptance Criteria:**
+- ✅ Egg cost breakdown chart (pie chart by purchase type)
+- ✅ Production trend chart (line chart, last 30 days)
+- ✅ Cost trend chart (line chart, cost per egg over time)
+- ✅ Flock productivity comparison (bar chart, eggs/hen/day)
+- ✅ Date range filters (7 days, 30 days, 3 months, custom)
+- ✅ Flock filter (all / specific flock)
+- ✅ Mobile-optimized charts (touch-friendly, responsive)
+
+**Technical Scope:**
+- **Frontend:**
+  - Statistics page with chart grid
+  - Recharts integration (pie, line, bar charts)
+  - Filter controls (date range picker, flock selector)
+  - Chart tooltips and legends
+  - Loading skeletons
+  - Empty state handling
+- **Backend:**
+  - Statistics endpoint: GET /api/statistics/egg-cost
+  - Cost breakdown calculation (group by purchase type)
+  - Timeline calculation (aggregate by week/month)
+  - Flock productivity calculation (eggs per hen per day)
+- **Database:**
+  - Complex aggregation queries
+  - Consider database indexes for performance
+
+**Dependencies:** M6 (egg cost calculation)
+
+**Out of Scope:**
+- Predictive analytics
+- Goal setting
+- Alerts/notifications for trends
+- Export charts as images
+
+---
+
+### M12: PWA Installation
+
+**Value Delivered:** Users can install app on home screen like a native app
+
+**User Story:** As a farmer, I want to install ChickenTrack on my phone's home screen, so that I can access it quickly like a native app.
+
+**Acceptance Criteria:**
+- ✅ Web app manifest configured (name, icons, theme)
+- ✅ App icons in all required sizes (72x72, 192x192, 512x512)
+- ✅ Install prompt shown after 2nd visit or 5 minutes usage
+- ✅ Custom install banner (Czech + English)
+- ✅ iOS "Add to Home Screen" instructions
+- ✅ Standalone display mode (no browser chrome)
+- ✅ Splash screen with branding
+- ✅ Lighthouse PWA score > 90
+
+**Technical Scope:**
+- **Frontend:**
+  - manifest.json configuration
+  - App icons (maskable + any purpose)
+  - Install prompt handler (beforeinstallprompt event)
+  - Custom install banner component
+  - iOS detection and instructions modal
+  - Theme color and background color
+- **Infrastructure:**
+  - Icon generation (multiple sizes)
+  - Screenshot generation for app stores
+  - manifest.json served from root
+
+**Dependencies:** M10 (service worker for PWA)
+
+**Out of Scope:**
+- App store submission (Google Play, Apple App Store)
+- Push notifications
+- Advanced PWA features (Web Share API, etc.)
+
+---
+
+## 9. Future Enhancements
+
+Features beyond the 12 core milestones, prioritized for future development.
+
+### 11.1 High Priority (Next Wave)
 
 **Push Notifications**
-- Daily reminder (19:00): "Don't forget to log eggs"
+- Daily reminders (19:00): "Don't forget to log eggs"
 - Sync completed: "3 records saved"
 - Chicks ready to mature: "Chicks are 6 weeks old"
+- **Complexity:** Medium (Web Push API + backend notification service)
 
-**UX Improvements**
-- Install prompt optimization (personalization)
-- Onboarding tutorial (first-time user)
-- Dark mode (optional)
-- Swipe gestures (delete, archive)
+**Advanced Flock Statistics**
+- Flock size over time (area chart)
+- Productivity trends (eggs/hen/day)
+- Flock comparison (side-by-side)
+- Historical composition chart
+- **Complexity:** Medium (aggregation queries + chart components)
 
-**Clerk Upgrades (Optional)**
-- Social logins (Google, Facebook) - still free tier
-- Multi-factor authentication (MFA) - requires Pro tier ($25/month)
-- Organizations (family sharing) - requires Pro tier
+**Dark Mode**
+- Theme toggle in settings
+- Persist preference
+- Material-UI theme switching
+- **Complexity:** Small
 
-**Performance**
-- Advanced caching strategies
-- Prefetching (anticipate user actions)
-- Image optimization (WebP + lazy loading)
+**Swipe Gestures**
+- Swipe to delete (with undo)
+- Swipe to archive
+- Pull to refresh
+- **Complexity:** Small
 
 ---
 
-### 8.3 Phase 3 (2-3 months)
+### 11.2 Medium Priority
 
-**Individual Chickens (Optional)**
+**Individual Chicken Tracking**
 - CRUD individual chickens
 - Link to flock
-- Chicken detail (notes, photo)
+- Notes and photo per chicken
+- Death/sale tracking
+- **Complexity:** Large (new entities, complex UI)
+- **Why not in core:** Not essential for profitability tracking
 
-**Exports**
-- CSV export (all agendas)
-- PDF report (dashboard snapshot)
+**Photo Uploads**
+- Chicken photos
+- Coop photos
+- Receipt photos for purchases
+- Client-side compression
+- Azure Blob Storage integration
+- **Complexity:** Large (storage costs, offline sync complexity)
+- **Why not in core:** Not essential for MVP, adds infrastructure costs
+
+**CSV/PDF Exports**
+- Export daily records as CSV
+- Export purchases as CSV
+- Generate PDF reports (dashboard snapshot)
 - Email reports (weekly/monthly)
+- **Complexity:** Medium (report generation library)
 
-**Advanced Features**
-- Voice input for notes (Web Speech API)
-- Photo upload (with compression)
-- Calendar view (daily records)
-- Multi-language support (full i18n)
+**Breed/Color Tags**
+- Free-text tags per flock
+- Tag-based filtering
+- Popular tags autocomplete
+- **Complexity:** Small
 
-**Offline Enhancements**
-- Advanced conflict resolution (merge strategies)
-- Offline conflict UI (choose version)
-- Offline analytics (track offline usage)
+**Multi-language Expansion**
+- Additional languages beyond Czech/English
+- Community translations
+- **Complexity:** Medium (translation effort)
 
 ---
 
-### 8.4 Future Ideas (Backlog)
+### 11.3 Low Priority (Nice to Have)
 
-**Integrations**
-- Export to accounting software (Money S3, Pohoda)
-- E-commerce integration (egg sales)
-- API for external applications
+**Voice Input**
+- Voice-to-text for notes
+- Web Speech API
+- **Complexity:** Small
+- **Why not in core:** Limited browser support, not critical
 
-**Advanced Analytics**
-- Machine Learning: production prediction
-- Anomaly detection (unusual production decrease)
-- Feed optimization (cost/benefit analysis)
+**Calendar View**
+- Daily records in calendar format
+- Color-coded by production level
+- Month/week view toggle
+- **Complexity:** Medium
 
-**Community**
+**Social Logins**
+- Google Sign-In
+- Facebook Sign-In
+- Still free tier in Clerk
+- **Complexity:** Small
+- **Why not in core:** Email/password sufficient for MVP
+
+**Multi-Factor Authentication**
+- SMS/App-based MFA
+- Requires Clerk Pro tier ($25/month)
+- **Complexity:** Small (Clerk handles it)
+- **Why not in core:** Cost, not essential for initial users
+
+**Onboarding Tutorial**
+- First-time user walkthrough
+- Interactive tour of features
+- Tooltips and hints
+- **Complexity:** Medium
+
+---
+
+### 11.4 Future Exploration
+
+**Income Tracking (ROI)**
+- Record egg sales (date, quantity, price, buyer)
+- Profit/loss calculation (income - costs)
+- ROI dashboard
+- Break-even analysis
+- **Complexity:** Large (new domain, UI, calculations)
+- **Why not in core:** Users need cost tracking first before income
+
+**Accounting Software Integration**
+- Export to Money S3
+- Export to Pohoda
+- Export to other Czech accounting tools
+- **Complexity:** Large (API integrations, format conversions)
+
+**E-commerce Integration**
+- Online store for egg sales
+- Inventory management
+- Customer orders
+- **Complexity:** Very Large (separate product)
+
+**Machine Learning Predictions**
+- Production forecasting
+- Anomaly detection (unusual drops)
+- Feed optimization recommendations
+- **Complexity:** Very Large (ML models, training data)
+
+**Community Features**
 - Share statistics (anonymized)
-- Benchmark with other farmers
+- Benchmark against other farmers
 - Discussion forum
+- Best practices sharing
+- **Complexity:** Large (moderation, privacy concerns)
+
+**Advanced Conflict Resolution**
+- Detect offline sync conflicts
+- UI for choosing versions (Keep mine / Take theirs / Merge)
+- Field-level merge strategies
+- **Complexity:** Large (complex UI, backend logic)
 
 ---
 
-## 9. Open Questions for Discussion
+## 10. Open Questions for Discussion
 
-### 9.1 Currency
+### 11.1 Currency
 **Question:** CZK only? Or multi-currency?
 
 **Options:**
@@ -1821,7 +2345,7 @@ Authorization: Bearer <clerk-jwt-token>
 
 **Recommendation:** Start with CZK only, Phase 2 multi-currency
 
-### 9.2 Quantity Units
+### 11.2 Quantity Units
 **Question:** Preferred units for feed (kg, pcs, liters)? Or optional?
 
 **Options:**
@@ -1831,7 +2355,7 @@ Authorization: Bearer <clerk-jwt-token>
 
 **Recommendation:** Start with predefined (A), Phase 2 custom
 
-### 9.3 Photos
+### 11.3 Photos
 **Question:** Want to add photos of chickens/coops/flocks?
 
 **Options:**
@@ -1848,7 +2372,7 @@ Authorization: Bearer <clerk-jwt-token>
 
 **Recommendation:** Phase 2 or 3
 
-### 9.4 Breed/Color
+### 11.4 Breed/Color
 **Question:** Record breed or chicken color?
 
 **Options:**
@@ -1858,7 +2382,7 @@ Authorization: Bearer <clerk-jwt-token>
 
 **Recommendation:** Phase 2, custom tags in flock notes (interim)
 
-### 9.5 Egg Sales (ROI)
+### 11.5 Egg Sales (ROI)
 **Question:** Plan to track income from egg sales for ROI calculation?
 
 **Options:**
@@ -1875,7 +2399,7 @@ Authorization: Bearer <clerk-jwt-token>
 
 **Recommendation:** Start costs only (A), Phase 2 income (B)
 
-### 9.6 Notifications
+### 11.6 Notifications
 **Question:** Push notifications for daily record reminder?
 
 **Options:**
@@ -1885,7 +2409,7 @@ Authorization: Bearer <clerk-jwt-token>
 
 **Recommendation:** Phase 2 push notifications
 
-### 9.7 Initial Costs Data Model
+### 11.7 Initial Costs Data Model
 **Question:** How to track initial costs (purchasing chickens/chicks)?
 
 **Options:**
@@ -1895,7 +2419,7 @@ Authorization: Bearer <clerk-jwt-token>
 
 **Recommendation:** B - Purchase type "Animal purchase"
 
-### 9.8 Historical Data
+### 11.8 Historical Data
 **Question:** Need to import historical data (migration from Excel)?
 
 **Options:**
@@ -1907,9 +2431,9 @@ Authorization: Bearer <clerk-jwt-token>
 
 ---
 
-## 10. Risks & Mitigation
+## 11. Risks & Mitigation
 
-### 10.1 Technical Risks
+### 11.1 Technical Risks
 
 **1. Offline Sync Conflicts**
 - **Risk:** Data loss during conflict merge
@@ -1948,7 +2472,7 @@ Authorization: Bearer <clerk-jwt-token>
 
 ---
 
-### 10.2 Business Risks
+### 11.2 Business Risks
 
 **1. Low User Adoption**
 - **Risk:** Target audience doesn't adopt app
@@ -1973,7 +2497,7 @@ Authorization: Bearer <clerk-jwt-token>
 
 ---
 
-### 10.3 UX Risks
+### 11.3 UX Risks
 
 **1. Complexity Creep**
 - **Risk:** Feature bloat → loss of simplicity
