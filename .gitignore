@@ -92,7 +92,6 @@ precache-manifest*.js
 .DS_Store
 
 # Docker
-.dockerignore
 docker-compose.override.yml
 
 # Azure

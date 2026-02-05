@@ -1,0 +1,57 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+CLAUDE.md
+docs/
+*.md
+
+# CI/CD
+.github/
+.ralph-tui/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# Backend
+backend/bin/
+backend/obj/
+backend/**/bin/
+backend/**/obj/
+backend/.vs/
+backend/.vscode/
+backend/**/*.user
+backend/**/*.suo
+backend/**/*.cache
+backend/**/TestResults/
+
+# Tests
+backend/**/*.Tests/
+frontend/tests/
+**/coverage/
+
+# Other
+scripts/
+tasks/
+*.log
+.DS_Store
+Thumbs.db
