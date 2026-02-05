@@ -1,4 +1,6 @@
+using ChickenTrack.Application.Interfaces;
 using ChickenTrack.Infrastructure.Data;
+using ChickenTrack.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +32,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.EnableDetailedErrors();
     }
 });
+
+// Register repositories
+builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 
 // Configure CORS for development only
 if (builder.Environment.IsDevelopment())
