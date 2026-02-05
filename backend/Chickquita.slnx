@@ -3,4 +3,5 @@
   <Project Path="ChickenTrack.Application/ChickenTrack.Application.csproj" />
   <Project Path="ChickenTrack.Domain/ChickenTrack.Domain.csproj" />
   <Project Path="ChickenTrack.Infrastructure/ChickenTrack.Infrastructure.csproj" />
+  <Project Path="ChickenTrack.Infrastructure.Tests/ChickenTrack.Infrastructure.Tests.csproj" />
 </Solution>
