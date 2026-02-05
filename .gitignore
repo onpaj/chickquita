@@ -64,12 +64,12 @@ build/
 out/
 
 # Environment Variables
+# Note: .env.development and .env.production contain placeholder values and are committed
+# Actual secrets should be in .env.local or .env.*.local files
 .env
 .env.local
-.env.development
+.env.*.local
 .env.test
-.env.production
-.env*.local
 
 # Testing
 coverage/
