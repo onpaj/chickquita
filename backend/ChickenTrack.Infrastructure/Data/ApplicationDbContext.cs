@@ -35,8 +35,8 @@ public class ApplicationDbContext : DbContext
     public async Task SetTenantContextAsync(Guid tenantId)
     {
         await Database.ExecuteSqlRawAsync(
-            "SELECT set_config('app.current_tenant_id', {0}, false)",
-            tenantId.ToString()
+            "SELECT set_tenant_context({0})",
+            tenantId
         );
     }
 }
