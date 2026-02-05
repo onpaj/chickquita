@@ -1,3 +1,4 @@
+using ChickenTrack.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChickenTrack.Infrastructure.Data;
@@ -12,6 +13,11 @@ public class ApplicationDbContext : DbContext
         : base(options)
     {
     }
+
+    /// <summary>
+    /// Tenants (user accounts) in the system.
+    /// </summary>
+    public DbSet<Tenant> Tenants => Set<Tenant>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
