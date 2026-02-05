@@ -78,6 +78,9 @@ app.MapGet("/ping", async (IMediator mediator) =>
 // Map webhook endpoints
 app.MapWebhooksEndpoints();
 
+// Map users endpoints
+app.MapUsersEndpoints();
+
 app.Run();
 
 // Make Program accessible for integration tests

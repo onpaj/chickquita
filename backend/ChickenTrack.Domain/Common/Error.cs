@@ -64,4 +64,11 @@ public sealed class Error
     /// <param name="message">The failure error message.</param>
     /// <returns>A new failure error.</returns>
     public static Error Failure(string message) => new("Error.Failure", message);
+
+    /// <summary>
+    /// Creates a new unauthorized error.
+    /// </summary>
+    /// <param name="message">The unauthorized error message.</param>
+    /// <returns>A new unauthorized error.</returns>
+    public static Error Unauthorized(string message) => new("Error.Unauthorized", message);
 }
