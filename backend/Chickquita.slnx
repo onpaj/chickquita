@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ChickenTrack.Api/ChickenTrack.Api.csproj" />
+  <Project Path="ChickenTrack.Application/ChickenTrack.Application.csproj" />
+  <Project Path="ChickenTrack.Domain/ChickenTrack.Domain.csproj" />
+  <Project Path="ChickenTrack.Infrastructure/ChickenTrack.Infrastructure.csproj" />
+</Solution>
