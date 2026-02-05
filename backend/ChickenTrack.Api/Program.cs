@@ -1,4 +1,5 @@
 using ChickenTrack.Api.Endpoints;
+using ChickenTrack.Api.Middleware;
 using ChickenTrack.Application;
 using ChickenTrack.Application.Interfaces;
 using ChickenTrack.Infrastructure;
@@ -52,6 +53,10 @@ app.UseHttpsRedirection();
 
 // Authentication & Authorization middleware
 app.UseAuthentication();
+
+// Tenant resolution middleware - must come after UseAuthentication
+app.UseMiddleware<TenantResolutionMiddleware>();
+
 app.UseAuthorization();
 
 // Health check endpoint
