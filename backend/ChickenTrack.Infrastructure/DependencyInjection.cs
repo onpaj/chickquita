@@ -1,5 +1,6 @@
 using ChickenTrack.Application.Interfaces;
 using ChickenTrack.Infrastructure.Data;
+using ChickenTrack.Infrastructure.Data.Interceptors;
 using ChickenTrack.Infrastructure.Repositories;
 using ChickenTrack.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,11 +27,19 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Register DbContext with Npgsql (PostgreSQL)
-        services.AddDbContext<ApplicationDbContext>(options =>
+        // Register tenant interceptor
+        services.AddScoped<TenantInterceptor>();
+
+        // Register DbContext with Npgsql (PostgreSQL) and tenant interceptor
+        services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+        {
+            var tenantInterceptor = serviceProvider.GetRequiredService<TenantInterceptor>();
+
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
+                .AddInterceptors(tenantInterceptor);
+        });
 
         // Register repositories
         services.AddScoped<ITenantRepository, TenantRepository>();
@@ -43,6 +52,9 @@ public static class DependencyInjection
 
         // Register current user service
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+        // Register tenant service
+        services.AddScoped<ITenantService, TenantService>();
 
         // Configure JWT Bearer Authentication
         var clerkAuthority = configuration["Clerk:Authority"];
