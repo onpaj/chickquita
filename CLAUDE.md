@@ -575,4 +575,8 @@ export function MatureChicksModal({ flock, open, onClose }: Props) {
 
 ---
 
-For detailed technical specifications, see `/docs/ChickenTrack_PRD.md`
+## API Documentation
+
+For detailed API specifications, see:
+- `/docs/API_SPEC_COOPS.md` - Coops endpoints documentation
+- `/docs/ChickenTrack_PRD.md` - Product requirements document
