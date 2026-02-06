@@ -24,6 +24,16 @@ public class ApplicationDbContext : DbContext
     /// </summary>
     public DbSet<Coop> Coops => Set<Coop>();
 
+    /// <summary>
+    /// Flocks (groups of chickens) in the system.
+    /// </summary>
+    public DbSet<Flock> Flocks => Set<Flock>();
+
+    /// <summary>
+    /// Flock history entries tracking composition changes over time.
+    /// </summary>
+    public DbSet<FlockHistory> FlockHistory => Set<FlockHistory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
