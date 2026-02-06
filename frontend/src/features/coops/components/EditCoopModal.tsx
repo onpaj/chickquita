@@ -7,6 +7,7 @@ import {
   TextField,
   Button,
   Box,
+  CircularProgress,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useUpdateCoop } from '../hooks/useCoops';
@@ -230,8 +231,9 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
             type="submit"
             variant="contained"
             disabled={isPending || !isFormValid()}
+            startIcon={isPending ? <CircularProgress size={20} color="inherit" /> : undefined}
           >
-            {t('common.save')}
+            {isPending ? t('common.saving') : t('common.save')}
           </Button>
         </DialogActions>
       </form>

@@ -5,6 +5,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  CircularProgress,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -61,8 +62,9 @@ export function ArchiveCoopDialog({
           variant="contained"
           color="warning"
           disabled={isPending}
+          startIcon={isPending ? <CircularProgress size={20} color="inherit" /> : undefined}
         >
-          {t('coops.archiveCoop')}
+          {isPending ? t('coops.archiving') : t('coops.archiveCoop')}
         </Button>
       </DialogActions>
     </Dialog>

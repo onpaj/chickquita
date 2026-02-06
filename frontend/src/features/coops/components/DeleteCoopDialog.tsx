@@ -5,6 +5,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  CircularProgress,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
@@ -61,8 +62,9 @@ export function DeleteCoopDialog({
           variant="contained"
           color="error"
           disabled={isPending}
+          startIcon={isPending ? <CircularProgress size={20} color="inherit" /> : undefined}
         >
-          {t('common.delete')}
+          {isPending ? t('common.deleting') : t('common.delete')}
         </Button>
       </DialogActions>
     </Dialog>
