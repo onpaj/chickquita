@@ -77,6 +77,13 @@
     "hens": "Slepice",
     "roosters": "Kohouti",
     "chicks": "Kuřata",
+    "total": "Celkem",
+    "active": "Aktivní",
+    "archived": "Archivováno",
+    "coop": "Kurník",
+    "viewHistory": "Zobrazit historii",
+    "flockCardAriaLabel": "Hejno {{identifier}} v kurníku {{coopName}}",
+    "belongsToCoopAriaLabel": "Patří do kurníku {{coopName}}",
     "matureChicks": {
       "title": "Převést kuřata na dospělé",
       "chicksCount": "Počet kuřat",

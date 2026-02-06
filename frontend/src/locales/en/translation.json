@@ -77,6 +77,13 @@
     "hens": "Hens",
     "roosters": "Roosters",
     "chicks": "Chicks",
+    "total": "Total",
+    "active": "Active",
+    "archived": "Archived",
+    "coop": "Coop",
+    "viewHistory": "View History",
+    "flockCardAriaLabel": "Flock {{identifier}} in coop {{coopName}}",
+    "belongsToCoopAriaLabel": "Belongs to coop {{coopName}}",
     "matureChicks": {
       "title": "Mature Chicks to Adults",
       "chicksCount": "Number of Chicks",
