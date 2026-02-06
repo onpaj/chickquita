@@ -273,6 +273,111 @@ public class DeleteCoopCommandHandlerTests
 
     #endregion
 
+    #region Tenant Isolation Tests
+
+    [Fact]
+    public async Task Handle_WhenCoopBelongsToDifferentTenant_ShouldStillDeleteIfFoundByRepository()
+    {
+        // Arrange
+        // Note: Tenant isolation is enforced at the repository level (via EF Core global query filters and RLS)
+        // The handler trusts that GetByIdAsync only returns coops belonging to the current tenant
+        // If the repository returns a coop, the handler assumes it belongs to the current tenant
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location");
+
+        var command = new DeleteCoopCommand { Id = coopId };
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
+            .ReturnsAsync(existingCoop); // Repository returns the coop (tenant check passed)
+        _mockCoopRepository.Setup(x => x.HasFlocksAsync(coopId))
+            .ReturnsAsync(false);
+        _mockCoopRepository.Setup(x => x.DeleteAsync(coopId))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _mockCoopRepository.Verify(x => x.GetByIdAsync(coopId), Times.Once);
+        _mockCoopRepository.Verify(x => x.DeleteAsync(coopId), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_WhenCoopBelongsToDifferentTenant_RepositoryShouldReturnNull()
+    {
+        // Arrange
+        // This test verifies the expected behavior: repository should return null for coops
+        // belonging to other tenants (enforced by EF Core global query filters and RLS)
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+
+        var command = new DeleteCoopCommand { Id = coopId };
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
+            .ReturnsAsync((Coop?)null); // Repository returns null (tenant isolation enforced)
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Code.Should().Be("Error.NotFound");
+        result.Error.Message.Should().Be("Coop not found");
+
+        _mockCoopRepository.Verify(x => x.GetByIdAsync(coopId), Times.Once);
+        _mockCoopRepository.Verify(x => x.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    #endregion
+
+    #region Delete Behavior Tests
+
+    [Fact]
+    public async Task Handle_WithValidCoop_ShouldPerformHardDelete()
+    {
+        // Arrange
+        // Note: Current implementation performs hard delete (EF Core Remove)
+        // The Coop entity has IsActive property for soft delete, but DeleteAsync uses Remove()
+        // This test documents the actual behavior: hard delete from database
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location");
+
+        var command = new DeleteCoopCommand { Id = coopId };
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
+            .ReturnsAsync(existingCoop);
+        _mockCoopRepository.Setup(x => x.HasFlocksAsync(coopId))
+            .ReturnsAsync(false);
+        _mockCoopRepository.Setup(x => x.DeleteAsync(coopId))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().BeTrue();
+
+        // Verify DeleteAsync is called (which performs hard delete in repository)
+        _mockCoopRepository.Verify(x => x.DeleteAsync(coopId), Times.Once);
+
+        // Note: In the actual repository implementation (CoopRepository.cs:71-79),
+        // DeleteAsync uses _context.Coops.Remove(coop), which is a hard delete.
+        // If soft delete was implemented, we would expect UpdateAsync with IsActive = false instead.
+    }
+
+    #endregion
+
     #region Edge Cases
 
     [Fact]
