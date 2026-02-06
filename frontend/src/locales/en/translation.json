@@ -49,7 +49,11 @@
     "createdAt": "Created {{date}}",
     "updatedAt": "Updated {{date}}",
     "details": "Coop Details",
-    "coopNotFound": "Coop not found"
+    "coopNotFound": "Coop not found",
+    "emptyState": {
+      "title": "No coops yet",
+      "message": "Add your first coop to get started!"
+    }
   },
   "flocks": {
     "title": "Flocks",

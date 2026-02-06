@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { useCoops } from '../features/coops/hooks/useCoops';
 import { CreateCoopModal } from '../features/coops/components/CreateCoopModal';
 import { CoopCard } from '../features/coops/components/CoopCard';
+import { CoopsEmptyState } from '../features/coops/components/CoopsEmptyState';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { processApiError } from '../lib/errors';
 
@@ -116,14 +117,7 @@ export default function CoopsPage() {
             ))}
           </Box>
         ) : sortedCoops.length === 0 ? (
-          <Box sx={{ textAlign: 'center', mt: 8 }}>
-            <Typography variant="body1" color="text.secondary" gutterBottom>
-              {t('coops.noCoops')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {t('coops.addFirstCoop')}
-            </Typography>
-          </Box>
+          <CoopsEmptyState onAddClick={() => setIsModalOpen(true)} />
         ) : (
           <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {sortedCoops.map((coop) => (

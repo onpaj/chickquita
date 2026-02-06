@@ -49,7 +49,11 @@
     "createdAt": "Vytvořeno {{date}}",
     "updatedAt": "Aktualizováno {{date}}",
     "details": "Detail kurníku",
-    "coopNotFound": "Kurník nenalezen"
+    "coopNotFound": "Kurník nenalezen",
+    "emptyState": {
+      "title": "Zatím tu nejsou žádné kurníky",
+      "message": "Přidejte svůj první kurník, abyste mohli začít!"
+    }
   },
   "flocks": {
     "title": "Hejna",
