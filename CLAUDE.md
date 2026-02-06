@@ -72,6 +72,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Multi-tenancy
 - Every user gets their own tenant on registration (via Clerk webhook)
+- **Fallback**: If webhook fails, tenant is auto-created on first API request
 - All data partitioned by `tenant_id` (UUID)
 - Row-Level Security (RLS) enforced at database level
 - EF Core global query filters as additional safety layer
@@ -186,8 +187,11 @@ docker-compose up --build
 5. All API calls include `Authorization: Bearer <token>`
 6. Backend validates Clerk JWT
 7. Backend extracts `ClerkUserId`, looks up `TenantId`
-8. Backend sets RLS context: `SET app.current_tenant_id = <tenant_id>`
-9. All queries automatically filtered by tenant via RLS policies
+8. **Fallback behavior**: If no tenant exists, automatically create one (handles webhook failures)
+9. Backend sets RLS context: `SET app.current_tenant_id = <tenant_id>`
+10. All queries automatically filtered by tenant via RLS policies
+
+**Note**: The `TenantResolutionMiddleware` includes automatic tenant creation as a fallback. This ensures that even if the Clerk webhook fails or doesn't fire during sign-up, the tenant will be created on the user's first API request. The middleware logs this event for monitoring purposes.
 
 ### Frontend Integration
 ```tsx

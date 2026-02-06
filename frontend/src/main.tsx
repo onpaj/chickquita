@@ -13,6 +13,7 @@ createRoot(document.getElementById('root')!).render(
       publishableKey={clerkConfig.publishableKey}
       localization={clerkConfig.localization}
       appearance={clerkConfig.appearance}
+      afterSignInUrl="/dashboard" 
     >
       <BrowserRouter>
         <App />
