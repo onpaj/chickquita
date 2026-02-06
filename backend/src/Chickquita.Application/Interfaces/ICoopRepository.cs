@@ -39,4 +39,11 @@ public interface ICoopRepository
     /// </summary>
     /// <param name="id">The coop ID</param>
     Task DeleteAsync(Guid id);
+
+    /// <summary>
+    /// Checks if a coop with the specified name already exists for the current tenant.
+    /// </summary>
+    /// <param name="name">The coop name to check</param>
+    /// <returns>True if a coop with this name exists, false otherwise</returns>
+    Task<bool> ExistsByNameAsync(string name);
 }

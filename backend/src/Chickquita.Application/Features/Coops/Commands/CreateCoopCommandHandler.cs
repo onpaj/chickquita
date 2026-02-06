@@ -67,6 +67,17 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
                 return Result<CoopDto>.Failure(Error.Unauthorized("Tenant not found"));
             }
 
+            // Check if a coop with this name already exists for the current tenant
+            var nameExists = await _coopRepository.ExistsByNameAsync(request.Name);
+            if (nameExists)
+            {
+                _logger.LogWarning(
+                    "CreateCoopCommand: Coop with name '{Name}' already exists for tenant {TenantId}",
+                    request.Name,
+                    tenantId.Value);
+                return Result<CoopDto>.Failure(Error.Conflict("A coop with this name already exists"));
+            }
+
             // Create the coop entity
             var coop = Coop.Create(tenantId.Value, request.Name, request.Location);
 

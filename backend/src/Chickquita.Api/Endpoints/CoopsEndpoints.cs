@@ -25,7 +25,8 @@ public static class CoopsEndpoints
             .WithOpenApi()
             .Produces<CoopDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized);
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> GetCoops(
@@ -58,6 +59,7 @@ public static class CoopsEndpoints
             {
                 "Error.Unauthorized" => Results.Unauthorized(),
                 "Error.Validation" => Results.BadRequest(new { error = result.Error }),
+                "Error.Conflict" => Results.Conflict(new { error = result.Error }),
                 _ => Results.BadRequest(new { error = result.Error })
             };
         }

@@ -7,8 +7,10 @@ import {
   TextField,
   Button,
   Box,
+  Alert,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { AxiosError } from 'axios';
 import { useCreateCoop } from '../hooks/useCoops';
 import type { CreateCoopRequest } from '../api/coopsApi';
 
@@ -25,12 +27,14 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
   const [location, setLocation] = useState('');
   const [nameError, setNameError] = useState('');
   const [locationError, setLocationError] = useState('');
+  const [serverError, setServerError] = useState('');
 
   const handleClose = () => {
     setName('');
     setLocation('');
     setNameError('');
     setLocationError('');
+    setServerError('');
     onClose();
   };
 
@@ -83,10 +87,19 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
       onSuccess: () => {
         handleClose();
       },
-      onError: (error) => {
+      onError: (error: Error) => {
         console.error('Failed to create coop:', error);
-        // Don't clear existing validation errors, just log the error
-        // The user can see what went wrong in the console
+
+        // Handle 409 Conflict error (duplicate name)
+        if (error instanceof AxiosError && error.response?.status === 409) {
+          setNameError(t('coops.duplicateName'));
+        } else if (error instanceof AxiosError && error.response?.data?.error?.message) {
+          // For other errors, show the server error message
+          setServerError(error.response.data.error.message);
+        } else {
+          // Fallback to generic error message
+          setServerError(t('errors.generic'));
+        }
       },
     });
   };
@@ -97,16 +110,24 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
         <DialogTitle>{t('coops.addCoop')}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            {serverError && (
+              <Alert severity="error" onClose={() => setServerError('')}>
+                {serverError}
+              </Alert>
+            )}
             <TextField
               autoFocus
               label={t('coops.coopName')}
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                // Clear error when user starts fixing input
+                // Clear errors when user starts fixing input
                 if (nameError) {
                   const newError = validateName(e.target.value);
                   setNameError(newError);
+                }
+                if (serverError) {
+                  setServerError('');
                 }
               }}
               onBlur={() => {

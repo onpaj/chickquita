@@ -70,4 +70,16 @@ public class CoopRepository : ICoopRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    /// <inheritdoc />
+    public async Task<bool> ExistsByNameAsync(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
+
+        return await _context.Coops
+            .AnyAsync(c => c.Name.ToLower() == name.ToLower());
+    }
 }

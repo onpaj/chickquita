@@ -38,7 +38,8 @@
     "coopName": "Coop Name",
     "coopDescription": "Description",
     "noCoops": "You don't have any coops yet",
-    "addFirstCoop": "Click the + button to add your first coop"
+    "addFirstCoop": "Click the + button to add your first coop",
+    "duplicateName": "A coop with this name already exists"
   },
   "flocks": {
     "title": "Flocks",
