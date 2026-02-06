@@ -243,9 +243,16 @@ export function CoopDetailPage() {
           </Box>
 
           {/* Action Buttons */}
-          <Stack direction="row" spacing={2} sx={{ pt: 2 }}>
+          <Stack direction="row" spacing={2} sx={{ pt: 2, flexWrap: 'wrap' }}>
             <Button
               variant="contained"
+              onClick={() => navigate(`/coops/${coop.id}/flocks`)}
+              sx={{ minWidth: '120px' }}
+            >
+              {t('flocks.title')}
+            </Button>
+            <Button
+              variant="outlined"
               startIcon={<EditIcon />}
               onClick={handleEdit}
               disabled={!coop.isActive}

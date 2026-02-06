@@ -113,6 +113,10 @@
       "success": "Hejno bylo úspěšně archivováno",
       "error": "Nepodařilo se archivovat hejno"
     },
+    "archiving": "Archivuji...",
+    "archiveSuccess": "Hejno bylo úspěšně archivováno",
+    "archiveConfirmTitle": "Archivovat hejno?",
+    "archiveConfirmMessage": "Toto hejno bude archivováno a odstraněno z vašeho aktivního seznamu. V případě potřeby jej můžete později znovu aktivovat.",
     "emptyState": {
       "title": "Zatím tu nejsou žádná hejna",
       "message": "Přidejte své první hejno, abyste mohli začít sledovat slepice!"

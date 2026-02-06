@@ -113,6 +113,10 @@
       "success": "Flock archived successfully",
       "error": "Failed to archive flock"
     },
+    "archiving": "Archiving...",
+    "archiveSuccess": "Flock archived successfully",
+    "archiveConfirmTitle": "Archive Flock?",
+    "archiveConfirmMessage": "This flock will be archived and removed from your active list. You can reactivate it later if needed.",
     "emptyState": {
       "title": "No flocks yet",
       "message": "Add your first flock to start tracking your chickens!"
