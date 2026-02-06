@@ -14,7 +14,12 @@ public sealed class FlockMappingProfile : Profile
     /// </summary>
     public FlockMappingProfile()
     {
+        // FlockHistory -> FlockHistoryDto
+        CreateMap<FlockHistory, FlockHistoryDto>();
+
         // Flock -> FlockDto
-        CreateMap<Flock, FlockDto>();
+        CreateMap<Flock, FlockDto>()
+            .ForMember(dest => dest.History,
+                opt => opt.MapFrom(src => src.History.OrderByDescending(h => h.ChangeDate)));
     }
 }

@@ -59,4 +59,10 @@ public sealed class FlockDto
     /// Timestamp when the flock was last updated.
     /// </summary>
     public DateTime UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Composition change history for this flock.
+    /// Ordered by ChangeDate descending (most recent first).
+    /// </summary>
+    public List<FlockHistoryDto> History { get; set; } = new();
 }

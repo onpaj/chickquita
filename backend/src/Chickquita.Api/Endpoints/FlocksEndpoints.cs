@@ -19,6 +19,13 @@ public static class FlocksEndpoints
             .Produces<List<FlockDto>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapGet("/{flockId:guid}", GetFlockById)
+            .WithName("GetFlockById")
+            .WithOpenApi()
+            .Produces<FlockDto>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetFlocks(
@@ -30,6 +37,30 @@ public static class FlocksEndpoints
         {
             CoopId = coopId,
             IncludeInactive = includeInactive
+        };
+        var result = await mediator.Send(query);
+
+        if (!result.IsSuccess)
+        {
+            return result.Error.Code switch
+            {
+                "Error.Unauthorized" => Results.Unauthorized(),
+                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
+                _ => Results.BadRequest(new { error = result.Error })
+            };
+        }
+
+        return Results.Ok(result.Value);
+    }
+
+    private static async Task<IResult> GetFlockById(
+        [FromRoute] Guid coopId,
+        [FromRoute] Guid flockId,
+        [FromServices] IMediator mediator)
+    {
+        var query = new GetFlockByIdQuery
+        {
+            FlockId = flockId
         };
         var result = await mediator.Send(query);
 
