@@ -1,0 +1,59 @@
+Summary
+  Generated on: 06.02.2026 - 12:48:30
+  Coverage date: 06.02.2026 - 12:48:15
+  Parser: Cobertura
+  Assemblies: 2
+  Classes: 35
+  Files: 31
+  Line coverage: 42.3%
+  Covered lines: 278
+  Uncovered lines: 379
+  Coverable lines: 657
+  Total lines: 1780
+  Branch coverage: 52.5% (42 of 80)
+  Covered branches: 42
+  Total branches: 80
+  Method coverage: 41.9% (47 of 112)
+  Full method coverage: 40.1% (45 of 112)
+  Covered methods: 47
+  Fully covered methods: 45
+  Total methods: 112
+
+Chickquita.Application                                                         37.5%
+  Chickquita.Application.DependencyInjection                                      0%
+  Chickquita.Application.DTOs.ClerkEmailDto                                       0%
+  Chickquita.Application.DTOs.ClerkWebhookDataDto                                 0%
+  Chickquita.Application.DTOs.ClerkWebhookDto                                     0%
+  Chickquita.Application.DTOs.CoopDto                                            75%
+  Chickquita.Application.DTOs.TenantDto                                           0%
+  Chickquita.Application.DTOs.UserDto                                             0%
+  Chickquita.Application.Features.Coops.Commands.ArchiveCoopCommand               0%
+  Chickquita.Application.Features.Coops.Commands.ArchiveCoopCommandHandler        0%
+  Chickquita.Application.Features.Coops.Commands.ArchiveCoopCommandValidator      0%
+  Chickquita.Application.Features.Coops.Commands.CreateCoopCommand              100%
+  Chickquita.Application.Features.Coops.Commands.CreateCoopCommandHandler       100%
+  Chickquita.Application.Features.Coops.Commands.CreateCoopCommandValidator       0%
+  Chickquita.Application.Features.Coops.Commands.DeleteCoopCommand              100%
+  Chickquita.Application.Features.Coops.Commands.DeleteCoopCommandHandler       100%
+  Chickquita.Application.Features.Coops.Commands.DeleteCoopCommandValidator       0%
+  Chickquita.Application.Features.Coops.Commands.UpdateCoopCommand              100%
+  Chickquita.Application.Features.Coops.Commands.UpdateCoopCommandHandler       100%
+  Chickquita.Application.Features.Coops.Commands.UpdateCoopCommandValidator       0%
+  Chickquita.Application.Features.Coops.Queries.GetCoopByIdQuery                  0%
+  Chickquita.Application.Features.Coops.Queries.GetCoopByIdQueryHandler           0%
+  Chickquita.Application.Features.Coops.Queries.GetCoopsQuery                     0%
+  Chickquita.Application.Features.Coops.Queries.GetCoopsQueryHandler              0%
+  Chickquita.Application.Features.System.PingQueryHandler                         0%
+  Chickquita.Application.Features.Users.Commands.SyncUserCommand                  0%
+  Chickquita.Application.Features.Users.Commands.SyncUserCommandHandler           0%
+  Chickquita.Application.Features.Users.Commands.SyncUserCommandValidator         0%
+  Chickquita.Application.Features.Users.Queries.GetCurrentUserQueryHandler        0%
+  Chickquita.Application.Mappings.CoopMappingProfile                              0%
+  Chickquita.Application.Mappings.TenantMappingProfile                            0%
+
+Chickquita.Domain                                                              59.5%
+  Chickquita.Domain.Common.Error                                                100%
+  Chickquita.Domain.Common.Result                                                 0%
+  Chickquita.Domain.Common.Result<T>                                             84%
+  Chickquita.Domain.Entities.Coop                                              82.7%
+  Chickquita.Domain.Entities.Tenant                                               0%
