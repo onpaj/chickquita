@@ -7,13 +7,10 @@ import type { CreateCoopRequest } from '../../api/coopsApi';
 
 // Mock the useCreateCoop hook
 const mockCreateCoop = vi.fn();
-const mockIsPending = false;
+const mockUseCreateCoop = vi.fn();
 
 vi.mock('../../hooks/useCoops', () => ({
-  useCreateCoop: () => ({
-    mutate: mockCreateCoop,
-    isPending: mockIsPending,
-  }),
+  useCreateCoop: () => mockUseCreateCoop(),
 }));
 
 // Mock useErrorHandler hook
@@ -27,7 +24,7 @@ vi.mock('../../../../hooks/useErrorHandler', () => ({
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, params?: any) => {
+    t: (key: string, params?: { count?: number }) => {
       const translations: Record<string, string> = {
         'coops.addCoop': 'Add Coop',
         'coops.coopName': 'Coop Name',
@@ -54,6 +51,11 @@ describe('CreateCoopModal', () => {
         queries: { retry: false },
         mutations: { retry: false },
       },
+    });
+    // Default mock implementation
+    mockUseCreateCoop.mockReturnValue({
+      mutate: mockCreateCoop,
+      isPending: false,
     });
     vi.clearAllMocks();
   });
@@ -374,6 +376,37 @@ describe('CreateCoopModal', () => {
     });
   });
 
+  describe('Loading State', () => {
+    it('should show loading state during submission', async () => {
+      const user = userEvent.setup();
+
+      // Mock pending state
+      mockUseCreateCoop.mockReturnValue({
+        mutate: mockCreateCoop,
+        isPending: true,
+      });
+
+      renderModal();
+
+      const nameInput = screen.getByLabelText(/Coop Name/);
+      await user.type(nameInput, 'Test Coop');
+
+      // Check that save button shows loading text
+      const saveButton = screen.getByRole('button', { name: 'Saving...' });
+      expect(saveButton).toBeInTheDocument();
+      expect(saveButton).toBeDisabled();
+
+      // Check that cancel button is disabled during submission
+      const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+      expect(cancelButton).toBeDisabled();
+
+      // Check that form fields are disabled during submission
+      expect(nameInput).toBeDisabled();
+      const locationInput = screen.getByLabelText(/Location/);
+      expect(locationInput).toBeDisabled();
+    });
+  });
+
   describe('User Interactions', () => {
     it('should close modal when cancel button is clicked', async () => {
       const user = userEvent.setup();
@@ -395,6 +428,36 @@ describe('CreateCoopModal', () => {
       await waitFor(() => {
         expect(mockCreateCoop).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('Location Field Validation', () => {
+    it('should have correct label "Location" (not "coopDescription")', () => {
+      renderModal();
+
+      // Check that the label is "Location" and not "coopDescription"
+      const locationInput = screen.getByLabelText(/Location/);
+      expect(locationInput).toBeInTheDocument();
+
+      // Verify "coopDescription" is not used
+      expect(screen.queryByLabelText(/coopDescription/i)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/Description/i)).not.toBeInTheDocument();
+    });
+
+    it('should allow location field to be empty (optional)', async () => {
+      const user = userEvent.setup();
+      renderModal();
+
+      const nameInput = screen.getByLabelText(/Coop Name/);
+      await user.type(nameInput, 'Test Coop');
+
+      // Leave location empty
+      const locationInput = screen.getByLabelText(/Location/);
+      expect(locationInput).toHaveValue('');
+
+      // Save button should be enabled
+      const saveButton = screen.getByRole('button', { name: 'Save' });
+      expect(saveButton).not.toBeDisabled();
     });
   });
 });
