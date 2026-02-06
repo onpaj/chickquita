@@ -195,19 +195,18 @@ docker-compose up --build
 
 ### Frontend Integration
 ```tsx
-// Use Clerk hooks for authentication
+// Use Clerk hooks for authentication and apiClient for API calls
 import { useAuth, useUser } from '@clerk/clerk-react';
+import apiClient from '@/lib/apiClient';
 
 function MyComponent() {
-  const { isSignedIn, getToken } = useAuth();
+  const { isSignedIn } = useAuth();
   const { user } = useUser();
 
-  // Make API call with Clerk token
+  // Make API call using apiClient (automatically includes Clerk token)
   const fetchData = async () => {
-    const token = await getToken();
-    const response = await fetch('/api/coops', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await apiClient.get('/coops');
+    return response.data;
   };
 }
 ```

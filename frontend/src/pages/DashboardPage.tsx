@@ -10,6 +10,7 @@ import {
   Button,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import apiClient from '../lib/apiClient';
 
 interface UserData {
   id: string;
@@ -41,24 +42,11 @@ export default function DashboardPage() {
         const token = await getToken();
         console.log('Token obtained:', token ? 'Yes' : 'No');
 
-        const response = await fetch('http://localhost:5000/api/users/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await apiClient.get('/users/me');
 
         console.log('Response status:', response.status);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('API Error:', errorText);
-          throw new Error(`API request failed: ${response.status} - ${errorText}`);
-        }
-
-        const data = await response.json();
-        console.log('User data received:', data);
-        setUserData(data);
+        console.log('User data received:', response.data);
+        setUserData(response.data);
       } catch (err) {
         console.error('Error fetching user data:', err);
         setError(err instanceof Error ? err.message : 'Unknown error occurred');

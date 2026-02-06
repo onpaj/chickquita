@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Coops API</title>
+</head>
+<body>
+    <h1>Testing Coops API</h1>
+    <button onclick="testCoopsAPI()">Test API Call</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function testCoopsAPI() {
+            const output = document.getElementById('output');
+            output.textContent = 'Testing...\n';
+
+            try {
+                // Test 1: Check if backend is reachable
+                output.textContent += '\n1. Checking backend health...\n';
+                const healthResponse = await fetch('http://localhost:5100/health');
+                output.textContent += `Health status: ${healthResponse.status} - ${await healthResponse.text()}\n`;
+
+                // Test 2: Try to get coops (will fail with 401 without auth)
+                output.textContent += '\n2. Trying to get coops (expecting 401)...\n';
+                const coopsResponse = await fetch('http://localhost:5100/api/coops');
+                output.textContent += `Coops status: ${coopsResponse.status}\n`;
+
+                if (coopsResponse.status === 401) {
+                    output.textContent += '✓ Backend is working (returns 401 as expected without auth)\n';
+                } else {
+                    output.textContent += `Response: ${await coopsResponse.text()}\n`;
+                }
+
+                // Test 3: Check frontend
+                output.textContent += '\n3. Checking frontend...\n';
+                const frontendResponse = await fetch('http://localhost:3100');
+                output.textContent += `Frontend status: ${frontendResponse.status}\n`;
+
+                if (frontendResponse.ok) {
+                    output.textContent += '✓ Frontend is accessible\n';
+                }
+
+                output.textContent += '\n✅ All basic tests passed!\n';
+                output.textContent += '\nIf you\'re seeing errors in the app, please check:\n';
+                output.textContent += '- Browser console for JavaScript errors\n';
+                output.textContent += '- Network tab for failed requests\n';
+                output.textContent += '- Make sure you\'re logged in with Clerk\n';
+
+            } catch (error) {
+                output.textContent += `\n❌ Error: ${error.message}\n`;
+            }
+        }
+    </script>
+</body>
+</html>

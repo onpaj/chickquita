@@ -68,7 +68,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 if (builder.Environment.IsDevelopment())
 {
     var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-        ?? new[] { "http://localhost:3000" };
+        ?? new[] { "http://localhost:3100" };
 
     builder.Services.AddCors(options =>
     {

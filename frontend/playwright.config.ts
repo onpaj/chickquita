@@ -28,7 +28,7 @@ export default defineConfig({
   // Shared settings for all the projects below
   use: {
     // Base URL to use in actions like `await page.goto('/')`
-    baseURL: process.env.VITE_APP_URL || 'http://localhost:5173',
+    baseURL: process.env.VITE_APP_URL || 'http://localhost:3100',
 
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
@@ -42,7 +42,7 @@ export default defineConfig({
 
   // Configure projects for major browsers
   projects: [
-    // Setup project for authentication
+    // Setup project - runs first to authenticate
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
@@ -52,7 +52,7 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Use prepared auth state
+        // Use prepared auth state if it exists (manual login required first)
         storageState: '.auth/user.json',
       },
       dependencies: ['setup'],
@@ -98,7 +98,7 @@ export default defineConfig({
   // Run your local dev server before starting the tests
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:5173',
+    url: 'http://localhost:3100',
     reuseExistingServer: !process.env.CI,
     stdout: 'ignore',
     stderr: 'pipe',

@@ -722,6 +722,78 @@ export const useFlocks = (coopId?: string) => {
 
 ---
 
+## Configuration & Environment Variables
+
+### Frontend Configuration
+
+**IMPORTANT: Never hardcode URLs, API endpoints, or environment-specific values in your code.**
+
+```typescript
+// ❌ BAD: Hardcoded URLs
+const response = await fetch('http://localhost:5000/api/users/me', {
+  headers: { Authorization: `Bearer ${token}` }
+});
+
+const apiUrl = 'https://api.chickquita.com';
+
+// ✅ GOOD: Use environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+// ✅ BEST: Use the configured apiClient
+import apiClient from '@/lib/apiClient';
+
+const response = await apiClient.get('/users/me');
+```
+
+### Environment Variable Guidelines
+
+1. **Use `.env` files for configuration**
+   - `.env.example` - Template with placeholder values (committed to git)
+   - `.env.development` - Development values (committed to git)
+   - `.env.local` - Local overrides (NOT committed, in `.gitignore`)
+
+2. **Naming convention**
+   - Frontend (Vite): `VITE_` prefix (e.g., `VITE_API_BASE_URL`)
+   - Backend (.NET): Standard naming (e.g., `ConnectionStrings__DefaultConnection`)
+
+3. **Always use the apiClient for API calls**
+   ```typescript
+   // The apiClient is pre-configured with:
+   // - Base URL from VITE_API_BASE_URL
+   // - Automatic JWT token injection
+   // - Error handling interceptors
+   import apiClient from '@/lib/apiClient';
+
+   // GET request
+   const { data } = await apiClient.get('/coops');
+
+   // POST request
+   const { data } = await apiClient.post('/coops', coopData);
+
+   // PUT request
+   const { data } = await apiClient.put(`/coops/${id}`, coopData);
+
+   // DELETE request
+   await apiClient.delete(`/coops/${id}`);
+   ```
+
+4. **Required environment variables**
+   ```bash
+   # Frontend (.env.example)
+   VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+   VITE_API_BASE_URL=http://localhost:5100/api
+   VITE_APP_NAME=Chickquita
+   VITE_APP_VERSION=0.0.0
+   ```
+
+5. **Security considerations**
+   - NEVER commit `.env.local` files
+   - NEVER include sensitive keys in frontend code (use backend for secrets)
+   - Validate required env vars on application startup
+   - Use Azure Key Vault for production secrets
+
+---
+
 ## Code Organization Best Practices
 
 ### Import Organization

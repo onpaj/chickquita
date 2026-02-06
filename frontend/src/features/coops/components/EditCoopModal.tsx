@@ -183,7 +183,7 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
               }}
             />
             <TextField
-              label={t('coops.coopDescription')}
+              label={t('coops.location')}
               value={location}
               onChange={(e) => {
                 setLocation(e.target.value);

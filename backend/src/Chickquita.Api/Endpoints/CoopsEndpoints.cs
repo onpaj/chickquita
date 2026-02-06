@@ -62,8 +62,8 @@ public static class CoopsEndpoints
     }
 
     private static async Task<IResult> GetCoops(
-        [FromQuery] bool includeArchived,
-        [FromServices] IMediator mediator)
+        [FromServices] IMediator mediator,
+        [FromQuery] bool includeArchived = false)
     {
         var query = new GetCoopsQuery { IncludeArchived = includeArchived };
         var result = await mediator.Send(query);

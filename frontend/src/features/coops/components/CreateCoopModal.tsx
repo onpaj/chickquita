@@ -169,7 +169,7 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
               }}
             />
             <TextField
-              label={t('coops.coopDescription')}
+              label={t('coops.location')}
               value={location}
               onChange={(e) => {
                 setLocation(e.target.value);
