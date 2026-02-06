@@ -34,6 +34,15 @@ public static class CoopsEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status409Conflict);
+
+        group.MapPut("/{id:guid}", UpdateCoop)
+            .WithName("UpdateCoop")
+            .WithOpenApi()
+            .Produces<CoopDto>()
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status409Conflict);
     }
 
     private static async Task<IResult> GetCoops(
@@ -92,5 +101,33 @@ public static class CoopsEndpoints
         }
 
         return Results.Created($"/api/coops/{result.Value.Id}", result.Value);
+    }
+
+    private static async Task<IResult> UpdateCoop(
+        [FromRoute] Guid id,
+        [FromBody] UpdateCoopCommand command,
+        [FromServices] IMediator mediator)
+    {
+        // Ensure the ID from the route matches the command
+        if (id != command.Id)
+        {
+            return Results.BadRequest(new { error = new { message = "Route ID and command ID do not match" } });
+        }
+
+        var result = await mediator.Send(command);
+
+        if (!result.IsSuccess)
+        {
+            return result.Error.Code switch
+            {
+                "Error.Unauthorized" => Results.Unauthorized(),
+                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
+                "NotFound" => Results.NotFound(new { error = result.Error }),
+                "Error.Conflict" => Results.Conflict(new { error = result.Error }),
+                _ => Results.BadRequest(new { error = result.Error })
+            };
+        }
+
+        return Results.Ok(result.Value);
     }
 }

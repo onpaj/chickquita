@@ -14,6 +14,12 @@ export interface CreateCoopRequest {
   location?: string;
 }
 
+export interface UpdateCoopRequest {
+  id: string;
+  name: string;
+  location?: string;
+}
+
 export const coopsApi = {
   getAll: async (): Promise<Coop[]> => {
     const response = await apiClient.get<Coop[]>('/coops');
@@ -27,6 +33,11 @@ export const coopsApi = {
 
   create: async (data: CreateCoopRequest): Promise<Coop> => {
     const response = await apiClient.post<Coop>('/coops', data);
+    return response.data;
+  },
+
+  update: async (data: UpdateCoopRequest): Promise<Coop> => {
+    const response = await apiClient.put<Coop>(`/coops/${data.id}`, data);
     return response.data;
   },
 };

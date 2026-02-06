@@ -18,3 +18,15 @@ export function useCreateCoop() {
     },
   });
 }
+
+export function useUpdateCoop() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: coopsApi.update,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['coops'] });
+      queryClient.invalidateQueries({ queryKey: ['coops', data.id] });
+    },
+  });
+}

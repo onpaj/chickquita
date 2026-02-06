@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -18,6 +19,7 @@ import {
   Archive as ArchiveIcon,
 } from '@mui/icons-material';
 import { useCoopDetail } from '../features/coops/hooks/useCoopDetail';
+import { EditCoopModal } from '../features/coops/components/EditCoopModal';
 import { format } from 'date-fns';
 import { cs, enUS } from 'date-fns/locale';
 
@@ -26,6 +28,7 @@ export function CoopDetailPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { data: coop, isLoading, error } = useCoopDetail(id!);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const dateLocale = i18n.language === 'cs' ? cs : enUS;
 
@@ -34,8 +37,11 @@ export function CoopDetailPage() {
   };
 
   const handleEdit = () => {
-    // TODO: Implement edit functionality in future US
-    console.log('Edit coop', id);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
   };
 
   const handleArchive = () => {
@@ -170,6 +176,15 @@ export function CoopDetailPage() {
           </Stack>
         </Stack>
       </Paper>
+
+      {/* Edit Modal */}
+      {coop && (
+        <EditCoopModal
+          open={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          coop={coop}
+        />
+      )}
     </Container>
   );
 }
