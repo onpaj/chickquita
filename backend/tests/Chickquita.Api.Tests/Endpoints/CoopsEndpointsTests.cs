@@ -82,27 +82,22 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         var tenantId = Guid.NewGuid();
         var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
 
-        using var scope = _factory.WithWebHostBuilder(builder =>
+        var factory = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
             {
                 ReplaceWithInMemoryDatabase(services);
                 ReplaceCurrentUserService(services, mockCurrentUser);
             });
-        }).Services.CreateScope();
+        });
+
+        using var scope = factory.Services.CreateScope();
 
         await SeedTenant(scope, tenantId, "clerk_user_1");
         await SeedCoop(scope, tenantId, "Coop 1", "Location 1");
         await SeedCoop(scope, tenantId, "Coop 2", "Location 2");
 
-        var client = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                ReplaceWithInMemoryDatabase(services);
-                ReplaceCurrentUserService(services, mockCurrentUser);
-            });
-        }).CreateClient();
+        var client = factory.CreateClient();
 
         // Act
         var response = await client.GetAsync("/api/coops");
@@ -122,26 +117,21 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         var tenantId = Guid.NewGuid();
         var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
 
-        using var scope = _factory.WithWebHostBuilder(builder =>
+        var factory = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
             {
                 ReplaceWithInMemoryDatabase(services);
                 ReplaceCurrentUserService(services, mockCurrentUser);
             });
-        }).Services.CreateScope();
+        });
+
+        using var scope = factory.Services.CreateScope();
 
         await SeedTenant(scope, tenantId, "clerk_user_1");
         var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Test Location");
 
-        var client = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                ReplaceWithInMemoryDatabase(services);
-                ReplaceCurrentUserService(services, mockCurrentUser);
-            });
-        }).CreateClient();
+        var client = factory.CreateClient();
 
         // Act
         var response = await client.GetAsync($"/api/coops/{coopId}");
@@ -197,26 +187,21 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         var tenantId = Guid.NewGuid();
         var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
 
-        using var scope = _factory.WithWebHostBuilder(builder =>
+        var factory = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
             {
                 ReplaceWithInMemoryDatabase(services);
                 ReplaceCurrentUserService(services, mockCurrentUser);
             });
-        }).Services.CreateScope();
+        });
+
+        using var scope = factory.Services.CreateScope();
 
         await SeedTenant(scope, tenantId, "clerk_user_1");
         var coopId = await SeedCoop(scope, tenantId, "Original Name", "Original Location");
 
-        var client = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                ReplaceWithInMemoryDatabase(services);
-                ReplaceCurrentUserService(services, mockCurrentUser);
-            });
-        }).CreateClient();
+        var client = factory.CreateClient();
 
         var updateCommand = new UpdateCoopCommand
         {
@@ -284,26 +269,21 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         var tenantId = Guid.NewGuid();
         var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
 
-        using var scope = _factory.WithWebHostBuilder(builder =>
+        var factory = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
             {
                 ReplaceWithInMemoryDatabase(services);
                 ReplaceCurrentUserService(services, mockCurrentUser);
             });
-        }).Services.CreateScope();
+        });
+
+        using var scope = factory.Services.CreateScope();
 
         await SeedTenant(scope, tenantId, "clerk_user_1");
         var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Test Location");
 
-        var client = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                ReplaceWithInMemoryDatabase(services);
-                ReplaceCurrentUserService(services, mockCurrentUser);
-            });
-        }).CreateClient();
+        var client = factory.CreateClient();
 
         // Act
         var response = await client.DeleteAsync($"/api/coops/{coopId}");
@@ -401,26 +381,21 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         var tenantId = Guid.NewGuid();
         var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
 
-        using var scope = _factory.WithWebHostBuilder(builder =>
+        var factory = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
             {
                 ReplaceWithInMemoryDatabase(services);
                 ReplaceCurrentUserService(services, mockCurrentUser);
             });
-        }).Services.CreateScope();
+        });
+
+        using var scope = factory.Services.CreateScope();
 
         await SeedTenant(scope, tenantId, "clerk_user_1");
         var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Test Location");
 
-        var client = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                ReplaceWithInMemoryDatabase(services);
-                ReplaceCurrentUserService(services, mockCurrentUser);
-            });
-        }).CreateClient();
+        var client = factory.CreateClient();
 
         // Act
         var response = await client.PatchAsync($"/api/coops/{coopId}/archive", null);
@@ -430,8 +405,9 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         var result = await response.Content.ReadFromJsonAsync<bool>();
         result.Should().BeTrue();
 
-        // Verify coop is archived in database
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        // Verify coop is archived in database - create new scope from factory to get updated context
+        using var verifyScope = factory.Services.CreateScope();
+        var dbContext = verifyScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var coop = await dbContext.Coops.FindAsync(coopId);
         coop.Should().NotBeNull();
         coop!.IsActive.Should().BeFalse();
@@ -480,14 +456,16 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         var tenantId = Guid.NewGuid();
         var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
 
-        using var scope = _factory.WithWebHostBuilder(builder =>
+        var factory = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
             {
                 ReplaceWithInMemoryDatabase(services);
                 ReplaceCurrentUserService(services, mockCurrentUser);
             });
-        }).Services.CreateScope();
+        });
+
+        using var scope = factory.Services.CreateScope();
 
         await SeedTenant(scope, tenantId, "clerk_user_1");
         var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Test Location");
@@ -498,14 +476,7 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         coop!.Deactivate();
         await dbContext.SaveChangesAsync();
 
-        var client = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                ReplaceWithInMemoryDatabase(services);
-                ReplaceCurrentUserService(services, mockCurrentUser);
-            });
-        }).CreateClient();
+        var client = factory.CreateClient();
 
         // Act
         var response = await client.PatchAsync($"/api/coops/{coopId}/archive", null);
@@ -573,9 +544,15 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
             services.Remove(descriptor);
         }
 
-        services.AddDbContext<ApplicationDbContext>(options =>
+        // Use a unique database name for each test to ensure isolation
+        var databaseName = $"TestDb_{Guid.NewGuid()}";
+
+        services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
         {
-            options.UseInMemoryDatabase("TestDb");
+            options.UseInMemoryDatabase(databaseName);
+            options.EnableSensitiveDataLogging();
+            // ConfigureWarnings to ignore query filter warnings in tests
+            options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.QueryIterationFailed));
         });
 
         // Bypass authentication for tests
