@@ -463,9 +463,9 @@ test.describe('M2: Coop Management', () => {
 
       // Verify buttons are large enough (minimum 44x44px)
       const coopCard = await coopsPage.getCoopCard(coopName);
-      const editButton = coopCard.getByRole('button', { name: /edit/i });
+      const moreButton = coopCard.getByRole('button', { name: /more|více/i });
 
-      const boundingBox = await editButton.boundingBox();
+      const boundingBox = await moreButton.boundingBox();
       expect(boundingBox).not.toBeNull();
 
       if (boundingBox) {

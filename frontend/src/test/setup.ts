@@ -2,6 +2,10 @@ import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 
+// Mock environment variables
+vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:5100/api');
+vi.stubEnv('VITE_CLERK_PUBLISHABLE_KEY', 'pk_test_mock_key');
+
 // Extend Vitest's expect method with methods from react-testing-library
 expect.extend(matchers);
 

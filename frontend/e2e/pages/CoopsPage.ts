@@ -13,7 +13,8 @@ export class CoopsPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.getByRole('heading', { name: /coops|kurníky/i });
-    this.createCoopButton = page.getByRole('button', { name: /add coop|přidat kurník|create coop/i });
+    // Use first matching button (handles case where there are multiple add buttons)
+    this.createCoopButton = page.getByRole('button', { name: /add coop|přidat kurník|create coop/i }).first();
     this.emptyStateMessage = page.getByText(/no coops yet|zatím nemáte žádné kurníky/i);
     this.coopCardsList = page.locator('[data-testid="coop-card"]');
   }
@@ -36,17 +37,26 @@ export class CoopsPage {
 
   async clickEditCoop(coopName: string) {
     const card = await this.getCoopCard(coopName);
-    await card.getByRole('button', { name: /edit|upravit/i }).click();
+    // Open the menu first
+    await card.getByRole('button', { name: /more|více/i }).click();
+    // Then click edit in the menu
+    await this.page.getByRole('menuitem', { name: /edit|upravit/i }).click();
   }
 
   async clickArchiveCoop(coopName: string) {
     const card = await this.getCoopCard(coopName);
-    await card.getByRole('button', { name: /archive|archivovat/i }).click();
+    // Open the menu first
+    await card.getByRole('button', { name: /more|více/i }).click();
+    // Then click archive in the menu
+    await this.page.getByRole('menuitem', { name: /archive|archivovat/i }).click();
   }
 
   async clickDeleteCoop(coopName: string) {
     const card = await this.getCoopCard(coopName);
-    await card.getByRole('button', { name: /delete|smazat/i }).click();
+    // Open the menu first
+    await card.getByRole('button', { name: /more|více/i }).click();
+    // Then click delete in the menu
+    await this.page.getByRole('menuitem', { name: /delete|smazat/i }).click();
   }
 
   async clickCoopCard(coopName: string) {

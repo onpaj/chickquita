@@ -31,7 +31,7 @@ vi.mock('react-i18next', () => ({
       const translations: Record<string, string> = {
         'coops.addCoop': 'Add Coop',
         'coops.coopName': 'Coop Name',
-        'coops.coopDescription': 'Description',
+        'coops.location': 'Location',
         'common.cancel': 'Cancel',
         'common.save': 'Save',
         'common.saving': 'Saving...',
@@ -77,9 +77,9 @@ describe('CreateCoopModal', () => {
       expect(screen.getByLabelText(/Coop Name/)).toBeInTheDocument();
     });
 
-    it('should render description input field', () => {
+    it('should render location input field', () => {
       renderModal();
-      expect(screen.getByLabelText(/Description/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Location/)).toBeInTheDocument();
     });
 
     it('should render cancel button', () => {
@@ -138,7 +138,7 @@ describe('CreateCoopModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const locationInput = screen.getByLabelText(/Description/);
+      const locationInput = screen.getByLabelText(/Location/);
       const longLocation = 'a'.repeat(201);
 
       await user.click(locationInput);
@@ -158,7 +158,7 @@ describe('CreateCoopModal', () => {
 
       // Trigger required error by focusing and blurring
       await user.click(nameInput);
-      await user.click(screen.getByLabelText(/Description/)); // Click away to blur
+      await user.click(screen.getByLabelText(/Location/)); // Click away to blur
 
       await waitFor(() => {
         expect(screen.getByText('This field is required')).toBeInTheDocument();
@@ -190,7 +190,7 @@ describe('CreateCoopModal', () => {
       renderModal();
 
       const nameInput = screen.getByLabelText(/Coop Name/);
-      const locationInput = screen.getByLabelText(/Description/);
+      const locationInput = screen.getByLabelText(/Location/);
 
       await user.type(nameInput, 'Test Coop');
       await user.type(locationInput, 'Test Location');
@@ -236,7 +236,7 @@ describe('CreateCoopModal', () => {
       renderModal();
 
       const nameInput = screen.getByLabelText(/Coop Name/);
-      const locationInput = screen.getByLabelText(/Description/);
+      const locationInput = screen.getByLabelText(/Location/);
 
       await user.type(nameInput, '  Test Coop  ');
       await user.type(locationInput, '  Test Location  ');
