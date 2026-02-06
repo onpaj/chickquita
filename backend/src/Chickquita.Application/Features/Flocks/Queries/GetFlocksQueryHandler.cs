@@ -1,5 +1,6 @@
 using AutoMapper;
 using Chickquita.Domain.Common;
+using Chickquita.Domain.Entities;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Interfaces;
 using MediatR;
@@ -41,7 +42,8 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
     }
 
     /// <summary>
-    /// Handles the GetFlocksQuery by retrieving all flocks for the specified coop.
+    /// Handles the GetFlocksQuery by retrieving flocks for the current tenant.
+    /// Can optionally filter by coop ID.
     /// </summary>
     /// <param name="request">The get flocks query.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
@@ -50,7 +52,7 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
     {
         _logger.LogInformation(
             "Processing GetFlocksQuery for CoopId: {CoopId}, IncludeInactive: {IncludeInactive}",
-            request.CoopId,
+            request.CoopId?.ToString() ?? "All",
             request.IncludeInactive);
 
         try
@@ -70,24 +72,34 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
                 return Result<List<FlockDto>>.Failure(Error.Unauthorized("Tenant not found"));
             }
 
-            // Verify the coop exists and belongs to the current tenant
-            var coop = await _coopRepository.GetByIdAsync(request.CoopId);
-            if (coop == null)
-            {
-                _logger.LogWarning(
-                    "GetFlocksQuery: Coop not found with ID: {CoopId}",
-                    request.CoopId);
-                return Result<List<FlockDto>>.Failure(Error.NotFound("Coop not found"));
-            }
+            List<Flock> flocks;
 
-            // Retrieve flocks for the specified coop
-            // Tenant isolation is handled by RLS and global query filter in the repository
-            var flocks = await _flockRepository.GetByCoopIdAsync(request.CoopId, request.IncludeInactive);
+            // If CoopId is provided, filter by coop
+            if (request.CoopId.HasValue)
+            {
+                // Verify the coop exists and belongs to the current tenant
+                var coop = await _coopRepository.GetByIdAsync(request.CoopId.Value);
+                if (coop == null)
+                {
+                    _logger.LogWarning(
+                        "GetFlocksQuery: Coop not found with ID: {CoopId}",
+                        request.CoopId);
+                    return Result<List<FlockDto>>.Failure(Error.NotFound("Coop not found"));
+                }
+
+                // Retrieve flocks for the specified coop
+                flocks = await _flockRepository.GetByCoopIdAsync(request.CoopId.Value, request.IncludeInactive);
+            }
+            else
+            {
+                // Retrieve all flocks for the current tenant
+                flocks = await _flockRepository.GetAllAsync(request.IncludeInactive);
+            }
 
             _logger.LogInformation(
                 "Retrieved {Count} flocks for CoopId: {CoopId}, TenantId: {TenantId} (IncludeInactive: {IncludeInactive})",
                 flocks.Count,
-                request.CoopId,
+                request.CoopId?.ToString() ?? "All",
                 tenantId.Value,
                 request.IncludeInactive);
 
@@ -103,7 +115,7 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
             _logger.LogError(
                 ex,
                 "Error occurred while retrieving flocks for CoopId: {CoopId}",
-                request.CoopId);
+                request.CoopId?.ToString() ?? "All");
 
             return Result<List<FlockDto>>.Failure(
                 Error.Failure($"Failed to retrieve flocks: {ex.Message}"));
