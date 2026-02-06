@@ -84,6 +84,15 @@
     "viewHistory": "Zobrazit historii",
     "flockCardAriaLabel": "Hejno {{identifier}} v kurníku {{coopName}}",
     "belongsToCoopAriaLabel": "Patří do kurníku {{coopName}}",
+    "form": {
+      "identifier": "Identifikátor hejna",
+      "hatchDate": "Datum líhnutí",
+      "hatchDateFuture": "Datum nemůže být v budoucnosti",
+      "composition": "Složení hejna",
+      "atLeastOne": "Alespoň jeden počet musí být větší než 0",
+      "increase": "Zvýšit",
+      "decrease": "Snížit"
+    },
     "matureChicks": {
       "title": "Převést kuřata na dospělé",
       "chicksCount": "Počet kuřat",

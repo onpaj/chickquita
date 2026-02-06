@@ -84,6 +84,15 @@
     "viewHistory": "View History",
     "flockCardAriaLabel": "Flock {{identifier}} in coop {{coopName}}",
     "belongsToCoopAriaLabel": "Belongs to coop {{coopName}}",
+    "form": {
+      "identifier": "Flock Identifier",
+      "hatchDate": "Hatch Date",
+      "hatchDateFuture": "Date cannot be in the future",
+      "composition": "Flock Composition",
+      "atLeastOne": "At least one count must be greater than 0",
+      "increase": "Increase",
+      "decrease": "Decrease"
+    },
     "matureChicks": {
       "title": "Mature Chicks to Adults",
       "chicksCount": "Number of Chicks",
