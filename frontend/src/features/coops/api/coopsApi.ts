@@ -8,6 +8,7 @@ export interface Coop {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  flocksCount: number;
 }
 
 export interface CreateCoopRequest {

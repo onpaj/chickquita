@@ -77,7 +77,7 @@ public sealed class DeleteCoopCommandHandler : IRequestHandler<DeleteCoopCommand
                     "DeleteCoopCommand: Cannot delete coop {CoopId} because it has associated flocks",
                     request.Id);
                 return Result<bool>.Failure(
-                    Error.Validation("Cannot delete coop with existing flocks. Please delete or move all flocks first."));
+                    Error.ValidationWithCode("HAS_FLOCKS", "Cannot delete coop with existing flocks. Please delete or move all flocks first."));
             }
 
             // Delete the coop

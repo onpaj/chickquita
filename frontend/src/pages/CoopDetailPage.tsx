@@ -265,7 +265,7 @@ export function CoopDetailPage() {
               color="error"
               startIcon={<DeleteIcon />}
               onClick={handleDelete}
-              disabled={!coop.isActive || isDeleting}
+              disabled={!coop.isActive || isDeleting || coop.flocksCount > 0}
             >
               {t('common.delete')}
             </Button>

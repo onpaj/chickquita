@@ -45,6 +45,14 @@ public sealed class Error
     public static Error Validation(string message) => new("Error.Validation", message);
 
     /// <summary>
+    /// Creates a new validation error with a specific subcode.
+    /// </summary>
+    /// <param name="subcode">The validation error subcode.</param>
+    /// <param name="message">The validation error message.</param>
+    /// <returns>A new validation error with the specified subcode.</returns>
+    public static Error ValidationWithCode(string subcode, string message) => new($"Error.Validation.{subcode}", message);
+
+    /// <summary>
     /// Creates a new not found error.
     /// </summary>
     /// <param name="message">The not found error message.</param>

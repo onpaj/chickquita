@@ -54,4 +54,11 @@ public interface ICoopRepository
     /// <param name="coopId">The coop ID to check</param>
     /// <returns>True if the coop has flocks, false otherwise</returns>
     Task<bool> HasFlocksAsync(Guid coopId);
+
+    /// <summary>
+    /// Gets the count of flocks associated with a coop (includes both active and archived flocks).
+    /// </summary>
+    /// <param name="coopId">The coop ID</param>
+    /// <returns>The number of flocks associated with the coop</returns>
+    Task<int> GetFlocksCountAsync(Guid coopId);
 }

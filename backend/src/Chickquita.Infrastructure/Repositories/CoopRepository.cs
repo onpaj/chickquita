@@ -100,4 +100,15 @@ public class CoopRepository : ICoopRepository
         await Task.CompletedTask; // To satisfy async requirement
         return false;
     }
+
+    /// <inheritdoc />
+    public async Task<int> GetFlocksCountAsync(Guid coopId)
+    {
+        // TODO: Update this method when Flocks entity is added to the schema
+        // For now, return 0 as Flocks table doesn't exist yet
+        // When Flocks are implemented, this should be:
+        // return await _context.Flocks.CountAsync(f => f.CoopId == coopId);
+        await Task.CompletedTask; // To satisfy async requirement
+        return 0;
+    }
 }

@@ -103,6 +103,10 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
                 tenantId.Value);
 
             var coopDto = _mapper.Map<CoopDto>(coop);
+
+            // Populate flocks count
+            coopDto.FlocksCount = await _coopRepository.GetFlocksCountAsync(coopDto.Id);
+
             return Result<CoopDto>.Success(coopDto);
         }
         catch (ArgumentException ex)

@@ -39,4 +39,9 @@ public sealed class CoopDto
     /// Indicates whether the coop is currently active.
     /// </summary>
     public bool IsActive { get; set; }
+
+    /// <summary>
+    /// Number of flocks associated with this coop (includes active and archived flocks).
+    /// </summary>
+    public int FlocksCount { get; set; }
 }

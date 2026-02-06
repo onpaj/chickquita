@@ -67,6 +67,10 @@ public class GetCoopByIdQueryHandler : IRequestHandler<GetCoopByIdQuery, Result<
                 tenantId.Value);
 
             var coopDto = _mapper.Map<CoopDto>(coop);
+
+            // Populate flocks count
+            coopDto.FlocksCount = await _coopRepository.GetFlocksCountAsync(coopDto.Id);
+
             return Result<CoopDto>.Success(coopDto);
         }
         catch (Exception ex)

@@ -90,6 +90,10 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
                 tenantId.Value);
 
             var coopDto = _mapper.Map<CoopDto>(addedCoop);
+
+            // New coops have no flocks
+            coopDto.FlocksCount = 0;
+
             return Result<CoopDto>.Success(coopDto);
         }
         catch (ArgumentException ex)
