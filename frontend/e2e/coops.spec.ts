@@ -367,7 +367,8 @@ test.describe('M2: Coop Management', () => {
       // Coop should no longer be visible in active list
       // Note: Depending on implementation, archived coops might be filtered out
       // or shown with an "archived" badge
-      await page.waitForTimeout(1000); // Wait for UI update
+      // Wait for the coop card to be removed or updated (network-first strategy)
+      await page.waitForLoadState('networkidle');
     });
 
     test('should cancel archive', async ({ page }) => {

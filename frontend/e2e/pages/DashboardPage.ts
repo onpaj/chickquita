@@ -12,7 +12,8 @@ export class DashboardPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.getByRole('heading', { name: /dashboard|přehled/i });
-    this.coopsNavigationButton = page.getByRole('button', { name: /coops|kurníky/i });
+    // BottomNavigationAction renders as a button with the label as accessible name
+    this.coopsNavigationButton = page.getByRole('button', { name: /^(coops|kurníky)$/i });
     this.userButton = page.locator('.cl-userButton');
   }
 
