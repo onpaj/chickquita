@@ -55,6 +55,10 @@
     "archiveConfirmMessage": "Tento kurník bude archivován a odstraněn z vašeho aktivního seznamu. V případě potřeby jej můžete později znovu aktivovat.",
     "archiveSuccess": "Kurník byl úspěšně archivován",
     "archiveError": "Nepodařilo se archivovat kurník",
+    "deleteConfirmTitle": "Smazat kurník?",
+    "deleteConfirmMessage": "Tento kurník bude trvale smazán. Tuto akci nelze vrátit zpět.",
+    "deleteSuccess": "Kurník byl úspěšně smazán",
+    "deleteErrorHasFlocks": "Nelze smazat kurník s existujícími hejny. Nejprve prosím smažte nebo přesuňte všechna hejna.",
     "emptyState": {
       "title": "Zatím tu nejsou žádné kurníky",
       "message": "Přidejte svůj první kurník, abyste mohli začít!"

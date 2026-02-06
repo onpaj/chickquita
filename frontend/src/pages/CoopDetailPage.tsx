@@ -16,11 +16,13 @@ import {
   ArrowBack as ArrowBackIcon,
   Edit as EditIcon,
   Archive as ArchiveIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { useCoopDetail } from '../features/coops/hooks/useCoopDetail';
-import { useArchiveCoop } from '../features/coops/hooks/useCoops';
+import { useArchiveCoop, useDeleteCoop } from '../features/coops/hooks/useCoops';
 import { EditCoopModal } from '../features/coops/components/EditCoopModal';
 import { ArchiveCoopDialog } from '../features/coops/components/ArchiveCoopDialog';
+import { DeleteCoopDialog } from '../features/coops/components/DeleteCoopDialog';
 import { ResourceNotFound } from '../components/ResourceNotFound';
 import { processApiError, ErrorType } from '../lib/errors';
 import { useErrorHandler } from '../hooks/useErrorHandler';
@@ -34,10 +36,12 @@ export function CoopDetailPage() {
   const { t, i18n } = useTranslation();
   const { data: coop, isLoading, error } = useCoopDetail(id!);
   const { mutate: archiveCoop, isPending: isArchiving } = useArchiveCoop();
+  const { mutate: deleteCoop, isPending: isDeleting } = useDeleteCoop();
   const { handleError } = useErrorHandler();
-  const { showSuccess } = useToast();
+  const { showSuccess, showError } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const dateLocale = i18n.language === 'cs' ? cs : enUS;
 
@@ -73,6 +77,37 @@ export function CoopDetailPage() {
       onError: (error: Error) => {
         setIsArchiveDialogOpen(false);
         handleError(error, handleConfirmArchive);
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!id) return;
+
+    deleteCoop(id, {
+      onSuccess: () => {
+        showSuccess(t('coops.deleteSuccess'));
+        setIsDeleteDialogOpen(false);
+        navigate('/coops');
+      },
+      onError: (error: Error) => {
+        setIsDeleteDialogOpen(false);
+        const processedError = processApiError(error);
+
+        // Check if the error is due to coop having flocks
+        if (processedError.type === ErrorType.VALIDATION) {
+          showError(t('coops.deleteErrorHasFlocks'));
+        } else {
+          handleError(error, handleConfirmDelete);
+        }
       },
     });
   };
@@ -225,6 +260,15 @@ export function CoopDetailPage() {
             >
               {t('coops.archiveCoop')}
             </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleDelete}
+              disabled={!coop.isActive || isDeleting}
+            >
+              {t('common.delete')}
+            </Button>
           </Stack>
         </Stack>
       </Paper>
@@ -246,6 +290,17 @@ export function CoopDetailPage() {
           onConfirm={handleConfirmArchive}
           coopName={coop.name}
           isPending={isArchiving}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {coop && (
+        <DeleteCoopDialog
+          open={isDeleteDialogOpen}
+          onClose={handleCloseDeleteDialog}
+          onConfirm={handleConfirmDelete}
+          coopName={coop.name}
+          isPending={isDeleting}
         />
       )}
     </Container>

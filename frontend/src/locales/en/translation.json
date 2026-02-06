@@ -55,6 +55,10 @@
     "archiveConfirmMessage": "This coop will be archived and removed from your active list. You can reactivate it later if needed.",
     "archiveSuccess": "Coop archived successfully",
     "archiveError": "Failed to archive coop",
+    "deleteConfirmTitle": "Delete Coop?",
+    "deleteConfirmMessage": "This coop will be permanently deleted. This action cannot be undone.",
+    "deleteSuccess": "Coop deleted successfully",
+    "deleteErrorHasFlocks": "Cannot delete coop with existing flocks. Please delete or move all flocks first.",
     "emptyState": {
       "title": "No coops yet",
       "message": "Add your first coop to get started!"

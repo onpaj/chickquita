@@ -46,4 +46,9 @@ export const coopsApi = {
     const response = await apiClient.patch<boolean>(`/coops/${id}/archive`);
     return response.data;
   },
+
+  delete: async (id: string): Promise<boolean> => {
+    const response = await apiClient.delete<boolean>(`/coops/${id}`);
+    return response.data;
+  },
 };

@@ -42,3 +42,15 @@ export function useArchiveCoop() {
     },
   });
 }
+
+export function useDeleteCoop() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: coopsApi.delete,
+    onSuccess: (_data, coopId) => {
+      queryClient.invalidateQueries({ queryKey: ['coops'] });
+      queryClient.invalidateQueries({ queryKey: ['coops', coopId] });
+    },
+  });
+}
