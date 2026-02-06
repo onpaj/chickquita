@@ -4,6 +4,7 @@ using Chickquita.Application.Interfaces;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -39,11 +40,13 @@ public class TenantResolutionMiddlewareTests
             .Setup(rd => rd(It.IsAny<HttpContext>()))
             .Returns(Task.CompletedTask);
 
+        var mockLogger = new Mock<ILogger<Chickquita.Api.Middleware.TenantResolutionMiddleware>>();
+
         var middleware = new Chickquita.Api.Middleware.TenantResolutionMiddleware(
             requestDelegate.Object);
 
         // Act
-        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object);
+        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object, mockLogger.Object);
 
         // Assert
         mockTenantRepository.Verify(
@@ -75,11 +78,13 @@ public class TenantResolutionMiddlewareTests
             .Setup(rd => rd(It.IsAny<HttpContext>()))
             .Returns(Task.CompletedTask);
 
+        var mockLogger = new Mock<ILogger<Chickquita.Api.Middleware.TenantResolutionMiddleware>>();
+
         var middleware = new Chickquita.Api.Middleware.TenantResolutionMiddleware(
             requestDelegate.Object);
 
         // Act
-        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object);
+        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object, mockLogger.Object);
 
         // Assert
         httpContext.Items.Should().ContainKey("TenantId");
@@ -87,37 +92,54 @@ public class TenantResolutionMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_WhenTenantNotFound_Returns403Forbidden()
+    public async Task InvokeAsync_WhenTenantNotFound_AutoCreatesNewTenant()
     {
         // Arrange
         var clerkUserId = "user_123";
+        var email = "test@example.com";
+        var createdTenant = Tenant.Create(clerkUserId, email);
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
             .Setup(r => r.GetByClerkUserIdAsync(clerkUserId))
             .ReturnsAsync((Tenant?)null);
+        mockTenantRepository
+            .Setup(r => r.AddAsync(It.IsAny<Tenant>()))
+            .ReturnsAsync(createdTenant);
 
         var httpContext = new DefaultHttpContext();
         httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim("sub", clerkUserId)
+            new Claim("sub", clerkUserId),
+            new Claim("email", email)
         }, "TestAuth"));
-        httpContext.Response.Body = new MemoryStream();
 
         var requestDelegate = new Mock<RequestDelegate>();
+        requestDelegate
+            .Setup(rd => rd(It.IsAny<HttpContext>()))
+            .Returns(Task.CompletedTask);
+
+        var mockLogger = new Mock<ILogger<Chickquita.Api.Middleware.TenantResolutionMiddleware>>();
 
         var middleware = new Chickquita.Api.Middleware.TenantResolutionMiddleware(
             requestDelegate.Object);
 
         // Act
-        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object);
+        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object, mockLogger.Object);
 
         // Assert
-        httpContext.Response.StatusCode.Should().Be((int)HttpStatusCode.Forbidden);
+        mockTenantRepository.Verify(
+            r => r.AddAsync(It.Is<Tenant>(t => t.ClerkUserId == clerkUserId && t.Email == email)),
+            Times.Once,
+            "Should auto-create tenant when not found");
+
+        httpContext.Items.Should().ContainKey("TenantId");
+        httpContext.Items["TenantId"].Should().Be(createdTenant.Id);
+
         requestDelegate.Verify(
             rd => rd(It.IsAny<HttpContext>()),
-            Times.Never,
-            "Should not call next middleware when tenant not found");
+            Times.Once,
+            "Should call next middleware after creating tenant");
     }
 
     [Fact]
@@ -145,11 +167,13 @@ public class TenantResolutionMiddlewareTests
             .Callback(() => nextCalled = true)
             .Returns(Task.CompletedTask);
 
+        var mockLogger = new Mock<ILogger<Chickquita.Api.Middleware.TenantResolutionMiddleware>>();
+
         var middleware = new Chickquita.Api.Middleware.TenantResolutionMiddleware(
             requestDelegate.Object);
 
         // Act
-        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object);
+        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object, mockLogger.Object);
 
         // Assert
         nextCalled.Should().BeTrue("Middleware should call next delegate when tenant is found");
@@ -171,11 +195,13 @@ public class TenantResolutionMiddlewareTests
             .Callback(() => nextCalled = true)
             .Returns(Task.CompletedTask);
 
+        var mockLogger = new Mock<ILogger<Chickquita.Api.Middleware.TenantResolutionMiddleware>>();
+
         var middleware = new Chickquita.Api.Middleware.TenantResolutionMiddleware(
             requestDelegate.Object);
 
         // Act
-        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object);
+        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object, mockLogger.Object);
 
         // Assert
         nextCalled.Should().BeTrue("Middleware should call next delegate for unauthenticated requests");
@@ -184,5 +210,50 @@ public class TenantResolutionMiddlewareTests
             r => r.GetByClerkUserIdAsync(It.IsAny<string>()),
             Times.Never,
             "Should not query tenant repository when user is not authenticated");
+    }
+
+    [Fact]
+    public async Task InvokeAsync_WhenTenantNotFound_AndNoEmailInClaims_UsesFallbackEmail()
+    {
+        // Arrange
+        var clerkUserId = "user_123";
+        var expectedFallbackEmail = $"{clerkUserId}@clerk.temp";
+        var createdTenant = Tenant.Create(clerkUserId, expectedFallbackEmail);
+
+        var mockTenantRepository = new Mock<ITenantRepository>();
+        mockTenantRepository
+            .Setup(r => r.GetByClerkUserIdAsync(clerkUserId))
+            .ReturnsAsync((Tenant?)null);
+        mockTenantRepository
+            .Setup(r => r.AddAsync(It.IsAny<Tenant>()))
+            .ReturnsAsync(createdTenant);
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim("sub", clerkUserId)
+            // No email claim
+        }, "TestAuth"));
+
+        var requestDelegate = new Mock<RequestDelegate>();
+        requestDelegate
+            .Setup(rd => rd(It.IsAny<HttpContext>()))
+            .Returns(Task.CompletedTask);
+
+        var mockLogger = new Mock<ILogger<Chickquita.Api.Middleware.TenantResolutionMiddleware>>();
+
+        var middleware = new Chickquita.Api.Middleware.TenantResolutionMiddleware(
+            requestDelegate.Object);
+
+        // Act
+        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object, mockLogger.Object);
+
+        // Assert
+        mockTenantRepository.Verify(
+            r => r.AddAsync(It.Is<Tenant>(t =>
+                t.ClerkUserId == clerkUserId &&
+                t.Email == expectedFallbackEmail)),
+            Times.Once,
+            "Should use fallback email when email claim is not present");
     }
 }

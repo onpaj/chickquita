@@ -19,6 +19,11 @@ public class ApplicationDbContext : DbContext
     /// </summary>
     public DbSet<Tenant> Tenants => Set<Tenant>();
 
+    /// <summary>
+    /// Coops (chicken coop locations) in the system.
+    /// </summary>
+    public DbSet<Coop> Coops => Set<Coop>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

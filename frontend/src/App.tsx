@@ -2,27 +2,45 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import SignUpPage from './pages/SignUpPage'
 import SignInPage from './pages/SignInPage'
 import DashboardPage from './pages/DashboardPage'
+import CoopsPage from './pages/CoopsPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import { BottomNavigation } from './components/BottomNavigation'
 import { useApiClient } from './lib/useApiClient'
+import { useAuth } from '@clerk/clerk-react'
+import { Box } from '@mui/material'
 
 function App() {
   // Initialize API client with Clerk authentication
   useApiClient()
+  const { isSignedIn } = useAuth()
 
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/sign-up" replace />} />
-      <Route path="/sign-up/*" element={<SignUpPage />} />
-      <Route path="/sign-in/*" element={<SignInPage />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+    <>
+      <Box sx={{ pb: isSignedIn ? 8 : 0 }}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/sign-up" replace />} />
+          <Route path="/sign-up/*" element={<SignUpPage />} />
+          <Route path="/sign-in/*" element={<SignInPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/coops"
+            element={
+              <ProtectedRoute>
+                <CoopsPage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Box>
+      {isSignedIn && <BottomNavigation />}
+    </>
   )
 }
 

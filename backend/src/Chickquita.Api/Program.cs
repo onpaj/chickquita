@@ -163,6 +163,9 @@ app.MapWebhooksEndpoints();
 // Map users endpoints
 app.MapUsersEndpoints();
 
+// Map coops endpoints
+app.MapCoopsEndpoints();
+
 // SPA fallback - serve index.html for all non-API routes
 // This must come AFTER API endpoint mapping to ensure API routes take precedence
 app.MapFallbackToFile("index.html");

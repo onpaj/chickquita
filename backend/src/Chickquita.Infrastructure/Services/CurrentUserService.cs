@@ -25,6 +25,23 @@ public class CurrentUserService : ICurrentUserService
         ?? _httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
 
     /// <summary>
+    /// Gets the tenant ID from HttpContext.Items
+    /// Set by TenantResolutionMiddleware
+    /// </summary>
+    public Guid? TenantId
+    {
+        get
+        {
+            if (_httpContextAccessor.HttpContext?.Items.TryGetValue("TenantId", out var tenantIdObj) == true
+                && tenantIdObj is Guid tenantId)
+            {
+                return tenantId;
+            }
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Gets whether the current request has an authenticated user
     /// </summary>
     public bool IsAuthenticated =>

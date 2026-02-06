@@ -42,6 +42,7 @@ public static class DependencyInjection
 
         // Register repositories
         services.AddScoped<ITenantRepository, TenantRepository>();
+        services.AddScoped<ICoopRepository, CoopRepository>();
 
         // Register webhook validation service
         services.AddScoped<IClerkWebhookValidator, ClerkWebhookValidator>();
