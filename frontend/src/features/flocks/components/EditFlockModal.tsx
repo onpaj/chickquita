@@ -8,12 +8,7 @@ import {
   Button,
   Box,
   CircularProgress,
-  IconButton,
-  InputAdornment,
-  Typography,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
 import { useTranslation } from 'react-i18next';
 import { useUpdateFlock } from '../hooks/useFlocks';
 import { useErrorHandler } from '../../../hooks/useErrorHandler';
@@ -33,32 +28,25 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
 
   const [identifier, setIdentifier] = useState('');
   const [hatchDate, setHatchDate] = useState('');
-  const [hens, setHens] = useState(0);
-  const [roosters, setRoosters] = useState(0);
-  const [chicks, setChicks] = useState(0);
 
   const [identifierError, setIdentifierError] = useState('');
   const [hatchDateError, setHatchDateError] = useState('');
-  const [countsError, setCountsError] = useState('');
 
   // Initialize form values when modal opens or flock changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (open && flock) {
       setIdentifier(flock.identifier);
       setHatchDate(flock.hatchDate.split('T')[0]); // Extract date part from ISO string
-      setHens(flock.currentHens);
-      setRoosters(flock.currentRoosters);
-      setChicks(flock.currentChicks);
       setIdentifierError('');
       setHatchDateError('');
-      setCountsError('');
     }
   }, [open, flock]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleClose = () => {
     setIdentifierError('');
     setHatchDateError('');
-    setCountsError('');
     onClose();
   };
 
@@ -85,63 +73,22 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
     return '';
   };
 
-  const validateCounts = (hensCount: number, roostersCount: number, chicksCount: number): string => {
-    if (hensCount < 0 || roostersCount < 0 || chicksCount < 0) {
-      return t('validation.positiveNumber');
-    }
-    if (hensCount === 0 && roostersCount === 0 && chicksCount === 0) {
-      return t('flocks.form.atLeastOne');
-    }
-    return '';
-  };
-
   const validate = (): boolean => {
     const identifierErr = validateIdentifier(identifier);
     const hatchDateErr = validateHatchDate(hatchDate);
-    const countsErr = validateCounts(hens, roosters, chicks);
 
     setIdentifierError(identifierErr);
     setHatchDateError(hatchDateErr);
-    setCountsError(countsErr);
 
-    return !identifierErr && !hatchDateErr && !countsErr;
+    return !identifierErr && !hatchDateErr;
   };
 
   const isFormValid = (): boolean => {
     return (
       identifier.trim().length > 0 &&
       identifier.length <= 50 &&
-      hatchDate.length > 0 &&
-      hens >= 0 &&
-      roosters >= 0 &&
-      chicks >= 0 &&
-      (hens > 0 || roosters > 0 || chicks > 0)
+      hatchDate.length > 0
     );
-  };
-
-  const handleNumberChange = (
-    setter: (value: number) => void,
-    value: number
-  ) => {
-    const newValue = Math.max(0, value);
-    setter(newValue);
-    // Clear counts error when user changes values
-    if (countsError) {
-      const err = validateCounts(
-        setter === setHens ? newValue : hens,
-        setter === setRoosters ? newValue : roosters,
-        setter === setChicks ? newValue : chicks
-      );
-      setCountsError(err);
-    }
-  };
-
-  const incrementValue = (setter: (value: number) => void, currentValue: number) => {
-    handleNumberChange(setter, currentValue + 1);
-  };
-
-  const decrementValue = (setter: (value: number) => void, currentValue: number) => {
-    handleNumberChange(setter, currentValue - 1);
   };
 
   const submitFlock = () => {
@@ -153,9 +100,9 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
       id: flock.id,
       identifier: identifier.trim(),
       hatchDate,
-      currentHens: hens,
-      currentRoosters: roosters,
-      currentChicks: chicks,
+      currentHens: flock.currentHens,
+      currentRoosters: flock.currentRoosters,
+      currentChicks: flock.currentChicks,
     };
 
     updateFlock(
@@ -272,134 +219,6 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
                 style: { minHeight: '44px' },
               }}
             />
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-              <Typography variant="subtitle2" color="text.secondary">
-                {t('flocks.form.composition')}
-              </Typography>
-
-              <TextField
-                label={t('flocks.hens')}
-                value={hens}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  handleNumberChange(setHens, value);
-                }}
-                fullWidth
-                disabled={isPending}
-                type="number"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => decrementValue(setHens, hens)}
-                        disabled={isPending || hens <= 0}
-                        size="small"
-                        aria-label={t('flocks.form.decrease')}
-                        sx={{ minWidth: '44px', minHeight: '44px' }}
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => incrementValue(setHens, hens)}
-                        disabled={isPending}
-                        size="small"
-                        aria-label={t('flocks.form.increase')}
-                        sx={{ minWidth: '44px', minHeight: '44px' }}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                inputProps={{
-                  min: 0,
-                  style: { minHeight: '44px' },
-                }}
-              />
-
-              <TextField
-                label={t('flocks.roosters')}
-                value={roosters}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  handleNumberChange(setRoosters, value);
-                }}
-                fullWidth
-                disabled={isPending}
-                type="number"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => decrementValue(setRoosters, roosters)}
-                        disabled={isPending || roosters <= 0}
-                        size="small"
-                        aria-label={t('flocks.form.decrease')}
-                        sx={{ minWidth: '44px', minHeight: '44px' }}
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => incrementValue(setRoosters, roosters)}
-                        disabled={isPending}
-                        size="small"
-                        aria-label={t('flocks.form.increase')}
-                        sx={{ minWidth: '44px', minHeight: '44px' }}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                inputProps={{
-                  min: 0,
-                  style: { minHeight: '44px' },
-                }}
-              />
-
-              <TextField
-                label={t('flocks.chicks')}
-                value={chicks}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  handleNumberChange(setChicks, value);
-                }}
-                fullWidth
-                disabled={isPending}
-                type="number"
-                error={!!countsError}
-                helperText={countsError}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => decrementValue(setChicks, chicks)}
-                        disabled={isPending || chicks <= 0}
-                        size="small"
-                        aria-label={t('flocks.form.decrease')}
-                        sx={{ minWidth: '44px', minHeight: '44px' }}
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => incrementValue(setChicks, chicks)}
-                        disabled={isPending}
-                        size="small"
-                        aria-label={t('flocks.form.increase')}
-                        sx={{ minWidth: '44px', minHeight: '44px' }}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                inputProps={{
-                  min: 0,
-                  style: { minHeight: '44px' },
-                }}
-              />
-            </Box>
           </Box>
         </DialogContent>
         <DialogActions
