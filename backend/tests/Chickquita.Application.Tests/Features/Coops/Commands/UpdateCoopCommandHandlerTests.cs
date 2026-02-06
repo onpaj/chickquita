@@ -418,6 +418,48 @@ public class UpdateCoopCommandHandlerTests
 
     #endregion
 
+    #region Tenant Isolation Tests
+
+    [Fact]
+    public async Task Handle_WhenCoopBelongsToAnotherTenant_ShouldReturnNotFound()
+    {
+        // Arrange
+        var currentUserTenantId = Guid.NewGuid();
+        var otherTenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+
+        // Coop belongs to a different tenant
+        var otherTenantCoop = Coop.Create(otherTenantId, "Other Tenant Coop", "Other Location");
+
+        var command = new UpdateCoopCommand
+        {
+            Id = coopId,
+            Name = "Attempted Update",
+            Location = "New Location"
+        };
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(currentUserTenantId);
+
+        // Repository returns null because of RLS - coop is not visible to current tenant
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
+            .ReturnsAsync((Coop?)null);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Code.Should().Be("Error.NotFound");
+        result.Error.Message.Should().Be("Coop not found");
+
+        // Verify that update was never attempted
+        _mockCoopRepository.Verify(x => x.UpdateAsync(It.IsAny<Coop>()), Times.Never);
+    }
+
+    #endregion
+
     #region Error Handling Tests
 
     [Fact]
