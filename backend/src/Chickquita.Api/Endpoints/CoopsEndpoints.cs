@@ -51,6 +51,14 @@ public static class CoopsEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPatch("/{id:guid}/archive", ArchiveCoop)
+            .WithName("ArchiveCoop")
+            .WithOpenApi()
+            .Produces<bool>()
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetCoops(
@@ -84,7 +92,7 @@ public static class CoopsEndpoints
             return result.Error.Code switch
             {
                 "Error.Unauthorized" => Results.Unauthorized(),
-                "NotFound" => Results.NotFound(new { error = result.Error }),
+                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
                 _ => Results.BadRequest(new { error = result.Error })
             };
         }
@@ -131,7 +139,7 @@ public static class CoopsEndpoints
             {
                 "Error.Unauthorized" => Results.Unauthorized(),
                 "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "NotFound" => Results.NotFound(new { error = result.Error }),
+                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
                 "Error.Conflict" => Results.Conflict(new { error = result.Error }),
                 _ => Results.BadRequest(new { error = result.Error })
             };
@@ -153,7 +161,28 @@ public static class CoopsEndpoints
             {
                 "Error.Unauthorized" => Results.Unauthorized(),
                 "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "NotFound" => Results.NotFound(new { error = result.Error }),
+                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
+                _ => Results.BadRequest(new { error = result.Error })
+            };
+        }
+
+        return Results.Ok(result.Value);
+    }
+
+    private static async Task<IResult> ArchiveCoop(
+        [FromRoute] Guid id,
+        [FromServices] IMediator mediator)
+    {
+        var command = new ArchiveCoopCommand { Id = id };
+        var result = await mediator.Send(command);
+
+        if (!result.IsSuccess)
+        {
+            return result.Error.Code switch
+            {
+                "Error.Unauthorized" => Results.Unauthorized(),
+                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
+                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
                 _ => Results.BadRequest(new { error = result.Error })
             };
         }

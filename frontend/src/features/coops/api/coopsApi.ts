@@ -5,6 +5,7 @@ export interface Coop {
   tenantId: string;
   name: string;
   location?: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +39,11 @@ export const coopsApi = {
 
   update: async (data: UpdateCoopRequest): Promise<Coop> => {
     const response = await apiClient.put<Coop>(`/coops/${data.id}`, data);
+    return response.data;
+  },
+
+  archive: async (id: string): Promise<boolean> => {
+    const response = await apiClient.patch<boolean>(`/coops/${id}/archive`);
     return response.data;
   },
 };

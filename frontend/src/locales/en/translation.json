@@ -45,11 +45,16 @@
     "addFirstCoop": "Click the + button to add your first coop",
     "duplicateName": "A coop with this name already exists",
     "active": "Active",
+    "archived": "Archived",
     "status": "Status",
     "createdAt": "Created {{date}}",
     "updatedAt": "Updated {{date}}",
     "details": "Coop Details",
     "coopNotFound": "Coop not found",
+    "archiveConfirmTitle": "Archive Coop?",
+    "archiveConfirmMessage": "This coop will be archived and removed from your active list. You can reactivate it later if needed.",
+    "archiveSuccess": "Coop archived successfully",
+    "archiveError": "Failed to archive coop",
     "emptyState": {
       "title": "No coops yet",
       "message": "Add your first coop to get started!"

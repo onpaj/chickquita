@@ -395,6 +395,126 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task ArchiveCoop_WithValidCoop_Returns200()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        using var scope = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        }).Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Test Location");
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        }).CreateClient();
+
+        // Act
+        var response = await client.PatchAsync($"/api/coops/{coopId}/archive", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<bool>();
+        result.Should().BeTrue();
+
+        // Verify coop is archived in database
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var coop = await dbContext.Coops.FindAsync(coopId);
+        coop.Should().NotBeNull();
+        coop!.IsActive.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ArchiveCoop_WithNonExistentCoop_Returns404NotFound()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        using var scope = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        }).Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        }).CreateClient();
+
+        var nonExistentId = Guid.NewGuid();
+
+        // Act
+        var response = await client.PatchAsync($"/api/coops/{nonExistentId}/archive", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task ArchiveCoop_WithAlreadyArchivedCoop_Returns400BadRequest()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        using var scope = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        }).Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Test Location");
+
+        // Archive the coop first
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var coop = await dbContext.Coops.FindAsync(coopId);
+        coop!.Deactivate();
+        await dbContext.SaveChangesAsync();
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        }).CreateClient();
+
+        // Act
+        var response = await client.PatchAsync($"/api/coops/{coopId}/archive", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task TenantIsolation_UserCannotSeeOtherTenantCoops()
     {
         // Arrange

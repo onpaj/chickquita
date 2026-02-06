@@ -30,3 +30,15 @@ export function useUpdateCoop() {
     },
   });
 }
+
+export function useArchiveCoop() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: coopsApi.archive,
+    onSuccess: (_data, coopId) => {
+      queryClient.invalidateQueries({ queryKey: ['coops'] });
+      queryClient.invalidateQueries({ queryKey: ['coops', coopId] });
+    },
+  });
+}

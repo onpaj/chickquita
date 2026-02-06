@@ -45,11 +45,16 @@
     "addFirstCoop": "Klikněte na tlačítko + pro přidání vašeho prvního kurníku",
     "duplicateName": "Kurník s tímto názvem už existuje",
     "active": "Aktivní",
+    "archived": "Archivován",
     "status": "Stav",
     "createdAt": "Vytvořeno {{date}}",
     "updatedAt": "Aktualizováno {{date}}",
     "details": "Detail kurníku",
     "coopNotFound": "Kurník nenalezen",
+    "archiveConfirmTitle": "Archivovat kurník?",
+    "archiveConfirmMessage": "Tento kurník bude archivován a odstraněn z vašeho aktivního seznamu. V případě potřeby jej můžete později znovu aktivovat.",
+    "archiveSuccess": "Kurník byl úspěšně archivován",
+    "archiveError": "Nepodařilo se archivovat kurník",
     "emptyState": {
       "title": "Zatím tu nejsou žádné kurníky",
       "message": "Přidejte svůj první kurník, abyste mohli začít!"

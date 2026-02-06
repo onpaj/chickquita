@@ -18,9 +18,13 @@ import {
   Archive as ArchiveIcon,
 } from '@mui/icons-material';
 import { useCoopDetail } from '../features/coops/hooks/useCoopDetail';
+import { useArchiveCoop } from '../features/coops/hooks/useCoops';
 import { EditCoopModal } from '../features/coops/components/EditCoopModal';
+import { ArchiveCoopDialog } from '../features/coops/components/ArchiveCoopDialog';
 import { ResourceNotFound } from '../components/ResourceNotFound';
 import { processApiError, ErrorType } from '../lib/errors';
+import { useErrorHandler } from '../hooks/useErrorHandler';
+import { useToast } from '../hooks/useToast';
 import { format } from 'date-fns';
 import { cs, enUS } from 'date-fns/locale';
 
@@ -29,7 +33,11 @@ export function CoopDetailPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { data: coop, isLoading, error } = useCoopDetail(id!);
+  const { mutate: archiveCoop, isPending: isArchiving } = useArchiveCoop();
+  const { handleError } = useErrorHandler();
+  const { showSuccess } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
 
   const dateLocale = i18n.language === 'cs' ? cs : enUS;
 
@@ -46,8 +54,27 @@ export function CoopDetailPage() {
   };
 
   const handleArchive = () => {
-    // TODO: Implement archive functionality in future US
-    console.log('Archive coop', id);
+    setIsArchiveDialogOpen(true);
+  };
+
+  const handleCloseArchiveDialog = () => {
+    setIsArchiveDialogOpen(false);
+  };
+
+  const handleConfirmArchive = () => {
+    if (!id) return;
+
+    archiveCoop(id, {
+      onSuccess: () => {
+        showSuccess(t('coops.archiveSuccess'));
+        setIsArchiveDialogOpen(false);
+        navigate('/coops');
+      },
+      onError: (error: Error) => {
+        setIsArchiveDialogOpen(false);
+        handleError(error, handleConfirmArchive);
+      },
+    });
   };
 
   if (isLoading) {
@@ -154,8 +181,8 @@ export function CoopDetailPage() {
               {t('coops.status')}
             </Typography>
             <Chip
-              label={t('coops.active')}
-              color="success"
+              label={coop.isActive ? t('coops.active') : t('coops.archived')}
+              color={coop.isActive ? 'success' : 'default'}
               size="small"
             />
           </Box>
@@ -186,6 +213,7 @@ export function CoopDetailPage() {
               variant="contained"
               startIcon={<EditIcon />}
               onClick={handleEdit}
+              disabled={!coop.isActive}
             >
               {t('common.edit')}
             </Button>
@@ -193,6 +221,7 @@ export function CoopDetailPage() {
               variant="outlined"
               startIcon={<ArchiveIcon />}
               onClick={handleArchive}
+              disabled={!coop.isActive || isArchiving}
             >
               {t('coops.archiveCoop')}
             </Button>
@@ -206,6 +235,17 @@ export function CoopDetailPage() {
           open={isEditModalOpen}
           onClose={handleCloseEditModal}
           coop={coop}
+        />
+      )}
+
+      {/* Archive Confirmation Dialog */}
+      {coop && (
+        <ArchiveCoopDialog
+          open={isArchiveDialogOpen}
+          onClose={handleCloseArchiveDialog}
+          onConfirm={handleConfirmArchive}
+          coopName={coop.name}
+          isPending={isArchiving}
         />
       )}
     </Container>
