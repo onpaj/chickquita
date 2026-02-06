@@ -1,6 +1,6 @@
 # Technology Stack
 
-**ChickenTrack (Chickquita)** - Technology choices and architectural decisions for the mobile-first PWA.
+**Chickquita (Chickquita)** - Technology choices and architectural decisions for the mobile-first PWA.
 
 **Version:** 2.0
 **Date:** February 5, 2026
@@ -416,10 +416,10 @@ RUN npm run build
 # Stage 2: Build backend
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS backend-build
 WORKDIR /app
-COPY src/backend/*.sln ./
-COPY src/backend/**/*.csproj ./
+COPY backend/src/*.sln ./
+COPY backend/src/**/*.csproj ./
 RUN dotnet restore
-COPY src/backend ./
+COPY backend/src ./
 RUN dotnet publish -c Release -o /app/publish
 
 # Stage 3: Runtime
@@ -428,7 +428,7 @@ WORKDIR /app
 COPY --from=backend-build /app/publish ./
 COPY --from=frontend-build /app/frontend/dist ./wwwroot
 EXPOSE 80
-ENTRYPOINT ["dotnet", "ChickenTrack.Api.dll"]
+ENTRYPOINT ["dotnet", "Chickquita.Api.dll"]
 ```
 
 ### Container Registry

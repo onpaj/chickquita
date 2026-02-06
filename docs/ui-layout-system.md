@@ -1,6 +1,6 @@
 # UI Layout System
 
-**ChickenTrack (Chickquita)** - Complete UI design system, layout patterns, and component specifications for mobile-first PWA.
+**Chickquita (Chickquita)** - Complete UI design system, layout patterns, and component specifications for mobile-first PWA.
 
 **Version:** 1.0
 **Date:** February 5, 2026
@@ -311,7 +311,7 @@ const navItems = [
     {/* Left: Logo + Title */}
     <Box display="flex" alignItems="center" gap={1}>
       <Avatar src="/logo.png" sx={{ width: 32, height: 32 }} />
-      <Typography variant="h6">ChickenTrack</Typography>
+      <Typography variant="h6">Chickquita</Typography>
     </Box>
 
     {/* Right: Actions */}

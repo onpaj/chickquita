@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**ChickenTrack** (Chickquita) is a mobile-first Progressive Web Application (PWA) for tracking the financial profitability of chicken farming. The application features:
+**Chickquita** is a mobile-first Progressive Web Application (PWA) for tracking the financial profitability of chicken farming. The application features:
 
 - Multi-tenant architecture with isolated data per farmer
 - Offline-first design for use outdoors at chicken coops
@@ -130,7 +130,7 @@ npm run test
 
 ### Backend
 ```bash
-cd src/backend
+cd backend
 
 # Restore packages
 dotnet restore
@@ -139,20 +139,20 @@ dotnet restore
 dotnet build
 
 # Run locally
-dotnet run --project ChickenTrack.Api
+dotnet run --project backend/src/Chickquita.Api
 
 # Run tests
 dotnet test
 
 # Create EF Core migration
 dotnet ef migrations add <MigrationName> \
-  --project ChickenTrack.Infrastructure \
-  --startup-project ChickenTrack.Api
+  --project backend/src/Chickquita.Infrastructure \
+  --startup-project backend/src/Chickquita.Api
 
 # Apply migrations to database
 dotnet ef database update \
-  --project ChickenTrack.Infrastructure \
-  --startup-project ChickenTrack.Api
+  --project backend/src/Chickquita.Infrastructure \
+  --startup-project backend/src/Chickquita.Api
 ```
 
 ### Docker
@@ -397,19 +397,22 @@ chickquita/
 │   ├── technology-stack.md          # Tech stack documentation
 │   ├── filesystem-structure.md      # Project structure
 │   └── migration-clerk-neon.md      # Migration guide
-├── src/
-│   ├── backend/                     # .NET 8 API
-│   │   ├── ChickenTrack.Api/       # Entry point, endpoints
-│   │   ├── ChickenTrack.Application/ # Features (CQRS + MediatR)
-│   │   ├── ChickenTrack.Domain/    # Entities, value objects
-│   │   └── ChickenTrack.Infrastructure/ # EF Core, Clerk integration
-│   └── frontend/                    # React PWA
-│       ├── src/
-│       │   ├── features/            # Feature modules
-│       │   ├── shared/              # Shared components
-│       │   ├── lib/                 # Third-party setup (Clerk, API)
-│       │   └── locales/             # i18n translations (cs, en)
-│       └── public/                  # Static assets, manifest.json
+├── backend/                         # .NET 8 API
+│   ├── src/                         # Production code
+│   │   ├── Chickquita.Api/          # Entry point, endpoints
+│   │   ├── Chickquita.Application/  # Features (CQRS + MediatR)
+│   │   ├── Chickquita.Domain/       # Entities, value objects
+│   │   └── Chickquita.Infrastructure/ # EF Core, Clerk integration
+│   └── tests/                       # Test projects
+│       ├── Chickquita.Api.Tests/    # API integration tests
+│       └── Chickquita.Infrastructure.Tests/ # Infrastructure tests
+├── frontend/                        # React PWA
+│   ├── src/
+│   │   ├── features/                # Feature modules
+│   │   ├── shared/                  # Shared components
+│   │   ├── lib/                     # Third-party setup (Clerk, API)
+│   │   └── locales/                 # i18n translations (cs, en)
+│   └── public/                      # Static assets, manifest.json
 ├── Dockerfile                       # Multi-stage build
 ├── .github/workflows/               # CI/CD pipelines
 └── README.md                        # Project overview
@@ -424,7 +427,7 @@ chickquita/
 - Upgrade to paid when needed (~$20/month for 10GB)
 
 ### Clerk
-- Application name: `ChickenTrack`
+- Application name: `Chickquita`
 - Plan: Free tier (10k MAU)
 - Features: Email/password, hosted UI
 - Publishable Key: Frontend env var
@@ -452,7 +455,7 @@ chickquita/
 
 ### Backend - Creating a New Feature
 
-1. **Domain Entity** (`ChickenTrack.Domain/Entities/`)
+1. **Domain Entity** (`backend/src/Chickquita.Domain/Entities/`)
 ```csharp
 public class Flock
 {
@@ -467,7 +470,7 @@ public class Flock
 }
 ```
 
-2. **Command/Query** (`ChickenTrack.Application/Features/Flocks/Commands/`)
+2. **Command/Query** (`backend/src/Chickquita.Application/Features/Flocks/Commands/`)
 ```csharp
 public record MatureChicksCommand : IRequest<Result<FlockDto>>
 {
@@ -491,7 +494,7 @@ public class MatureChicksCommandHandler : IRequestHandler<MatureChicksCommand, R
 }
 ```
 
-4. **Endpoint** (`ChickenTrack.Application/Features/Flocks/FlocksEndpoints.cs`)
+4. **Endpoint** (`backend/src/Chickquita.Api/Endpoints/FlocksEndpoints.cs`)
 ```csharp
 public static class FlocksEndpoints
 {

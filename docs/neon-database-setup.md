@@ -1,6 +1,6 @@
 # Neon Postgres Database Setup
 
-This document provides step-by-step instructions for creating and configuring the Neon Postgres database for ChickenTrack (Chickquita).
+This document provides step-by-step instructions for creating and configuring the Neon Postgres database for Chickquita (Chickquita).
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ This document provides step-by-step instructions for creating and configuring th
 1. Log in to your Neon console at https://console.neon.tech
 2. Click **"Create a project"** or **"New Project"**
 3. Configure the project:
-   - **Project name**: `chickquita` or `ChickenTrack`
+   - **Project name**: `chickquita` or `Chickquita`
    - **Database name**: `chickquita`
    - **PostgreSQL version**: **16** (required)
    - **Region**: Select closest to your Azure Container Apps region
@@ -134,7 +134,7 @@ chickquita=>
 After configuring `appsettings.Development.json`, run:
 
 ```bash
-cd backend/ChickenTrack.Api
+cd backend/src/Chickquita.Api
 dotnet run
 ```
 

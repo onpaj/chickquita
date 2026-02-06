@@ -1,1 +1,12 @@
-<Solution />
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="backend\src\Chickquita.Api\Chickquita.Api.csproj" />
+    <Project Path="backend\src\Chickquita.Application\Chickquita.Application.csproj" />
+    <Project Path="backend\src\Chickquita.Domain\Chickquita.Domain.csproj" />
+    <Project Path="backend\src\Chickquita.Infrastructure\Chickquita.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="backend\tests\Chickquita.Api.Tests\Chickquita.Api.Tests.csproj" />
+    <Project Path="backend\tests\Chickquita.Infrastructure.Tests\Chickquita.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

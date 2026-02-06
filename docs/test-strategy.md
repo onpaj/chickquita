@@ -1,6 +1,6 @@
 # Test Strategy
 
-**ChickenTrack (Chickquita)** - Comprehensive testing approach for backend and frontend, covering unit, integration, and E2E tests.
+**Chickquita (Chickquita)** - Comprehensive testing approach for backend and frontend, covering unit, integration, and E2E tests.
 
 **Version:** 1.0
 **Date:** February 5, 2026
@@ -128,7 +128,7 @@ public void CreateFlock_WithValidData_ReturnsSuccess() { }
 ### Test Project Setup
 
 ```xml
-<!-- ChickenTrack.Tests/Application.Tests/Application.Tests.csproj -->
+<!-- Chickquita.Tests/Application.Tests/Application.Tests.csproj -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -148,8 +148,8 @@ public void CreateFlock_WithValidData_ReturnsSuccess() { }
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ChickenTrack.Application\ChickenTrack.Application.csproj" />
-    <ProjectReference Include="..\..\ChickenTrack.Domain\ChickenTrack.Domain.csproj" />
+    <ProjectReference Include="..\..\Chickquita.Application\Chickquita.Application.csproj" />
+    <ProjectReference Include="..\..\Chickquita.Domain\Chickquita.Domain.csproj" />
   </ItemGroup>
 </Project>
 ```
@@ -456,8 +456,8 @@ public class MatureChicksCommandValidatorTests
 ### Test Setup
 
 ```csharp
-// Integration.Tests/TestUtilities/ChickenTrackWebApplicationFactory.cs
-public class ChickenTrackWebApplicationFactory : WebApplicationFactory<Program>
+// Integration.Tests/TestUtilities/ChickquitaWebApplicationFactory.cs
+public class ChickquitaWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -479,8 +479,8 @@ public class ChickenTrackWebApplicationFactory : WebApplicationFactory<Program>
             services.Configure<JwtSettings>(options =>
             {
                 options.Secret = "test-secret-key-for-testing-only-minimum-256-bits";
-                options.Issuer = "ChickenTrackTest";
-                options.Audience = "ChickenTrackTest";
+                options.Issuer = "ChickquitaTest";
+                options.Audience = "ChickquitaTest";
             });
         });
 
@@ -489,13 +489,13 @@ public class ChickenTrackWebApplicationFactory : WebApplicationFactory<Program>
 }
 
 // Integration.Tests/TestUtilities/IntegrationTestBase.cs
-public abstract class IntegrationTestBase : IClassFixture<ChickenTrackWebApplicationFactory>
+public abstract class IntegrationTestBase : IClassFixture<ChickquitaWebApplicationFactory>
 {
     protected readonly HttpClient Client;
-    protected readonly ChickenTrackWebApplicationFactory Factory;
+    protected readonly ChickquitaWebApplicationFactory Factory;
     protected readonly IFixture Fixture;
 
-    protected IntegrationTestBase(ChickenTrackWebApplicationFactory factory)
+    protected IntegrationTestBase(ChickquitaWebApplicationFactory factory)
     {
         Factory = factory;
         Client = factory.CreateClient();
@@ -532,7 +532,7 @@ public abstract class IntegrationTestBase : IClassFixture<ChickenTrackWebApplica
 // Integration.Tests/Features/Flocks/FlocksEndpointsTests.cs
 public class FlocksEndpointsTests : IntegrationTestBase
 {
-    public FlocksEndpointsTests(ChickenTrackWebApplicationFactory factory)
+    public FlocksEndpointsTests(ChickquitaWebApplicationFactory factory)
         : base(factory) { }
 
     [Fact]

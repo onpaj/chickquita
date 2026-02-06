@@ -1,6 +1,6 @@
 # GitHub Actions CI/CD Pipeline
 
-This directory contains the GitHub Actions workflows for the ChickenTrack (Chickquita) project.
+This directory contains the GitHub Actions workflows for the Chickquita project.
 
 ## Workflows
 

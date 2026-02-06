@@ -1,6 +1,6 @@
 # Filesystem Structure
 
-**ChickenTrack (Chickquita)** - Complete directory layout for the monorepo with vertical slice architecture.
+**Chickquita (Chickquita)** - Complete directory layout for the monorepo with vertical slice architecture.
 
 **Version:** 2.0
 **Date:** February 5, 2026
@@ -35,10 +35,11 @@ chickquita/
 │   ├── plans/                  # Implementation plans
 │   ├── api/                    # API documentation, OpenAPI specs
 │   ├── architecture/           # Architecture diagrams, ADRs
-│   └── ChickenTrack_PRD.md     # Product Requirements Document
-├── src/
-│   ├── backend/                # .NET 8 API
-│   └── frontend/               # React PWA
+│   └── Chickquita_PRD.md     # Product Requirements Document
+├── backend/                    # .NET 8 API
+│   ├── src/                    # Production code
+│   └── tests/                  # Test projects
+├── frontend/                   # React PWA
 ├── scripts/
 │   ├── setup-dev.sh            # Local development environment setup
 │   ├── seed-data.sh            # Test data seeding for development
@@ -53,7 +54,8 @@ chickquita/
 
 ### Key Principles
 
-- **Separation:** Backend and frontend in separate `src/` subdirectories
+- **Separation:** Backend and frontend in separate root directories
+- **Test Isolation:** Test projects separated in `backend/tests/` directory
 - **Documentation:** Centralized in `docs/` with logical subcategories
 - **Automation:** Scripts for common development tasks in `scripts/`
 - **CI/CD:** GitHub Actions workflows at repository root
@@ -72,21 +74,23 @@ The backend follows **Domain-Driven Design (DDD) with Vertical Slices**:
 - Clean separation: API → Application → Domain → Infrastructure
 
 ```
-src/backend/
-├── ChickenTrack.sln                    # .NET solution file
-├── ChickenTrack.Api/                   # Web API layer (entry point)
-├── ChickenTrack.Application/           # Application layer (features)
-├── ChickenTrack.Domain/                # Domain layer (business logic)
-├── ChickenTrack.Infrastructure/        # Infrastructure (data access)
-└── ChickenTrack.Tests/                 # Test projects
+backend/
+├── src/                              # Production code
+│   ├── Chickquita.Api/              # Web API layer (entry point)
+│   ├── Chickquita.Application/      # Application layer (features)
+│   ├── Chickquita.Domain/           # Domain layer (business logic)
+│   └── Chickquita.Infrastructure/   # Infrastructure (data access)
+└── tests/                           # Test projects
+    ├── Chickquita.Api.Tests/        # API integration tests
+    └── Chickquita.Infrastructure.Tests/ # Infrastructure tests
 ```
 
 ---
 
-### ChickenTrack.Api (Entry Point)
+### Chickquita.Api (Entry Point)
 
 ```
-ChickenTrack.Api/
+Chickquita.Api/
 ├── Program.cs                      # Application entry, middleware setup, DI
 ├── appsettings.json                # Configuration (non-secrets)
 ├── appsettings.Development.json    # Development overrides
@@ -111,10 +115,10 @@ ChickenTrack.Api/
 
 ---
 
-### ChickenTrack.Application (Vertical Slices)
+### Chickquita.Application (Vertical Slices)
 
 ```
-ChickenTrack.Application/
+Chickquita.Application/
 ├── Common/                         # Shared application concerns
 │   ├── Behaviors/
 │   │   ├── ValidationBehavior.cs   # MediatR pipeline - validates commands
@@ -242,10 +246,10 @@ ChickenTrack.Application/
 
 ---
 
-### ChickenTrack.Domain (Core Business Logic)
+### Chickquita.Domain (Core Business Logic)
 
 ```
-ChickenTrack.Domain/
+Chickquita.Domain/
 ├── Entities/                       # Aggregates and entities
 │   ├── Tenant.cs                   # Aggregate root
 │   ├── Coop.cs                     # Aggregate root
@@ -288,10 +292,10 @@ ChickenTrack.Domain/
 
 ---
 
-### ChickenTrack.Infrastructure (Data Access)
+### Chickquita.Infrastructure (Data Access)
 
 ```
-ChickenTrack.Infrastructure/
+Chickquita.Infrastructure/
 ├── Persistence/
 │   ├── ApplicationDbContext.cs         # EF Core DbContext
 │   ├── Configurations/                 # Entity configurations (Fluent API)
@@ -327,10 +331,10 @@ ChickenTrack.Infrastructure/
 
 ---
 
-### ChickenTrack.Tests (Testing)
+### Chickquita.Tests (Testing)
 
 ```
-ChickenTrack.Tests/
+Chickquita.Tests/
 ├── Application.Tests/              # Feature/slice tests
 │   ├── Features/
 │   │   ├── Users/
@@ -375,7 +379,7 @@ ChickenTrack.Tests/
 │   │       ├── CoopRepositoryTests.cs
 │   │       └── DailyRecordRepositoryTests.cs
 │   └── TestUtilities/
-│       ├── ChickenTrackWebApplicationFactory.cs  # Test server
+│       ├── ChickquitaWebApplicationFactory.cs  # Test server
 │       ├── IntegrationTestBase.cs
 │       ├── PostgresFixture.cs          # Test database setup
 │       └── AutoMoqDataAttribute.cs     # AutoFixture + Moq
@@ -654,7 +658,7 @@ docs/
 │   ├── data-model.md
 │   └── ADRs/                       # Architecture Decision Records
 │       └── 001-vertical-slices.md
-└── ChickenTrack_PRD.md             # Product Requirements Document
+└── Chickquita_PRD.md             # Product Requirements Document
 ```
 
 ### Scripts

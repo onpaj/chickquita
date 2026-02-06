@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "ChickenTrack",
+    "appName": "Chickquita",
     "loading": "Načítání...",
     "save": "Uložit",
     "cancel": "Zrušit",
@@ -21,7 +21,7 @@
     "signOut": "Odhlásit se",
     "email": "E-mail",
     "password": "Heslo",
-    "welcome": "Vítejte v ChickenTrack"
+    "welcome": "Vítejte v Chickquita"
   },
   "dashboard": {
     "title": "Přehled",

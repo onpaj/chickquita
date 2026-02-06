@@ -11,13 +11,17 @@ import { csCZ } from '@clerk/localizations';
 // Get Clerk Publishable Key from environment variables
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
+// Temporary debug logging - remove after fixing
+console.log('Clerk Key (first 20 chars):', clerkPublishableKey?.substring(0, 20));
+console.log('Clerk Key length:', clerkPublishableKey?.length);
+
 if (!clerkPublishableKey) {
   throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY environment variable');
 }
 
 /**
  * Appearance Configuration
- * Customizes the look and feel of Clerk components to match ChickenTrack branding
+ * Customizes the look and feel of Clerk components to match Chickquita branding
  */
 export const clerkAppearance: Appearance = {
   // Base theme

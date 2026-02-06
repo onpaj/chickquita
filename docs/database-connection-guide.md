@@ -10,10 +10,10 @@ Follow the instructions in [neon-database-setup.md](./neon-database-setup.md) to
 
 ### Step 2: Configure Local Environment
 
-Create a `.env` file in `backend/ChickenTrack.Api/`:
+Create a `.env` file in `backend/src/Chickquita.Api/`:
 
 ```bash
-cd backend/ChickenTrack.Api
+cd backend/src/Chickquita.Api
 cp .env.example .env
 ```
 
@@ -146,7 +146,7 @@ chickquita=>
 ### Using .NET Application
 
 ```bash
-cd backend/ChickenTrack.Api
+cd backend/src/Chickquita.Api
 dotnet run
 ```
 

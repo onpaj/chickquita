@@ -1,4 +1,4 @@
-# Product Requirements Document: ChickenTrack PWA
+# Product Requirements Document: Chickquita PWA
 
 **Version:** 2.0
 **Date:** February 5, 2026
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-ChickenTrack is a PWA application for tracking the financial profitability of chicken farming with multi-tenant architecture. The application is designed with a **mobile-first** approach, enabling farmers to efficiently record costs, production, and calculate economic efficiency directly at the chicken coops with offline mode support.
+Chickquita is a PWA application for tracking the financial profitability of chicken farming with multi-tenant architecture. The application is designed with a **mobile-first** approach, enabling farmers to efficiently record costs, production, and calculate economic efficiency directly at the chicken coops with offline mode support.
 
 ### Key Values
 - 📱 **Mobile-first PWA** - optimized for mobile use outdoors
@@ -103,7 +103,7 @@ ChickenTrack is a PWA application for tracking the financial profitability of ch
 
 #### Technology: Clerk.com
 
-ChickenTrack uses **Clerk** for authentication management, providing:
+Chickquita uses **Clerk** for authentication management, providing:
 - Secure, battle-tested authentication
 - Pre-built UI components
 - Email + password authentication (MVP)
@@ -756,7 +756,7 @@ workbox.routing.registerRoute(
 
 ```javascript
 // Dexie.js schema
-const db = new Dexie('ChickenTrackDB');
+const db = new Dexie('ChickquitaDB');
 db.version(1).stores({
   // Offline queue
   pendingRequests: '++id, method, url, timestamp',
@@ -1104,8 +1104,8 @@ Detail:
 **manifest.json:**
 ```json
 {
-  "name": "ChickenTrack - Evidence chovu slepic",
-  "short_name": "ChickenTrack",
+  "name": "Chickquita - Evidence chovu slepic",
+  "short_name": "Chickquita",
   "description": "Sledování rentability chovu slepic",
   "start_url": "/",
   "display": "standalone",
@@ -2150,7 +2150,7 @@ M10 (Offline) → M12 (PWA Install)
 
 **Value Delivered:** Users can install app on home screen like a native app
 
-**User Story:** As a farmer, I want to install ChickenTrack on my phone's home screen, so that I can access it quickly like a native app.
+**User Story:** As a farmer, I want to install Chickquita on my phone's home screen, so that I can access it quickly like a native app.
 
 **Acceptance Criteria:**
 - ✅ Web app manifest configured (name, icons, theme)
@@ -2550,7 +2550,7 @@ Features beyond the 12 core milestones, prioritized for future development.
 
 ### 12.1 Summary
 
-ChickenTrack is a **mobile-first PWA** application for tracking chicken farming financial profitability with focus on:
+Chickquita is a **mobile-first PWA** application for tracking chicken farming financial profitability with focus on:
 - ✅ **Offline-first approach** (important for use at coops)
 - ✅ **Multi-tenant architecture** (data isolation)
 - ✅ **Fast logging** (daily records < 30 seconds)
@@ -2610,7 +2610,7 @@ ChickenTrack is a **mobile-first PWA** application for tracking chicken farming 
 
 ## 13. Contact & Revisions
 
-**Document:** ChickenTrack PRD v2.0
+**Document:** Chickquita PRD v2.0
 **Author:** Ondřej (Ondra)
 **Date:** February 5, 2026
 **Status:** Approved

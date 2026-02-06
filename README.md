@@ -1,10 +1,10 @@
-# ChickenTrack (Chickquita)
+# Chickquita (Chickquita)
 
 > Mobile-first Progressive Web Application for tracking the financial profitability of chicken farming
 
 ## Overview
 
-ChickenTrack is a comprehensive solution for chicken farmers to track costs, egg production, and flock management. Built as a PWA for offline-first mobile use, the application helps farmers answer the key question: "What is the real cost per egg?"
+Chickquita is a comprehensive solution for chicken farmers to track costs, egg production, and flock management. Built as a PWA for offline-first mobile use, the application helps farmers answer the key question: "What is the real cost per egg?"
 
 ### Key Features
 
@@ -45,6 +45,8 @@ ChickenTrack is a comprehensive solution for chicken farmers to track costs, egg
 ```
 chickquita/
 ├── backend/           # .NET 8 Web API
+│   ├── src/          # Production code
+│   └── tests/        # Test projects
 ├── frontend/          # React PWA application
 ├── docs/              # Comprehensive project documentation
 ├── .github/           # GitHub Actions workflows
@@ -58,7 +60,7 @@ chickquita/
 
 Comprehensive documentation is available in the `/docs` directory:
 
-- **[ChickenTrack_PRD.md](docs/ChickenTrack_PRD.md)** - Product Requirements Document
+- **[Chickquita_PRD.md](docs/Chickquita_PRD.md)** - Product Requirements Document
 - **[technology-stack.md](docs/technology-stack.md)** - Detailed technology choices and rationale
 - **[filesystem-structure.md](docs/filesystem-structure.md)** - Complete project structure
 - **[coding-standards.md](docs/coding-standards.md)** - Code quality guidelines
@@ -92,7 +94,7 @@ The application will start at `http://localhost:5173`
 First, configure the database connection:
 
 ```bash
-cd backend/ChickenTrack.Api
+cd backend/src/Chickquita.Api
 cp .env.example .env
 # Edit .env and add your Neon connection string
 ```
@@ -104,7 +106,7 @@ Then start the backend:
 ```bash
 cd backend
 dotnet restore
-dotnet run --project ChickenTrack.Api
+dotnet run --project src/Chickquita.Api
 ```
 
 The API will start at `http://localhost:5000`
@@ -191,4 +193,4 @@ For issues, questions, or feature requests, please contact the development team.
 
 ---
 
-**Built with by the ChickenTrack team**
+**Built with by the Chickquita team**

@@ -1,6 +1,6 @@
 # Coding Standards
 
-**ChickenTrack (Chickquita)** - Code conventions and best practices for backend (C#) and frontend (TypeScript/React).
+**Chickquita (Chickquita)** - Code conventions and best practices for backend (C#) and frontend (TypeScript/React).
 
 **Version:** 1.0
 **Date:** February 5, 2026
@@ -60,7 +60,7 @@ public interface IAuthService { }
 // File name matches class name: FlockService.cs
 
 // Namespace matches folder structure
-namespace ChickenTrack.Application.Features.Flocks.Commands.MatureChicks;
+namespace Chickquita.Application.Features.Flocks.Commands.MatureChicks;
 
 // Using statements order:
 // 1. System namespaces
@@ -71,8 +71,8 @@ using System.Collections.Generic;
 using System.Threading;
 using MediatR;
 using FluentValidation;
-using ChickenTrack.Domain.Entities;
-using ChickenTrack.Domain.Interfaces;
+using Chickquita.Domain.Entities;
+using Chickquita.Domain.Interfaces;
 ```
 
 ### Class Structure Order
@@ -455,7 +455,7 @@ builder.Logging.AddApplicationInsights();
 // Set minimum log levels
 builder.Logging.AddFilter("Microsoft", LogLevel.Warning);
 builder.Logging.AddFilter("System", LogLevel.Warning);
-builder.Logging.AddFilter("ChickenTrack", LogLevel.Information);
+builder.Logging.AddFilter("Chickquita", LogLevel.Information);
 
 // Usage in handlers
 public class MatureChicksCommandHandler

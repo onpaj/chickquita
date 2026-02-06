@@ -13,7 +13,7 @@ This checklist helps verify that the Neon Postgres database has been properly cr
 
 - [ ] Log in to Neon console
 - [ ] Click "Create a project" or "New Project"
-- [ ] Set project name: `chickquita` or `ChickenTrack`
+- [ ] Set project name: `chickquita` or `Chickquita`
 - [ ] Set database name: `chickquita`
 - [ ] Select PostgreSQL version: **16** (REQUIRED)
 - [ ] Select region closest to Azure deployment
@@ -50,7 +50,7 @@ postgresql://chickquita_owner:AbCdEfGhIjKlMnOp@ep-cool-cloud-12345678.region.aws
 
 ### Step 5: Configure Backend
 
-- [ ] Navigate to `backend/ChickenTrack.Api/`
+- [ ] Navigate to `backend/src/Chickquita.Api/`
 - [ ] Copy `.env.example` to `.env`:
   ```bash
   cp .env.example .env
@@ -84,7 +84,7 @@ If you have `psql` installed:
 
 Note: This step will work after US-015 (EF Core configuration) is completed.
 
-- [ ] Navigate to `backend/ChickenTrack.Api/`
+- [ ] Navigate to `backend/src/Chickquita.Api/`
 - [ ] Run: `dotnet run`
 - [ ] Check logs for successful startup
 - [ ] No connection errors in console
@@ -104,7 +104,7 @@ info: Microsoft.Hosting.Lifetime[0]
 
 - [ ] File exists: `docs/neon-database-setup.md`
 - [ ] File exists: `docs/database-connection-guide.md`
-- [ ] File exists: `backend/ChickenTrack.Api/.env.example`
+- [ ] File exists: `backend/src/Chickquita.Api/.env.example`
 - [ ] `.gitignore` includes `.env` (line 69)
 - [ ] `appsettings.Development.json` has `ConnectionStrings` section
 - [ ] `appsettings.json` has empty `ConnectionStrings` section

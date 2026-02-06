@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "ChickenTrack",
+    "appName": "Chickquita",
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
@@ -21,7 +21,7 @@
     "signOut": "Sign Out",
     "email": "Email",
     "password": "Password",
-    "welcome": "Welcome to ChickenTrack"
+    "welcome": "Welcome to Chickquita"
   },
   "dashboard": {
     "title": "Dashboard",
