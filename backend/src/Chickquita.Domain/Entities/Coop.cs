@@ -28,6 +28,12 @@ public class Coop
     public string? Location { get; private set; }
 
     /// <summary>
+    /// Indicates whether the coop is currently active.
+    /// Soft delete functionality - inactive coops are hidden but preserved.
+    /// </summary>
+    public bool IsActive { get; private set; }
+
+    /// <summary>
     /// Timestamp when the coop was created.
     /// </summary>
     public DateTime CreatedAt { get; private set; }
@@ -86,6 +92,7 @@ public class Coop
             TenantId = tenantId,
             Name = name,
             Location = location,
+            IsActive = true,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -115,6 +122,24 @@ public class Coop
 
         Name = name;
         Location = location;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Deactivates the coop (soft delete).
+    /// </summary>
+    public void Deactivate()
+    {
+        IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Reactivates the coop.
+    /// </summary>
+    public void Activate()
+    {
+        IsActive = true;
         UpdatedAt = DateTime.UtcNow;
     }
 }

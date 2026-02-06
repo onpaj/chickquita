@@ -35,6 +35,11 @@ public class CoopConfiguration : IEntityTypeConfiguration<Coop>
             .HasColumnName("location")
             .HasMaxLength(200);
 
+        builder.Property(c => c.IsActive)
+            .HasColumnName("is_active")
+            .IsRequired()
+            .HasDefaultValue(true);
+
         builder.Property(c => c.CreatedAt)
             .HasColumnName("created_at")
             .HasColumnType("timestamp with time zone")
@@ -54,6 +59,12 @@ public class CoopConfiguration : IEntityTypeConfiguration<Coop>
         // Indexes
         builder.HasIndex(c => c.TenantId)
             .HasDatabaseName("ix_coops_tenant_id");
+
+        builder.HasIndex(c => c.IsActive)
+            .HasDatabaseName("ix_coops_is_active");
+
+        builder.HasIndex(c => c.CreatedAt)
+            .HasDatabaseName("ix_coops_created_at");
 
         // Global query filter for tenant isolation
         builder.HasQueryFilter(c => EF.Property<Guid>(c, "TenantId") == Guid.Empty);
