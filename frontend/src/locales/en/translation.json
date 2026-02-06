@@ -17,7 +17,8 @@
     "error": "Error",
     "success": "Success",
     "more": "More",
-    "retry": "Retry"
+    "retry": "Retry",
+    "all": "All"
   },
   "auth": {
     "signIn": "Sign In",
@@ -80,6 +81,7 @@
     "total": "Total",
     "active": "Active",
     "archived": "Archived",
+    "filterStatus": "Filter by status",
     "coop": "Coop",
     "viewHistory": "View History",
     "flockCardAriaLabel": "Flock {{identifier}} in coop {{coopName}}",
@@ -110,6 +112,10 @@
     "archive": {
       "success": "Flock archived successfully",
       "error": "Failed to archive flock"
+    },
+    "emptyState": {
+      "title": "No flocks yet",
+      "message": "Add your first flock to start tracking your chickens!"
     }
   },
   "purchases": {

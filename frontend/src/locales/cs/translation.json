@@ -17,7 +17,8 @@
     "error": "Chyba",
     "success": "Úspěch",
     "more": "Více",
-    "retry": "Zkusit znovu"
+    "retry": "Zkusit znovu",
+    "all": "Vše"
   },
   "auth": {
     "signIn": "Přihlásit se",
@@ -80,6 +81,7 @@
     "total": "Celkem",
     "active": "Aktivní",
     "archived": "Archivováno",
+    "filterStatus": "Filtrovat podle stavu",
     "coop": "Kurník",
     "viewHistory": "Zobrazit historii",
     "flockCardAriaLabel": "Hejno {{identifier}} v kurníku {{coopName}}",
@@ -110,6 +112,10 @@
     "archive": {
       "success": "Hejno bylo úspěšně archivováno",
       "error": "Nepodařilo se archivovat hejno"
+    },
+    "emptyState": {
+      "title": "Zatím tu nejsou žádná hejna",
+      "message": "Přidejte své první hejno, abyste mohli začít sledovat slepice!"
     }
   },
   "purchases": {

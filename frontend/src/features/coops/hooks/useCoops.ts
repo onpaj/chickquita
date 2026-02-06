@@ -8,6 +8,14 @@ export function useCoops() {
   });
 }
 
+export function useCoopDetail(id: string) {
+  return useQuery({
+    queryKey: ['coops', id],
+    queryFn: () => coopsApi.getById(id),
+    enabled: !!id,
+  });
+}
+
 export function useCreateCoop() {
   const queryClient = useQueryClient();
 
