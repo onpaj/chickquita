@@ -118,10 +118,30 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <form onSubmit={handleSubmit}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      fullScreen={window.innerWidth < 480}
+      sx={{
+        '& .MuiDialog-paper': {
+          // Ensure form is scrollable on small screens
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '100vh',
+        },
+      }}
+    >
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <DialogTitle>{t('coops.editCoop')}</DialogTitle>
-        <DialogContent>
+        <DialogContent
+          sx={{
+            // Make content scrollable to prevent keyboard from obscuring submit button
+            overflowY: 'auto',
+            flex: 1,
+          }}
+        >
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             {serverError && (
               <Alert severity="error" onClose={() => setServerError('')}>
@@ -152,6 +172,11 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
               required
               fullWidth
               disabled={isPending}
+              type="text"
+              inputProps={{
+                // Ensure touch-friendly height (min 44px)
+                style: { minHeight: '44px' },
+              }}
             />
             <TextField
               label={t('coops.coopDescription')}
@@ -174,10 +199,27 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
               disabled={isPending}
               multiline
               rows={2}
+              type="text"
+              inputProps={{
+                // Ensure touch-friendly height
+                style: { minHeight: '44px' },
+              }}
             />
           </Box>
         </DialogContent>
-        <DialogActions>
+        <DialogActions
+          sx={{
+            // Ensure actions are always visible and not obscured by keyboard
+            position: 'sticky',
+            bottom: 0,
+            backgroundColor: 'background.paper',
+            zIndex: 1,
+            // Touch-friendly button height
+            '& .MuiButton-root': {
+              minHeight: '44px',
+            },
+          }}
+        >
           <Button onClick={handleClose} disabled={isPending}>
             {t('common.cancel')}
           </Button>
