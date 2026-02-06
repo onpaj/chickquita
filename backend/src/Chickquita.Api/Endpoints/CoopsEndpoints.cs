@@ -43,6 +43,14 @@ public static class CoopsEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict);
+
+        group.MapDelete("/{id:guid}", DeleteCoop)
+            .WithName("DeleteCoop")
+            .WithOpenApi()
+            .Produces<bool>()
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetCoops(
@@ -125,6 +133,27 @@ public static class CoopsEndpoints
                 "Error.Validation" => Results.BadRequest(new { error = result.Error }),
                 "NotFound" => Results.NotFound(new { error = result.Error }),
                 "Error.Conflict" => Results.Conflict(new { error = result.Error }),
+                _ => Results.BadRequest(new { error = result.Error })
+            };
+        }
+
+        return Results.Ok(result.Value);
+    }
+
+    private static async Task<IResult> DeleteCoop(
+        [FromRoute] Guid id,
+        [FromServices] IMediator mediator)
+    {
+        var command = new DeleteCoopCommand { Id = id };
+        var result = await mediator.Send(command);
+
+        if (!result.IsSuccess)
+        {
+            return result.Error.Code switch
+            {
+                "Error.Unauthorized" => Results.Unauthorized(),
+                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
+                "NotFound" => Results.NotFound(new { error = result.Error }),
                 _ => Results.BadRequest(new { error = result.Error })
             };
         }

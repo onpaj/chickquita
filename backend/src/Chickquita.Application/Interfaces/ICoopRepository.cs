@@ -47,4 +47,11 @@ public interface ICoopRepository
     /// <param name="name">The coop name to check</param>
     /// <returns>True if a coop with this name exists, false otherwise</returns>
     Task<bool> ExistsByNameAsync(string name);
+
+    /// <summary>
+    /// Checks if a coop has any associated flocks.
+    /// </summary>
+    /// <param name="coopId">The coop ID to check</param>
+    /// <returns>True if the coop has flocks, false otherwise</returns>
+    Task<bool> HasFlocksAsync(Guid coopId);
 }

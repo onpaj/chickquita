@@ -89,4 +89,15 @@ public class CoopRepository : ICoopRepository
         return await _context.Coops
             .AnyAsync(c => c.Name.ToLower() == name.ToLower());
     }
+
+    /// <inheritdoc />
+    public async Task<bool> HasFlocksAsync(Guid coopId)
+    {
+        // TODO: Update this method when Flocks entity is added to the schema
+        // For now, return false as Flocks table doesn't exist yet
+        // When Flocks are implemented, this should be:
+        // return await _context.Flocks.AnyAsync(f => f.CoopId == coopId);
+        await Task.CompletedTask; // To satisfy async requirement
+        return false;
+    }
 }
