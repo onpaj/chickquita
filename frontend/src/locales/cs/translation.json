@@ -45,6 +45,7 @@
     "addFirstCoop": "Klikněte na tlačítko + pro přidání vašeho prvního kurníku",
     "duplicateName": "Kurník s tímto názvem už existuje",
     "active": "Aktivní",
+    "status": "Stav",
     "createdAt": "Vytvořeno {{date}}",
     "updatedAt": "Aktualizováno {{date}}",
     "details": "Detail kurníku",

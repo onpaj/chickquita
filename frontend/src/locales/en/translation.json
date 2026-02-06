@@ -45,6 +45,7 @@
     "addFirstCoop": "Click the + button to add your first coop",
     "duplicateName": "A coop with this name already exists",
     "active": "Active",
+    "status": "Status",
     "createdAt": "Created {{date}}",
     "updatedAt": "Updated {{date}}",
     "details": "Coop Details",

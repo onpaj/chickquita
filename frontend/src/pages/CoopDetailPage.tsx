@@ -151,7 +151,7 @@ export function CoopDetailPage() {
           {/* Status */}
           <Box>
             <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              Status
+              {t('coops.status')}
             </Typography>
             <Chip
               label={t('coops.active')}
