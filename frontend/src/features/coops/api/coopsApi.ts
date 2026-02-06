@@ -20,6 +20,11 @@ export const coopsApi = {
     return response.data;
   },
 
+  getById: async (id: string): Promise<Coop> => {
+    const response = await apiClient.get<Coop>(`/coops/${id}`);
+    return response.data;
+  },
+
   create: async (data: CreateCoopRequest): Promise<Coop> => {
     const response = await apiClient.post<Coop>('/coops', data);
     return response.data;

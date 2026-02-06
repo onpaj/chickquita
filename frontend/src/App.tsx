@@ -3,6 +3,7 @@ import SignUpPage from './pages/SignUpPage'
 import SignInPage from './pages/SignInPage'
 import DashboardPage from './pages/DashboardPage'
 import CoopsPage from './pages/CoopsPage'
+import { CoopDetailPage } from './pages/CoopDetailPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import { BottomNavigation } from './components/BottomNavigation'
 import { useApiClient } from './lib/useApiClient'
@@ -34,6 +35,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CoopsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/coops/:id"
+            element={
+              <ProtectedRoute>
+                <CoopDetailPage />
               </ProtectedRoute>
             }
           />

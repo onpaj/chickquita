@@ -20,6 +20,13 @@ public static class CoopsEndpoints
             .Produces<List<CoopDto>>()
             .Produces(StatusCodes.Status401Unauthorized);
 
+        group.MapGet("/{id:guid}", GetCoopById)
+            .WithName("GetCoopById")
+            .WithOpenApi()
+            .Produces<CoopDto>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status404NotFound);
+
         group.MapPost("", CreateCoop)
             .WithName("CreateCoop")
             .WithOpenApi()
@@ -40,6 +47,26 @@ public static class CoopsEndpoints
             return result.Error.Code switch
             {
                 "Error.Unauthorized" => Results.Unauthorized(),
+                _ => Results.BadRequest(new { error = result.Error })
+            };
+        }
+
+        return Results.Ok(result.Value);
+    }
+
+    private static async Task<IResult> GetCoopById(
+        [FromRoute] Guid id,
+        [FromServices] IMediator mediator)
+    {
+        var query = new GetCoopByIdQuery { Id = id };
+        var result = await mediator.Send(query);
+
+        if (!result.IsSuccess)
+        {
+            return result.Error.Code switch
+            {
+                "Error.Unauthorized" => Results.Unauthorized(),
+                "NotFound" => Results.NotFound(new { error = result.Error }),
                 _ => Results.BadRequest(new { error = result.Error })
             };
         }

@@ -36,13 +36,18 @@
     "addCoop": "Add Coop",
     "editCoop": "Edit Coop",
     "deleteCoop": "Delete Coop",
+    "archiveCoop": "Archive Coop",
     "coopName": "Coop Name",
     "coopDescription": "Description",
+    "location": "Location",
     "noCoops": "You don't have any coops yet",
     "addFirstCoop": "Click the + button to add your first coop",
     "duplicateName": "A coop with this name already exists",
     "active": "Active",
-    "createdAt": "Created {{date}}"
+    "createdAt": "Created {{date}}",
+    "updatedAt": "Updated {{date}}",
+    "details": "Coop Details",
+    "coopNotFound": "Coop not found"
   },
   "flocks": {
     "title": "Flocks",

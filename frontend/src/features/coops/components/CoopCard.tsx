@@ -9,6 +9,7 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import type { Coop } from '../api/coopsApi';
 
 interface CoopCardProps {
@@ -18,6 +19,11 @@ interface CoopCardProps {
 
 export function CoopCard({ coop, onMenuClick }: CoopCardProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/coops/${coop.id}`);
+  };
 
   const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -31,7 +37,17 @@ export function CoopCard({ coop, onMenuClick }: CoopCardProps) {
   });
 
   return (
-    <Card elevation={2} sx={{ position: 'relative' }}>
+    <Card
+      elevation={2}
+      sx={{
+        position: 'relative',
+        cursor: 'pointer',
+        '&:hover': {
+          boxShadow: 4,
+        },
+      }}
+      onClick={handleCardClick}
+    >
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
           <Typography variant="h6" component="h2" sx={{ flexGrow: 1, pr: 1 }}>
