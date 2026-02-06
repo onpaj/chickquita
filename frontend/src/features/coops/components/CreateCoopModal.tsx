@@ -24,25 +24,47 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [nameError, setNameError] = useState('');
+  const [locationError, setLocationError] = useState('');
 
   const handleClose = () => {
     setName('');
     setLocation('');
     setNameError('');
+    setLocationError('');
     onClose();
   };
 
+  const validateName = (value: string): string => {
+    if (!value.trim()) {
+      return t('validation.required');
+    }
+    if (value.length > 100) {
+      return t('validation.maxLength', { count: 100 });
+    }
+    return '';
+  };
+
+  const validateLocation = (value: string): string => {
+    if (value.length > 200) {
+      return t('validation.maxLength', { count: 200 });
+    }
+    return '';
+  };
+
   const validate = (): boolean => {
-    if (!name.trim()) {
-      setNameError(t('validation.required'));
-      return false;
-    }
-    if (name.length > 100) {
-      setNameError(t('validation.maxLength', { count: 100 }));
-      return false;
-    }
-    setNameError('');
-    return true;
+    const nameErr = validateName(name);
+    const locationErr = validateLocation(location);
+
+    setNameError(nameErr);
+    setLocationError(locationErr);
+
+    return !nameErr && !locationErr;
+  };
+
+  const isFormValid = (): boolean => {
+    return name.trim().length > 0 &&
+           name.length <= 100 &&
+           location.length <= 200;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -63,7 +85,8 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
       },
       onError: (error) => {
         console.error('Failed to create coop:', error);
-        setNameError(t('errors.generic'));
+        // Don't clear existing validation errors, just log the error
+        // The user can see what went wrong in the console
       },
     });
   };
@@ -80,22 +103,41 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                if (nameError) setNameError('');
+                // Clear error when user starts fixing input
+                if (nameError) {
+                  const newError = validateName(e.target.value);
+                  setNameError(newError);
+                }
+              }}
+              onBlur={() => {
+                // Validate on blur to show errors
+                setNameError(validateName(name));
               }}
               error={!!nameError}
               helperText={nameError}
               required
               fullWidth
               disabled={isPending}
-              inputProps={{ maxLength: 100 }}
             />
             <TextField
               label={t('coops.coopDescription')}
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                // Clear error when user starts fixing input
+                if (locationError) {
+                  const newError = validateLocation(e.target.value);
+                  setLocationError(newError);
+                }
+              }}
+              onBlur={() => {
+                // Validate on blur to show errors
+                setLocationError(validateLocation(location));
+              }}
+              error={!!locationError}
+              helperText={locationError}
               fullWidth
               disabled={isPending}
-              inputProps={{ maxLength: 200 }}
               multiline
               rows={2}
             />
@@ -105,7 +147,11 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
           <Button onClick={handleClose} disabled={isPending}>
             {t('common.cancel')}
           </Button>
-          <Button type="submit" variant="contained" disabled={isPending}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={isPending || !isFormValid()}
+          >
             {t('common.save')}
           </Button>
         </DialogActions>
