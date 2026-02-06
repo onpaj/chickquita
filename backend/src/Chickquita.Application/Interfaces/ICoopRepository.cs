@@ -10,8 +10,9 @@ public interface ICoopRepository
     /// <summary>
     /// Gets all coops for the current tenant.
     /// </summary>
-    /// <returns>A list of all coops</returns>
-    Task<List<Coop>> GetAllAsync();
+    /// <param name="includeArchived">Whether to include archived (inactive) coops. Defaults to false.</param>
+    /// <returns>A list of all coops ordered by CreatedAt descending</returns>
+    Task<List<Coop>> GetAllAsync(bool includeArchived = false);
 
     /// <summary>
     /// Gets a coop by its ID.

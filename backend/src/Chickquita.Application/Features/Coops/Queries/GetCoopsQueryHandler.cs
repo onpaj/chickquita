@@ -64,12 +64,13 @@ public sealed class GetCoopsQueryHandler : IRequestHandler<GetCoopsQuery, Result
             }
 
             // Retrieve all coops (tenant isolation is handled by RLS and global query filter)
-            var coops = await _coopRepository.GetAllAsync();
+            var coops = await _coopRepository.GetAllAsync(request.IncludeArchived);
 
             _logger.LogInformation(
-                "Retrieved {Count} coops for tenant: {TenantId}",
+                "Retrieved {Count} coops for tenant: {TenantId} (IncludeArchived: {IncludeArchived})",
                 coops.Count,
-                tenantId.Value);
+                tenantId.Value,
+                request.IncludeArchived);
 
             var coopDtos = _mapper.Map<List<CoopDto>>(coops);
             return Result<List<CoopDto>>.Success(coopDtos);

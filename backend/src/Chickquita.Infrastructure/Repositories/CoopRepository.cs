@@ -18,9 +18,16 @@ public class CoopRepository : ICoopRepository
     }
 
     /// <inheritdoc />
-    public async Task<List<Coop>> GetAllAsync()
+    public async Task<List<Coop>> GetAllAsync(bool includeArchived = false)
     {
-        return await _context.Coops
+        var query = _context.Coops.AsQueryable();
+
+        if (!includeArchived)
+        {
+            query = query.Where(c => c.IsActive);
+        }
+
+        return await query
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
     }

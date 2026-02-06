@@ -34,4 +34,9 @@ public sealed class CoopDto
     /// Timestamp when the coop was last updated.
     /// </summary>
     public DateTime UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Indicates whether the coop is currently active.
+    /// </summary>
+    public bool IsActive { get; set; }
 }
