@@ -72,6 +72,7 @@
     "addFlock": "Add Flock",
     "editFlock": "Edit Flock",
     "deleteFlock": "Delete Flock",
+    "archiveFlock": "Archive Flock",
     "flockName": "Flock Name",
     "hens": "Hens",
     "roosters": "Roosters",
@@ -81,6 +82,18 @@
       "chicksCount": "Number of Chicks",
       "toHens": "To Hens",
       "toRoosters": "To Roosters"
+    },
+    "create": {
+      "success": "Flock created successfully",
+      "error": "Failed to create flock"
+    },
+    "update": {
+      "success": "Flock updated successfully",
+      "error": "Failed to update flock"
+    },
+    "archive": {
+      "success": "Flock archived successfully",
+      "error": "Failed to archive flock"
     }
   },
   "purchases": {

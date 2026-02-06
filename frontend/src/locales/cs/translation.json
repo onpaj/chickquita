@@ -72,6 +72,7 @@
     "addFlock": "Přidat hejno",
     "editFlock": "Upravit hejno",
     "deleteFlock": "Smazat hejno",
+    "archiveFlock": "Archivovat hejno",
     "flockName": "Název hejna",
     "hens": "Slepice",
     "roosters": "Kohouti",
@@ -81,6 +82,18 @@
       "chicksCount": "Počet kuřat",
       "toHens": "Na slepice",
       "toRoosters": "Na kohouty"
+    },
+    "create": {
+      "success": "Hejno bylo úspěšně vytvořeno",
+      "error": "Nepodařilo se vytvořit hejno"
+    },
+    "update": {
+      "success": "Hejno bylo úspěšně aktualizováno",
+      "error": "Nepodařilo se aktualizovat hejno"
+    },
+    "archive": {
+      "success": "Hejno bylo úspěšně archivováno",
+      "error": "Nepodařilo se archivovat hejno"
     }
   },
   "purchases": {

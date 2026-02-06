@@ -67,48 +67,52 @@ export interface UpdateFlockRequest {
  */
 export const flocksApi = {
   /**
-   * Retrieves all flocks for the authenticated user's tenant.
-   * Optionally filters by coop if coopId is provided.
+   * Retrieves all flocks for a specific coop.
+   * Backend endpoint: GET /api/coops/{coopId}/flocks?includeInactive={bool}
    */
-  getAll: async (coopId?: string): Promise<Flock[]> => {
-    const url = coopId ? `/flocks?coopId=${coopId}` : '/flocks';
-    const response = await apiClient.get<Flock[]>(url);
+  getAll: async (coopId: string, includeInactive: boolean = false): Promise<Flock[]> => {
+    const response = await apiClient.get<Flock[]>(
+      `/coops/${coopId}/flocks?includeInactive=${includeInactive}`
+    );
     return response.data;
   },
 
   /**
    * Retrieves a specific flock by ID.
+   * Backend endpoint: GET /api/coops/{coopId}/flocks/{flockId}
    * Includes full composition history.
    */
-  getById: async (id: string): Promise<Flock> => {
-    const response = await apiClient.get<Flock>(`/flocks/${id}`);
+  getById: async (coopId: string, flockId: string): Promise<Flock> => {
+    const response = await apiClient.get<Flock>(`/coops/${coopId}/flocks/${flockId}`);
     return response.data;
   },
 
   /**
    * Creates a new flock with initial composition.
    * Automatically creates the first history entry.
+   * Note: Backend endpoint not yet implemented
    */
   create: async (data: CreateFlockRequest): Promise<Flock> => {
-    const response = await apiClient.post<Flock>('/flocks', data);
+    const response = await apiClient.post<Flock>(`/coops/${data.coopId}/flocks`, data);
     return response.data;
   },
 
   /**
    * Updates an existing flock's basic information.
    * Does not affect composition - use composition change endpoints for that.
+   * Note: Backend endpoint not yet implemented
    */
-  update: async (data: UpdateFlockRequest): Promise<Flock> => {
-    const response = await apiClient.put<Flock>(`/flocks/${data.id}`, data);
+  update: async (coopId: string, data: UpdateFlockRequest): Promise<Flock> => {
+    const response = await apiClient.put<Flock>(`/coops/${coopId}/flocks/${data.id}`, data);
     return response.data;
   },
 
   /**
-   * Deletes a flock permanently.
-   * This operation cannot be undone.
+   * Archives a flock (sets isActive to false).
+   * Note: Backend endpoint not yet implemented
    */
-  delete: async (id: string): Promise<boolean> => {
-    const response = await apiClient.delete<boolean>(`/flocks/${id}`);
+  archive: async (coopId: string, flockId: string): Promise<boolean> => {
+    const response = await apiClient.patch<boolean>(`/coops/${coopId}/flocks/${flockId}/archive`);
     return response.data;
   },
 };
