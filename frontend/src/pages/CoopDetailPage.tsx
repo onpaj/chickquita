@@ -10,7 +10,6 @@ import {
   Button,
   Chip,
   Skeleton,
-  Alert,
   IconButton,
 } from '@mui/material';
 import {
@@ -20,6 +19,8 @@ import {
 } from '@mui/icons-material';
 import { useCoopDetail } from '../features/coops/hooks/useCoopDetail';
 import { EditCoopModal } from '../features/coops/components/EditCoopModal';
+import { ResourceNotFound } from '../components/ResourceNotFound';
+import { processApiError, ErrorType } from '../lib/errors';
 import { format } from 'date-fns';
 import { cs, enUS } from 'date-fns/locale';
 
@@ -69,7 +70,22 @@ export function CoopDetailPage() {
     );
   }
 
-  if (error || !coop) {
+  if (error) {
+    const processedError = processApiError(error);
+
+    // Show ResourceNotFound component for 404 errors
+    if (processedError.type === ErrorType.NOT_FOUND) {
+      return (
+        <ResourceNotFound
+          resourceType={t('coops.title')}
+          translationKey="coops.coopNotFound"
+          backPath="/coops"
+          backButtonTranslationKey="errors.backToList"
+        />
+      );
+    }
+
+    // For other errors, show a generic error with back button
     return (
       <Container maxWidth="sm" sx={{ py: 3 }}>
         <Box sx={{ mb: 3 }}>
@@ -77,11 +93,18 @@ export function CoopDetailPage() {
             <ArrowBackIcon />
           </IconButton>
         </Box>
-        <Alert severity="error">
-          {t('coops.coopNotFound')}
-        </Alert>
+        <Typography variant="h6" color="error" gutterBottom>
+          {t(processedError.translationKey)}
+        </Typography>
+        <Button variant="contained" onClick={handleBack} sx={{ mt: 2 }}>
+          {t('errors.backToList')}
+        </Button>
       </Container>
     );
+  }
+
+  if (!coop) {
+    return null;
   }
 
   return (

@@ -14,7 +14,8 @@
     "close": "Zavřít",
     "error": "Chyba",
     "success": "Úspěch",
-    "more": "Více"
+    "more": "Více",
+    "retry": "Zkusit znovu"
   },
   "auth": {
     "signIn": "Přihlásit se",
@@ -104,9 +105,19 @@
   },
   "errors": {
     "generic": "Něco se pokazilo",
-    "network": "Chyba sítě",
-    "notFound": "Nenalezeno",
-    "unauthorized": "Neautorizováno",
-    "forbidden": "Zakázáno"
+    "unknown": "Došlo k neočekávané chybě",
+    "networkError": "Chyba připojení. Zkontrolujte prosím připojení k internetu.",
+    "validationError": "Formulář obsahuje chyby",
+    "notFound": "Požadovaný prostředek nebyl nalezen",
+    "notFoundTitle": "Stránka nenalezena",
+    "notFoundDescription": "Omlouváme se, ale stránka, kterou hledáte, neexistuje.",
+    "resourceNotFoundDescription": "{{resource}} nebyl nalezen nebo již neexistuje.",
+    "backToDashboard": "Zpět na přehled",
+    "backToList": "Zpět na seznam",
+    "unauthorized": "Nejste přihlášeni. Přihlaste se prosím znovu.",
+    "forbidden": "Nemáte oprávnění k provedení této akce",
+    "conflict": "Konflikt - prostředek již existuje",
+    "duplicateName": "Položka s tímto názvem již existuje",
+    "serverError": "Chyba serveru. Zkuste to prosím později."
   }
 }

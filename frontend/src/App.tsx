@@ -4,6 +4,7 @@ import SignInPage from './pages/SignInPage'
 import DashboardPage from './pages/DashboardPage'
 import CoopsPage from './pages/CoopsPage'
 import { CoopDetailPage } from './pages/CoopDetailPage'
+import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import { BottomNavigation } from './components/BottomNavigation'
 import { useApiClient } from './lib/useApiClient'
@@ -46,6 +47,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Box>
       {isSignedIn && <BottomNavigation />}

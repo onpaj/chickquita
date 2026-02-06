@@ -7,11 +7,11 @@ import {
   TextField,
   Button,
   Box,
-  Alert,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { AxiosError } from 'axios';
 import { useCreateCoop } from '../hooks/useCoops';
+import { useErrorHandler } from '../../../hooks/useErrorHandler';
+import { processApiError, ErrorType } from '../../../lib/errors';
 import type { CreateCoopRequest } from '../api/coopsApi';
 
 interface CreateCoopModalProps {
@@ -22,19 +22,18 @@ interface CreateCoopModalProps {
 export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
   const { t } = useTranslation();
   const { mutate: createCoop, isPending } = useCreateCoop();
+  const { handleError } = useErrorHandler();
 
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [nameError, setNameError] = useState('');
   const [locationError, setLocationError] = useState('');
-  const [serverError, setServerError] = useState('');
 
   const handleClose = () => {
     setName('');
     setLocation('');
     setNameError('');
     setLocationError('');
-    setServerError('');
     onClose();
   };
 
@@ -71,9 +70,7 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
            location.length <= 200;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submitCoop = () => {
     if (!validate()) {
       return;
     }
@@ -88,20 +85,33 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
         handleClose();
       },
       onError: (error: Error) => {
-        console.error('Failed to create coop:', error);
+        const processedError = processApiError(error);
 
-        // Handle 409 Conflict error (duplicate name)
-        if (error instanceof AxiosError && error.response?.status === 409) {
+        // Handle 409 Conflict error (duplicate name) - show as field error
+        if (processedError.type === ErrorType.CONFLICT) {
           setNameError(t('coops.duplicateName'));
-        } else if (error instanceof AxiosError && error.response?.data?.error?.message) {
-          // For other errors, show the server error message
-          setServerError(error.response.data.error.message);
-        } else {
-          // Fallback to generic error message
-          setServerError(t('errors.generic'));
+        }
+        // Handle 400 Validation errors - show as field errors
+        else if (processedError.type === ErrorType.VALIDATION && processedError.fieldErrors) {
+          processedError.fieldErrors.forEach((fieldError) => {
+            if (fieldError.field === 'name' || fieldError.field === 'Name') {
+              setNameError(fieldError.message);
+            } else if (fieldError.field === 'location' || fieldError.field === 'Location') {
+              setLocationError(fieldError.message);
+            }
+          });
+        }
+        // For all other errors (network, server, etc.), show toast with retry
+        else {
+          handleError(error, submitCoop);
         }
       },
     });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitCoop();
   };
 
   return (
@@ -130,11 +140,6 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
           }}
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            {serverError && (
-              <Alert severity="error" onClose={() => setServerError('')}>
-                {serverError}
-              </Alert>
-            )}
             <TextField
               autoFocus
               label={t('coops.coopName')}
@@ -145,9 +150,6 @@ export function CreateCoopModal({ open, onClose }: CreateCoopModalProps) {
                 if (nameError) {
                   const newError = validateName(e.target.value);
                   setNameError(newError);
-                }
-                if (serverError) {
-                  setServerError('');
                 }
               }}
               onBlur={() => {

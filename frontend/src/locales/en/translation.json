@@ -14,7 +14,8 @@
     "close": "Close",
     "error": "Error",
     "success": "Success",
-    "more": "More"
+    "more": "More",
+    "retry": "Retry"
   },
   "auth": {
     "signIn": "Sign In",
@@ -104,9 +105,19 @@
   },
   "errors": {
     "generic": "Something went wrong",
-    "network": "Network error",
-    "notFound": "Not found",
-    "unauthorized": "Unauthorized",
-    "forbidden": "Forbidden"
+    "unknown": "An unexpected error occurred",
+    "networkError": "Connection error. Please check your internet connection.",
+    "validationError": "The form contains errors",
+    "notFound": "The requested resource was not found",
+    "notFoundTitle": "Page Not Found",
+    "notFoundDescription": "Sorry, the page you are looking for does not exist.",
+    "resourceNotFoundDescription": "The {{resource}} was not found or no longer exists.",
+    "backToDashboard": "Back to Dashboard",
+    "backToList": "Back to List",
+    "unauthorized": "You are not signed in. Please sign in again.",
+    "forbidden": "You do not have permission to perform this action",
+    "conflict": "Conflict - resource already exists",
+    "duplicateName": "An item with this name already exists",
+    "serverError": "Server error. Please try again later."
   }
 }

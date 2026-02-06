@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
+import { processApiError } from './errors';
 
 /**
  * API Client Configuration
@@ -83,6 +84,7 @@ apiClient.interceptors.request.use(
  * 1. Handles common HTTP errors (401, 403, 500, etc.)
  * 2. Provides consistent error messages
  * 3. Logs errors for debugging
+ * 4. Processes errors into a standardized format
  */
 apiClient.interceptors.response.use(
   (response) => {
@@ -90,53 +92,19 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    // Handle different error scenarios
-    if (error.response) {
-      // Server responded with error status
-      const status = error.response.status;
+    // Process the error into a standardized format
+    const processedError = processApiError(error);
 
-      switch (status) {
-        case 401:
-          // Unauthorized - token might be expired or invalid
-          console.error('Unauthorized: Invalid or expired token');
+    // Log the processed error for debugging
+    console.error('API Error:', {
+      type: processedError.type,
+      message: processedError.message,
+      translationKey: processedError.translationKey,
+      canRetry: processedError.canRetry,
+      fieldErrors: processedError.fieldErrors,
+    });
 
-          // Clerk automatically handles token refresh
-          // If we get a 401, the token is truly invalid and user should be redirected
-          // The Clerk React components will handle this automatically
-          break;
-
-        case 403:
-          // Forbidden - user doesn't have permission
-          console.error('Forbidden: Insufficient permissions');
-          break;
-
-        case 404:
-          // Not found
-          console.error('Not found:', error.config?.url);
-          break;
-
-        case 422:
-          // Validation error
-          console.error('Validation error:', error.response.data);
-          break;
-
-        case 500:
-          // Server error
-          console.error('Server error:', error.response.data);
-          break;
-
-        default:
-          console.error('API error:', status, error.response.data);
-      }
-    } else if (error.request) {
-      // Request was made but no response received
-      console.error('Network error: No response received');
-    } else {
-      // Error in request configuration
-      console.error('Request configuration error:', error.message);
-    }
-
-    // Reject with the original error
+    // Reject with the original error (components will handle the error display)
     return Promise.reject(error);
   }
 );

@@ -6,27 +6,36 @@ import {
   Card,
   CardContent,
   Skeleton,
-  Alert,
   Container,
+  Button,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation } from 'react-i18next';
 import { useCoops } from '../features/coops/hooks/useCoops';
 import { CreateCoopModal } from '../features/coops/components/CreateCoopModal';
 import { CoopCard } from '../features/coops/components/CoopCard';
+import { useErrorHandler } from '../hooks/useErrorHandler';
+import { processApiError } from '../lib/errors';
 
 export default function CoopsPage() {
   const { t } = useTranslation();
   const { data: coops, isLoading, error, refetch } = useCoops();
+  const { handleError } = useErrorHandler();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await refetch();
-    setIsRefreshing(false);
-  }, [refetch]);
+    try {
+      await refetch();
+    } catch (err) {
+      handleError(err, handleRefresh);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refetch, handleError]);
 
   // Sort coops by created date (newest first)
   const sortedCoops = coops
@@ -34,9 +43,37 @@ export default function CoopsPage() {
     : [];
 
   if (error) {
+    const processedError = processApiError(error);
+
     return (
-      <Container sx={{ mt: 2 }}>
-        <Alert severity="error">{t('errors.generic')}</Alert>
+      <Container
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          textAlign: 'center',
+          py: 4,
+        }}
+      >
+        <Typography variant="h6" color="error" gutterBottom>
+          {t(processedError.translationKey)}
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          {processedError.message}
+        </Typography>
+
+        {processedError.canRetry && (
+          <Button
+            variant="contained"
+            startIcon={<RefreshIcon />}
+            onClick={() => refetch()}
+          >
+            {t('common.retry')}
+          </Button>
+        )}
       </Container>
     );
   }

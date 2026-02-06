@@ -6,6 +6,7 @@ import './index.css'
 import './lib/i18n'
 import App from './App.tsx'
 import { clerkConfig } from './lib/clerkConfig'
+import { ToastProvider } from './components/ToastProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -13,10 +14,12 @@ createRoot(document.getElementById('root')!).render(
       publishableKey={clerkConfig.publishableKey}
       localization={clerkConfig.localization}
       appearance={clerkConfig.appearance}
-      afterSignInUrl="/dashboard" 
+      afterSignInUrl="/dashboard"
     >
       <BrowserRouter>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </BrowserRouter>
     </ClerkProvider>
   </StrictMode>,
