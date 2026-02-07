@@ -20,7 +20,8 @@
     "retry": "Zkusit znovu",
     "all": "Vše",
     "processing": "Zpracovávám...",
-    "characters": "znaků"
+    "characters": "znaků",
+    "locale": "cs-CZ"
   },
   "auth": {
     "signIn": "Přihlásit se",
@@ -188,12 +189,65 @@
     "amount": "Částka",
     "date": "Datum",
     "description": "Popis",
+    "currency": "Kč",
     "categories": {
       "feed": "Krmivo",
       "bedding": "Podestýlka",
       "veterinary": "Veterinární péče",
       "equipment": "Vybavení",
       "other": "Ostatní"
+    },
+    "types": {
+      "feed": "Krmivo",
+      "vitamins": "Vitamíny",
+      "bedding": "Podestýlka",
+      "toys": "Hračky",
+      "veterinary": "Veterinární péče",
+      "other": "Ostatní"
+    },
+    "units": {
+      "kg": "kg",
+      "pcs": "ks",
+      "l": "l",
+      "package": "balení",
+      "other": "jiné"
+    },
+    "filters": {
+      "title": "Filtry",
+      "fromDate": "Od data",
+      "toDate": "Do data",
+      "type": "Typ",
+      "flock": "Hejno"
+    },
+    "summary": {
+      "thisMonth": "Celkem utraceno tento měsíc"
+    },
+    "list": {
+      "type": "Typ",
+      "amount": "Částka",
+      "quantity": "Množství",
+      "flock": "Hejno",
+      "unknownFlock": "Neznámé hejno"
+    },
+    "emptyState": {
+      "title": "Zatím žádné nákupy",
+      "description": "Začněte sledovat náklady na chov přidáním prvního nákupu."
+    },
+    "delete": {
+      "title": "Smazat nákup?",
+      "message": "Opravdu chcete smazat nákup \"{{name}}\"?",
+      "warning": "Tuto akci nelze vrátit zpět.",
+      "success": "Nákup byl úspěšně smazán",
+      "error": "Nepodařilo se smazat nákup"
+    },
+    "purchaseCardAriaLabel": "Nákup {{name}}",
+    "create": {
+      "success": "Nákup byl úspěšně vytvořen",
+      "error": "Nepodařilo se vytvořit nákup"
+    },
+    "update": {
+      "success": "Nákup byl úspěšně aktualizován",
+      "error": "Nepodařilo se aktualizovat nákup"
     }
   },
   "dailyRecords": {

@@ -20,7 +20,8 @@
     "retry": "Retry",
     "all": "All",
     "processing": "Processing...",
-    "characters": "characters"
+    "characters": "characters",
+    "locale": "en-US"
   },
   "auth": {
     "signIn": "Sign In",
@@ -188,12 +189,65 @@
     "amount": "Amount",
     "date": "Date",
     "description": "Description",
+    "currency": "CZK",
     "categories": {
       "feed": "Feed",
       "bedding": "Bedding",
       "veterinary": "Veterinary Care",
       "equipment": "Equipment",
       "other": "Other"
+    },
+    "types": {
+      "feed": "Feed",
+      "vitamins": "Vitamins",
+      "bedding": "Bedding",
+      "toys": "Toys",
+      "veterinary": "Veterinary",
+      "other": "Other"
+    },
+    "units": {
+      "kg": "kg",
+      "pcs": "pcs",
+      "l": "L",
+      "package": "package",
+      "other": "other"
+    },
+    "filters": {
+      "title": "Filters",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "type": "Type",
+      "flock": "Flock"
+    },
+    "summary": {
+      "thisMonth": "Total Spent This Month"
+    },
+    "list": {
+      "type": "Type",
+      "amount": "Amount",
+      "quantity": "Quantity",
+      "flock": "Flock",
+      "unknownFlock": "Unknown Flock"
+    },
+    "emptyState": {
+      "title": "No purchases yet",
+      "description": "Start tracking your farming costs by adding your first purchase."
+    },
+    "delete": {
+      "title": "Delete Purchase?",
+      "message": "Are you sure you want to delete purchase \"{{name}}\"?",
+      "warning": "This action cannot be undone.",
+      "success": "Purchase deleted successfully",
+      "error": "Failed to delete purchase"
+    },
+    "purchaseCardAriaLabel": "Purchase {{name}}",
+    "create": {
+      "success": "Purchase created successfully",
+      "error": "Failed to create purchase"
+    },
+    "update": {
+      "success": "Purchase updated successfully",
+      "error": "Failed to update purchase"
     }
   },
   "dailyRecords": {
