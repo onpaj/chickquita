@@ -13,43 +13,68 @@ public static class PurchasesEndpoints
 {
     public static void MapPurchasesEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/purchases")
+        var group = app.MapGroup("/api/v1/purchases")
             .WithTags("Purchases")
             .RequireAuthorization();
 
         group.MapGet("", GetPurchases)
             .WithName("GetPurchases")
-            .WithOpenApi()
-            .Produces<List<PurchaseDto>>()
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Get all purchases";
+                operation.Description = "Retrieves a list of purchases for the current tenant with optional filtering by date range, type, and flock.";
+                return operation;
+            })
+            .Produces<List<PurchaseDto>>(StatusCodes.Status200OK, "application/json")
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapGet("/{id:guid}", GetPurchaseById)
             .WithName("GetPurchaseById")
-            .WithOpenApi()
-            .Produces<PurchaseDto>()
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Get purchase by ID";
+                operation.Description = "Retrieves a specific purchase by its unique identifier. Only returns purchases belonging to the current tenant.";
+                return operation;
+            })
+            .Produces<PurchaseDto>(StatusCodes.Status200OK, "application/json")
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/names", GetPurchaseNames)
             .WithName("GetPurchaseNames")
-            .WithOpenApi()
-            .Produces<List<string>>()
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Get purchase names for autocomplete";
+                operation.Description = "Retrieves a list of distinct purchase names for autocomplete functionality. Supports optional search query and limit parameters.";
+                return operation;
+            })
+            .Produces<List<string>>(StatusCodes.Status200OK, "application/json")
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPost("", CreatePurchase)
             .WithName("CreatePurchase")
-            .WithOpenApi()
-            .Produces<PurchaseDto>(StatusCodes.Status201Created)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Create a new purchase";
+                operation.Description = "Creates a new purchase record for the current tenant. Validates that the referenced coop (if provided) belongs to the tenant.";
+                return operation;
+            })
+            .Produces<PurchaseDto>(StatusCodes.Status201Created, "application/json")
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/{id:guid}", UpdatePurchase)
             .WithName("UpdatePurchase")
-            .WithOpenApi()
-            .Produces<PurchaseDto>()
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Update an existing purchase";
+                operation.Description = "Updates a purchase record. Only purchases belonging to the current tenant can be updated. The ID in the URL must match the ID in the request body.";
+                return operation;
+            })
+            .Produces<PurchaseDto>(StatusCodes.Status200OK, "application/json")
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
@@ -57,8 +82,13 @@ public static class PurchasesEndpoints
 
         group.MapDelete("/{id:guid}", DeletePurchase)
             .WithName("DeletePurchase")
-            .WithOpenApi()
-            .Produces<bool>(StatusCodes.Status204NoContent)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Delete a purchase";
+                operation.Description = "Permanently deletes a purchase record. Only purchases belonging to the current tenant can be deleted.";
+                return operation;
+            })
+            .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
@@ -157,7 +187,7 @@ public static class PurchasesEndpoints
             };
         }
 
-        return Results.Created($"/api/purchases/{result.Value.Id}", result.Value);
+        return Results.Created($"/api/v1/purchases/{result.Value.Id}", result.Value);
     }
 
     private static async Task<IResult> UpdatePurchase(

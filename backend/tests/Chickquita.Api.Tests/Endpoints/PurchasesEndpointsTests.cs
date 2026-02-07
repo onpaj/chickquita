@@ -18,8 +18,6 @@ namespace Chickquita.Api.Tests.Endpoints;
 /// <summary>
 /// Integration tests for Purchases API endpoints.
 /// Tests full HTTP flow including authentication, tenant isolation, and business logic.
-/// Note: These tests assume the PurchasesEndpoints will be created in a future story.
-/// Currently tests the command/handler integration through the endpoint pattern.
 /// </summary>
 public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
 {
@@ -29,6 +27,417 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
     {
         _factory = factory;
     }
+
+    #region HTTP Integration Tests
+
+    [Fact]
+    public async Task CreatePurchase_WithValidData_Returns201Created()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var client = factory.CreateClient();
+
+        var command = new CreatePurchaseCommand
+        {
+            Name = "Chicken Feed",
+            Type = PurchaseType.Feed,
+            Amount = 250.50m,
+            Quantity = 25m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date,
+            Notes = "High quality feed"
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/v1/purchases", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response.Headers.Location.Should().NotBeNull();
+        response.Headers.Location!.ToString().Should().StartWith("/api/v1/purchases/");
+
+        var result = await response.Content.ReadFromJsonAsync<PurchaseDto>();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("Chicken Feed");
+        result.Type.Should().Be(PurchaseType.Feed);
+        result.Amount.Should().Be(250.50m);
+        result.TenantId.Should().Be(tenantId);
+    }
+
+    [Fact]
+    public async Task CreatePurchase_WithInvalidData_Returns400BadRequest()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var client = factory.CreateClient();
+
+        var command = new CreatePurchaseCommand
+        {
+            Name = "", // Invalid: empty name
+            Type = PurchaseType.Feed,
+            Amount = 250.50m,
+            Quantity = 25m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/v1/purchases", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task GetPurchases_WithExistingPurchases_Returns200WithList()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        await SeedPurchase(scope, tenantId, "Feed 1", PurchaseType.Feed, 100m);
+        await SeedPurchase(scope, tenantId, "Feed 2", PurchaseType.Feed, 150m);
+
+        var client = factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/api/v1/purchases");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<List<PurchaseDto>>();
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetPurchaseById_WithValidId_Returns200()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var purchaseId = await SeedPurchase(scope, tenantId, "Test Feed", PurchaseType.Feed, 200m);
+
+        var client = factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync($"/api/v1/purchases/{purchaseId}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<PurchaseDto>();
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(purchaseId);
+        result.Name.Should().Be("Test Feed");
+    }
+
+    [Fact]
+    public async Task GetPurchaseById_WithInvalidId_Returns404()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var client = factory.CreateClient();
+        var invalidId = Guid.NewGuid();
+
+        // Act
+        var response = await client.GetAsync($"/api/v1/purchases/{invalidId}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task UpdatePurchase_WithValidData_Returns200()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var purchaseId = await SeedPurchase(scope, tenantId, "Original Feed", PurchaseType.Feed, 200m);
+
+        var client = factory.CreateClient();
+
+        var updateCommand = new Chickquita.Application.Features.Purchases.Commands.Update.UpdatePurchaseCommand
+        {
+            Id = purchaseId,
+            Name = "Updated Feed",
+            Type = PurchaseType.Feed,
+            Amount = 300m,
+            Quantity = 30m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date
+        };
+
+        // Act
+        var response = await client.PutAsJsonAsync($"/api/v1/purchases/{purchaseId}", updateCommand);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<PurchaseDto>();
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("Updated Feed");
+        result.Amount.Should().Be(300m);
+    }
+
+    [Fact]
+    public async Task UpdatePurchase_WithMismatchedIds_Returns400()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var purchaseId = await SeedPurchase(scope, tenantId, "Original Feed", PurchaseType.Feed, 200m);
+
+        var client = factory.CreateClient();
+
+        var differentId = Guid.NewGuid();
+        var updateCommand = new Chickquita.Application.Features.Purchases.Commands.Update.UpdatePurchaseCommand
+        {
+            Id = differentId, // Different from route
+            Name = "Updated Feed",
+            Type = PurchaseType.Feed,
+            Amount = 300m,
+            Quantity = 30m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date
+        };
+
+        // Act
+        var response = await client.PutAsJsonAsync($"/api/v1/purchases/{purchaseId}", updateCommand);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task DeletePurchase_WithValidId_Returns204()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var purchaseId = await SeedPurchase(scope, tenantId, "Feed to Delete", PurchaseType.Feed, 200m);
+
+        var client = factory.CreateClient();
+
+        // Act
+        var response = await client.DeleteAsync($"/api/v1/purchases/{purchaseId}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task DeletePurchase_WithInvalidId_Returns404()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var client = factory.CreateClient();
+        var invalidId = Guid.NewGuid();
+
+        // Act
+        var response = await client.DeleteAsync($"/api/v1/purchases/{invalidId}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetPurchaseNames_Returns200WithList()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        await SeedPurchase(scope, tenantId, "Premium Feed", PurchaseType.Feed, 100m);
+        await SeedPurchase(scope, tenantId, "Basic Feed", PurchaseType.Feed, 80m);
+
+        var client = factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/api/v1/purchases/names?query=Feed&limit=10");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<List<string>>();
+        result.Should().NotBeNull();
+        result!.Should().Contain("Premium Feed");
+        result.Should().Contain("Basic Feed");
+    }
+
+    [Fact]
+    public async Task PurchasesEndpoint_VerifiesTenantIsolation()
+    {
+        // Arrange - Create two tenants
+        var tenant1Id = Guid.NewGuid();
+        var tenant2Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
+        var mockCurrentUser2 = CreateMockCurrentUser("clerk_user_2", tenant2Id);
+
+        // Setup for Tenant 1
+        var factory1 = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        });
+
+        using var scope1 = factory1.Services.CreateScope();
+        await SeedTenant(scope1, tenant1Id, "clerk_user_1");
+        var purchase1Id = await SeedPurchase(scope1, tenant1Id, "Tenant 1 Feed", PurchaseType.Feed, 200m);
+
+        // Setup for Tenant 2
+        var factory2 = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser2);
+            });
+        });
+
+        using var scope2 = factory2.Services.CreateScope();
+        await SeedTenant(scope2, tenant2Id, "clerk_user_2");
+
+        var client2 = factory2.CreateClient();
+
+        // Act - Tenant 2 tries to access Tenant 1's purchase
+        var response = await client2.GetAsync($"/api/v1/purchases/{purchase1Id}");
+
+        // Assert - Should return 404 (not found, not forbidden, to prevent info disclosure)
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    #endregion
+
+    #region MediatR Handler Tests
+
+    #endregion
 
     [Fact]
     public async Task CreatePurchase_WithValidData_ShouldCreateSuccessfully()
@@ -741,6 +1150,26 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         dbContext.Coops.Add(coop);
         await dbContext.SaveChangesAsync();
         return coop.Id;
+    }
+
+    private static async Task<Guid> SeedPurchase(IServiceScope scope, Guid tenantId, string name, PurchaseType type, decimal amount)
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var purchase = Purchase.Create(
+            tenantId,
+            name,
+            type,
+            amount,
+            10m,
+            QuantityUnit.Kg,
+            DateTime.UtcNow.Date,
+            null,
+            null,
+            null
+        );
+        dbContext.Purchases.Add(purchase);
+        await dbContext.SaveChangesAsync();
+        return purchase.Id;
     }
 
     #endregion
