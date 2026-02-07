@@ -6,7 +6,7 @@ import {
   DialogActions,
   TextField,
   Button,
-  Box,
+  Stack,
   CircularProgress,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,16 @@ import { useUpdateCoop } from '../hooks/useCoops';
 import { useErrorHandler } from '../../../hooks/useErrorHandler';
 import { processApiError, ErrorType } from '../../../lib/errors';
 import type { Coop, UpdateCoopRequest } from '../api/coopsApi';
+import {
+  DIALOG_CONFIG,
+  isMobileViewport,
+  dialogTitleSx,
+  dialogContentSx,
+  dialogActionsSx,
+  touchButtonSx,
+  touchInputProps,
+  FORM_FIELD_SPACING,
+} from '@/shared/constants/modalConfig';
 
 interface EditCoopModalProps {
   open: boolean;
@@ -133,12 +143,11 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      fullScreen={window.innerWidth < 480}
+      maxWidth={DIALOG_CONFIG.maxWidth}
+      fullWidth={DIALOG_CONFIG.fullWidth}
+      fullScreen={isMobileViewport()}
       sx={{
         '& .MuiDialog-paper': {
-          // Ensure form is scrollable on small screens
           display: 'flex',
           flexDirection: 'column',
           maxHeight: '100vh',
@@ -146,29 +155,27 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
       }}
     >
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <DialogTitle>{t('coops.editCoop')}</DialogTitle>
+        <DialogTitle sx={dialogTitleSx}>{t('coops.editCoop')}</DialogTitle>
         <DialogContent
           sx={{
-            // Make content scrollable to prevent keyboard from obscuring submit button
+            ...dialogContentSx,
             overflowY: 'auto',
             flex: 1,
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+          <Stack spacing={FORM_FIELD_SPACING}>
             <TextField
               autoFocus
               label={t('coops.coopName')}
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                // Clear errors when user starts fixing input
                 if (nameError) {
                   const newError = validateName(e.target.value);
                   setNameError(newError);
                 }
               }}
               onBlur={() => {
-                // Validate on blur to show errors
                 setNameError(validateName(name));
               }}
               error={!!nameError}
@@ -177,24 +184,19 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
               fullWidth
               disabled={isPending}
               type="text"
-              inputProps={{
-                // Ensure touch-friendly height (min 44px)
-                style: { minHeight: '44px' },
-              }}
+              inputProps={touchInputProps}
             />
             <TextField
               label={t('coops.location')}
               value={location}
               onChange={(e) => {
                 setLocation(e.target.value);
-                // Clear error when user starts fixing input
                 if (locationError) {
                   const newError = validateLocation(e.target.value);
                   setLocationError(newError);
                 }
               }}
               onBlur={() => {
-                // Validate on blur to show errors
                 setLocationError(validateLocation(location));
               }}
               error={!!locationError}
@@ -204,27 +206,12 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
               multiline
               rows={2}
               type="text"
-              inputProps={{
-                // Ensure touch-friendly height
-                style: { minHeight: '44px' },
-              }}
+              inputProps={touchInputProps}
             />
-          </Box>
+          </Stack>
         </DialogContent>
-        <DialogActions
-          sx={{
-            // Ensure actions are always visible and not obscured by keyboard
-            position: 'sticky',
-            bottom: 0,
-            backgroundColor: 'background.paper',
-            zIndex: 1,
-            // Touch-friendly button height
-            '& .MuiButton-root': {
-              minHeight: '44px',
-            },
-          }}
-        >
-          <Button onClick={handleClose} disabled={isPending}>
+        <DialogActions sx={dialogActionsSx}>
+          <Button onClick={handleClose} disabled={isPending} sx={touchButtonSx}>
             {t('common.cancel')}
           </Button>
           <Button
@@ -232,6 +219,7 @@ export function EditCoopModal({ open, onClose, coop }: EditCoopModalProps) {
             variant="contained"
             disabled={isPending || !isFormValid()}
             startIcon={isPending ? <CircularProgress size={20} color="inherit" /> : undefined}
+            sx={touchButtonSx}
           >
             {isPending ? t('common.saving') : t('common.save')}
           </Button>

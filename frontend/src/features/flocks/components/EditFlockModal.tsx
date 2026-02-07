@@ -6,7 +6,7 @@ import {
   DialogActions,
   TextField,
   Button,
-  Box,
+  Stack,
   CircularProgress,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,16 @@ import { useUpdateFlock } from '../hooks/useFlocks';
 import { useErrorHandler } from '../../../hooks/useErrorHandler';
 import { processApiError, ErrorType } from '../../../lib/errors';
 import type { Flock, UpdateFlockRequest } from '../api/flocksApi';
+import {
+  DIALOG_CONFIG,
+  isMobileViewport,
+  dialogTitleSx,
+  dialogContentSx,
+  dialogActionsSx,
+  touchButtonSx,
+  touchInputProps,
+  FORM_FIELD_SPACING,
+} from '@/shared/constants/modalConfig';
 
 interface EditFlockModalProps {
   open: boolean;
@@ -147,9 +157,9 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      fullScreen={window.innerWidth < 480}
+      maxWidth={DIALOG_CONFIG.maxWidth}
+      fullWidth={DIALOG_CONFIG.fullWidth}
+      fullScreen={isMobileViewport()}
       sx={{
         '& .MuiDialog-paper': {
           display: 'flex',
@@ -159,14 +169,15 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
       }}
     >
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <DialogTitle>{t('flocks.editFlock')}</DialogTitle>
+        <DialogTitle sx={dialogTitleSx}>{t('flocks.editFlock')}</DialogTitle>
         <DialogContent
           sx={{
+            ...dialogContentSx,
             overflowY: 'auto',
             flex: 1,
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+          <Stack spacing={FORM_FIELD_SPACING}>
             <TextField
               autoFocus
               label={t('flocks.form.identifier')}
@@ -187,9 +198,7 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
               fullWidth
               disabled={isPending}
               type="text"
-              inputProps={{
-                style: { minHeight: '44px' },
-              }}
+              inputProps={touchInputProps}
             />
 
             <TextField
@@ -216,23 +225,13 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
               }}
               inputProps={{
                 max: getTodayDate(),
-                style: { minHeight: '44px' },
+                ...touchInputProps,
               }}
             />
-          </Box>
+          </Stack>
         </DialogContent>
-        <DialogActions
-          sx={{
-            position: 'sticky',
-            bottom: 0,
-            backgroundColor: 'background.paper',
-            zIndex: 1,
-            '& .MuiButton-root': {
-              minHeight: '44px',
-            },
-          }}
-        >
-          <Button onClick={handleClose} disabled={isPending}>
+        <DialogActions sx={dialogActionsSx}>
+          <Button onClick={handleClose} disabled={isPending} sx={touchButtonSx}>
             {t('common.cancel')}
           </Button>
           <Button
@@ -240,6 +239,7 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
             variant="contained"
             disabled={isPending || !isFormValid()}
             startIcon={isPending ? <CircularProgress size={20} color="inherit" /> : undefined}
+            sx={touchButtonSx}
           >
             {isPending ? t('common.saving') : t('common.save')}
           </Button>
