@@ -216,6 +216,12 @@
     "quickAdd": {
       "title": "Quick Add Eggs"
     },
+    "edit": {
+      "title": "Edit Daily Record",
+      "dateNotEditable": "Record date cannot be changed",
+      "flockNotEditable": "Flock cannot be changed",
+      "sameDayRestriction": "Records can only be edited on the day they were created"
+    },
     "emptyState": {
       "title": "No records yet",
       "noRecords": "Start recording your daily egg production",

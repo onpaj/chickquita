@@ -21,12 +21,15 @@ import { format, subDays } from 'date-fns';
 import { useDailyRecords } from '../features/dailyRecords/hooks/useDailyRecords';
 import { useCoops } from '../features/coops/hooks/useCoops';
 import { DailyRecordCard } from '../features/dailyRecords/components/DailyRecordCard';
+import { EditDailyRecordModal } from '../features/dailyRecords/components/EditDailyRecordModal';
 import { IllustratedEmptyState, DailyRecordCardSkeleton } from '../shared/components';
-import type { GetDailyRecordsParams } from '../features/dailyRecords/api/dailyRecordsApi';
+import type { GetDailyRecordsParams, DailyRecordDto } from '../features/dailyRecords/api/dailyRecordsApi';
 
 export function DailyRecordsListPage() {
   const { t } = useTranslation();
   const [filters, setFilters] = useState<GetDailyRecordsParams>({});
+  const [editingRecord, setEditingRecord] = useState<DailyRecordDto | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { isLoading: isLoadingCoops } = useCoops();
   const { data: dailyRecords, isLoading: isLoadingRecords } = useDailyRecords(filters);
@@ -75,6 +78,16 @@ export function DailyRecordsListPage() {
 
   const handleClearFilters = () => {
     setFilters({});
+  };
+
+  const handleEditRecord = (record: DailyRecordDto) => {
+    setEditingRecord(record);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingRecord(null);
   };
 
   const hasActiveFilters = filters.flockId || filters.startDate || filters.endDate;
@@ -278,12 +291,21 @@ export function DailyRecordsListPage() {
                   key={record.id}
                   record={record}
                   flockIdentifier={flockMap.get(record.flockId)}
+                  onEdit={handleEditRecord}
                 />
               ))}
             </Box>
           </>
         )}
       </Box>
+
+      {/* Edit Modal */}
+      <EditDailyRecordModal
+        open={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        record={editingRecord}
+        flockIdentifier={editingRecord ? flockMap.get(editingRecord.flockId) : undefined}
+      />
     </Container>
   );
 }

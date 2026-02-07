@@ -219,6 +219,12 @@
     "quickAdd": {
       "title": "Rychlý záznam vajec"
     },
+    "edit": {
+      "title": "Upravit denní záznam",
+      "dateNotEditable": "Datum záznamu nelze změnit",
+      "flockNotEditable": "Hejno nelze změnit",
+      "sameDayRestriction": "Záznamy lze upravovat pouze v den vytvoření"
+    },
     "emptyState": {
       "title": "Zatím tu nejsou žádné záznamy",
       "noRecords": "Začněte zaznamenávat denní produkci vajec",

@@ -1,5 +1,5 @@
-import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
-import { Egg as EggIcon } from '@mui/icons-material';
+import { Card, CardContent, Typography, Box, Chip, IconButton } from '@mui/material';
+import { Egg as EggIcon, Edit as EditIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import type { DailyRecordDto } from '../api/dailyRecordsApi';
@@ -7,6 +7,7 @@ import type { DailyRecordDto } from '../api/dailyRecordsApi';
 interface DailyRecordCardProps {
   record: DailyRecordDto;
   flockIdentifier?: string;
+  onEdit?: (record: DailyRecordDto) => void;
 }
 
 /**
@@ -21,10 +22,21 @@ interface DailyRecordCardProps {
  *   flockIdentifier="Hejno A"
  * />
  */
-export function DailyRecordCard({ record, flockIdentifier }: DailyRecordCardProps) {
+export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecordCardProps) {
   const formattedDate = format(new Date(record.recordDate), 'dd. MM. yyyy', {
     locale: cs,
   });
+
+  // Check if record can be edited (same-day restriction)
+  const canEdit = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const createdDate = new Date(record.createdAt);
+    createdDate.setHours(0, 0, 0, 0);
+
+    return createdDate.getTime() === today.getTime();
+  })();
 
   return (
     <Card
@@ -41,7 +53,7 @@ export function DailyRecordCard({ record, flockIdentifier }: DailyRecordCardProp
       }}
     >
       <CardContent sx={{ flexGrow: 1, pb: 2 }}>
-        {/* Header with date */}
+        {/* Header with date and edit button */}
         <Box
           sx={{
             display: 'flex',
@@ -53,6 +65,21 @@ export function DailyRecordCard({ record, flockIdentifier }: DailyRecordCardProp
           <Typography variant="h6" component="h3" sx={{ fontWeight: 600 }}>
             {formattedDate}
           </Typography>
+          {canEdit && onEdit && (
+            <IconButton
+              size="small"
+              onClick={() => onEdit(record)}
+              sx={{
+                color: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'primary.50',
+                },
+              }}
+              aria-label="edit record"
+            >
+              <EditIcon />
+            </IconButton>
+          )}
         </Box>
 
         {/* Egg count - prominent display */}
