@@ -90,7 +90,7 @@ export function EditDailyRecordModal({
   const eggCountRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill form when record changes
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
     if (record && open) {
       setEggCount(record.eggCount);
