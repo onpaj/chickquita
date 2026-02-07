@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage'
 import CoopsPage from './pages/CoopsPage'
 import { CoopDetailPage } from './pages/CoopDetailPage'
 import FlocksPage from './pages/FlocksPage'
+import { FlockDetailPage } from './pages/FlockDetailPage'
 import { SettingsPage } from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -54,6 +55,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FlocksPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/coops/:coopId/flocks/:flockId"
+            element={
+              <ProtectedRoute>
+                <FlockDetailPage />
               </ProtectedRoute>
             }
           />
