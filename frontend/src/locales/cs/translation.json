@@ -19,7 +19,8 @@
     "more": "Více",
     "retry": "Zkusit znovu",
     "all": "Vše",
-    "processing": "Zpracovávám..."
+    "processing": "Zpracovávám...",
+    "characters": "znaků"
   },
   "auth": {
     "signIn": "Přihlásit se",
@@ -200,7 +201,24 @@
     "addRecord": "Přidat záznam",
     "eggCount": "Počet vajec",
     "date": "Datum",
-    "notes": "Poznámky"
+    "notes": "Poznámky",
+    "flock": "Hejno",
+    "noFlocks": "Žádná dostupná hejna",
+    "quickAdd": {
+      "title": "Rychlý záznam vajec"
+    },
+    "create": {
+      "success": "Denní záznam byl úspěšně vytvořen",
+      "error": "Nepodařilo se vytvořit denní záznam"
+    },
+    "update": {
+      "success": "Denní záznam byl úspěšně aktualizován",
+      "error": "Nepodařilo se aktualizovat denní záznam"
+    },
+    "delete": {
+      "success": "Denní záznam byl úspěšně smazán",
+      "error": "Nepodařilo se smazat denní záznam"
+    }
   },
   "settings": {
     "title": "Nastavení",
