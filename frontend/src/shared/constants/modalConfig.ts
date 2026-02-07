@@ -6,10 +6,19 @@
 import type { SxProps, Theme } from '@mui/material';
 
 /**
- * Standard Dialog sizing
+ * Standard Dialog sizing for form modals
  */
 export const DIALOG_CONFIG = {
   maxWidth: 'sm' as const,
+  fullWidth: true,
+} as const;
+
+/**
+ * Standard Dialog sizing for confirmation dialogs
+ * US-010: Smaller size for confirmations
+ */
+export const CONFIRMATION_DIALOG_CONFIG = {
+  maxWidth: 'xs' as const,
   fullWidth: true,
 } as const;
 

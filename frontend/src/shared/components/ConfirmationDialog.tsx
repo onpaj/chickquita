@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
-  DIALOG_CONFIG,
+  CONFIRMATION_DIALOG_CONFIG,
   isMobileViewport,
   dialogTitleSx,
   dialogContentSx,
@@ -82,6 +82,18 @@ interface ConfirmationDialogProps {
   confirmColor?: 'primary' | 'error' | 'warning' | 'success';
 
   /**
+   * Variant of the confirm button
+   * @default 'contained'
+   */
+  confirmVariant?: 'text' | 'outlined' | 'contained';
+
+  /**
+   * Variant of the cancel button
+   * @default 'text'
+   */
+  cancelVariant?: 'text' | 'outlined' | 'contained';
+
+  /**
    * Text to display in confirm button while pending
    * @default 'common.processing'
    */
@@ -90,14 +102,17 @@ interface ConfirmationDialogProps {
 
 /**
  * Standardized confirmation dialog component
+ * US-010 Standardization
  *
  * Features:
- * - Consistent sizing (maxWidth: 'sm')
+ * - Consistent sizing (maxWidth: 'xs' for confirmations)
  * - Mobile fullscreen support
- * - Standardized padding (DialogTitle: p: 2, DialogContent: p: 3)
+ * - Clear warning message with context
+ * - Danger action button (red, outlined or contained)
+ * - Cancel button (text or outlined)
+ * - Loading state with disabled buttons
+ * - Standardized padding and spacing (DialogTitle: p: 2, DialogContent: p: 3)
  * - Touch-friendly buttons (minHeight: 44px)
- * - Loading state with spinner
- * - Configurable button colors
  */
 export function ConfirmationDialog({
   open,
@@ -111,6 +126,8 @@ export function ConfirmationDialog({
   confirmText,
   cancelText,
   confirmColor = 'primary',
+  confirmVariant = 'contained',
+  cancelVariant = 'text',
   pendingText,
 }: ConfirmationDialogProps) {
   const { t } = useTranslation();
@@ -122,8 +139,8 @@ export function ConfirmationDialog({
     <Dialog
       open={open}
       onClose={isPending ? undefined : onClose}
-      maxWidth={DIALOG_CONFIG.maxWidth}
-      fullWidth={DIALOG_CONFIG.fullWidth}
+      maxWidth={CONFIRMATION_DIALOG_CONFIG.maxWidth}
+      fullWidth={CONFIRMATION_DIALOG_CONFIG.fullWidth}
       fullScreen={isMobileViewport()}
     >
       <DialogTitle sx={dialogTitleSx}>{title}</DialogTitle>
@@ -150,6 +167,7 @@ export function ConfirmationDialog({
         <Button
           onClick={onClose}
           disabled={isPending}
+          variant={cancelVariant}
           sx={touchButtonSx}
         >
           {defaultCancelText}
@@ -157,7 +175,7 @@ export function ConfirmationDialog({
         <Button
           onClick={onConfirm}
           color={confirmColor}
-          variant="contained"
+          variant={confirmVariant}
           disabled={isPending}
           sx={touchButtonSx}
           startIcon={

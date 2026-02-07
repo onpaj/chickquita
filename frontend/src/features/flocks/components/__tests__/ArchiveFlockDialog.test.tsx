@@ -196,14 +196,14 @@ describe('ArchiveFlockDialog', () => {
   });
 
   describe('Mobile Responsiveness', () => {
-    it('should have fullWidth and maxWidth sm properties for mobile', () => {
+    it('should have fullWidth and maxWidth xs properties for confirmation dialogs', () => {
       renderDialog();
 
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
 
       // Dialog component should be present with proper responsive settings
-      // fullWidth and maxWidth="sm" props are applied to make it mobile-friendly
+      // fullWidth and maxWidth="xs" props are applied per US-010 standardization
     });
 
     it('should have minimum touch target size for buttons', () => {
