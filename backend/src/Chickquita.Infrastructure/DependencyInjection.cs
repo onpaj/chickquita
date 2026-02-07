@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Chickquita.Infrastructure;
@@ -29,13 +30,18 @@ public static class DependencyInjection
         // Register tenant interceptor
         services.AddScoped<TenantInterceptor>();
 
+        // Determine which connection string to use based on environment
+        var environment = configuration["ASPNETCORE_ENVIRONMENT"] ?? "Development";
+        var connectionStringKey = environment == "E2ETests" ? "E2ETests" : "DefaultConnection";
+        var connectionString = configuration.GetConnectionString(connectionStringKey);
+
         // Register DbContext with Npgsql (PostgreSQL) and tenant interceptor
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
         {
             var tenantInterceptor = serviceProvider.GetRequiredService<TenantInterceptor>();
 
             options.UseNpgsql(
-                configuration.GetConnectionString("DefaultConnection"),
+                connectionString,
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
                 .AddInterceptors(tenantInterceptor);
         });

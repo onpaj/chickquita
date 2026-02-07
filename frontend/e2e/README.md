@@ -82,6 +82,49 @@ npx playwright codegen --save-storage=.auth/user.json http://localhost:3100
 # Copy cookies and localStorage to .auth/user.json
 ```
 
+### Database Configuration
+
+E2E tests use a **separate database** to avoid interfering with development data. Configure this in your user secrets:
+
+```bash
+# Navigate to the API project
+cd ../../backend/src/Chickquita.Api
+
+# Set the E2E database connection string in user secrets
+dotnet user-secrets set "ConnectionStrings:E2ETests" "postgresql://username:password@endpoint/chickquita_e2e?sslmode=require"
+```
+
+Apply migrations to the E2E database:
+
+```bash
+cd ../../backend/src/Chickquita.Api
+
+# Run migrations for E2E database
+ASPNETCORE_ENVIRONMENT=E2ETests dotnet ef database update \
+  --project ../Chickquita.Infrastructure \
+  --startup-project .
+```
+
+### Starting the Backend for E2E Tests
+
+Before running E2E tests, start the backend in E2ETests mode:
+
+**Option 1: Using dotnet run**
+```bash
+# Terminal 1: Start backend in E2ETests mode
+cd backend/src/Chickquita.Api
+dotnet run --launch-profile E2ETests
+```
+
+**Option 2: Using the helper script**
+```bash
+# Terminal 1: Start backend using helper script
+cd frontend/e2e
+./start-backend-e2e.sh
+```
+
+The backend will use the `ConnectionStrings:E2ETests` connection string from user secrets.
+
 ### Environment Variables
 
 Optional environment variables:
@@ -264,6 +307,13 @@ npx playwright codegen http://localhost:5173
 6. **Accessibility**: Use ARIA roles for reliable selectors
 
 ## Common Issues
+
+### Issue: Database connection error during E2E tests
+**Solution**:
+- Verify `ConnectionStrings:E2ETests` is set in user secrets
+- Ensure the E2E database exists and migrations are applied
+- Check that the backend is running in E2ETests mode (`--launch-profile E2ETests`)
+- Verify connection string format: `postgresql://user:pass@host/dbname?sslmode=require`
 
 ### Issue: Test user credentials not found
 **Solution**: Set `TEST_USER_EMAIL` and `TEST_USER_PASSWORD` environment variables

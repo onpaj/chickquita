@@ -38,12 +38,21 @@
       }
     },
     "Database Migration": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "ef database update --project ../Chickquita.Infrastructure --startup-project .",
+      "workingDirectory": "$(ProjectDir)",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "E2ETests": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5100",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "E2ETests"
       }
     }
   }
