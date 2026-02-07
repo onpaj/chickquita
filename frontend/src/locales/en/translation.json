@@ -19,7 +19,8 @@
     "more": "More",
     "retry": "Retry",
     "all": "All",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "characters": "characters"
   },
   "auth": {
     "signIn": "Sign In",
@@ -199,6 +200,7 @@
     "title": "Daily Records",
     "addRecord": "Add Record",
     "eggCount": "Egg Count",
+    "eggsLabel": "eggs",
     "date": "Date",
     "notes": "Notes",
     "flock": "Flock",
@@ -206,6 +208,7 @@
     "clearFilters": "Clear Filters",
     "recordsCount": "{{count}} records",
     "recordsCount_one": "{{count}} record",
+    "dateFutureError": "Record date cannot be in the future",
     "filters": {
       "today": "Today",
       "lastWeek": "Last Week",
@@ -241,6 +244,28 @@
       "flockInfo": "Flock: {{flock}}",
       "success": "Daily record deleted successfully",
       "error": "Failed to delete daily record"
+    },
+    "validation": {
+      "flockIdRequired": "Flock ID is required",
+      "flockIdString": "Flock ID must be a string",
+      "flockIdUuid": "Flock ID must be a valid UUID format",
+      "recordDateRequired": "Record date is required",
+      "recordDateString": "Record date must be a string",
+      "recordDateFormat": "Record date must be in YYYY-MM-DD format",
+      "recordDateFuture": "Record date cannot be in the future",
+      "eggCountNumber": "Egg count must be a number",
+      "eggCountInteger": "Egg count must be an integer",
+      "eggCountNonnegative": "Egg count cannot be negative",
+      "notesString": "Notes must be a string",
+      "notesMaxLength": "Notes cannot exceed 500 characters",
+      "recordIdRequired": "Daily record ID is required",
+      "recordIdString": "Daily record ID must be a string",
+      "recordIdUuid": "Daily record ID must be a valid UUID format",
+      "startDateString": "Start date must be a string",
+      "startDateFormat": "Start date must be in YYYY-MM-DD format",
+      "endDateString": "End date must be a string",
+      "endDateFormat": "End date must be in YYYY-MM-DD format",
+      "endDateAfterStart": "End date must be the same or later than start date"
     }
   },
   "settings": {

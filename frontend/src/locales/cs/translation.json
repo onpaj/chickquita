@@ -200,6 +200,7 @@
     "title": "Denní záznamy",
     "addRecord": "Přidat záznam",
     "eggCount": "Počet vajec",
+    "eggsLabel": "vajec",
     "date": "Datum",
     "notes": "Poznámky",
     "flock": "Hejno",
@@ -209,6 +210,7 @@
     "recordsCount_one": "{{count}} záznam",
     "recordsCount_few": "{{count}} záznamy",
     "recordsCount_many": "{{count}} záznamů",
+    "dateFutureError": "Datum záznamu nemůže být v budoucnosti",
     "filters": {
       "today": "Dnes",
       "lastWeek": "Poslední týden",
@@ -244,6 +246,28 @@
       "flockInfo": "Hejno: {{flock}}",
       "success": "Denní záznam byl úspěšně smazán",
       "error": "Nepodařilo se smazat denní záznam"
+    },
+    "validation": {
+      "flockIdRequired": "ID hejna je povinné",
+      "flockIdString": "ID hejna musí být textový řetězec",
+      "flockIdUuid": "ID hejna musí být platný UUID formát",
+      "recordDateRequired": "Datum záznamu je povinné",
+      "recordDateString": "Datum záznamu musí být textový řetězec",
+      "recordDateFormat": "Datum záznamu musí být ve formátu YYYY-MM-DD",
+      "recordDateFuture": "Datum záznamu nemůže být v budoucnosti",
+      "eggCountNumber": "Počet vajec musí být číslo",
+      "eggCountInteger": "Počet vajec musí být celé číslo",
+      "eggCountNonnegative": "Počet vajec nemůže být záporný",
+      "notesString": "Poznámky musí být textový řetězec",
+      "notesMaxLength": "Poznámky nesmí překročit 500 znaků",
+      "recordIdRequired": "ID denního záznamu je povinné",
+      "recordIdString": "ID denního záznamu musí být textový řetězec",
+      "recordIdUuid": "ID denního záznamu musí být platný UUID formát",
+      "startDateString": "Datum začátku musí být textový řetězec",
+      "startDateFormat": "Datum začátku musí být ve formátu YYYY-MM-DD",
+      "endDateString": "Datum konce musí být textový řetězec",
+      "endDateFormat": "Datum konce musí být ve formátu YYYY-MM-DD",
+      "endDateAfterStart": "Datum konce musí být stejné nebo pozdější než datum začátku"
     }
   },
   "settings": {

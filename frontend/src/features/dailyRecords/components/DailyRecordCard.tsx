@@ -2,6 +2,7 @@ import { Card, CardContent, Typography, Box, Chip, IconButton } from '@mui/mater
 import { Egg as EggIcon, Edit as EditIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import type { DailyRecordDto } from '../api/dailyRecordsApi';
 
 interface DailyRecordCardProps {
@@ -23,6 +24,7 @@ interface DailyRecordCardProps {
  * />
  */
 export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecordCardProps) {
+  const { t } = useTranslation();
   const formattedDate = format(new Date(record.recordDate), 'dd. MM. yyyy', {
     locale: cs,
   });
@@ -100,7 +102,7 @@ export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecord
               {record.eggCount}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              vajec
+              {t('dailyRecords.eggsLabel')}
             </Typography>
           </Box>
         </Box>
