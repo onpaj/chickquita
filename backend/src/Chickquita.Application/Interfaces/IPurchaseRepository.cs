@@ -14,6 +14,20 @@ public interface IPurchaseRepository
     Task<List<Purchase>> GetAllAsync();
 
     /// <summary>
+    /// Gets purchases with optional filters.
+    /// </summary>
+    /// <param name="fromDate">Optional start date filter (inclusive)</param>
+    /// <param name="toDate">Optional end date filter (inclusive)</param>
+    /// <param name="type">Optional purchase type filter</param>
+    /// <param name="coopId">Optional coop ID filter</param>
+    /// <returns>A list of filtered purchases ordered by PurchaseDate descending</returns>
+    Task<List<Purchase>> GetWithFiltersAsync(
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        PurchaseType? type = null,
+        Guid? coopId = null);
+
+    /// <summary>
     /// Gets a purchase by its ID with navigation properties loaded.
     /// </summary>
     /// <param name="id">The purchase ID</param>
@@ -40,6 +54,14 @@ public interface IPurchaseRepository
     /// </summary>
     /// <returns>A list of distinct purchase names</returns>
     Task<List<string>> GetDistinctNamesAsync();
+
+    /// <summary>
+    /// Gets distinct purchase names filtered by query string for autocomplete.
+    /// </summary>
+    /// <param name="query">The search query string (case-insensitive)</param>
+    /// <param name="limit">Maximum number of results to return (default 20)</param>
+    /// <returns>A list of distinct purchase names matching the query, sorted alphabetically</returns>
+    Task<List<string>> GetDistinctNamesByQueryAsync(string query, int limit = 20);
 
     /// <summary>
     /// Adds a new purchase.

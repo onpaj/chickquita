@@ -27,6 +27,47 @@ public class PurchaseRepository : IPurchaseRepository
     }
 
     /// <inheritdoc />
+    public async Task<List<Purchase>> GetWithFiltersAsync(
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        PurchaseType? type = null,
+        Guid? coopId = null)
+    {
+        var query = _context.Purchases
+            .Include(p => p.Coop)
+            .AsQueryable();
+
+        // Apply date range filter
+        if (fromDate.HasValue)
+        {
+            var fromDateUtc = DateTime.SpecifyKind(fromDate.Value.Date, DateTimeKind.Utc);
+            query = query.Where(p => p.PurchaseDate >= fromDateUtc);
+        }
+
+        if (toDate.HasValue)
+        {
+            var toDateUtc = DateTime.SpecifyKind(toDate.Value.Date, DateTimeKind.Utc);
+            query = query.Where(p => p.PurchaseDate <= toDateUtc);
+        }
+
+        // Apply type filter
+        if (type.HasValue)
+        {
+            query = query.Where(p => p.Type == type.Value);
+        }
+
+        // Apply coop filter
+        if (coopId.HasValue)
+        {
+            query = query.Where(p => p.CoopId == coopId.Value);
+        }
+
+        return await query
+            .OrderByDescending(p => p.PurchaseDate)
+            .ToListAsync();
+    }
+
+    /// <inheritdoc />
     public async Task<Purchase?> GetByIdAsync(Guid id)
     {
         return await _context.Purchases
@@ -65,6 +106,25 @@ public class PurchaseRepository : IPurchaseRepository
             .Select(p => p.Name)
             .Distinct()
             .OrderBy(n => n)
+            .ToListAsync();
+    }
+
+    /// <inheritdoc />
+    public async Task<List<string>> GetDistinctNamesByQueryAsync(string query, int limit = 20)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return new List<string>();
+        }
+
+        var lowerQuery = query.ToLower();
+
+        return await _context.Purchases
+            .Where(p => p.Name.ToLower().Contains(lowerQuery))
+            .Select(p => p.Name)
+            .Distinct()
+            .OrderBy(n => n)
+            .Take(limit)
             .ToListAsync();
     }
 
