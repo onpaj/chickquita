@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/backend/" />
+  <Folder Name="/backend/src/" />
+  <Folder Name="/backend/tests/">
+    <Project Path="backend/tests/Chickquita.Application.Tests/Chickquita.Application.Tests.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="backend\src\Chickquita.Api\Chickquita.Api.csproj" />
     <Project Path="backend\src\Chickquita.Application\Chickquita.Application.csproj" />
