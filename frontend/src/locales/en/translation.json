@@ -4,6 +4,7 @@
     "loading": "Loading...",
     "save": "Save",
     "saving": "Saving...",
+    "create": "Create",
     "cancel": "Cancel",
     "delete": "Delete",
     "deleting": "Deleting...",
@@ -248,6 +249,20 @@
     "update": {
       "success": "Purchase updated successfully",
       "error": "Failed to update purchase"
+    },
+    "form": {
+      "type": "Purchase Type",
+      "name": "Name",
+      "purchaseDate": "Purchase Date",
+      "amount": "Amount (CZK)",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "consumedDate": "Consumed Date",
+      "notes": "Notes",
+      "coop": "Coop",
+      "noCoop": "No Coop",
+      "purchaseDateFuture": "Purchase date cannot be in the future",
+      "consumedDateFuture": "Consumed date cannot be in the future"
     }
   },
   "dailyRecords": {
@@ -335,7 +350,11 @@
     "maxLength": "Maximum length is {{count}} characters",
     "min": "Minimum value is {{count}}",
     "max": "Maximum value is {{count}}",
-    "positiveNumber": "Must be a positive number"
+    "positiveNumber": "Must be a positive number",
+    "invalidNumber": "Must be a valid number",
+    "invalidType": "Invalid type",
+    "maxAmount": "Maximum amount is 999999.99 CZK",
+    "maxQuantity": "Maximum quantity is 999999.99"
   },
   "errors": {
     "generic": "Something went wrong",

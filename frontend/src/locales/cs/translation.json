@@ -4,6 +4,7 @@
     "loading": "Načítání...",
     "save": "Uložit",
     "saving": "Ukládám...",
+    "create": "Vytvořit",
     "cancel": "Zrušit",
     "delete": "Smazat",
     "deleting": "Mažu...",
@@ -248,6 +249,20 @@
     "update": {
       "success": "Nákup byl úspěšně aktualizován",
       "error": "Nepodařilo se aktualizovat nákup"
+    },
+    "form": {
+      "type": "Typ nákupu",
+      "name": "Název",
+      "purchaseDate": "Datum nákupu",
+      "amount": "Částka (Kč)",
+      "quantity": "Množství",
+      "unit": "Jednotka",
+      "consumedDate": "Datum spotřeby",
+      "notes": "Poznámky",
+      "coop": "Kurník",
+      "noCoop": "Bez kurníku",
+      "purchaseDateFuture": "Datum nákupu nemůže být v budoucnosti",
+      "consumedDateFuture": "Datum spotřeby nemůže být v budoucnosti"
     }
   },
   "dailyRecords": {
@@ -337,7 +352,11 @@
     "maxLength": "Maximální délka je {{count}} znaků",
     "min": "Minimální hodnota je {{count}}",
     "max": "Maximální hodnota je {{count}}",
-    "positiveNumber": "Musí být kladné číslo"
+    "positiveNumber": "Musí být kladné číslo",
+    "invalidNumber": "Musí být platné číslo",
+    "invalidType": "Neplatný typ",
+    "maxAmount": "Maximální částka je 999999.99 Kč",
+    "maxQuantity": "Maximální množství je 999999.99"
   },
   "errors": {
     "generic": "Něco se pokazilo",
