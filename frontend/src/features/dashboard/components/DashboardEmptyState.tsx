@@ -1,7 +1,8 @@
 import { Box, Typography, Button, Paper } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import EggIcon from '@mui/icons-material/Egg';
+import AddIcon from '@mui/icons-material/Add';
+import { EmptyDashboardIllustration } from '../../../assets/illustrations';
 
 /**
  * Empty state component for dashboard when user has no data
@@ -36,19 +37,8 @@ export function DashboardEmptyState() {
         }}
       >
         {/* Illustration */}
-        <Box
-          sx={{
-            width: 120,
-            height: 120,
-            borderRadius: '50%',
-            backgroundColor: 'primary.light',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.8,
-          }}
-        >
-          <EggIcon sx={{ fontSize: 64, color: 'primary.main' }} />
+        <Box>
+          <EmptyDashboardIllustration aria-label={t('dashboard.emptyState.title')} />
         </Box>
 
         {/* Text content */}
@@ -66,7 +56,7 @@ export function DashboardEmptyState() {
           variant="contained"
           size="large"
           onClick={handleCreateCoop}
-          startIcon={<EggIcon />}
+          startIcon={<AddIcon />}
           sx={{
             borderRadius: 2,
             px: 4,

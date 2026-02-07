@@ -1,7 +1,7 @@
 import { Box, Typography, Button } from '@mui/material';
-import HouseIcon from '@mui/icons-material/House';
 import AddIcon from '@mui/icons-material/Add';
 import { useTranslation } from 'react-i18next';
+import { EmptyCoopsIllustration } from '../../../assets/illustrations';
 
 interface CoopsEmptyStateProps {
   onAddClick: () => void;
@@ -23,25 +23,8 @@ export function CoopsEmptyState({ onAddClick }: CoopsEmptyStateProps) {
         px: 2,
       }}
     >
-      <Box
-        sx={{
-          width: 120,
-          height: 120,
-          borderRadius: '50%',
-          backgroundColor: 'primary.light',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          mb: 3,
-          opacity: 0.9,
-        }}
-      >
-        <HouseIcon
-          sx={{
-            fontSize: 64,
-            color: 'primary.main',
-          }}
-        />
+      <Box sx={{ mb: 3 }}>
+        <EmptyCoopsIllustration aria-label={t('coops.emptyState.title')} />
       </Box>
 
       <Typography variant="h6" color="text.primary" gutterBottom sx={{ fontWeight: 500 }}>

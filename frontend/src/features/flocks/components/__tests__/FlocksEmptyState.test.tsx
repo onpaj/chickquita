@@ -3,6 +3,15 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlocksEmptyState } from '../FlocksEmptyState';
 
+// Mock SVG imports
+vi.mock('../../../../assets/illustrations', () => ({
+  EmptyFlocksIllustration: ({ 'aria-label': ariaLabel }: { 'aria-label'?: string }) => (
+    <svg data-testid="empty-flocks-illustration" aria-label={ariaLabel} role="img">
+      <title>Empty Flocks</title>
+    </svg>
+  ),
+}));
+
 // Mock i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -41,13 +50,14 @@ describe('FlocksEmptyState', () => {
       expect(button).toBeInTheDocument();
     });
 
-    it('renders egg icon', () => {
+    it('renders empty flocks illustration', () => {
       const mockOnAddClick = vi.fn();
-      const { container } = render(<FlocksEmptyState onAddClick={mockOnAddClick} />);
+      render(<FlocksEmptyState onAddClick={mockOnAddClick} />);
 
-      // Check for MUI EggIcon - it uses SVG with specific test id or class
-      const icon = container.querySelector('svg[data-testid="EggIcon"]');
-      expect(icon).toBeInTheDocument();
+      // Check for the custom SVG illustration
+      const illustration = screen.getByTestId('empty-flocks-illustration');
+      expect(illustration).toBeInTheDocument();
+      expect(illustration).toHaveAttribute('role', 'img');
     });
   });
 

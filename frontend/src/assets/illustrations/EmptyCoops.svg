@@ -1,0 +1,48 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Empty chicken coop illustration">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#F7FAFC"/>
+
+  <!-- Coop base -->
+  <rect x="50" y="110" width="100" height="60" rx="4" fill="#718096"/>
+  <rect x="55" y="115" width="90" height="50" rx="2" fill="#A0AEC0"/>
+
+  <!-- Coop roof -->
+  <path d="M40 110 L100 70 L160 110 Z" fill="#E55420"/>
+  <path d="M45 110 L100 75 L155 110 Z" fill="#FF6B35"/>
+
+  <!-- Roof ridge -->
+  <rect x="98" y="70" width="4" height="40" fill="#E55420"/>
+
+  <!-- Door -->
+  <rect x="80" y="130" width="40" height="40" rx="2" fill="#4A5568"/>
+  <rect x="85" y="135" width="30" height="30" rx="1" fill="#2D3748"/>
+  <circle cx="112" cy="150" r="2" fill="#FFA94D"/>
+
+  <!-- Window -->
+  <circle cx="65" cy="135" r="8" fill="#63B3ED"/>
+  <line x1="65" y1="127" x2="65" y2="143" stroke="#4A5568" stroke-width="1.5"/>
+  <line x1="57" y1="135" x2="73" y2="135" stroke="#4A5568" stroke-width="1.5"/>
+
+  <!-- Fence posts -->
+  <rect x="25" y="120" width="6" height="50" rx="1" fill="#718096"/>
+  <rect x="169" y="120" width="6" height="50" rx="1" fill="#718096"/>
+
+  <!-- Fence bars -->
+  <rect x="31" y="130" width="14" height="3" rx="1" fill="#A0AEC0"/>
+  <rect x="31" y="145" width="14" height="3" rx="1" fill="#A0AEC0"/>
+  <rect x="31" y="160" width="14" height="3" rx="1" fill="#A0AEC0"/>
+
+  <rect x="155" y="130" width="14" height="3" rx="1" fill="#A0AEC0"/>
+  <rect x="155" y="145" width="14" height="3" rx="1" fill="#A0AEC0"/>
+  <rect x="155" y="160" width="14" height="3" rx="1" fill="#A0AEC0"/>
+
+  <!-- Ground -->
+  <ellipse cx="100" cy="175" rx="80" ry="8" fill="#E2E8F0" opacity="0.6"/>
+
+  <!-- Decorative elements: hay bales -->
+  <rect x="155" y="155" width="15" height="12" rx="1" fill="#FFA94D"/>
+  <rect x="157" y="157" width="11" height="8" rx="0.5" fill="#FFB86C"/>
+
+  <rect x="30" y="155" width="15" height="12" rx="1" fill="#FFA94D"/>
+  <rect x="32" y="157" width="11" height="8" rx="0.5" fill="#FFB86C"/>
+</svg>

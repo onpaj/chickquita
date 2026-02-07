@@ -1,0 +1,113 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Empty flocks illustration with chickens">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#F7FAFC"/>
+
+  <!-- Ground -->
+  <ellipse cx="100" cy="160" rx="85" ry="10" fill="#E2E8F0" opacity="0.8"/>
+
+  <!-- Left chicken -->
+  <g transform="translate(50, 95)">
+    <!-- Body -->
+    <ellipse cx="20" cy="30" rx="18" ry="20" fill="#FFFFFF"/>
+    <ellipse cx="20" cy="30" rx="16" ry="18" fill="#F7FAFC"/>
+
+    <!-- Wing -->
+    <ellipse cx="15" cy="28" rx="8" ry="12" fill="#E2E8F0"/>
+
+    <!-- Head -->
+    <circle cx="20" cy="15" r="10" fill="#FFFFFF"/>
+    <circle cx="20" cy="15" r="9" fill="#F7FAFC"/>
+
+    <!-- Eye -->
+    <circle cx="23" cy="14" r="2" fill="#2D3748"/>
+    <circle cx="24" cy="13" r="0.8" fill="#FFFFFF"/>
+
+    <!-- Beak -->
+    <path d="M28 15 L32 16 L28 17 Z" fill="#FFA94D"/>
+
+    <!-- Comb -->
+    <path d="M18 8 Q20 5 22 8" fill="#E55420"/>
+
+    <!-- Wattle -->
+    <path d="M22 19 Q24 21 22 23" fill="#E55420"/>
+
+    <!-- Legs -->
+    <line x1="16" y1="48" x2="16" y2="55" stroke="#FFA94D" stroke-width="2" stroke-linecap="round"/>
+    <line x1="24" y1="48" x2="24" y2="55" stroke="#FFA94D" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Feet -->
+    <path d="M14 55 L16 55 L16 57 M16 55 L18 57" stroke="#FFA94D" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M22 55 L24 55 L24 57 M24 55 L26 57" stroke="#FFA94D" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Right chicken (larger, different pose) -->
+  <g transform="translate(105, 90)">
+    <!-- Body -->
+    <ellipse cx="20" cy="35" rx="20" ry="22" fill="#FFE5CC"/>
+    <ellipse cx="20" cy="35" rx="18" ry="20" fill="#FFF5E6"/>
+
+    <!-- Wing -->
+    <ellipse cx="14" cy="32" rx="9" ry="14" fill="#FFE5CC"/>
+
+    <!-- Tail feathers -->
+    <path d="M35 30 Q40 25 38 35 Q40 30 42 38" fill="#E2E8F0"/>
+
+    <!-- Head -->
+    <circle cx="22" cy="18" r="11" fill="#FFE5CC"/>
+    <circle cx="22" cy="18" r="10" fill="#FFF5E6"/>
+
+    <!-- Eye -->
+    <circle cx="25" cy="17" r="2" fill="#2D3748"/>
+    <circle cx="26" cy="16" r="0.8" fill="#FFFFFF"/>
+
+    <!-- Beak -->
+    <path d="M30 18 L34 19 L30 20 Z" fill="#FF922B"/>
+
+    <!-- Comb (more prominent) -->
+    <path d="M18 10 Q20 6 22 10 Q24 6 26 10" fill="#FF6B35"/>
+
+    <!-- Wattle -->
+    <path d="M24 23 Q26 25 24 28" fill="#FF6B35"/>
+
+    <!-- Legs -->
+    <line x1="16" y1="55" x2="16" y2="62" stroke="#FF922B" stroke-width="2" stroke-linecap="round"/>
+    <line x1="24" y1="55" x2="24" y2="62" stroke="#FF922B" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Feet -->
+    <path d="M14 62 L16 62 L16 64 M16 62 L18 64" stroke="#FF922B" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M22 62 L24 62 L24 64 M24 62 L26 64" stroke="#FF922B" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Egg in foreground -->
+  <ellipse cx="95" cy="155" rx="8" ry="10" fill="#FFFFFF"/>
+  <ellipse cx="95" cy="155" rx="7" ry="9" fill="#FFF5E6"/>
+
+  <!-- Small chick -->
+  <g transform="translate(140, 135)">
+    <!-- Body (small fluffy circle) -->
+    <circle cx="10" cy="12" r="8" fill="#FFEB99"/>
+    <circle cx="10" cy="12" r="7" fill="#FFF9CC"/>
+
+    <!-- Head -->
+    <circle cx="10" cy="6" r="5" fill="#FFEB99"/>
+    <circle cx="10" cy="6" r="4" fill="#FFF9CC"/>
+
+    <!-- Eye -->
+    <circle cx="12" cy="5" r="1.5" fill="#2D3748"/>
+    <circle cx="12.5" cy="4.5" r="0.5" fill="#FFFFFF"/>
+
+    <!-- Beak -->
+    <path d="M13 6 L15 6.5 L13 7 Z" fill="#FFA94D"/>
+
+    <!-- Legs (short) -->
+    <line x1="8" y1="19" x2="8" y2="22" stroke="#FFA94D" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="12" y1="19" x2="12" y2="22" stroke="#FFA94D" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Feed scattered on ground -->
+  <circle cx="70" cy="158" r="2" fill="#FFB86C" opacity="0.7"/>
+  <circle cx="75" cy="160" r="1.5" fill="#FFB86C" opacity="0.7"/>
+  <circle cx="68" cy="162" r="1.8" fill="#FFB86C" opacity="0.7"/>
+  <circle cx="130" cy="156" r="2" fill="#FFB86C" opacity="0.7"/>
+  <circle cx="135" cy="159" r="1.5" fill="#FFB86C" opacity="0.7"/>
+</svg>
