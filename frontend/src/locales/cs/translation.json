@@ -239,6 +239,9 @@
       "error": "Nepodařilo se aktualizovat denní záznam"
     },
     "delete": {
+      "title": "Smazat denní záznam",
+      "message": "Opravdu chcete smazat denní záznam z data",
+      "flockInfo": "Hejno: {{flock}}",
       "success": "Denní záznam byl úspěšně smazán",
       "error": "Nepodařilo se smazat denní záznam"
     }

@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { EditDailyRecordModal } from '../EditDailyRecordModal';
-import { useUpdateDailyRecord } from '../../hooks/useDailyRecords';
+import { useUpdateDailyRecord, useDeleteDailyRecord } from '../../hooks/useDailyRecords';
 import type { DailyRecordDto } from '../../api/dailyRecordsApi';
 
 // Mock the hooks
@@ -28,6 +28,7 @@ vi.mock('react-i18next', () => ({
         'dailyRecords.notes': 'Poznámky',
         'dailyRecords.noFlocks': 'Žádná dostupná hejna',
         'common.cancel': 'Zrušit',
+        'common.delete': 'Smazat',
         'common.save': 'Uložit',
         'common.saving': 'Ukládám...',
         'common.characters': 'znaků',
@@ -40,6 +41,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 const mockUpdateDailyRecord = vi.fn();
+const mockDeleteDailyRecord = vi.fn();
 
 describe('EditDailyRecordModal', () => {
   const queryClient = new QueryClient({
@@ -77,6 +79,11 @@ describe('EditDailyRecordModal', () => {
 
     (useUpdateDailyRecord as ReturnType<typeof vi.fn>).mockReturnValue({
       mutate: mockUpdateDailyRecord,
+      isPending: false,
+    });
+
+    (useDeleteDailyRecord as ReturnType<typeof vi.fn>).mockReturnValue({
+      mutate: mockDeleteDailyRecord,
       isPending: false,
     });
   });

@@ -10,6 +10,7 @@ import {
   TextField,
   Alert,
 } from '@mui/material';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useUpdateDailyRecord } from '../hooks/useDailyRecords';
 import { useErrorHandler } from '../../../hooks/useErrorHandler';
@@ -26,6 +27,7 @@ import {
   FORM_FIELD_SPACING,
 } from '@/shared/constants/modalConfig';
 import type { DailyRecordDto } from '../api/dailyRecordsApi';
+import { DeleteDailyRecordDialog } from './DeleteDailyRecordDialog';
 
 interface EditDailyRecordModalProps {
   open: boolean;
@@ -83,19 +85,17 @@ export function EditDailyRecordModal({
   const [notes, setNotes] = useState<string>('');
   const [eggCountError, setEggCountError] = useState('');
   const [notesError, setNotesError] = useState('');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const eggCountRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill form when record changes
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (record && open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEggCount(record.eggCount);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNotes(record.notes || '');
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEggCountError('');
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNotesError('');
     }
   }, [record, open]);
@@ -116,7 +116,16 @@ export function EditDailyRecordModal({
     setNotes('');
     setEggCountError('');
     setNotesError('');
+    setIsDeleteDialogOpen(false);
     onClose();
+  };
+
+  const handleDeleteClick = () => {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteDialogClose = () => {
+    setIsDeleteDialogOpen(false);
   };
 
   const validateEggCount = (value: number): string => {
@@ -302,6 +311,15 @@ export function EditDailyRecordModal({
         </DialogContent>
         <DialogActions sx={dialogActionsSx}>
           <Button
+            onClick={handleDeleteClick}
+            disabled={isPending || !canEdit}
+            color="error"
+            startIcon={<DeleteIcon />}
+            sx={{ ...touchButtonSx, mr: 'auto' }}
+          >
+            {t('common.delete')}
+          </Button>
+          <Button
             onClick={handleClose}
             disabled={isPending}
             sx={touchButtonSx}
@@ -321,6 +339,15 @@ export function EditDailyRecordModal({
           </Button>
         </DialogActions>
       </form>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteDailyRecordDialog
+        open={isDeleteDialogOpen}
+        onClose={handleDeleteDialogClose}
+        record={record}
+        flockIdentifier={flockIdentifier}
+        onSuccess={handleClose}
+      />
     </Dialog>
   );
 }

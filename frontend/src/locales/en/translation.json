@@ -236,6 +236,9 @@
       "error": "Failed to update daily record"
     },
     "delete": {
+      "title": "Delete Daily Record",
+      "message": "Are you sure you want to delete the daily record from",
+      "flockInfo": "Flock: {{flock}}",
       "success": "Daily record deleted successfully",
       "error": "Failed to delete daily record"
     }
