@@ -578,6 +578,71 @@ public class CreateFlockCommandHandlerTests
         _mockFlockRepository.Verify(x => x.AddAsync(It.IsAny<Flock>()), Times.Never);
     }
 
+    [Fact]
+    public async Task Handle_WithDuplicateIdentifierInDifferentCoop_ShouldCreateSuccessfully()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coop1Id = Guid.NewGuid();
+        var coop2Id = Guid.NewGuid();
+        var sharedIdentifier = "Shared Flock Name";
+
+        var command = new CreateFlockCommand
+        {
+            CoopId = coop2Id,
+            Identifier = sharedIdentifier, // Same identifier as in coop1
+            HatchDate = DateTime.UtcNow.AddDays(-10),
+            InitialHens = 10,
+            InitialRoosters = 2,
+            InitialChicks = 0
+        };
+
+        var coop2 = Coop.Create(tenantId, "Second Coop", "South Field");
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coop2Id)).ReturnsAsync(coop2);
+
+        // The identifier exists in coop1, but not in coop2
+        _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coop2Id, sharedIdentifier))
+            .ReturnsAsync(false);
+
+        var createdFlock = Flock.Create(
+            tenantId,
+            coop2Id,
+            command.Identifier,
+            command.HatchDate,
+            command.InitialHens,
+            command.InitialRoosters,
+            command.InitialChicks);
+
+        _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
+            .ReturnsAsync(createdFlock);
+
+        var expectedDto = new FlockDto
+        {
+            Id = createdFlock.Id,
+            TenantId = tenantId,
+            CoopId = coop2Id,
+            Identifier = command.Identifier,
+            IsActive = true
+        };
+
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(expectedDto);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Identifier.Should().Be(sharedIdentifier);
+        result.Value.CoopId.Should().Be(coop2Id);
+
+        _mockFlockRepository.Verify(x => x.ExistsByIdentifierInCoopAsync(coop2Id, sharedIdentifier), Times.Once);
+        _mockFlockRepository.Verify(x => x.AddAsync(It.IsAny<Flock>()), Times.Once);
+    }
+
     #endregion
 
     #region Authentication and Tenant Isolation Tests
