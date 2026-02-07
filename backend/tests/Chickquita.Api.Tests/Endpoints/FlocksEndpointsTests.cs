@@ -646,6 +646,178 @@ public class FlocksEndpointsTests : IClassFixture<WebApplicationFactory<Program>
     }
 
     [Fact]
+    public async Task TenantIsolation_UserCannotGetFlockFromDifferentTenant()
+    {
+        // Arrange
+        var tenant1Id = Guid.NewGuid();
+        var tenant2Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
+
+        using var scope = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+            });
+        }).Services.CreateScope();
+
+        await SeedTenant(scope, tenant1Id, "clerk_user_1");
+        await SeedTenant(scope, tenant2Id, "clerk_user_2");
+        var coop1Id = await SeedCoop(scope, tenant1Id, "Tenant 1 Coop", "Location 1");
+        var coop2Id = await SeedCoop(scope, tenant2Id, "Tenant 2 Coop", "Location 2");
+
+        // Seed flock for tenant 2
+        var tenant2FlockId = await SeedFlock(scope, tenant2Id, coop2Id, "Tenant 2 Flock", 15, 3, 5);
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        }).CreateClient();
+
+        // Act - Tenant 1 user tries to get Tenant 2's flock
+        var response = await client.GetAsync($"/api/flocks/{tenant2FlockId}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task TenantIsolation_UserCannotUpdateFlockFromDifferentTenant()
+    {
+        // Arrange
+        var tenant1Id = Guid.NewGuid();
+        var tenant2Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
+
+        using var scope = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+            });
+        }).Services.CreateScope();
+
+        await SeedTenant(scope, tenant1Id, "clerk_user_1");
+        await SeedTenant(scope, tenant2Id, "clerk_user_2");
+        var coop1Id = await SeedCoop(scope, tenant1Id, "Tenant 1 Coop", "Location 1");
+        var coop2Id = await SeedCoop(scope, tenant2Id, "Tenant 2 Coop", "Location 2");
+
+        // Seed flock for tenant 2
+        var tenant2FlockId = await SeedFlock(scope, tenant2Id, coop2Id, "Tenant 2 Flock", 15, 3, 5);
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        }).CreateClient();
+
+        var updateCommand = new UpdateFlockCommand
+        {
+            FlockId = tenant2FlockId,
+            Identifier = "Hacked Flock",
+            HatchDate = DateTime.UtcNow.AddMonths(-3)
+        };
+
+        // Act - Tenant 1 user tries to update Tenant 2's flock
+        var response = await client.PutAsJsonAsync($"/api/flocks/{tenant2FlockId}", updateCommand);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task TenantIsolation_UserCannotArchiveFlockFromDifferentTenant()
+    {
+        // Arrange
+        var tenant1Id = Guid.NewGuid();
+        var tenant2Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
+
+        using var scope = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+            });
+        }).Services.CreateScope();
+
+        await SeedTenant(scope, tenant1Id, "clerk_user_1");
+        await SeedTenant(scope, tenant2Id, "clerk_user_2");
+        var coop1Id = await SeedCoop(scope, tenant1Id, "Tenant 1 Coop", "Location 1");
+        var coop2Id = await SeedCoop(scope, tenant2Id, "Tenant 2 Coop", "Location 2");
+
+        // Seed flock for tenant 2
+        var tenant2FlockId = await SeedFlock(scope, tenant2Id, coop2Id, "Tenant 2 Flock", 15, 3, 5);
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        }).CreateClient();
+
+        // Act - Tenant 1 user tries to archive Tenant 2's flock
+        var response = await client.PostAsync($"/api/flocks/{tenant2FlockId}/archive", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task TenantIsolation_UserCannotCreateFlockInDifferentTenantCoop()
+    {
+        // Arrange
+        var tenant1Id = Guid.NewGuid();
+        var tenant2Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
+
+        using var scope = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+            });
+        }).Services.CreateScope();
+
+        await SeedTenant(scope, tenant1Id, "clerk_user_1");
+        await SeedTenant(scope, tenant2Id, "clerk_user_2");
+        var coop2Id = await SeedCoop(scope, tenant2Id, "Tenant 2 Coop", "Location 2");
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        }).CreateClient();
+
+        var command = new CreateFlockCommand
+        {
+            Identifier = "Malicious Flock",
+            HatchDate = DateTime.UtcNow.AddMonths(-3),
+            InitialHens = 10,
+            InitialRoosters = 2,
+            InitialChicks = 0
+        };
+
+        // Act - Tenant 1 user tries to create flock in Tenant 2's coop
+        var response = await client.PostAsJsonAsync($"/api/coops/{coop2Id}/flocks", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public void AllEndpoints_RequireAuthorization()
     {
         // This test verifies that all Flocks endpoints are configured with RequireAuthorization()

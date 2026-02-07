@@ -281,6 +281,82 @@ public class ArchiveFlockCommandHandlerTests
         result.IsSuccess.Should().BeTrue();
     }
 
+    [Fact]
+    public async Task Handle_WhenFlockBelongsToDifferentTenant_ShouldReturnNotFoundError()
+    {
+        // Arrange
+        var currentTenantId = Guid.NewGuid();
+        var differentTenantId = Guid.NewGuid();
+        var flockId = Guid.NewGuid();
+
+        var command = new ArchiveFlockCommand
+        {
+            FlockId = flockId
+        };
+
+        // Repository returns null due to RLS/global query filter when flock belongs to different tenant
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(currentTenantId);
+        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
+            .ReturnsAsync((Flock?)null); // RLS filters out the flock from different tenant
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Code.Should().Be("Error.NotFound");
+        result.Error.Message.Should().Be("Flock not found");
+
+        _mockFlockRepository.Verify(x => x.GetByIdWithoutHistoryAsync(flockId), Times.Once);
+        _mockFlockRepository.Verify(x => x.UpdateAsync(It.IsAny<Flock>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldOnlyAccessCurrentTenantData()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var flockId = Guid.NewGuid();
+
+        var command = new ArchiveFlockCommand
+        {
+            FlockId = flockId
+        };
+
+        var existingFlock = Flock.Create(
+            tenantId,
+            coopId,
+            "My Flock",
+            DateTime.UtcNow.AddDays(-60),
+            initialHens: 10,
+            initialRoosters: 2,
+            initialChicks: 0);
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
+            .ReturnsAsync(existingFlock);
+        _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
+            .ReturnsAsync((Flock f) => f);
+
+        var expectedDto = new FlockDto { Id = flockId, TenantId = tenantId, IsActive = false };
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(expectedDto);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TenantId.Should().Be(tenantId);
+
+        // Verify repository is called (which applies RLS/global filter)
+        _mockFlockRepository.Verify(x => x.GetByIdWithoutHistoryAsync(flockId), Times.Once);
+    }
+
     #endregion
 
     #region Authentication Tests
