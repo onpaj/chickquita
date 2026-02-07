@@ -274,6 +274,232 @@ public class CreateFlockCommandHandlerTests
         initialHistory.Reason.Should().Be("Initial");
     }
 
+    [Fact]
+    public async Task Handle_WhenCreatingFlock_InitialHistoryShouldHaveTypeInitial()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var command = new CreateFlockCommand
+        {
+            CoopId = coopId,
+            Identifier = "Test Flock",
+            HatchDate = DateTime.UtcNow.AddDays(-10),
+            InitialHens = 5,
+            InitialRoosters = 1,
+            InitialChicks = 2
+        };
+
+        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
+            .ReturnsAsync(false);
+
+        Flock? capturedFlock = null;
+        _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
+            .Callback<Flock>(f => capturedFlock = f)
+            .ReturnsAsync((Flock f) => f);
+
+        var expectedDto = new FlockDto { Id = Guid.NewGuid() };
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(expectedDto);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        capturedFlock.Should().NotBeNull();
+        capturedFlock!.History.Should().HaveCount(1);
+
+        var initialHistory = capturedFlock.History.First();
+        initialHistory.Reason.Should().Be("Initial", "initial history entry should have 'Initial' as the reason");
+    }
+
+    [Fact]
+    public async Task Handle_WhenCreatingFlock_InitialHistoryShouldHaveCorrectDate()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var beforeCreate = DateTime.UtcNow;
+
+        var command = new CreateFlockCommand
+        {
+            CoopId = coopId,
+            Identifier = "Test Flock",
+            HatchDate = DateTime.UtcNow.AddDays(-10),
+            InitialHens = 5,
+            InitialRoosters = 1,
+            InitialChicks = 2
+        };
+
+        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
+            .ReturnsAsync(false);
+
+        Flock? capturedFlock = null;
+        _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
+            .Callback<Flock>(f => capturedFlock = f)
+            .ReturnsAsync((Flock f) => f);
+
+        var expectedDto = new FlockDto { Id = Guid.NewGuid() };
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(expectedDto);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var afterCreate = DateTime.UtcNow;
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        capturedFlock.Should().NotBeNull();
+
+        var initialHistory = capturedFlock!.History.First();
+        initialHistory.ChangeDate.Should().BeOnOrAfter(beforeCreate, "history change date should be at or after creation");
+        initialHistory.ChangeDate.Should().BeOnOrBefore(afterCreate, "history change date should be at or before completion");
+    }
+
+    [Fact]
+    public async Task Handle_WhenCreatingFlock_InitialHistoryShouldHaveCorrectComposition()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var command = new CreateFlockCommand
+        {
+            CoopId = coopId,
+            Identifier = "Test Flock",
+            HatchDate = DateTime.UtcNow.AddDays(-10),
+            InitialHens = 12,
+            InitialRoosters = 3,
+            InitialChicks = 7
+        };
+
+        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
+            .ReturnsAsync(false);
+
+        Flock? capturedFlock = null;
+        _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
+            .Callback<Flock>(f => capturedFlock = f)
+            .ReturnsAsync((Flock f) => f);
+
+        var expectedDto = new FlockDto { Id = Guid.NewGuid() };
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(expectedDto);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        capturedFlock.Should().NotBeNull();
+
+        var initialHistory = capturedFlock!.History.First();
+        initialHistory.Hens.Should().Be(command.InitialHens, "history hens should match initial hens");
+        initialHistory.Roosters.Should().Be(command.InitialRoosters, "history roosters should match initial roosters");
+        initialHistory.Chicks.Should().Be(command.InitialChicks, "history chicks should match initial chicks");
+    }
+
+    [Fact]
+    public async Task Handle_WhenCreatingFlock_InitialHistoryShouldBelongToCorrectTenant()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var command = new CreateFlockCommand
+        {
+            CoopId = coopId,
+            Identifier = "Test Flock",
+            HatchDate = DateTime.UtcNow.AddDays(-10),
+            InitialHens = 5,
+            InitialRoosters = 1,
+            InitialChicks = 2
+        };
+
+        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
+            .ReturnsAsync(false);
+
+        Flock? capturedFlock = null;
+        _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
+            .Callback<Flock>(f => capturedFlock = f)
+            .ReturnsAsync((Flock f) => f);
+
+        var expectedDto = new FlockDto { Id = Guid.NewGuid() };
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(expectedDto);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        capturedFlock.Should().NotBeNull();
+
+        var initialHistory = capturedFlock!.History.First();
+        initialHistory.TenantId.Should().Be(tenantId, "history entry should belong to the same tenant as the flock");
+        initialHistory.FlockId.Should().Be(capturedFlock.Id, "history entry should reference the correct flock");
+    }
+
+    [Fact]
+    public async Task Handle_WhenCreatingFlockWithNotes_InitialHistoryShouldIncludeNotes()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var notes = "First batch - very healthy";
+
+        var command = new CreateFlockCommand
+        {
+            CoopId = coopId,
+            Identifier = "Test Flock",
+            HatchDate = DateTime.UtcNow.AddDays(-10),
+            InitialHens = 5,
+            InitialRoosters = 1,
+            InitialChicks = 2,
+            Notes = notes
+        };
+
+        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
+            .ReturnsAsync(false);
+
+        Flock? capturedFlock = null;
+        _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
+            .Callback<Flock>(f => capturedFlock = f)
+            .ReturnsAsync((Flock f) => f);
+
+        var expectedDto = new FlockDto { Id = Guid.NewGuid() };
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(expectedDto);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        capturedFlock.Should().NotBeNull();
+
+        var initialHistory = capturedFlock!.History.First();
+        initialHistory.Notes.Should().Be(notes, "history entry should preserve the initial notes");
+    }
+
     #endregion
 
     #region Coop Validation Tests
