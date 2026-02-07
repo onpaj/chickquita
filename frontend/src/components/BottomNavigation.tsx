@@ -2,6 +2,7 @@ import { BottomNavigation as MuiBottomNavigation, BottomNavigationAction, Paper 
 import {
   Dashboard as DashboardIcon,
   HomeWork as CoopsIcon,
+  ShoppingCart as PurchasesIcon,
   Assignment as DailyRecordsIcon,
   Settings as SettingsIcon
 } from '@mui/icons-material';
@@ -15,6 +16,7 @@ export function BottomNavigation() {
 
   const getCurrentTab = () => {
     if (location.pathname.startsWith('/coops')) return 'coops';
+    if (location.pathname.startsWith('/purchases')) return 'purchases';
     if (location.pathname.startsWith('/daily-records')) return 'daily-records';
     if (location.pathname.startsWith('/settings')) return 'settings';
     return 'dashboard';
@@ -27,6 +29,9 @@ export function BottomNavigation() {
         break;
       case 'coops':
         navigate('/coops');
+        break;
+      case 'purchases':
+        navigate('/purchases');
         break;
       case 'daily-records':
         // Placeholder for M4 - Daily Records not yet implemented
@@ -78,6 +83,11 @@ export function BottomNavigation() {
           label={t('navigation.coops')}
           value="coops"
           icon={<CoopsIcon />}
+        />
+        <BottomNavigationAction
+          label={t('navigation.purchases')}
+          value="purchases"
+          icon={<PurchasesIcon />}
         />
         <BottomNavigationAction
           label={t('navigation.dailyRecords')}

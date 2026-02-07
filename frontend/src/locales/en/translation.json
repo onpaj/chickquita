@@ -35,6 +35,7 @@
   "navigation": {
     "dashboard": "Dashboard",
     "coops": "Coops",
+    "purchases": "Purchases",
     "dailyRecords": "Daily Records",
     "settings": "Settings"
   },
@@ -186,6 +187,8 @@
   "purchases": {
     "title": "Purchases",
     "addPurchase": "Add Purchase",
+    "createPurchase": "Create Purchase",
+    "editPurchase": "Edit Purchase",
     "category": "Category",
     "amount": "Amount",
     "date": "Date",

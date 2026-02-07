@@ -35,6 +35,7 @@
   "navigation": {
     "dashboard": "Přehled",
     "coops": "Kurníky",
+    "purchases": "Nákupy",
     "dailyRecords": "Denní záznamy",
     "settings": "Nastavení"
   },
@@ -186,6 +187,8 @@
   "purchases": {
     "title": "Nákupy",
     "addPurchase": "Přidat nákup",
+    "createPurchase": "Vytvořit nákup",
+    "editPurchase": "Upravit nákup",
     "category": "Kategorie",
     "amount": "Částka",
     "date": "Datum",

@@ -7,6 +7,7 @@ import { CoopDetailPage } from './pages/CoopDetailPage'
 import FlocksPage from './pages/FlocksPage'
 import { FlockDetailPage } from './pages/FlockDetailPage'
 import { DailyRecordsListPage } from './pages/DailyRecordsListPage'
+import { PurchasesPage } from './features/purchases/pages/PurchasesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -72,6 +73,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DailyRecordsListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/purchases"
+            element={
+              <ProtectedRoute>
+                <PurchasesPage />
               </ProtectedRoute>
             }
           />
