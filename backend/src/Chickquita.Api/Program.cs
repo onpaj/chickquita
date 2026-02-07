@@ -175,6 +175,9 @@ app.MapDailyRecordsEndpoints();
 // Map statistics endpoints
 app.MapStatisticsEndpoints();
 
+// Map purchases endpoints
+app.MapPurchasesEndpoints();
+
 // SPA fallback - serve index.html for all non-API routes
 // This must come AFTER API endpoint mapping to ensure API routes take precedence
 app.MapFallbackToFile("index.html");

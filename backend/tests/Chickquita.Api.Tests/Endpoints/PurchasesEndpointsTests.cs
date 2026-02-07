@@ -349,6 +349,332 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         result.Error.Code.Should().Be("Error.Validation");
     }
 
+    [Fact]
+    public async Task UpdatePurchase_WithValidData_ShouldUpdateSuccessfully()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        // Create initial purchase
+        var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+        var createCommand = new CreatePurchaseCommand
+        {
+            Name = "Original Feed",
+            Type = PurchaseType.Feed,
+            Amount = 200.00m,
+            Quantity = 20m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date
+        };
+
+        var createResult = await mediator.Send(createCommand);
+        var purchaseId = createResult.Value.Id;
+
+        // Update command
+        var updateCommand = new Chickquita.Application.Features.Purchases.Commands.Update.UpdatePurchaseCommand
+        {
+            Id = purchaseId,
+            Name = "Updated Feed",
+            Type = PurchaseType.Feed,
+            Amount = 300.00m,
+            Quantity = 30m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date,
+            Notes = "Updated notes"
+        };
+
+        // Act
+        var result = await mediator.Send(updateCommand);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Id.Should().Be(purchaseId);
+        result.Value.Name.Should().Be("Updated Feed");
+        result.Value.Amount.Should().Be(300.00m);
+        result.Value.Quantity.Should().Be(30m);
+        result.Value.Notes.Should().Be("Updated notes");
+    }
+
+    [Fact]
+    public async Task UpdatePurchase_WithInvalidId_ShouldReturnNotFound()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+
+        var invalidId = Guid.NewGuid();
+        var updateCommand = new Chickquita.Application.Features.Purchases.Commands.Update.UpdatePurchaseCommand
+        {
+            Id = invalidId,
+            Name = "Updated Feed",
+            Type = PurchaseType.Feed,
+            Amount = 300.00m,
+            Quantity = 30m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date
+        };
+
+        // Act
+        var result = await mediator.Send(updateCommand);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Code.Should().Be("Error.NotFound");
+    }
+
+    [Fact]
+    public async Task UpdatePurchase_VerifiesTenantIsolation()
+    {
+        // Arrange - Create two tenants
+        var tenant1Id = Guid.NewGuid();
+        var tenant2Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
+        var mockCurrentUser2 = CreateMockCurrentUser("clerk_user_2", tenant2Id);
+
+        // Setup for Tenant 1
+        var factory1 = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        });
+
+        using var scope1 = factory1.Services.CreateScope();
+        await SeedTenant(scope1, tenant1Id, "clerk_user_1");
+
+        var mediator1 = scope1.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+
+        // Create purchase for Tenant 1
+        var createCommand = new CreatePurchaseCommand
+        {
+            Name = "Tenant 1 Feed",
+            Type = PurchaseType.Feed,
+            Amount = 200.00m,
+            Quantity = 20m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date
+        };
+
+        var createResult = await mediator1.Send(createCommand);
+        var purchaseId = createResult.Value.Id;
+
+        // Setup for Tenant 2
+        var factory2 = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser2);
+            });
+        });
+
+        using var scope2 = factory2.Services.CreateScope();
+        await SeedTenant(scope2, tenant2Id, "clerk_user_2");
+
+        var mediator2 = scope2.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+
+        // Act - Tenant 2 tries to update Tenant 1's purchase
+        var updateCommand = new Chickquita.Application.Features.Purchases.Commands.Update.UpdatePurchaseCommand
+        {
+            Id = purchaseId,
+            Name = "Unauthorized Update",
+            Type = PurchaseType.Feed,
+            Amount = 300.00m,
+            Quantity = 30m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date
+        };
+
+        var result = await mediator2.Send(updateCommand);
+
+        // Assert - Should fail because purchase belongs to different tenant
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Code.Should().Be("Error.NotFound");
+    }
+
+    [Fact]
+    public async Task DeletePurchase_WithValidId_ShouldDeleteSuccessfully()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        // Create initial purchase
+        var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+        var createCommand = new CreatePurchaseCommand
+        {
+            Name = "Feed to Delete",
+            Type = PurchaseType.Feed,
+            Amount = 200.00m,
+            Quantity = 20m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date
+        };
+
+        var createResult = await mediator.Send(createCommand);
+        var purchaseId = createResult.Value.Id;
+
+        // Delete command
+        var deleteCommand = new Chickquita.Application.Features.Purchases.Commands.Delete.DeletePurchaseCommand
+        {
+            PurchaseId = purchaseId
+        };
+
+        // Act
+        var result = await mediator.Send(deleteCommand);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DeletePurchase_WithInvalidId_ShouldReturnNotFound()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+
+        var invalidId = Guid.NewGuid();
+        var deleteCommand = new Chickquita.Application.Features.Purchases.Commands.Delete.DeletePurchaseCommand
+        {
+            PurchaseId = invalidId
+        };
+
+        // Act
+        var result = await mediator.Send(deleteCommand);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Code.Should().Be("Error.NotFound");
+    }
+
+    [Fact]
+    public async Task DeletePurchase_VerifiesTenantIsolation()
+    {
+        // Arrange - Create two tenants
+        var tenant1Id = Guid.NewGuid();
+        var tenant2Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
+        var mockCurrentUser2 = CreateMockCurrentUser("clerk_user_2", tenant2Id);
+
+        // Setup for Tenant 1
+        var factory1 = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        });
+
+        using var scope1 = factory1.Services.CreateScope();
+        await SeedTenant(scope1, tenant1Id, "clerk_user_1");
+
+        var mediator1 = scope1.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+
+        // Create purchase for Tenant 1
+        var createCommand = new CreatePurchaseCommand
+        {
+            Name = "Tenant 1 Feed",
+            Type = PurchaseType.Feed,
+            Amount = 200.00m,
+            Quantity = 20m,
+            Unit = QuantityUnit.Kg,
+            PurchaseDate = DateTime.UtcNow.Date
+        };
+
+        var createResult = await mediator1.Send(createCommand);
+        var purchaseId = createResult.Value.Id;
+
+        // Setup for Tenant 2
+        var factory2 = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser2);
+            });
+        });
+
+        using var scope2 = factory2.Services.CreateScope();
+        await SeedTenant(scope2, tenant2Id, "clerk_user_2");
+
+        var mediator2 = scope2.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+
+        // Act - Tenant 2 tries to delete Tenant 1's purchase
+        var deleteCommand = new Chickquita.Application.Features.Purchases.Commands.Delete.DeletePurchaseCommand
+        {
+            PurchaseId = purchaseId
+        };
+
+        var result = await mediator2.Send(deleteCommand);
+
+        // Assert - Should fail because purchase belongs to different tenant
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Code.Should().Be("Error.NotFound");
+    }
+
     #region Helper Methods
 
     private static Mock<ICurrentUserService> CreateMockCurrentUser(string clerkUserId, Guid tenantId)

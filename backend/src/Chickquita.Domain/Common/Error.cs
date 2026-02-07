@@ -79,4 +79,11 @@ public sealed class Error
     /// <param name="message">The unauthorized error message.</param>
     /// <returns>A new unauthorized error.</returns>
     public static Error Unauthorized(string message) => new("Error.Unauthorized", message);
+
+    /// <summary>
+    /// Creates a new forbidden error.
+    /// </summary>
+    /// <param name="message">The forbidden error message.</param>
+    /// <returns>A new forbidden error.</returns>
+    public static Error Forbidden(string message) => new("Error.Forbidden", message);
 }
