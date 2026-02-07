@@ -78,8 +78,16 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
                 return Result<FlockDto>.Failure(Error.NotFound("Flock not found"));
             }
 
+            // Check if flock is already archived
+            if (!flock.IsActive)
+            {
+                _logger.LogWarning(
+                    "ArchiveFlockCommand: Flock {FlockId} is already archived",
+                    request.FlockId);
+                return Result<FlockDto>.Failure(Error.Validation("Flock is already archived"));
+            }
+
             // Archive the flock using domain method
-            // This operation is idempotent - if already archived, it will still succeed
             flock.Archive();
 
             // Save to database

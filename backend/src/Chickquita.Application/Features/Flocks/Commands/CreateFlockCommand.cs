@@ -12,7 +12,7 @@ public sealed record CreateFlockCommand : IRequest<Result<FlockDto>>
     /// <summary>
     /// Gets or sets the ID of the coop this flock belongs to.
     /// </summary>
-    public Guid CoopId { get; init; }
+    public Guid CoopId { get; set; }
 
     /// <summary>
     /// Gets or sets the user-defined identifier for the flock.
