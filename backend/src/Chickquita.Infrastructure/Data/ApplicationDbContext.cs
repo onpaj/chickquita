@@ -39,6 +39,11 @@ public class ApplicationDbContext : DbContext
     /// </summary>
     public DbSet<DailyRecord> DailyRecords => Set<DailyRecord>();
 
+    /// <summary>
+    /// Purchases (expenses) for chicken farming.
+    /// </summary>
+    public DbSet<Purchase> Purchases => Set<Purchase>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
