@@ -204,8 +204,25 @@
     "notes": "Poznámky",
     "flock": "Hejno",
     "noFlocks": "Žádná dostupná hejna",
+    "clearFilters": "Vymazat filtry",
+    "recordsCount": "{{count}} záznamů",
+    "recordsCount_one": "{{count}} záznam",
+    "recordsCount_few": "{{count}} záznamy",
+    "recordsCount_many": "{{count}} záznamů",
+    "filters": {
+      "today": "Dnes",
+      "lastWeek": "Poslední týden",
+      "lastMonth": "Poslední měsíc",
+      "startDate": "Od data",
+      "endDate": "Do data"
+    },
     "quickAdd": {
       "title": "Rychlý záznam vajec"
+    },
+    "emptyState": {
+      "title": "Zatím tu nejsou žádné záznamy",
+      "noRecords": "Začněte zaznamenávat denní produkci vajec",
+      "noRecordsFiltered": "Žádné záznamy nevyhovují zvoleným filtrům"
     },
     "create": {
       "success": "Denní záznam byl úspěšně vytvořen",

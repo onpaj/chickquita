@@ -6,6 +6,7 @@ import CoopsPage from './pages/CoopsPage'
 import { CoopDetailPage } from './pages/CoopDetailPage'
 import FlocksPage from './pages/FlocksPage'
 import { FlockDetailPage } from './pages/FlockDetailPage'
+import { DailyRecordsListPage } from './pages/DailyRecordsListPage'
 import { SettingsPage } from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -63,6 +64,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FlockDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/daily-records"
+            element={
+              <ProtectedRoute>
+                <DailyRecordsListPage />
               </ProtectedRoute>
             }
           />

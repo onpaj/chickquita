@@ -200,7 +200,39 @@
     "addRecord": "Add Record",
     "eggCount": "Egg Count",
     "date": "Date",
-    "notes": "Notes"
+    "notes": "Notes",
+    "flock": "Flock",
+    "noFlocks": "No flocks available",
+    "clearFilters": "Clear Filters",
+    "recordsCount": "{{count}} records",
+    "recordsCount_one": "{{count}} record",
+    "filters": {
+      "today": "Today",
+      "lastWeek": "Last Week",
+      "lastMonth": "Last Month",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
+    "quickAdd": {
+      "title": "Quick Add Eggs"
+    },
+    "emptyState": {
+      "title": "No records yet",
+      "noRecords": "Start recording your daily egg production",
+      "noRecordsFiltered": "No records match the selected filters"
+    },
+    "create": {
+      "success": "Daily record created successfully",
+      "error": "Failed to create daily record"
+    },
+    "update": {
+      "success": "Daily record updated successfully",
+      "error": "Failed to update daily record"
+    },
+    "delete": {
+      "success": "Daily record deleted successfully",
+      "error": "Failed to delete daily record"
+    }
   },
   "settings": {
     "title": "Settings",
