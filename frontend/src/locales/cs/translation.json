@@ -28,6 +28,12 @@
     "password": "Heslo",
     "welcome": "Vítejte v Chickquita"
   },
+  "navigation": {
+    "dashboard": "Přehled",
+    "coops": "Kurníky",
+    "dailyRecords": "Denní záznamy",
+    "settings": "Nastavení"
+  },
   "dashboard": {
     "title": "Přehled",
     "totalEggs": "Celkem vajec",

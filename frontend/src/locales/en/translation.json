@@ -28,6 +28,12 @@
     "password": "Password",
     "welcome": "Welcome to Chickquita"
   },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "coops": "Coops",
+    "dailyRecords": "Daily Records",
+    "settings": "Settings"
+  },
   "dashboard": {
     "title": "Dashboard",
     "totalEggs": "Total Eggs",
