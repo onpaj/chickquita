@@ -44,9 +44,9 @@ export interface CreateFlockRequest {
   coopId: string;
   identifier: string;
   hatchDate: string;
-  currentHens: number;
-  currentRoosters: number;
-  currentChicks: number;
+  initialHens: number;
+  initialRoosters: number;
+  initialChicks: number;
 }
 
 /**

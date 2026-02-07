@@ -128,8 +128,17 @@ public class Flock
             throw new ArgumentException("Identifier cannot exceed 50 characters.", nameof(identifier));
         }
 
+        // Ensure hatchDate is in UTC
+        var hatchDateUtc = hatchDate.Kind switch
+        {
+            DateTimeKind.Utc => hatchDate,
+            DateTimeKind.Local => hatchDate.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(hatchDate, DateTimeKind.Utc),
+            _ => DateTime.SpecifyKind(hatchDate, DateTimeKind.Utc)
+        };
+
         // Validate hatch date
-        if (hatchDate > DateTime.UtcNow)
+        if (hatchDateUtc > DateTime.UtcNow)
         {
             throw new ArgumentException("Hatch date cannot be in the future.", nameof(hatchDate));
         }
@@ -167,7 +176,7 @@ public class Flock
             TenantId = tenantId,
             CoopId = coopId,
             Identifier = identifier,
-            HatchDate = hatchDate,
+            HatchDate = hatchDateUtc,
             CurrentHens = initialHens,
             CurrentRoosters = initialRoosters,
             CurrentChicks = initialChicks,
@@ -210,13 +219,22 @@ public class Flock
             throw new ArgumentException("Identifier cannot exceed 50 characters.", nameof(identifier));
         }
 
-        if (hatchDate > DateTime.UtcNow)
+        // Ensure hatchDate is in UTC
+        var hatchDateUtc = hatchDate.Kind switch
+        {
+            DateTimeKind.Utc => hatchDate,
+            DateTimeKind.Local => hatchDate.ToUniversalTime(),
+            DateTimeKind.Unspecified => DateTime.SpecifyKind(hatchDate, DateTimeKind.Utc),
+            _ => DateTime.SpecifyKind(hatchDate, DateTimeKind.Utc)
+        };
+
+        if (hatchDateUtc > DateTime.UtcNow)
         {
             throw new ArgumentException("Hatch date cannot be in the future.", nameof(hatchDate));
         }
 
         Identifier = identifier;
-        HatchDate = hatchDate;
+        HatchDate = hatchDateUtc;
         UpdatedAt = DateTime.UtcNow;
     }
 

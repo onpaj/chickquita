@@ -144,9 +144,9 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
       coopId,
       identifier: identifier.trim(),
       hatchDate,
-      currentHens: hens,
-      currentRoosters: roosters,
-      currentChicks: chicks,
+      initialHens: hens,
+      initialRoosters: roosters,
+      initialChicks: chicks,
     };
 
     createFlock(request, {
