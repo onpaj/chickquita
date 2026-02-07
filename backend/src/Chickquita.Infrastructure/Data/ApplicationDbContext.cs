@@ -34,6 +34,11 @@ public class ApplicationDbContext : DbContext
     /// </summary>
     public DbSet<FlockHistory> FlockHistory => Set<FlockHistory>();
 
+    /// <summary>
+    /// Daily records for tracking egg production per flock.
+    /// </summary>
+    public DbSet<DailyRecord> DailyRecords => Set<DailyRecord>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
