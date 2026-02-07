@@ -4,13 +4,11 @@ import {
   Box,
   Typography,
   Fab,
-  Card,
-  CardContent,
-  Skeleton,
   Container,
   Button,
   ToggleButtonGroup,
   ToggleButton,
+  CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -22,6 +20,7 @@ import { EditFlockModal } from '../features/flocks/components/EditFlockModal';
 import { ArchiveFlockDialog } from '../features/flocks/components/ArchiveFlockDialog';
 import { FlockCard } from '../features/flocks/components/FlockCard';
 import { FlocksEmptyState } from '../features/flocks/components/FlocksEmptyState';
+import { FlockCardSkeleton } from '../shared/components/FlockCardSkeleton';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useToast } from '../hooks/useToast';
 import { processApiError } from '../lib/errors';
@@ -191,7 +190,7 @@ export default function FlocksPage() {
         </Typography>
 
         {/* Filter toggle */}
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <ToggleButtonGroup
             value={includeInactive ? 'all' : 'active'}
             exclusive
@@ -202,6 +201,21 @@ export default function FlocksPage() {
             }}
             size="small"
             aria-label={t('flocks.filterStatus')}
+            sx={{
+              '& .MuiToggleButton-root': {
+                px: 2,
+                py: 1.25,
+                minWidth: 80,
+                minHeight: 44,
+                fontWeight: 500,
+                '&.Mui-selected': {
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                },
+              },
+            }}
           >
             <ToggleButton value="active" aria-label={t('flocks.active')}>
               {t('flocks.active')}
@@ -215,13 +229,7 @@ export default function FlocksPage() {
         {isLoading ? (
           <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {[1, 2, 3].map((index) => (
-              <Card key={index} elevation={2}>
-                <CardContent>
-                  <Skeleton variant="text" width="60%" height={32} />
-                  <Skeleton variant="text" width="40%" sx={{ mt: 1 }} />
-                  <Skeleton variant="text" width="30%" sx={{ mt: 1 }} />
-                </CardContent>
-              </Card>
+              <FlockCardSkeleton key={index} />
             ))}
           </Box>
         ) : filteredFlocks.length === 0 ? (
@@ -241,7 +249,18 @@ export default function FlocksPage() {
         )}
 
         {isRefreshing && (
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              mt: 2,
+              py: 2,
+            }}
+          >
+            <CircularProgress size={24} thickness={4} />
             <Typography variant="caption" color="text.secondary">
               {t('common.loading')}
             </Typography>

@@ -82,6 +82,7 @@ export function FlockCard({
         sx={{
           position: 'relative',
           cursor: 'pointer',
+          transition: 'box-shadow 0.3s ease',
           '&:hover': {
             boxShadow: 4,
           },
@@ -119,12 +120,16 @@ export function FlockCard({
                 sx={{ height: 24 }}
               />
               <IconButton
-                size="small"
                 onClick={handleMenuClick}
                 aria-label={t('common.more')}
                 aria-expanded={menuOpen}
                 aria-haspopup="true"
                 aria-controls={menuOpen ? `flock-menu-${flock.id}` : undefined}
+                sx={{
+                  p: 1.5,
+                  minWidth: 44,
+                  minHeight: 44,
+                }}
               >
                 <MoreVertIcon />
               </IconButton>

@@ -90,10 +90,10 @@ describe('FlocksEmptyState', () => {
       const mockOnAddClick = vi.fn();
       render(<FlocksEmptyState onAddClick={mockOnAddClick} />);
 
-      // h6 variant is used for the title
+      // h5 variant is used for the title (renders as h2 in HTML)
       const heading = screen.getByText('No flocks yet');
       expect(heading).toBeInTheDocument();
-      expect(heading.tagName).toBe('H6');
+      expect(heading.tagName).toBe('H2');
     });
   });
 
@@ -118,7 +118,8 @@ describe('FlocksEmptyState', () => {
       const wrapper = container.firstChild as HTMLElement;
       const styles = window.getComputedStyle(wrapper);
 
-      expect(styles.minHeight).toBe('60vh');
+      // IllustratedEmptyState uses minHeight: 300px
+      expect(styles.minHeight).toBe('300px');
     });
 
     it('centers text alignment', () => {
