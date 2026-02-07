@@ -11,7 +11,8 @@ Chickquita is a comprehensive solution for chicken farmers to track costs, egg p
 - **Multi-tenant Architecture**: Each farmer gets isolated data via Clerk authentication
 - **Offline-First Design**: Record daily egg counts and purchases even without internet
 - **Flock Management**: Track chickens (hens, roosters, chicks) with maturation history
-- **Cost Tracking**: Monitor all expenses (feed, supplements, bedding, veterinary, equipment)
+- **Purchase Tracking**: Comprehensive expense management with categorization (feed, vitamins, bedding, toys, veterinary, other)
+- **Cost Analysis**: Monitor all expenses with autocomplete, filtering, and consumption tracking
 - **Real-time Analytics**: Calculate egg cost based on total expenses and production
 - **Mobile-Optimized**: Touch-friendly UI designed for outdoor use at chicken coops
 
@@ -68,6 +69,8 @@ Comprehensive documentation is available in the `/docs` directory:
 - **[ui-layout-system.md](docs/ui-layout-system.md)** - Mobile-first design system
 - **[neon-database-setup.md](docs/neon-database-setup.md)** - Neon Postgres database creation guide
 - **[database-connection-guide.md](docs/database-connection-guide.md)** - Database connection configuration
+- **[API_SPEC_COOPS.md](docs/API_SPEC_COOPS.md)** - Coops API specification
+- **[API_SPEC_PURCHASES.md](docs/API_SPEC_PURCHASES.md)** - Purchases API specification
 
 ## Getting Started
 
@@ -152,6 +155,16 @@ Tracks three chicken types:
 - **Chicks**: Young chickens (counted in feed costs, not egg production)
 
 Chicks can be "matured" into hens/roosters with immutable historical tracking.
+
+### Purchase Management
+Comprehensive expense tracking system:
+- **Categories**: Feed, Vitamins, Bedding, Toys, Veterinary, Other
+- **Units**: Support for Kg, Pieces, Liters, Packages, and custom units
+- **Date Tracking**: Purchase date and optional consumption date
+- **Autocomplete**: Smart suggestions based on previous purchases
+- **Filtering**: Filter by date range, type, and associated flock
+- **Notes**: Optional notes for each purchase (max 500 characters)
+- **Coop Association**: Link purchases to specific coops or keep them general
 
 ## Authentication Flow
 
