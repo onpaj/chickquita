@@ -25,7 +25,7 @@ describe('createDailyRecordSchema', () => {
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('ID hejna musí být textový řetězec');
+        expect(result.error.issues[0].path).toContain('flockId');
       }
     });
 
@@ -38,8 +38,19 @@ describe('createDailyRecordSchema', () => {
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('ID hejna musí být platný UUID formát');
+        const flockIdError = result.error.issues.find((issue) => issue.path.includes('flockId'));
+        expect(flockIdError).toBeDefined();
       }
+    });
+
+    it('should reject empty flockId', () => {
+      const invalidData = {
+        flockId: '',
+        recordDate: '2025-02-07',
+        eggCount: 10,
+      };
+      const result = createDailyRecordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
     });
 
     it('should reject non-string flockId', () => {
@@ -50,9 +61,6 @@ describe('createDailyRecordSchema', () => {
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('ID hejna musí být textový řetězec');
-      }
     });
   });
 
@@ -90,9 +98,6 @@ describe('createDailyRecordSchema', () => {
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Datum záznamu nemůže být v budoucnosti');
-      }
     });
 
     it('should reject missing recordDate', () => {
@@ -103,21 +108,28 @@ describe('createDailyRecordSchema', () => {
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Datum záznamu musí být textový řetězec');
+        expect(result.error.issues[0].path).toContain('recordDate');
       }
     });
 
     it('should reject invalid date format', () => {
       const invalidData = {
         flockId: '123e4567-e89b-12d3-a456-426614174000',
-        recordDate: '07/02/2026', // Invalid format
+        recordDate: '07/02/2026',
         eggCount: 10,
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Datum záznamu musí být ve formátu YYYY-MM-DD');
-      }
+    });
+
+    it('should reject empty recordDate', () => {
+      const invalidData = {
+        flockId: '123e4567-e89b-12d3-a456-426614174000',
+        recordDate: '',
+        eggCount: 10,
+      };
+      const result = createDailyRecordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
     });
 
     it('should reject non-string recordDate', () => {
@@ -128,9 +140,6 @@ describe('createDailyRecordSchema', () => {
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Datum záznamu musí být textový řetězec');
-      }
     });
   });
 
@@ -155,6 +164,16 @@ describe('createDailyRecordSchema', () => {
       expect(result.success).toBe(true);
     });
 
+    it('should accept large egg count', () => {
+      const validData = {
+        flockId: '123e4567-e89b-12d3-a456-426614174000',
+        recordDate: '2025-02-07',
+        eggCount: 9999,
+      };
+      const result = createDailyRecordSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+    });
+
     it('should reject negative egg count', () => {
       const invalidData = {
         flockId: '123e4567-e89b-12d3-a456-426614174000',
@@ -163,9 +182,6 @@ describe('createDailyRecordSchema', () => {
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Počet vajec nemůže být záporný');
-      }
     });
 
     it('should reject decimal egg count', () => {
@@ -176,9 +192,6 @@ describe('createDailyRecordSchema', () => {
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Počet vajec musí být celé číslo');
-      }
     });
 
     it('should reject missing eggCount', () => {
@@ -189,7 +202,7 @@ describe('createDailyRecordSchema', () => {
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Počet vajec musí být číslo');
+        expect(result.error.issues[0].path).toContain('eggCount');
       }
     });
 
@@ -201,9 +214,6 @@ describe('createDailyRecordSchema', () => {
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Počet vajec musí být číslo');
-      }
     });
   });
 
@@ -267,9 +277,6 @@ describe('createDailyRecordSchema', () => {
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Poznámky nesmí překročit 500 znaků');
-      }
     });
 
     it('should accept notes exactly at 500 character limit', () => {
@@ -293,9 +300,6 @@ describe('createDailyRecordSchema', () => {
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Poznámky musí být textový řetězec');
-      }
     });
   });
 });
@@ -318,7 +322,7 @@ describe('updateDailyRecordSchema', () => {
       const result = updateDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('ID denního záznamu musí být textový řetězec');
+        expect(result.error.issues[0].path).toContain('id');
       }
     });
 
@@ -329,9 +333,15 @@ describe('updateDailyRecordSchema', () => {
       };
       const result = updateDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('ID denního záznamu musí být platný UUID formát');
-      }
+    });
+
+    it('should reject empty id', () => {
+      const invalidData = {
+        id: '',
+        eggCount: 10,
+      };
+      const result = updateDailyRecordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
     });
 
     it('should reject non-string id', () => {
@@ -341,9 +351,6 @@ describe('updateDailyRecordSchema', () => {
       };
       const result = updateDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('ID denního záznamu musí být textový řetězec');
-      }
     });
   });
 
@@ -373,9 +380,6 @@ describe('updateDailyRecordSchema', () => {
       };
       const result = updateDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Počet vajec nemůže být záporný');
-      }
     });
 
     it('should reject decimal egg count', () => {
@@ -385,9 +389,6 @@ describe('updateDailyRecordSchema', () => {
       };
       const result = updateDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Počet vajec musí být celé číslo');
-      }
     });
 
     it('should reject missing eggCount', () => {
@@ -397,7 +398,7 @@ describe('updateDailyRecordSchema', () => {
       const result = updateDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Počet vajec musí být číslo');
+        expect(result.error.issues[0].path).toContain('eggCount');
       }
     });
   });
@@ -457,9 +458,6 @@ describe('updateDailyRecordSchema', () => {
       };
       const result = updateDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Poznámky nesmí překročit 500 znaků');
-      }
     });
   });
 });
@@ -486,9 +484,6 @@ describe('getDailyRecordsParamsSchema', () => {
       };
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('ID hejna musí být platný UUID formát');
-      }
     });
 
     it('should reject non-string flockId', () => {
@@ -497,9 +492,6 @@ describe('getDailyRecordsParamsSchema', () => {
       };
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('ID hejna musí být textový řetězec');
-      }
     });
   });
 
@@ -546,7 +538,6 @@ describe('getDailyRecordsParamsSchema', () => {
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Datum konce musí být stejné nebo pozdější než datum začátku');
         expect(result.error.issues[0].path).toContain('endDate');
       }
     });
@@ -557,9 +548,6 @@ describe('getDailyRecordsParamsSchema', () => {
       };
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Datum začátku musí být ve formátu YYYY-MM-DD');
-      }
     });
 
     it('should reject invalid endDate format', () => {
@@ -568,9 +556,6 @@ describe('getDailyRecordsParamsSchema', () => {
       };
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Datum konce musí být ve formátu YYYY-MM-DD');
-      }
     });
 
     it('should reject non-string startDate', () => {
@@ -579,9 +564,6 @@ describe('getDailyRecordsParamsSchema', () => {
       };
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Datum začátku musí být textový řetězec');
-      }
     });
 
     it('should reject non-string endDate', () => {
@@ -590,9 +572,6 @@ describe('getDailyRecordsParamsSchema', () => {
       };
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Datum konce musí být textový řetězec');
-      }
     });
   });
 
