@@ -22,8 +22,11 @@ export default defineConfig({
   // Reporter to use
   reporter: [
     ['html'],
-    ['list']
-  ],
+    ['json', { outputFile: 'playwright-report/results.json' }],
+    ['list'],
+    // GitHub Actions reporter for better CI integration
+    process.env.CI ? ['github'] : null,
+  ].filter(Boolean),
 
   // Shared settings for all the projects below
   use: {

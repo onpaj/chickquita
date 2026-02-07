@@ -85,11 +85,167 @@ jobs:
           name: frontend-build
           path: frontend/dist
 
+  # E2E Tests Job
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: frontend-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install chromium --with-deps
+
+      - name: Run E2E tests
+        working-directory: frontend
+        run: npx playwright test --project=chromium --reporter=html,json,list
+        env:
+          CI: true
+        continue-on-error: false
+
+      - name: Verify test results
+        if: always()
+        working-directory: frontend
+        run: |
+          if [ -f playwright-report/results.json ]; then
+            FAILED=$(jq '[.suites[].specs[].tests[] | select(.status == "failed")] | length' playwright-report/results.json || echo "0")
+            if [ "$FAILED" -gt "0" ]; then
+              echo "::error::$FAILED E2E test(s) failed"
+              exit 1
+            fi
+          else
+            echo "::error::Test results not found"
+            exit 1
+          fi
+
+      - name: Generate test summary
+        if: always()
+        working-directory: frontend
+        run: |
+          echo "# E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f playwright-report/results.json ]; then
+            # Parse JSON results to extract test statistics
+            TOTAL=$(jq '.suites | map(.specs | length) | add' playwright-report/results.json || echo "0")
+            PASSED=$(jq '[.suites[].specs[].tests[] | select(.status == "passed")] | length' playwright-report/results.json || echo "0")
+            FAILED=$(jq '[.suites[].specs[].tests[] | select(.status == "failed")] | length' playwright-report/results.json || echo "0")
+            SKIPPED=$(jq '[.suites[].specs[].tests[] | select(.status == "skipped")] | length' playwright-report/results.json || echo "0")
+
+            echo "## Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Status | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| ✅ Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
+            echo "| ❌ Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
+            echo "| ⏭️ Skipped | $SKIPPED |" >> $GITHUB_STEP_SUMMARY
+            echo "| 📊 Total | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "## DailyRecords Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All DailyRecords E2E tests have been executed." >> $GITHUB_STEP_SUMMARY
+          echo "- daily-records-quick-add.spec.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- daily-records-list.spec.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- daily-records-edit.spec.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- daily-records-full-workflow.spec.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- daily-records-quick-add-performance.spec.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- daily-records-mobile-ui.spec.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- daily-records-accessibility.spec.ts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Full test report available in artifacts." >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          retention-days: 30
+
+      - name: Upload test report for PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-html-report
+          path: frontend/playwright-report/
+          retention-days: 14
+
+      - name: Comment PR with test results
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            let comment = '## 🎭 E2E Test Results\n\n';
+
+            const resultsPath = path.join(process.env.GITHUB_WORKSPACE, 'frontend/playwright-report/results.json');
+            if (fs.existsSync(resultsPath)) {
+              const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+              const stats = results.suites.reduce((acc, suite) => {
+                suite.specs.forEach(spec => {
+                  spec.tests.forEach(test => {
+                    acc[test.status] = (acc[test.status] || 0) + 1;
+                  });
+                });
+                return acc;
+              }, {});
+
+              comment += '| Status | Count |\n';
+              comment += '|--------|-------|\n';
+              comment += `| ✅ Passed | ${stats.passed || 0} |\n`;
+              comment += `| ❌ Failed | ${stats.failed || 0} |\n`;
+              comment += `| ⏭️ Skipped | ${stats.skipped || 0} |\n`;
+              comment += '\n';
+
+              if (stats.failed > 0) {
+                comment += '### ❌ Failed Tests\n\n';
+                results.suites.forEach(suite => {
+                  suite.specs.forEach(spec => {
+                    spec.tests.forEach(test => {
+                      if (test.status === 'failed') {
+                        comment += `- ${spec.title}: ${test.projectName}\n`;
+                      }
+                    });
+                  });
+                });
+                comment += '\n';
+              }
+            }
+
+            comment += 'Full HTML report available in workflow artifacts.\n';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
   # Docker Build Job
   docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-tests]
+    needs: [backend-tests, frontend-tests, e2e-tests]
 
     steps:
       - name: Checkout code
