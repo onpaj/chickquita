@@ -33,7 +33,48 @@
     "totalEggs": "Total Eggs",
     "totalCosts": "Total Costs",
     "eggCost": "Egg Cost",
-    "activeFlocks": "Active Flocks"
+    "activeFlocks": "Active Flocks",
+    "widgets": {
+      "todaySummary": {
+        "title": "Today's Summary",
+        "eggsToday": "Eggs Today",
+        "notAvailable": "Not available yet"
+      },
+      "weeklyProduction": {
+        "title": "Weekly Production",
+        "eggsThisWeek": "Eggs This Week",
+        "notAvailable": "Not available yet"
+      },
+      "flockStatus": {
+        "title": "Flock Status",
+        "totalHens": "Total Hens",
+        "totalRoosters": "Total Roosters",
+        "totalChicks": "Total Chicks",
+        "activeFlocks": "Active Flocks"
+      },
+      "eggCostCalc": {
+        "title": "Cost Calculation",
+        "costPerEgg": "Cost Per Egg",
+        "notAvailable": "Not available yet"
+      }
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "addDailyRecord": "Log Eggs",
+      "addDailyRecordDesc": "Add today's egg production",
+      "manageCoops": "Manage Coops",
+      "manageCoopsDesc": "Add or edit coops",
+      "manageFlocks": "Manage Flocks",
+      "manageFlocksDesc": "Track your chicken flocks",
+      "trackPurchases": "Track Purchases",
+      "trackPurchasesDesc": "Record farming costs"
+    },
+    "emptyState": {
+      "title": "Welcome to Chickquita!",
+      "message": "Start tracking your chicken farm",
+      "createFirstCoop": "Create Your First Coop",
+      "createFirstCoopDesc": "Set up a coop to start managing your flocks"
+    }
   },
   "coops": {
     "title": "Coops",

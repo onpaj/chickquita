@@ -33,7 +33,48 @@
     "totalEggs": "Celkem vajec",
     "totalCosts": "Celkové náklady",
     "eggCost": "Cena za vejce",
-    "activeFlocks": "Aktivní hejna"
+    "activeFlocks": "Aktivní hejna",
+    "widgets": {
+      "todaySummary": {
+        "title": "Dnešní přehled",
+        "eggsToday": "Vajec dnes",
+        "notAvailable": "Zatím nedostupné"
+      },
+      "weeklyProduction": {
+        "title": "Týdenní produkce",
+        "eggsThisWeek": "Vajec tento týden",
+        "notAvailable": "Zatím nedostupné"
+      },
+      "flockStatus": {
+        "title": "Stav hejn",
+        "totalHens": "Celkem slepic",
+        "totalRoosters": "Celkem kohoutů",
+        "totalChicks": "Celkem kuřat",
+        "activeFlocks": "Aktivních hejn"
+      },
+      "eggCostCalc": {
+        "title": "Kalkulace nákladů",
+        "costPerEgg": "Cena za vejce",
+        "notAvailable": "Zatím nedostupné"
+      }
+    },
+    "quickActions": {
+      "title": "Rychlé akce",
+      "addDailyRecord": "Zaznamenat vajíčka",
+      "addDailyRecordDesc": "Přidejte dnešní produkci vajec",
+      "manageCoops": "Spravovat kurníky",
+      "manageCoopsDesc": "Přidejte nebo upravte kurníky",
+      "manageFlocks": "Spravovat hejna",
+      "manageFlocksDesc": "Sledujte svá kuřecí hejna",
+      "trackPurchases": "Sledovat nákupy",
+      "trackPurchasesDesc": "Zaznamenejte náklady na chov"
+    },
+    "emptyState": {
+      "title": "Vítejte v Chickquita!",
+      "message": "Začněte sledováním své kuřecí farmy",
+      "createFirstCoop": "Vytvořte svůj první kurník",
+      "createFirstCoopDesc": "Nastavte kurník a začněte spravovat hejna"
+    }
   },
   "coops": {
     "title": "Kurníky",
