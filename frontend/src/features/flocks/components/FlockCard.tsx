@@ -11,11 +11,15 @@ import {
   ListItemIcon,
   ListItemText,
   Stack,
+  useTheme,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import HistoryIcon from '@mui/icons-material/History';
+import FemaleIcon from '@mui/icons-material/Female';
+import MaleIcon from '@mui/icons-material/Male';
+import EggIcon from '@mui/icons-material/Egg';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { Flock } from '../api/flocksApi';
@@ -36,6 +40,7 @@ export function FlockCard({
   onViewHistory,
 }: FlockCardProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -127,8 +132,8 @@ export function FlockCard({
                 aria-controls={menuOpen ? `flock-menu-${flock.id}` : undefined}
                 sx={{
                   p: 1.5,
-                  minWidth: 44,
-                  minHeight: 44,
+                  minWidth: 48,
+                  minHeight: 48,
                 }}
               >
                 <MoreVertIcon />
@@ -148,26 +153,68 @@ export function FlockCard({
 
           {/* Composition */}
           <Stack spacing={1}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                {t('flocks.hens')}:
-              </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <FemaleIcon
+                  sx={{
+                    fontSize: 18,
+                    color: theme.palette.error.main,
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  {t('flocks.hens')}:
+                </Typography>
+              </Box>
               <Typography variant="body2" fontWeight="medium">
                 {flock.currentHens}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                {t('flocks.roosters')}:
-              </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <MaleIcon
+                  sx={{
+                    fontSize: 18,
+                    color: theme.palette.info.main,
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  {t('flocks.roosters')}:
+                </Typography>
+              </Box>
               <Typography variant="body2" fontWeight="medium">
                 {flock.currentRoosters}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                {t('flocks.chicks')}:
-              </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <EggIcon
+                  sx={{
+                    fontSize: 18,
+                    color: theme.palette.warning.main,
+                  }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  {t('flocks.chicks')}:
+                </Typography>
+              </Box>
               <Typography variant="body2" fontWeight="medium">
                 {flock.currentChicks}
               </Typography>
@@ -177,15 +224,21 @@ export function FlockCard({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                pt: 1,
-                borderTop: 1,
-                borderColor: 'divider',
+                pt: 1.5,
+                mt: 0.5,
+                borderTop: 2,
+                borderColor: 'primary.main',
               }}
             >
-              <Typography variant="body2" fontWeight="medium">
+              <Typography variant="body1" fontWeight="bold" color="primary">
                 {t('flocks.total')}:
               </Typography>
-              <Typography variant="body2" fontWeight="bold">
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                color="primary"
+                sx={{ lineHeight: 1 }}
+              >
                 {totalAnimals}
               </Typography>
             </Box>
