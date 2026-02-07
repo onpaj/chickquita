@@ -15,3 +15,13 @@ export {
   useUpdateDailyRecord,
   useDeleteDailyRecord,
 } from './hooks/useDailyRecords';
+
+// Export validation schemas for daily records feature
+export {
+  createDailyRecordSchema,
+  updateDailyRecordSchema,
+  getDailyRecordsParamsSchema,
+  type CreateDailyRecordInput,
+  type UpdateDailyRecordInput,
+  type GetDailyRecordsParamsInput,
+} from './validation';
