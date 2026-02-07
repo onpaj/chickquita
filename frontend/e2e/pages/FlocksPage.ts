@@ -13,9 +13,9 @@ export class FlocksPage {
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.getByRole('heading', { name: /hejna|flocks/i, level: 1 });
-    this.addFlockButton = page.getByRole('button', { name: /přidat hejno|add flock/i });
+    this.addFlockButton = page.getByRole('button', { name: /přidat hejno|add flock/i }).first();
     this.emptyStateMessage = page.getByText(/zatím tu nejsou žádná hejna|no flocks yet/i);
-    this.emptyStateAddButton = page.getByRole('button', { name: /přidat hejno|add flock/i });
+    this.emptyStateAddButton = page.getByRole('button', { name: /přidat hejno|add flock/i }).first();
     this.flockCardsList = page.locator('[data-testid="flock-card"]');
     this.activeFilterButton = page.getByRole('button', { name: /^aktivní$|^active$/i });
     this.allFilterButton = page.getByRole('button', { name: /^vše$|^all$/i });

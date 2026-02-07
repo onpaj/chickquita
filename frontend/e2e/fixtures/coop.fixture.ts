@@ -9,10 +9,11 @@ export interface CoopTestData {
 }
 
 /**
- * Generate a unique coop name with timestamp
+ * Generate a unique coop name with timestamp and random suffix
  */
 export function generateCoopName(prefix: string = 'Test Coop'): string {
-  return `${prefix} ${Date.now()}`;
+  const random = Math.floor(Math.random() * 1000000);
+  return `${prefix} ${Date.now()}${random}`;
 }
 
 /**

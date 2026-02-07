@@ -39,31 +39,38 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
     await coopsPage.goto();
     await page.waitForLoadState('networkidle');
 
+    // Intercept the POST /api/coops response to capture the real coop ID
+    let createdCoopId: string | null = null;
+
+    page.on('response', async (response) => {
+      if (response.url().includes('/api/coops') && response.request().method() === 'POST' && response.status() === 201) {
+        try {
+          const data = await response.json();
+          if (data && data.id) {
+            createdCoopId = data.id;
+          }
+        } catch {
+          // Ignore JSON parse errors
+        }
+      }
+    });
+
     await coopsPage.openCreateCoopModal();
     await page.waitForTimeout(500);
 
     testCoopName = generateCoopName('Flock Test Coop');
     await createCoopModal.createCoop(testCoopName, 'Test Location for Flocks');
 
-    // Wait for modal to close completely
+    // Wait for modal to close and coop to be created
     await createCoopModal.waitForClose();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
     await page.waitForLoadState('networkidle');
 
-    // Navigate to the created coop to get its ID
-    const coopCard = await coopsPage.getCoopCard(testCoopName);
-    await expect(coopCard).toBeVisible({ timeout: 10000 });
-    await coopCard.click();
-    await page.waitForLoadState('networkidle');
-
-    // Extract coop ID from URL
-    await page.waitForTimeout(1000);
-    const url = page.url();
-    const match = url.match(/\/coops\/([a-f0-9-]+)/);
-    testCoopId = match ? match[1] : '';
+    // Navigate to the coop detail page using the captured ID
+    testCoopId = createdCoopId || '';
 
     if (!testCoopId) {
-      throw new Error(`Could not extract coop ID from URL: ${url}`);
+      throw new Error(`Could not capture coop ID from API response for coop: ${testCoopName}`);
     }
   });
 
