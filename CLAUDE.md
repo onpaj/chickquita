@@ -574,6 +574,69 @@ export function MatureChicksModal({ flock, open, onClose }: Props) {
 
 ---
 
+## Design System & Component Library
+
+### Component Library Documentation
+
+For comprehensive component documentation, usage examples, and design system guidelines, see:
+- **`/docs/COMPONENT_LIBRARY.md`** - Complete component library reference
+
+This document includes:
+- Theme configuration (colors, typography, spacing, breakpoints)
+- Shared components (NumericStepper, IllustratedEmptyState, StatCard, ConfirmationDialog)
+- Skeleton components (loading states)
+- Modal configuration constants
+- Design system principles
+- Complete usage examples
+- Component checklist for new components
+
+### Quick Reference: Available Components
+
+**Import from:** `@/shared/components`
+
+```tsx
+import {
+  NumericStepper,           // Mobile-friendly numeric input with +/- buttons
+  IllustratedEmptyState,    // Empty state with illustration and CTA
+  StatCard,                 // Dashboard statistics card with trends
+  ConfirmationDialog,       // Standardized confirmation dialog
+  ProtectedRoute,           // Authentication route guard
+  CoopCardSkeleton,         // Loading skeleton for CoopCard
+  FlockCardSkeleton,        // Loading skeleton for FlockCard
+  CoopDetailSkeleton,       // Loading skeleton for detail pages
+} from '@/shared/components';
+```
+
+### Theme Usage
+
+```tsx
+import { ThemeProvider } from '@mui/material/styles';
+import { theme } from '@/theme';
+
+// Access theme values in components
+<Box sx={{ color: 'primary.main', spacing: 2 }} />
+```
+
+### Modal Configuration
+
+```tsx
+import {
+  DIALOG_CONFIG,
+  dialogTitleSx,
+  dialogContentSx,
+  dialogActionsSx,
+} from '@/shared/constants/modalConfig';
+```
+
+### Design System Resources
+
+Additional design documentation:
+- `/docs/ui-layout-system.md` - Comprehensive UI/layout design system
+- `/docs/coding-standards.md` - Coding standards and conventions
+- `/docs/COMPONENT_LIBRARY.md` - Component library reference (NEW)
+
+---
+
 ## API Documentation
 
 For detailed API specifications, see:
