@@ -45,8 +45,9 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
     testCoopName = generateCoopName('Flock Test Coop');
     await createCoopModal.createCoop(testCoopName, 'Test Location for Flocks');
 
-    // Wait for coop to be created
-    await page.waitForTimeout(2000);
+    // Wait for modal to close completely
+    await createCoopModal.waitForClose();
+    await page.waitForTimeout(1000);
     await page.waitForLoadState('networkidle');
 
     // Navigate to the created coop to get its ID
