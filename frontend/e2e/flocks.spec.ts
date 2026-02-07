@@ -439,6 +439,14 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
       await expect(flocksPage.getFlockCard(activeFlock.identifier)).toBeVisible();
       await expect(flocksPage.getFlockCard(archivedFlock.identifier)).toBeVisible();
       expect(await flocksPage.getFlockCount()).toBe(2);
+
+      // Verify archived flock has visual indicator (status chip shows "Archivováno"/"Archived")
+      const archivedStatus = await flocksPage.getFlockStatus(archivedFlock.identifier);
+      expect(archivedStatus).toMatch(/archivováno|archived/i);
+
+      // Verify active flock has different visual indicator (status chip shows "Aktivní"/"Active")
+      const activeStatus = await flocksPage.getFlockStatus(activeFlock.identifier);
+      expect(activeStatus).toMatch(/aktivní|active/i);
     });
   });
 
