@@ -30,7 +30,7 @@ export const clerkAppearance: Appearance = {
   // Variables for consistent styling
   variables: {
       // Color scheme
-      colorPrimary: '#1976d2', // Material-UI primary blue
+      colorPrimary: '#FF6B35', // Chickquita brand primary orange
       colorBackground: '#ffffff',
       colorText: '#000000',
       colorTextSecondary: '#666666',
@@ -97,7 +97,7 @@ export const clerkAppearance: Appearance = {
 
       // Links
       footerActionLink: {
-        color: '#1976d2',
+        color: '#FF6B35',
         textDecoration: 'none',
         '&:hover': {
           textDecoration: 'underline',
