@@ -123,6 +123,8 @@ export function CoopCard({ coop }: CoopCardProps) {
         sx={{
           position: 'relative',
           cursor: 'pointer',
+          minHeight: 120,
+          transition: 'box-shadow 0.3s ease',
           '&:hover': {
             boxShadow: 4,
           },

@@ -3,11 +3,9 @@ import {
   Box,
   Typography,
   Fab,
-  Card,
-  CardContent,
-  Skeleton,
   Container,
   Button,
+  CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -16,6 +14,7 @@ import { useCoops } from '../features/coops/hooks/useCoops';
 import { CreateCoopModal } from '../features/coops/components/CreateCoopModal';
 import { CoopCard } from '../features/coops/components/CoopCard';
 import { CoopsEmptyState } from '../features/coops/components/CoopsEmptyState';
+import { CoopCardSkeleton } from '../shared/components/CoopCardSkeleton';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { processApiError } from '../lib/errors';
 
@@ -107,13 +106,7 @@ export default function CoopsPage() {
         {isLoading ? (
           <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {[1, 2, 3].map((index) => (
-              <Card key={index} elevation={2}>
-                <CardContent>
-                  <Skeleton variant="text" width="60%" height={32} />
-                  <Skeleton variant="text" width="40%" sx={{ mt: 1 }} />
-                  <Skeleton variant="text" width="30%" sx={{ mt: 1 }} />
-                </CardContent>
-              </Card>
+              <CoopCardSkeleton key={index} />
             ))}
           </Box>
         ) : sortedCoops.length === 0 ? (
@@ -127,7 +120,18 @@ export default function CoopsPage() {
         )}
 
         {isRefreshing && (
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              mt: 2,
+              py: 2,
+            }}
+          >
+            <CircularProgress size={24} thickness={4} />
             <Typography variant="caption" color="text.secondary">
               {t('common.loading')}
             </Typography>

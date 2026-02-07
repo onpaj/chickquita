@@ -15,7 +15,7 @@ import { Box, Card, CardContent, Skeleton } from '@mui/material';
  */
 export function CoopCardSkeleton() {
   return (
-    <Card elevation={2}>
+    <Card elevation={2} sx={{ minHeight: 120 }}>
       <CardContent>
         {/* Header: Title, Chip, and Menu Icon */}
         <Box
