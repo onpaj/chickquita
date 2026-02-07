@@ -439,6 +439,481 @@ public class DailyRecordsEndpointsTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     [Fact]
+    public async Task CreateDailyRecord_WithNonExistentFlock_Returns404NotFound()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var client = factory.CreateClient();
+
+        var nonExistentFlockId = Guid.NewGuid();
+        var command = new CreateDailyRecordCommand
+        {
+            FlockId = nonExistentFlockId,
+            RecordDate = DateTime.UtcNow.Date,
+            EggCount = 10,
+            Notes = "Test"
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync($"/api/flocks/{nonExistentFlockId}/daily-records", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task CreateDailyRecord_WithZeroEggCount_Returns201Created()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Location");
+        var flockId = await SeedFlock(scope, tenantId, coopId, "Test Flock");
+
+        var client = factory.CreateClient();
+
+        var command = new CreateDailyRecordCommand
+        {
+            FlockId = flockId,
+            RecordDate = DateTime.UtcNow.Date,
+            EggCount = 0,
+            Notes = "No eggs today"
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync($"/api/flocks/{flockId}/daily-records", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var result = await response.Content.ReadFromJsonAsync<DailyRecordDto>();
+        result.Should().NotBeNull();
+        result!.EggCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetDailyRecordsByFlock_ReturnsOnlyFlockRecords()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Location");
+        var flock1Id = await SeedFlock(scope, tenantId, coopId, "Flock 1");
+        var flock2Id = await SeedFlock(scope, tenantId, coopId, "Flock 2");
+        await SeedDailyRecord(scope, tenantId, flock1Id, DateTime.UtcNow.Date, 10);
+        await SeedDailyRecord(scope, tenantId, flock1Id, DateTime.UtcNow.Date.AddDays(-1), 8);
+        await SeedDailyRecord(scope, tenantId, flock2Id, DateTime.UtcNow.Date, 15);
+
+        var client = factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync($"/api/flocks/{flock1Id}/daily-records");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<List<DailyRecordDto>>();
+        result.Should().NotBeNull();
+        result!.Should().HaveCount(2);
+        result.Should().AllSatisfy(r => r.FlockId.Should().Be(flock1Id));
+    }
+
+    [Fact]
+    public async Task GetDailyRecords_WithNoFilters_ReturnsAllTenantRecords()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Location");
+        var flock1Id = await SeedFlock(scope, tenantId, coopId, "Flock 1");
+        var flock2Id = await SeedFlock(scope, tenantId, coopId, "Flock 2");
+        await SeedDailyRecord(scope, tenantId, flock1Id, DateTime.UtcNow.Date, 10);
+        await SeedDailyRecord(scope, tenantId, flock2Id, DateTime.UtcNow.Date, 15);
+
+        var client = factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/api/daily-records");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<List<DailyRecordDto>>();
+        result.Should().NotBeNull();
+        result!.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task GetDailyRecords_WithOnlyStartDate_ReturnsFilteredRecords()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Location");
+        var flockId = await SeedFlock(scope, tenantId, coopId, "Test Flock");
+        var today = DateTime.UtcNow.Date;
+        await SeedDailyRecord(scope, tenantId, flockId, today, 10);
+        await SeedDailyRecord(scope, tenantId, flockId, today.AddDays(-5), 8);
+        await SeedDailyRecord(scope, tenantId, flockId, today.AddDays(-10), 12);
+
+        var client = factory.CreateClient();
+
+        var startDate = today.AddDays(-7);
+
+        // Act
+        var response = await client.GetAsync($"/api/daily-records?flockId={flockId}&startDate={startDate:yyyy-MM-dd}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<List<DailyRecordDto>>();
+        result.Should().NotBeNull();
+        result!.Should().HaveCount(2);
+        result.Should().AllSatisfy(r => r.RecordDate.Should().BeOnOrAfter(startDate));
+    }
+
+    [Fact]
+    public async Task GetDailyRecords_WithOnlyEndDate_ReturnsFilteredRecords()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Location");
+        var flockId = await SeedFlock(scope, tenantId, coopId, "Test Flock");
+        var today = DateTime.UtcNow.Date;
+        await SeedDailyRecord(scope, tenantId, flockId, today, 10);
+        await SeedDailyRecord(scope, tenantId, flockId, today.AddDays(-5), 8);
+        await SeedDailyRecord(scope, tenantId, flockId, today.AddDays(-10), 12);
+
+        var client = factory.CreateClient();
+
+        var endDate = today.AddDays(-7);
+
+        // Act
+        var response = await client.GetAsync($"/api/daily-records?flockId={flockId}&endDate={endDate:yyyy-MM-dd}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<List<DailyRecordDto>>();
+        result.Should().NotBeNull();
+        result!.Should().HaveCount(1);
+        result.Should().AllSatisfy(r => r.RecordDate.Should().BeOnOrBefore(endDate));
+    }
+
+    [Fact]
+    public async Task UpdateDailyRecord_WithInvalidEggCount_Returns400BadRequest()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Location");
+        var flockId = await SeedFlock(scope, tenantId, coopId, "Test Flock");
+        var recordId = await SeedDailyRecord(scope, tenantId, flockId, DateTime.UtcNow.Date, 10);
+
+        var client = factory.CreateClient();
+
+        var updateCommand = new UpdateDailyRecordCommand
+        {
+            Id = recordId,
+            EggCount = -10,
+            Notes = "Invalid count"
+        };
+
+        // Act
+        var response = await client.PutAsJsonAsync($"/api/daily-records/{recordId}", updateCommand);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task TenantIsolation_UpdateDailyRecord_SucceedsWithinSameTenant()
+    {
+        // Arrange
+        var tenant1Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenant1Id, "clerk_user_1");
+        var coop1Id = await SeedCoop(scope, tenant1Id, "Tenant 1 Coop", "Location 1");
+        var flock1Id = await SeedFlock(scope, tenant1Id, coop1Id, "Tenant 1 Flock");
+        var tenant1RecordId = await SeedDailyRecord(scope, tenant1Id, flock1Id, DateTime.UtcNow.Date, 10);
+
+        var client = factory.CreateClient();
+
+        var updateCommand = new UpdateDailyRecordCommand
+        {
+            Id = tenant1RecordId,
+            EggCount = 100,
+            Notes = "Updated record within same tenant"
+        };
+
+        // Act
+        var response = await client.PutAsJsonAsync($"/api/daily-records/{tenant1RecordId}", updateCommand);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<DailyRecordDto>();
+        result.Should().NotBeNull();
+        result!.TenantId.Should().Be(tenant1Id);
+        result.EggCount.Should().Be(100);
+    }
+
+    [Fact]
+    public async Task TenantIsolation_DeleteDailyRecord_SucceedsWithinSameTenant()
+    {
+        // Arrange
+        var tenant1Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenant1Id, "clerk_user_1");
+        var coop1Id = await SeedCoop(scope, tenant1Id, "Tenant 1 Coop", "Location 1");
+        var flock1Id = await SeedFlock(scope, tenant1Id, coop1Id, "Tenant 1 Flock");
+        var tenant1RecordId = await SeedDailyRecord(scope, tenant1Id, flock1Id, DateTime.UtcNow.Date, 10);
+
+        var client = factory.CreateClient();
+
+        // Act
+        var response = await client.DeleteAsync($"/api/daily-records/{tenant1RecordId}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        // Verify record is deleted
+        using var verifyScope = factory.Services.CreateScope();
+        var dbContext = verifyScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var record = await dbContext.DailyRecords.FindAsync(tenant1RecordId);
+        record.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task CreateDailyRecord_WithMaxEggCount_Returns201Created()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Location");
+        var flockId = await SeedFlock(scope, tenantId, coopId, "Test Flock");
+
+        var client = factory.CreateClient();
+
+        var command = new CreateDailyRecordCommand
+        {
+            FlockId = flockId,
+            RecordDate = DateTime.UtcNow.Date,
+            EggCount = 10000,
+            Notes = "Large collection"
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync($"/api/flocks/{flockId}/daily-records", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var result = await response.Content.ReadFromJsonAsync<DailyRecordDto>();
+        result.Should().NotBeNull();
+        result!.EggCount.Should().Be(10000);
+    }
+
+    [Fact]
+    public async Task GetDailyRecords_WithEmptyResult_Returns200WithEmptyList()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Location");
+        var flockId = await SeedFlock(scope, tenantId, coopId, "Test Flock");
+
+        var client = factory.CreateClient();
+
+        // Act
+        var response = await client.GetAsync($"/api/flocks/{flockId}/daily-records");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<List<DailyRecordDto>>();
+        result.Should().NotBeNull();
+        result!.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task UpdateDailyRecord_WithZeroEggCount_Returns200()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
+
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+        var coopId = await SeedCoop(scope, tenantId, "Test Coop", "Location");
+        var flockId = await SeedFlock(scope, tenantId, coopId, "Test Flock");
+        var recordId = await SeedDailyRecord(scope, tenantId, flockId, DateTime.UtcNow.Date, 10);
+
+        var client = factory.CreateClient();
+
+        var updateCommand = new UpdateDailyRecordCommand
+        {
+            Id = recordId,
+            EggCount = 0,
+            Notes = "No eggs today"
+        };
+
+        // Act
+        var response = await client.PutAsJsonAsync($"/api/daily-records/{recordId}", updateCommand);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<DailyRecordDto>();
+        result.Should().NotBeNull();
+        result!.EggCount.Should().Be(0);
+    }
+
+    [Fact]
     public void AllEndpoints_RequireAuthorization()
     {
         // This test verifies that all DailyRecords endpoints are configured with RequireAuthorization()
