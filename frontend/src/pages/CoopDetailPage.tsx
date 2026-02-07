@@ -173,20 +173,25 @@ export function CoopDetailPage() {
     <Container maxWidth="sm" sx={{ py: 3, pb: 10 }}>
       {/* Header with Back Button */}
       <Box sx={{ mb: 3 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
+        <IconButton
           onClick={handleBack}
-          sx={{ mb: 2 }}
+          edge="start"
+          aria-label={t('common.back')}
+          sx={{
+            mb: 2,
+            minWidth: 48,
+            minHeight: 48,
+          }}
         >
-          {t('common.back')}
-        </Button>
+          <ArrowBackIcon fontSize="large" />
+        </IconButton>
         <Typography variant="h4" component="h1" gutterBottom>
           {t('coops.details')}
         </Typography>
       </Box>
 
       {/* Coop Details Card */}
-      <Paper sx={{ p: 3 }}>
+      <Paper elevation={2} sx={{ p: 3 }}>
         <Stack spacing={3}>
           {/* Coop Name */}
           <Box>
@@ -218,7 +223,8 @@ export function CoopDetailPage() {
             <Chip
               label={coop.isActive ? t('coops.active') : t('coops.archived')}
               color={coop.isActive ? 'success' : 'default'}
-              size="small"
+              size="medium"
+              sx={{ fontWeight: 600, px: 1 }}
             />
           </Box>
 
@@ -243,11 +249,15 @@ export function CoopDetailPage() {
           </Box>
 
           {/* Action Buttons */}
-          <Stack direction="row" spacing={2} sx={{ pt: 2, flexWrap: 'wrap' }}>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
+            sx={{ pt: 2 }}
+          >
             <Button
               variant="contained"
               onClick={() => navigate(`/coops/${coop.id}/flocks`)}
-              sx={{ minWidth: '120px' }}
+              sx={{ width: { xs: '100%', md: 'auto' }, minWidth: { md: 120 } }}
             >
               {t('flocks.title')}
             </Button>
@@ -256,6 +266,7 @@ export function CoopDetailPage() {
               startIcon={<EditIcon />}
               onClick={handleEdit}
               disabled={!coop.isActive}
+              sx={{ width: { xs: '100%', md: 'auto' } }}
             >
               {t('common.edit')}
             </Button>
@@ -264,15 +275,17 @@ export function CoopDetailPage() {
               startIcon={<ArchiveIcon />}
               onClick={handleArchive}
               disabled={!coop.isActive || isArchiving}
+              sx={{ width: { xs: '100%', md: 'auto' } }}
             >
               {t('coops.archiveCoop')}
             </Button>
             <Button
-              variant="outlined"
+              variant="text"
               color="error"
               startIcon={<DeleteIcon />}
               onClick={handleDelete}
               disabled={!coop.isActive || isDeleting || coop.flocksCount > 0}
+              sx={{ width: { xs: '100%', md: 'auto' } }}
             >
               {t('common.delete')}
             </Button>

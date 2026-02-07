@@ -18,11 +18,12 @@ export function CoopDetailSkeleton() {
     <Container maxWidth="sm" sx={{ py: 3 }}>
       {/* Header with Back Button */}
       <Box sx={{ mb: 3 }}>
-        <Skeleton variant="rectangular" height={40} width={100} />
+        <Skeleton variant="circular" height={48} width={48} sx={{ mb: 2 }} />
+        <Skeleton variant="text" height={40} width="60%" />
       </Box>
 
       {/* Main Content Card */}
-      <Paper sx={{ p: 3 }}>
+      <Paper elevation={2} sx={{ p: 3 }}>
         <Stack spacing={3}>
           {/* Coop Name */}
           <Box>
@@ -39,7 +40,7 @@ export function CoopDetailSkeleton() {
           {/* Status */}
           <Box>
             <Skeleton variant="text" width={80} height={16} sx={{ mb: 1 }} />
-            <Skeleton variant="rounded" height={24} width={60} />
+            <Skeleton variant="rounded" height={32} width={80} />
           </Box>
 
           {/* Created Date */}
@@ -55,11 +56,15 @@ export function CoopDetailSkeleton() {
           </Box>
 
           {/* Action Buttons */}
-          <Stack direction="row" spacing={2} sx={{ pt: 2, flexWrap: 'wrap' }}>
-            <Skeleton variant="rectangular" height={36} width={120} />
-            <Skeleton variant="rectangular" height={36} width={100} />
-            <Skeleton variant="rectangular" height={36} width={120} />
-            <Skeleton variant="rectangular" height={36} width={100} />
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
+            sx={{ pt: 2 }}
+          >
+            <Skeleton variant="rectangular" height={48} width="100%" />
+            <Skeleton variant="rectangular" height={48} width="100%" />
+            <Skeleton variant="rectangular" height={48} width="100%" />
+            <Skeleton variant="rectangular" height={48} width="100%" />
           </Stack>
         </Stack>
       </Paper>
