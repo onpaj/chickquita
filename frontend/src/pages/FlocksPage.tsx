@@ -123,7 +123,7 @@ export default function FlocksPage() {
           {t('common.error')}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Missing coop ID
+          {t('errors.missingCoopId')}
         </Typography>
       </Container>
     );

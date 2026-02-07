@@ -174,6 +174,7 @@
     "forbidden": "You do not have permission to perform this action",
     "conflict": "Conflict - resource already exists",
     "duplicateName": "An item with this name already exists",
-    "serverError": "Server error. Please try again later."
+    "serverError": "Server error. Please try again later.",
+    "missingCoopId": "Missing coop ID"
   }
 }
