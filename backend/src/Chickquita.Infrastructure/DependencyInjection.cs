@@ -50,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<ICoopRepository, CoopRepository>();
         services.AddScoped<IFlockRepository, FlockRepository>();
+        services.AddScoped<IStatisticsRepository, StatisticsRepository>();
 
         // Register webhook validation service
         services.AddScoped<IClerkWebhookValidator, ClerkWebhookValidator>();
