@@ -181,7 +181,7 @@ export default function DashboardPage() {
           <Tooltip title={t('dashboard.quickActions.addDailyRecord')} placement="left">
             <Fab
               color="primary"
-              aria-label="add daily record"
+              aria-label={t('dashboard.quickActions.addDailyRecordAriaLabel')}
               onClick={handleAddDailyRecord}
               disabled={true} // Will be enabled in M4
               sx={{

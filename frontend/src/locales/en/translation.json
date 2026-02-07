@@ -73,7 +73,8 @@
       "manageFlocks": "Manage Flocks",
       "manageFlocksDesc": "Track your chicken flocks",
       "trackPurchases": "Track Purchases",
-      "trackPurchasesDesc": "Record farming costs"
+      "trackPurchasesDesc": "Record farming costs",
+      "addDailyRecordAriaLabel": "Add daily record"
     },
     "emptyState": {
       "title": "Welcome to Chickquita!",

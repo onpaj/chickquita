@@ -73,7 +73,8 @@
       "manageFlocks": "Spravovat hejna",
       "manageFlocksDesc": "Sledujte svá kuřecí hejna",
       "trackPurchases": "Sledovat nákupy",
-      "trackPurchasesDesc": "Zaznamenejte náklady na chov"
+      "trackPurchasesDesc": "Zaznamenejte náklady na chov",
+      "addDailyRecordAriaLabel": "Přidat denní záznam"
     },
     "emptyState": {
       "title": "Vítejte v Chickquita!",
