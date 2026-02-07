@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Container, Box, Typography, Alert, Fab, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +14,8 @@ import { WeeklyProductionWidget } from '@/features/dashboard/components/WeeklyPr
 import { FlockStatusWidget } from '@/features/dashboard/components/FlockStatusWidget';
 import { EggCostWidget } from '@/features/dashboard/components/EggCostWidget';
 import { QuickActionCard } from '@/features/dashboard/components/QuickActionCard';
+import { QuickAddModal } from '@/features/dailyRecords/components/QuickAddModal';
+import { useAllFlocks } from '@/features/flocks/hooks/useAllFlocks';
 
 /**
  * Dashboard Page Component
@@ -29,9 +32,20 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: stats, isLoading, error } = useDashboardStats();
+  const { data: flocks = [] } = useAllFlocks();
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   // Check if user has any data
   const hasData = stats && stats.flockStats.activeFlocks > 0;
+
+  // Handler functions
+  const handleAddDailyRecord = () => {
+    setIsQuickAddOpen(true);
+  };
+
+  const handleCloseQuickAdd = () => {
+    setIsQuickAddOpen(false);
+  };
 
   // Quick actions configuration
   const quickActions = [
@@ -39,11 +53,8 @@ export default function DashboardPage() {
       title: t('dashboard.quickActions.addDailyRecord'),
       description: t('dashboard.quickActions.addDailyRecordDesc'),
       icon: <EggIcon />,
-      onClick: () => {
-        // TODO: Implement when M4 (Daily Records) is ready
-        console.log('Add Daily Record - Coming in M4');
-      },
-      disabled: true, // Will be enabled in M4
+      onClick: handleAddDailyRecord,
+      disabled: flocks.length === 0,
     },
     {
       title: t('dashboard.quickActions.manageCoops'),
@@ -70,11 +81,6 @@ export default function DashboardPage() {
       disabled: true, // Will be enabled when purchases are implemented
     },
   ];
-
-  const handleAddDailyRecord = () => {
-    // TODO: Implement when M4 (Daily Records) is ready
-    console.log('Add Daily Record FAB clicked - Coming in M4');
-  };
 
   return (
     <Container maxWidth="lg">
@@ -175,7 +181,7 @@ export default function DashboardPage() {
           </>
         )}
 
-        {/* Floating Action Button - Add Daily Record (M4) */}
+        {/* Floating Action Button - Add Daily Record */}
         {/* Only show if user has data (flocks exist) */}
         {hasData && (
           <Tooltip title={t('dashboard.quickActions.addDailyRecord')} placement="left">
@@ -183,18 +189,24 @@ export default function DashboardPage() {
               color="primary"
               aria-label={t('dashboard.quickActions.addDailyRecordAriaLabel')}
               onClick={handleAddDailyRecord}
-              disabled={true} // Will be enabled in M4
+              disabled={flocks.length === 0}
               sx={{
                 position: 'fixed',
                 bottom: 88, // Above bottom navigation (56px height + 32px spacing)
                 right: 16,
-                opacity: 0.6, // Indicate disabled state
               }}
             >
               <AddIcon />
             </Fab>
           </Tooltip>
         )}
+
+        {/* Quick Add Modal */}
+        <QuickAddModal
+          open={isQuickAddOpen}
+          onClose={handleCloseQuickAdd}
+          flocks={flocks}
+        />
       </Box>
     </Container>
   );

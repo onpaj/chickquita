@@ -8,6 +8,7 @@ export class DashboardPage {
   readonly pageTitle: Locator;
   readonly coopsNavigationButton: Locator;
   readonly userButton: Locator;
+  readonly quickAddFab: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -15,6 +16,8 @@ export class DashboardPage {
     // BottomNavigationAction renders as a button with the label as accessible name
     this.coopsNavigationButton = page.getByRole('button', { name: /^(coops|kurníky)$/i });
     this.userButton = page.locator('.cl-userButton');
+    // FAB button for quick add daily record
+    this.quickAddFab = page.locator('[aria-label*="Přidat denní záznam"]');
   }
 
   async goto() {
@@ -27,5 +30,13 @@ export class DashboardPage {
 
   async isUserLoggedIn(): Promise<boolean> {
     return await this.userButton.isVisible();
+  }
+
+  async clickQuickAddFab() {
+    await this.quickAddFab.click();
+  }
+
+  async isQuickAddFabVisible(): Promise<boolean> {
+    return await this.quickAddFab.isVisible();
   }
 }
