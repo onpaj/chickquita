@@ -6,3 +6,12 @@ export {
   type UpdateDailyRecordRequest,
   type GetDailyRecordsParams,
 } from './api/dailyRecordsApi';
+
+// Export hooks for daily records feature
+export {
+  useDailyRecords,
+  useDailyRecordsByFlock,
+  useCreateDailyRecord,
+  useUpdateDailyRecord,
+  useDeleteDailyRecord,
+} from './hooks/useDailyRecords';
