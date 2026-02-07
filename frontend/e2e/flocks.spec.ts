@@ -240,12 +240,12 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
       // Verify current values
       expect(await editFlockModal.getCurrentIdentifier()).toBe(originalFlock.identifier);
 
-      // Edit the flock
+      // Edit the flock (only identifier and hatch date can be edited)
       const newIdentifier = generateFlockIdentifier('Edited Flock');
-      const newHens = 25;
+      const newHatchDate = '2024-01-15';
       await editFlockModal.editFlock({
         identifier: newIdentifier,
-        hens: newHens,
+        hatchDate: newHatchDate,
       });
 
       // Verify changes
@@ -253,8 +253,11 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
       await expect(flocksPage.getFlockCard(newIdentifier)).toBeVisible();
       await expect(flocksPage.getFlockCard(originalFlock.identifier)).not.toBeVisible();
 
+      // Verify composition remained unchanged (composition cannot be edited via edit modal)
       const composition = await flocksPage.getFlockComposition(newIdentifier);
-      expect(composition.hens).toBe(newHens);
+      expect(composition.hens).toBe(originalFlock.hens);
+      expect(composition.roosters).toBe(originalFlock.roosters);
+      expect(composition.chicks).toBe(originalFlock.chicks);
     });
 
     test('should cancel flock edit', async () => {

@@ -7,9 +7,6 @@ export class EditFlockModal {
   readonly modalTitle: Locator;
   readonly identifierInput: Locator;
   readonly hatchDateInput: Locator;
-  readonly hensInput: Locator;
-  readonly roostersInput: Locator;
-  readonly chicksInput: Locator;
   readonly submitButton: Locator;
   readonly cancelButton: Locator;
   readonly errorMessage: Locator;
@@ -20,9 +17,6 @@ export class EditFlockModal {
     this.modalTitle = page.getByRole('dialog').getByRole('heading', { name: /upravit hejno|edit flock/i });
     this.identifierInput = page.getByRole('dialog').getByLabel(/identifikátor hejna|flock identifier/i);
     this.hatchDateInput = page.getByRole('dialog').getByLabel(/datum líhnutí|hatch date/i);
-    this.hensInput = page.getByRole('dialog').getByLabel(/^slepice$|^hens$/i);
-    this.roostersInput = page.getByRole('dialog').getByLabel(/^kohouti$|^roosters$/i);
-    this.chicksInput = page.getByRole('dialog').getByLabel(/^kuřata$|^chicks$/i);
     this.submitButton = page.getByRole('dialog').getByRole('button', { name: /uložit|save/i });
     this.cancelButton = page.getByRole('dialog').getByRole('button', { name: /zrušit|cancel/i });
     this.errorMessage = page.getByRole('dialog').locator('.MuiFormHelperText-root.Mui-error');
@@ -30,6 +24,8 @@ export class EditFlockModal {
 
   /**
    * Fill the flock form with provided data
+   * Note: Edit modal only allows editing identifier and hatchDate
+   * Composition (hens, roosters, chicks) cannot be edited here
    */
   async fillForm(data: Partial<FlockTestData>) {
     if (data.identifier !== undefined) {
@@ -40,21 +36,6 @@ export class EditFlockModal {
     if (data.hatchDate !== undefined) {
       await this.hatchDateInput.clear();
       await this.hatchDateInput.fill(data.hatchDate);
-    }
-
-    if (data.hens !== undefined) {
-      await this.hensInput.clear();
-      await this.hensInput.fill(data.hens.toString());
-    }
-
-    if (data.roosters !== undefined) {
-      await this.roostersInput.clear();
-      await this.roostersInput.fill(data.roosters.toString());
-    }
-
-    if (data.chicks !== undefined) {
-      await this.chicksInput.clear();
-      await this.chicksInput.fill(data.chicks.toString());
     }
   }
 
@@ -128,29 +109,5 @@ export class EditFlockModal {
    */
   async getCurrentHatchDate(): Promise<string> {
     return await this.hatchDateInput.inputValue();
-  }
-
-  /**
-   * Get current value of hens input
-   */
-  async getCurrentHens(): Promise<number> {
-    const value = await this.hensInput.inputValue();
-    return parseInt(value) || 0;
-  }
-
-  /**
-   * Get current value of roosters input
-   */
-  async getCurrentRoosters(): Promise<number> {
-    const value = await this.roostersInput.inputValue();
-    return parseInt(value) || 0;
-  }
-
-  /**
-   * Get current value of chicks input
-   */
-  async getCurrentChicks(): Promise<number> {
-    const value = await this.chicksInput.inputValue();
-    return parseInt(value) || 0;
   }
 }
