@@ -72,4 +72,13 @@ export class CoopsPage {
     const card = await this.getCoopCard(coopName);
     return await card.isVisible().catch(() => false);
   }
+
+  async clickAddButton() {
+    await this.createCoopButton.click();
+  }
+
+  async waitForCoopCard(coopName: string) {
+    const card = await this.getCoopCard(coopName);
+    await card.waitFor({ state: 'visible', timeout: 10000 });
+  }
 }

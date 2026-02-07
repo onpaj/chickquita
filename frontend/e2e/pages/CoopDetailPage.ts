@@ -58,4 +58,21 @@ export class CoopDetailPage {
     await this.flocksButton.click();
     await this.page.waitForLoadState('networkidle');
   }
+
+  async waitForLoaded() {
+    await this.page.waitForLoadState('networkidle');
+    await this.coopName.waitFor({ state: 'visible', timeout: 10000 });
+  }
+
+  async clickAddFlockButton() {
+    const addFlockButton = this.page.getByRole('button', { name: /přidat hejno|add flock/i }).first();
+    await addFlockButton.click();
+  }
+
+  async waitForFlockCard(identifier: string) {
+    const flockCard = this.page
+      .locator('[data-testid="flock-card"]')
+      .filter({ hasText: identifier });
+    await flockCard.waitFor({ state: 'visible', timeout: 10000 });
+  }
 }
