@@ -267,8 +267,9 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
       await flocksPage.clickEditFlock(originalFlock.identifier);
       await expect(editFlockModal.modalTitle).toBeVisible();
 
-      // Verify current values
+      // Verify current values are pre-filled
       expect(await editFlockModal.getCurrentIdentifier()).toBe(originalFlock.identifier);
+      expect(await editFlockModal.getCurrentHatchDate()).toBe(originalFlock.hatchDate);
 
       // Edit the flock (only identifier and hatch date can be edited)
       const newIdentifier = generateFlockIdentifier('Edited Flock');
