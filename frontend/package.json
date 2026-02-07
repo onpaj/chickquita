@@ -16,7 +16,17 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
-    "test:e2e:save-auth": "node e2e/save-auth.js"
+    "test:e2e:save-auth": "node e2e/save-auth.js",
+    "test:crossbrowser": "playwright test --config=playwright.crossbrowser.config.ts",
+    "test:crossbrowser:ui": "playwright test --config=playwright.crossbrowser.config.ts --ui",
+    "test:crossbrowser:headed": "playwright test --config=playwright.crossbrowser.config.ts --headed",
+    "test:crossbrowser:update": "playwright test --config=playwright.crossbrowser.config.ts --update-snapshots",
+    "test:crossbrowser:report": "playwright show-report playwright-report/crossbrowser",
+    "test:crossbrowser:chrome": "playwright test --config=playwright.crossbrowser.config.ts --project=chrome*",
+    "test:crossbrowser:firefox": "playwright test --config=playwright.crossbrowser.config.ts --project=firefox*",
+    "test:crossbrowser:safari": "playwright test --config=playwright.crossbrowser.config.ts --project=safari*",
+    "test:crossbrowser:mobile": "playwright test --config=playwright.crossbrowser.config.ts --project=mobile*",
+    "test:crossbrowser:breakpoints": "playwright test --config=playwright.crossbrowser.config.ts --project=breakpoint*"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.60.0",
