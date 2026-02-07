@@ -187,14 +187,16 @@ export function FlockDetailPage() {
           </Box>
 
           {/* Hatch Date */}
-          <Box>
-            <Typography variant="overline" color="text.secondary">
-              {t('flocks.hatchDate')}
-            </Typography>
-            <Typography variant="body1">
-              {format(new Date(flock.hatchDate), 'PPP', { locale: dateLocale })}
-            </Typography>
-          </Box>
+          {flock.hatchDate && (
+            <Box>
+              <Typography variant="overline" color="text.secondary">
+                {t('flocks.hatchDate')}
+              </Typography>
+              <Typography variant="body1">
+                {format(new Date(flock.hatchDate), 'PPP', { locale: dateLocale })}
+              </Typography>
+            </Box>
+          )}
 
           <Divider />
 
@@ -251,24 +253,28 @@ export function FlockDetailPage() {
           <Divider />
 
           {/* Created Date */}
-          <Box>
-            <Typography variant="overline" color="text.secondary">
-              {t('flocks.createdAt', { date: '' }).replace(/\s*$/, '')}
-            </Typography>
-            <Typography variant="body2">
-              {format(new Date(flock.createdAt), 'PPP p', { locale: dateLocale })}
-            </Typography>
-          </Box>
+          {flock.createdAt && (
+            <Box>
+              <Typography variant="overline" color="text.secondary">
+                {t('flocks.createdAt', { date: '' }).replace(/\s*$/, '')}
+              </Typography>
+              <Typography variant="body2">
+                {format(new Date(flock.createdAt), 'PPP p', { locale: dateLocale })}
+              </Typography>
+            </Box>
+          )}
 
           {/* Updated Date */}
-          <Box>
-            <Typography variant="overline" color="text.secondary">
-              {t('flocks.updatedAt', { date: '' }).replace(/\s*$/, '')}
-            </Typography>
-            <Typography variant="body2">
-              {format(new Date(flock.updatedAt), 'PPP p', { locale: dateLocale })}
-            </Typography>
-          </Box>
+          {flock.updatedAt && (
+            <Box>
+              <Typography variant="overline" color="text.secondary">
+                {t('flocks.updatedAt', { date: '' }).replace(/\s*$/, '')}
+              </Typography>
+              <Typography variant="body2">
+                {format(new Date(flock.updatedAt), 'PPP p', { locale: dateLocale })}
+              </Typography>
+            </Box>
+          )}
 
           {/* Action Buttons */}
           <Stack
