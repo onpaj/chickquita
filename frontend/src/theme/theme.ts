@@ -229,6 +229,10 @@ export const theme = createTheme({
           '&:active': {
             boxShadow: 'none',
           },
+          '&:focus-visible': {
+            outline: '3px solid #FF6B35',
+            outlineOffset: '2px',
+          },
         },
         contained: {
           '&:hover': {
@@ -268,6 +272,10 @@ export const theme = createTheme({
           '&:hover': {
             backgroundColor: 'rgba(255, 107, 53, 0.08)',
           },
+          '&:focus-visible': {
+            outline: '3px solid #FF6B35',
+            outlineOffset: '2px',
+          },
         },
         sizeLarge: {
           minWidth: 56,
@@ -296,6 +304,10 @@ export const theme = createTheme({
           '&:active': {
             boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.15), 0px 4px 8px rgba(0, 0, 0, 0.12)',
           },
+          '&:focus-visible': {
+            outline: '3px solid #FF6B35',
+            outlineOffset: '2px',
+          },
         },
       },
     },
@@ -309,6 +321,10 @@ export const theme = createTheme({
           transition: 'box-shadow 0.3s ease, transform 0.3s ease',
           '&:hover': {
             boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.15)',
+          },
+          '&:focus-visible': {
+            outline: '3px solid #FF6B35',
+            outlineOffset: '2px',
           },
         },
       },
@@ -361,6 +377,12 @@ export const theme = createTheme({
           '& .MuiOutlinedInput-root': {
             borderRadius: 8,
             minHeight: 48, // Touch-friendly
+            '&.Mui-focused': {
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderWidth: 2,
+                borderColor: '#FF6B35',
+              },
+            },
           },
         },
       },

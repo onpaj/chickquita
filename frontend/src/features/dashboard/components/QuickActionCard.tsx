@@ -33,6 +33,7 @@ export function QuickActionCard({
       <CardActionArea
         onClick={onClick}
         disabled={disabled}
+        aria-label={`${title}: ${description}`}
         sx={{
           height: '100%',
           display: 'flex',
@@ -98,7 +99,7 @@ export function QuickActionCard({
             </Box>
 
             {/* Chevron indicator */}
-            <ChevronRightIcon sx={{ color: 'text.secondary', flexShrink: 0 }} />
+            <ChevronRightIcon sx={{ color: 'text.secondary', flexShrink: 0 }} aria-hidden="true" />
           </Box>
         </CardContent>
       </CardActionArea>

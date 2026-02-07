@@ -130,10 +130,12 @@ export function CoopCard({ coop }: CoopCardProps) {
           },
         }}
         onClick={handleCardClick}
+        role="article"
+        aria-label={t('coops.coopCardAriaLabel', { coopName: coop.name })}
       >
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-            <Typography variant="h6" component="h2" sx={{ flexGrow: 1, pr: 1 }}>
+            <Typography variant="h6" component="h2" sx={{ flexGrow: 1, pr: 1 }} id={`coop-title-${coop.id}`}>
               {coop.name}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -147,6 +149,9 @@ export function CoopCard({ coop }: CoopCardProps) {
                 size="small"
                 onClick={handleMenuClick}
                 aria-label={t('common.more')}
+                aria-haspopup="true"
+                aria-expanded={menuOpen}
+                aria-controls={menuOpen ? `coop-menu-${coop.id}` : undefined}
               >
                 <MoreVertIcon />
               </IconButton>
@@ -170,10 +175,14 @@ export function CoopCard({ coop }: CoopCardProps) {
 
       {/* Action Menu */}
       <Menu
+        id={`coop-menu-${coop.id}`}
         anchorEl={anchorEl}
         open={menuOpen}
         onClose={handleMenuClose}
         onClick={(e) => e.stopPropagation()}
+        MenuListProps={{
+          'aria-labelledby': `coop-title-${coop.id}`,
+        }}
       >
         <MenuItem onClick={handleEdit} disabled={!coop.isActive}>
           <ListItemIcon>

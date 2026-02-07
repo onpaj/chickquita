@@ -18,7 +18,8 @@
     "success": "Success",
     "more": "More",
     "retry": "Retry",
-    "all": "All"
+    "all": "All",
+    "processing": "Processing..."
   },
   "auth": {
     "signIn": "Sign In",
@@ -111,6 +112,7 @@
     "deleteConfirmMessage": "This coop will be permanently deleted. This action cannot be undone.",
     "deleteSuccess": "Coop deleted successfully",
     "deleteErrorHasFlocks": "Cannot delete coop with existing flocks. Please delete or move all flocks first.",
+    "coopCardAriaLabel": "Coop {{coopName}}",
     "emptyState": {
       "title": "No coops yet",
       "message": "Add your first coop to get started!"

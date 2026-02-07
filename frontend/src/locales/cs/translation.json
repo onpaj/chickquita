@@ -18,7 +18,8 @@
     "success": "Úspěch",
     "more": "Více",
     "retry": "Zkusit znovu",
-    "all": "Vše"
+    "all": "Vše",
+    "processing": "Zpracovávám..."
   },
   "auth": {
     "signIn": "Přihlásit se",
@@ -111,6 +112,7 @@
     "deleteConfirmMessage": "Tento kurník bude trvale smazán. Tuto akci nelze vrátit zpět.",
     "deleteSuccess": "Kurník byl úspěšně smazán",
     "deleteErrorHasFlocks": "Nelze smazat kurník s existujícími hejny. Nejprve prosím smažte nebo přesuňte všechna hejna.",
+    "coopCardAriaLabel": "Kurník {{coopName}}",
     "emptyState": {
       "title": "Zatím tu nejsou žádné kurníky",
       "message": "Přidejte svůj první kurník, abyste mohli začít!"
