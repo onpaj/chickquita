@@ -213,7 +213,7 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
         await flocksPage.waitForFlocksToLoad();
       }
 
-      // Verify all flocks are visible
+      // Verify multiple flocks can be displayed
       expect(await flocksPage.getFlockCount()).toBe(3);
       await expect(flocksPage.getFlockCard(flock1.identifier)).toBeVisible();
       await expect(flocksPage.getFlockCard(flock2.identifier)).toBeVisible();
@@ -221,6 +221,35 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
 
       // Verify empty state is not shown
       await expect(flocksPage.emptyStateMessage).not.toBeVisible();
+
+      // Verify flock composition is displayed correctly for each flock
+      const composition1 = await flocksPage.getFlockComposition(flock1.identifier);
+      expect(composition1.hens).toBe(flock1.hens);
+      expect(composition1.roosters).toBe(flock1.roosters);
+      expect(composition1.chicks).toBe(flock1.chicks);
+      expect(composition1.total).toBe(flock1.hens + flock1.roosters + flock1.chicks);
+
+      const composition2 = await flocksPage.getFlockComposition(flock2.identifier);
+      expect(composition2.hens).toBe(flock2.hens);
+      expect(composition2.roosters).toBe(flock2.roosters);
+      expect(composition2.chicks).toBe(flock2.chicks);
+      expect(composition2.total).toBe(flock2.hens + flock2.roosters + flock2.chicks);
+
+      const composition3 = await flocksPage.getFlockComposition(flock3.identifier);
+      expect(composition3.hens).toBe(flock3.hens);
+      expect(composition3.roosters).toBe(flock3.roosters);
+      expect(composition3.chicks).toBe(flock3.chicks);
+      expect(composition3.total).toBe(flock3.hens + flock3.roosters + flock3.chicks);
+
+      // Verify flock status is displayed (all should be Active)
+      const status1 = await flocksPage.getFlockStatus(flock1.identifier);
+      expect(status1).toMatch(/aktivní|active/i);
+
+      const status2 = await flocksPage.getFlockStatus(flock2.identifier);
+      expect(status2).toMatch(/aktivní|active/i);
+
+      const status3 = await flocksPage.getFlockStatus(flock3.identifier);
+      expect(status3).toMatch(/aktivní|active/i);
     });
   });
 
