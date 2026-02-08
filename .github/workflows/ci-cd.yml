@@ -37,15 +37,46 @@ jobs:
       - name: Build backend
         run: dotnet build backend/Chickquita.slnx --configuration Release --no-restore
 
-      - name: Run backend tests
-        run: dotnet test backend/Chickquita.slnx --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+      - name: Run backend tests with coverage
+        run: dotnet test backend/Chickquita.slnx --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: Generate backend coverage report
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool || true
+          reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:"coverage/report" -reporttypes:"Html;Cobertura;TextSummary"
+          echo "## Backend Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat coverage/report/Summary.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Check backend coverage threshold
+        run: |
+          dotnet tool install -g dotnet-coverage || true
+          COVERAGE=$(grep -oP 'Line coverage: \K[0-9.]+' coverage/report/Summary.txt || echo "0")
+          echo "Backend coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 85" | bc -l) )); then
+            echo "::warning::Backend coverage ($COVERAGE%) is below threshold (85%)"
+          fi
+
+      - name: Upload backend coverage
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/**/coverage.cobertura.xml
+          flags: backend
+          name: backend-coverage
+          fail_ci_if_error: false
 
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: backend-test-results
-          path: '**/test-results.trx'
+          path: |
+            **/test-results.trx
+            coverage/report/
 
   # Frontend Tests Job
   frontend-tests:
@@ -74,6 +105,55 @@ jobs:
       - name: Run type check
         working-directory: frontend
         run: npx tsc --noEmit
+
+      - name: Run frontend unit tests with coverage
+        working-directory: frontend
+        run: npm run test:coverage
+        env:
+          CI: true
+
+      - name: Generate frontend coverage summary
+        if: always()
+        working-directory: frontend
+        run: |
+          echo "## Frontend Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            LINES=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)
+            STATEMENTS=$(jq -r '.total.statements.pct' coverage/coverage-summary.json)
+            FUNCTIONS=$(jq -r '.total.functions.pct' coverage/coverage-summary.json)
+            BRANCHES=$(jq -r '.total.branches.pct' coverage/coverage-summary.json)
+            echo "| Metric | Coverage |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|----------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Lines | ${LINES}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Statements | ${STATEMENTS}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Functions | ${FUNCTIONS}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Branches | ${BRANCHES}% |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            if (( $(echo "$LINES < 70" | bc -l) )); then
+              echo "::warning::Frontend coverage ($LINES%) is below threshold (70%)"
+            fi
+          fi
+
+      - name: Upload frontend coverage
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./frontend/coverage/cobertura-coverage.xml,./frontend/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+          fail_ci_if_error: false
+
+      - name: Upload frontend test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-results
+          path: |
+            frontend/coverage/
+            frontend/test-results/
 
       - name: Build frontend
         working-directory: frontend
@@ -240,6 +320,69 @@ jobs:
               repo: context.repo.repo,
               body: comment
             });
+
+  # Coverage Check Job
+  coverage-check:
+    name: Coverage Check
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download backend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend-coverage
+
+      - name: Download frontend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-test-results
+          path: frontend-coverage
+
+      - name: Check coverage thresholds
+        run: |
+          echo "## Coverage Threshold Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          PASS=true
+
+          # Check backend coverage
+          if [ -f backend-coverage/report/Summary.txt ]; then
+            BACKEND_COV=$(grep -oP 'Line coverage: \K[0-9.]+' backend-coverage/report/Summary.txt || echo "0")
+            echo "Backend coverage: $BACKEND_COV%" >> $GITHUB_STEP_SUMMARY
+            if (( $(echo "$BACKEND_COV < 85" | bc -l) )); then
+              echo "::error::Backend coverage ($BACKEND_COV%) is below required threshold (85%)"
+              PASS=false
+            fi
+          else
+            echo "::warning::Backend coverage report not found"
+          fi
+
+          # Check frontend coverage
+          if [ -f frontend-coverage/coverage-summary.json ]; then
+            FRONTEND_COV=$(jq -r '.total.lines.pct' frontend-coverage/coverage-summary.json)
+            echo "Frontend coverage: $FRONTEND_COV%" >> $GITHUB_STEP_SUMMARY
+            if (( $(echo "$FRONTEND_COV < 70" | bc -l) )); then
+              echo "::error::Frontend coverage ($FRONTEND_COV%) is below required threshold (70%)"
+              PASS=false
+            fi
+          else
+            echo "::warning::Frontend coverage report not found"
+          fi
+
+          if [ "$PASS" = false ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Coverage checks failed. Please increase test coverage." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ All coverage thresholds met." >> $GITHUB_STEP_SUMMARY
+          fi
 
   # Docker Build Job
   docker-build:
