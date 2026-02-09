@@ -654,6 +654,230 @@ async clickArchiveCoop(coopName: string) {
 
 ---
 
+### Feature: M2-F5 - Delete Coop
+
+**Milestone:** M2
+**PRD Reference:** Line 1768
+**Test Status:** ✅ Exists
+**Test File:** `/frontend/e2e/coops.spec.ts`
+**Test Cases:**
+- `should delete an empty coop` (line 401)
+- `should cancel delete` (line 418)
+
+**Execution Result:** ❌ Fail (0/2 tests pass - menu interaction bug blocks both tests)
+
+#### Test Output
+
+```
+Running 3 tests using 2 workers
+
+✅ Using existing auth state from .auth/user.json
+  ✓  1 [setup] › e2e/auth.setup.ts:45:1 › authenticate (248ms)
+  ✘  2 [chromium] › e2e/coops.spec.ts:401:5 › should delete an empty coop (9.5s)
+  ✘  3 [chromium] › e2e/coops.spec.ts:418:5 › should cancel delete (30.5s)
+
+  2 failed, 1 passed (32.4s)
+```
+
+**Error Messages:**
+
+**Test 1: "should delete an empty coop"**
+```
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByRole('dialog')
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+  404 |       // Confirm delete dialog
+  405 |       const confirmDialog = page.getByRole('dialog');
+> 406 |       await expect(confirmDialog).toBeVisible();
+
+Error occurred at coops.spec.ts:406
+```
+
+**Test 2: "should cancel delete"**
+```
+Test timeout of 30000ms exceeded.
+
+Error: locator.click: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for getByRole('menuitem', { name: /delete|smazat/i })
+    - locator resolved to <li tabindex="-1" role="menuitem" ...>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is not stable
+    - retrying click action
+  - element was detached from the DOM, retrying
+
+Error occurred at pages/CoopsPage.ts:59
+```
+
+#### Findings
+
+**Test Infrastructure:**
+- ✅ Backend running successfully on port 5100
+- ✅ Frontend running on port 3100
+- ✅ Authentication setup working (auth.setup.ts passed in 248ms)
+- ✅ Tests properly configured with auth state (`.auth/user.json`)
+- ✅ Test coops created successfully in beforeEach hooks
+
+**Test Execution Results:**
+- ❌ **FAIL:** Delete an empty coop (9.5s - dialog never appeared)
+- ❌ **FAIL:** Cancel delete (30.5s - menu interaction timeout)
+
+**Issue Analysis:**
+
+**Issue 1: Menu Interaction Instability - SAME BUG AS M2-F3 AND M2-F4**
+- Test clicks "More" button on coop card (line 57 in CoopsPage.ts)
+- Test immediately tries to click "Delete" menu item (line 59)
+- Menu item becomes unstable and gets detached from DOM during click attempt
+- Playwright retries multiple times but element keeps getting detached
+- Test times out after 30 seconds
+- **Root Cause:** Missing explicit wait for menu to open and stabilize after "More" button click
+- **Impact:** BLOCKS all delete functionality testing
+
+**Issue 2: Delete Dialog Never Appears (Consequence of Issue 1)**
+- First test attempts to click delete menu item
+- Click fails due to menu instability
+- Test continues to wait for confirmation dialog
+- Dialog never appears because delete action never triggered
+- Test times out after 5 seconds waiting for dialog
+- **Root Cause:** Menu click never succeeded, so delete action never triggered
+- **Impact:** Cannot verify delete confirmation dialog or delete functionality
+
+**Issue 3: Modal Close Timing (Test Setup Issue)**
+- Both tests have `beforeEach` that creates a test coop
+- Create coop modal may not close promptly after successful creation
+- This can affect test timing and initial state
+- Same pattern observed in M2-F4 (Archive Coop)
+- **Root Cause:** No explicit wait for modal to close in beforeEach
+- **Impact:** May contribute to test instability
+
+**Application Behavior Validation:**
+- ⚠️ **Cannot verify:** Delete coop functionality (blocked by menu bug)
+- ⚠️ **Cannot verify:** Delete confirmation dialog (blocked by menu bug)
+- ⚠️ **Cannot verify:** Cancel delete flow (blocked by menu bug)
+- ⚠️ **UI Bug:** Menu interaction timing/stability issue (CRITICAL - affects Edit, Archive, AND Delete)
+
+**Feature Coverage:**
+According to PRD line 1768, "Delete Coop" requires:
+- ⚠️ Delete coop (only if no active flocks) - **BLOCKED** by menu interaction bug
+- ⚠️ Delete confirmation dialog - **BLOCKED** by menu interaction bug
+- ⚠️ Cancel delete - **BLOCKED** by menu interaction bug
+- ⚠️ Validation: cannot delete coop with active flocks - **NOT TESTED** (requires M3 implementation, acknowledged in test comment line 431)
+
+**Test Coverage Status:**
+- ✅ **Test exists** for delete empty coop
+- ✅ **Test exists** for cancel delete
+- ⚠️ **Test missing** for "cannot delete coop with active flocks" (requires M3 flocks to exist first)
+- ❌ **Tests cannot execute** due to menu interaction bug
+
+#### Recommendations
+
+**Priority: CRITICAL** (Menu bug blocks ALL menu-based operations: Edit, Archive, AND Delete)
+
+**1. Fix Menu Interaction Timing Issue (URGENT - Affects M2-F3, M2-F4, M2-F5):**
+
+This is the THIRD feature blocked by the same menu interaction bug. Fix required in `CoopsPage.ts`:
+
+```typescript
+// Current implementation (line 54-60):
+async clickDeleteCoop(coopName: string) {
+  const card = await this.getCoopCard(coopName);
+  // Open the menu first
+  await card.getByRole('button', { name: /more|více/i }).click();
+  // Then click delete in the menu
+  await this.page.getByRole('menuitem', { name: /delete|smazat/i }).click();
+}
+
+// RECOMMENDED FIX:
+async clickDeleteCoop(coopName: string) {
+  const card = await this.getCoopCard(coopName);
+
+  // Open the menu
+  await card.getByRole('button', { name: /more|više/i }).click();
+
+  // CRITICAL: Wait for menu to be visible and stable before clicking
+  const deleteMenuItem = this.page.getByRole('menuitem', { name: /delete|smazat/i });
+  await deleteMenuItem.waitFor({ state: 'visible' });
+
+  // Small delay to ensure DOM stability
+  await this.page.waitForTimeout(100);
+
+  // Now click the menu item
+  await deleteMenuItem.click();
+}
+```
+
+**Apply same fix to:**
+- `clickEditCoop()` (line 38-44) - affects M2-F3
+- `clickArchiveCoop()` (line 46-52) - affects M2-F4
+- `clickDeleteCoop()` (line 54-60) - affects M2-F5
+
+**2. Fix Test Setup - Add Explicit Modal Close Wait:**
+
+Update `beforeEach` in all Delete Coop tests (line 393-399):
+```typescript
+test.beforeEach(async () => {
+  testCoopName = `Deletable Coop ${Date.now()}`;
+  await coopsPage.openCreateCoopModal();
+  await createCoopModal.createCoop(testCoopName);
+
+  // CRITICAL: Wait for modal to fully close before proceeding
+  await createCoopModal.waitForClose();
+
+  // Additional wait to ensure page state is stable
+  await page.waitForTimeout(500);
+});
+```
+
+**3. Add Missing Validation Test (Requires M3 Implementation):**
+
+Once M3 (Flocks) is implemented, add test for validation rule:
+```typescript
+test('should prevent delete of coop with active flocks', async ({ page }) => {
+  // Prerequisites: Create flock in the test coop (requires M3 API)
+
+  await coopsPage.clickDeleteCoop(testCoopName);
+
+  const confirmDialog = page.getByRole('dialog');
+  await expect(confirmDialog).toBeVisible();
+
+  // Should show error message about active flocks
+  await expect(page.getByText(/nelze smazat.*aktivní.*hejno/i)).toBeVisible();
+
+  // Delete button should be disabled or dialog should show error
+  const confirmButton = confirmDialog.getByRole('button', { name: /delete|smazat/i });
+  await expect(confirmButton).toBeDisabled();
+});
+```
+
+**4. Backend API Verification (Once Menu Bug Fixed):**
+
+Verify `DELETE /coops/{id}` endpoint:
+- Returns 400 Bad Request when coop has active flocks
+- Returns appropriate error message
+- Successfully deletes when coop is empty
+- Properly validates tenant isolation (can only delete own coops)
+
+**5. Re-run Tests After Menu Fix:**
+
+Once menu interaction bug is fixed, re-run ALL M2 tests:
+```bash
+cd frontend
+npx playwright test coops.spec.ts --project=chromium
+```
+
+**Priority Summary:**
+- 🔴 **CRITICAL:** Fix menu interaction bug (blocks 3 features: M2-F3, M2-F4, M2-F5)
+- 🟡 **MEDIUM:** Add explicit wait for modal close in test setup
+- 🟡 **MEDIUM:** Add validation test for "cannot delete with active flocks" (after M3 implemented)
+- 🟢 **LOW:** Re-run tests after fixes to verify delete functionality
+
+---
+
 ## Appendix A: Authentication Setup Status
 
 **Status:** ✅ Verified (per TASK-003)
