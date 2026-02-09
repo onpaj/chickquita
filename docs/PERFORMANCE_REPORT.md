@@ -1,6 +1,13 @@
 # Performance Testing & Optimization Report
+
+> **⚠️ PERFORMANCE BASELINE REPORT - OUTDATED**
+> **Report Date:** 2026-02-07
+> **Status:** ⚠️ OUTDATED (Purchases feature added Feb 8-9)
+>
+> **Recommendation:** Regenerate after current sprint to capture updated baseline including Purchases feature (US-033 to US-043).
+> **Note:** Bundle size and metrics reflect codebase state before Purchases implementation. Current bundle size is likely higher.
+
 **Story:** TESTING-003 - Performance Testing & Optimization
-**Date:** 2026-02-07
 **Environment:** Production Build (Vite 7.3.1)
 
 ## Executive Summary

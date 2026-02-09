@@ -1,9 +1,14 @@
 # Test Coverage Report - Milestone #2
 
-**Report Date:** 2026-02-06
+> **📋 HISTORICAL REPORT - MILESTONE 2 ONLY**
+> **Report Date:** 2026-02-06
+> **Scope:** Coops Management (M2)
+> **Status:** ✅ Complete
+>
+> **Note:** This report captures test coverage for Milestone 2 only. For current comprehensive test coverage across all features (M2-M8), consider generating `TEST_COVERAGE_CURRENT.md`.
+
 **Milestone:** M2 - Coops Management
 **Project:** Chickquita
-**Status:** ✅ Complete
 
 ---
 

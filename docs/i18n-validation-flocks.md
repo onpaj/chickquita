@@ -1,8 +1,14 @@
 # Internationalization Validation Report - Flocks Feature
 
+> **📋 HISTORICAL VALIDATION REPORT**
+> **Report Date:** 2026-02-07
+> **Scope:** Flocks Feature i18n Validation
+> **Status:** ✅ PASSED
+>
+> **Note:** This report validates i18n implementation for the Flocks feature only. For current translation keys reference across all features, see `I18N_KEYS.md`.
+
 **Story:** US-026 - Validate Internationalization for Flocks
 **Date:** 2026-02-07
-**Status:** ✅ PASSED
 
 ## Executive Summary
 
