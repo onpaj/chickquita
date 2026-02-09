@@ -1,6 +1,12 @@
-# Neon Database Setup Checklist - US-014
+# Neon Database Setup Checklist
 
 This checklist helps verify that the Neon Postgres database has been properly created and configured.
+
+## Related Documentation
+
+Before using this checklist, review these setup guides:
+- **[neon-database-setup.md](./neon-database-setup.md)** - Complete guide for creating Neon database
+- **[database-connection-guide.md](./database-connection-guide.md)** - How to configure connection strings in .NET application
 
 ## Pre-Setup
 
@@ -111,13 +117,13 @@ info: Microsoft.Hosting.Lifetime[0]
 
 ## Acceptance Criteria
 
-Review the acceptance criteria from US-014:
+Review the acceptance criteria:
 
-- [x] Given I have a Neon account
-- [x] When I create a database
-- [x] Then I have database named `chickquita`
-- [x] And I have PostgreSQL version 16
-- [x] And I have a connection string
+- [ ] Given I have a Neon account
+- [ ] When I create a database
+- [ ] Then I have database named `chickquita`
+- [ ] And I have PostgreSQL version 16
+- [ ] And I have a connection string
 - [ ] And I can connect to the database (manual verification required)
 
 ## Manual Steps Required
@@ -170,10 +176,10 @@ Since Claude cannot create external resources, you need to manually:
 
 After completing this checklist:
 
-1. **US-015**: Configure Entity Framework Core
-2. **US-016**: Create initial database migrations
-3. **US-017**: Set up Row-Level Security (RLS) policies
-4. **US-018**: Configure Clerk webhook integration
+1. Configure Entity Framework Core
+2. Create initial database migrations
+3. Set up Row-Level Security (RLS) policies
+4. Configure Clerk webhook integration
 
 ## Resources
 
@@ -186,4 +192,3 @@ After completing this checklist:
 
 **Checklist Version**: 1.0
 **Date**: 2026-02-05
-**User Story**: US-014 - Create Neon Postgres Database

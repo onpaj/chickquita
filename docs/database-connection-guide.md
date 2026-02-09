@@ -207,6 +207,11 @@ info: Microsoft.Hosting.Lifetime[0]
 5. **Monitor connections** - Use Neon dashboard to track connection usage
 6. **Limit IP access** - Configure IP allowlist in Neon (optional)
 
+## Related Documentation
+
+- **[neon-database-setup.md](./neon-database-setup.md)** - How to create the Neon Postgres database and obtain connection string
+- **[NEON_SETUP_CHECKLIST.md](./NEON_SETUP_CHECKLIST.md)** - Step-by-step verification checklist for database setup
+
 ## Next Steps
 
 After configuring the database connection:
@@ -216,10 +221,6 @@ After configuring the database connection:
 3. Configure EF Core in `Program.cs`
 4. Create initial migrations
 5. Apply migrations to create tables
-
-See related documentation:
-- [neon-database-setup.md](./neon-database-setup.md) - Database creation guide
-- Entity Framework Core setup (to be created in US-015)
 
 ---
 

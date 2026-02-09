@@ -213,6 +213,11 @@ After database creation:
 3. **US-017**: Set up Row-Level Security (RLS) policies
 4. **US-018**: Configure Clerk webhook for user sync
 
+## Related Documentation
+
+- **[database-connection-guide.md](./database-connection-guide.md)** - How to configure the Neon connection string in .NET application for local and production environments
+- **[NEON_SETUP_CHECKLIST.md](./NEON_SETUP_CHECKLIST.md)** - Step-by-step verification checklist for database setup
+
 ## References
 
 - Neon Documentation: https://neon.tech/docs
