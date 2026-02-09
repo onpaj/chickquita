@@ -2,9 +2,12 @@
 
 **Chickquita (Chickquita)** - Technology choices and architectural decisions for the mobile-first PWA.
 
-**Version:** 2.0
-**Date:** February 5, 2026
+**Version:** 2.1
+**Date:** February 9, 2026
 **Status:** Approved
+
+> **Note on Version Numbers:**
+> This document shows baseline versions as of 2026-02-09. Versions may be newer than documented during active development - this is expected and normal. For exact current versions, refer to `frontend/package.json` and `backend/**/*.csproj` files. We recommend reviewing this document quarterly to keep versions current.
 
 ---
 
@@ -23,43 +26,47 @@
 
 ### Core Framework & Build Tools
 
-**React 18.2+**
+**React 19.2.0 (as of 2026-02-09)**
 - UI framework with concurrent features for better UX
 - Excellent mobile performance
 - Large ecosystem and community support
+- Note: This is a forward-compatible major version upgrade from 18.2
 
-**TypeScript 5.0+**
+**TypeScript 5.9.3 (as of 2026-02-09)**
 - Strict mode enabled for maximum type safety
 - Better IDE support and refactoring
 - Catches errors at compile time
 
-**Vite 5.0+** - Build tool
+**Vite 7.2.4 (as of 2026-02-09)** - Build tool
 - Lightning-fast HMR (Hot Module Replacement) for development
 - Optimized production builds with automatic code splitting
 - Native ES modules support
 - Plugin ecosystem for PWA features
 - Significantly faster than webpack
+- Note: This is a forward-compatible major version upgrade from 5.0
 
 ### Routing & Navigation
 
-**React Router 6.20+**
+**React Router 7.13.0 (as of 2026-02-09)**
 - Declarative routing with data loading
 - Lazy loading for code splitting
 - Protected route wrappers for authentication
 - Navigation guards for offline mode
 - Nested routes support
+- Note: This is a forward-compatible major version upgrade from 6.20
 
 ### State Management
 
-**Zustand 4.4+** - Client state management (preferred over Redux Toolkit)
+**Zustand 5.0.11 (as of 2026-02-09)** - Client state management (preferred over Redux Toolkit)
 - Simpler API with minimal boilerplate
 - Built-in persistence middleware
 - Better DevTools integration
 - Smaller bundle size (~1KB vs ~12KB for Redux)
 - Easy integration with React Query for server state
 - No provider wrapper needed
+- Note: This is a forward-compatible major version upgrade from 4.4
 
-**TanStack Query 5.0+** - Server state management
+**TanStack Query 5.90.20 (as of 2026-02-09)** - Server state management
 - Automatic caching and invalidation
 - Background refetching for fresh data
 - Optimistic updates for offline support
@@ -69,19 +76,20 @@
 
 ### Forms & Validation
 
-**React Hook Form 7.48+**
+**React Hook Form 7.71.1 (as of 2026-02-09)**
 - Uncontrolled components for better performance
 - Native HTML5 validation integration
 - Easy integration with Zod schemas
 - Minimal re-renders (only affected fields)
 - Built-in error handling
 
-**Zod 3.22+** - Schema validation
+**Zod 4.3.6 (as of 2026-02-09)** - Schema validation
 - TypeScript-first schema validation
 - Runtime type safety
 - Composable validation rules
 - Shared schemas between frontend/backend
 - Clear error messages
+- Note: This is a forward-compatible major version upgrade from 3.22
 
 ---
 
@@ -89,7 +97,7 @@
 
 ### Component Library
 
-**Material-UI (MUI) 5.14+** - Selected over Chakra UI
+**Material-UI (MUI) 7.3.7 (as of 2026-02-09)** - Selected over Chakra UI
 
 **Why MUI:**
 - Superior mobile touch optimization out of the box
@@ -118,7 +126,7 @@
 
 ### Data Visualization
 
-**Recharts 2.10+** - Selected over Chart.js
+**Recharts 3.7.0 (as of 2026-02-09)** - Selected over Chart.js
 
 **Why Recharts:**
 - Declarative API (React-like)
@@ -127,6 +135,7 @@
 - Smaller bundle than Chart.js
 - Composable chart components
 - Good enough for MVP charts (egg cost trends, productivity graphs)
+- Note: This is a forward-compatible major version upgrade from 2.10
 
 ---
 
@@ -134,7 +143,7 @@
 
 ### Service Worker Management
 
-**Workbox 7.0+**
+**Workbox 7.4.0 (as of 2026-02-09)**
 - Google's production-ready service worker library
 - Precaching strategies for static assets
 - Runtime caching with customizable strategies
@@ -144,13 +153,14 @@
 
 ### Offline Storage
 
-**Dexie.js 3.2+** - IndexedDB wrapper
+**Dexie.js 4.3.0 (as of 2026-02-09)** - IndexedDB wrapper
 - Clean, promise-based API
 - TypeScript support out of the box
 - Observable queries for reactivity
 - Supports complex queries and indexing
 - Built-in versioning for schema migrations
 - Better than raw IndexedDB API
+- Note: This is a forward-compatible major version upgrade from 3.2
 
 ### Configuration
 
@@ -213,7 +223,7 @@
 
 ### Data Access
 
-**Entity Framework Core 8.0+** - ORM for Neon Postgres
+**Entity Framework Core 8.0.2 (as of 2026-02-09)** - ORM for Neon Postgres
 - Code-First approach with migrations
 - LINQ query support
 - Change tracking and automatic updates
@@ -221,7 +231,7 @@
 - Global query filters for tenant isolation
 - Migration tooling via `dotnet ef`
 
-**Npgsql.EntityFrameworkCore.PostgreSQL 8.0+**
+**Npgsql.EntityFrameworkCore.PostgreSQL 8.0.2 (as of 2026-02-09)**
 - PostgreSQL provider for EF Core
 - Full support for PostgreSQL 16 features
 - JSON column support
@@ -237,14 +247,15 @@
 
 ### Validation & Mapping
 
-**FluentValidation 11.9+**
+**FluentValidation 12.1.1 (as of 2026-02-09)**
 - Fluent API for validation rules
 - Async validation support
 - Custom validators
 - Integration with ASP.NET Core (automatic validation)
 - Clear, testable validation logic
+- Note: This is a forward-compatible major version upgrade from 11.9
 
-**AutoMapper 12.0+**
+**AutoMapper 12.0.1 (as of 2026-02-09)**
 - DTO to Entity mapping
 - Profile-based configuration
 - Projection support for queries
