@@ -2200,6 +2200,229 @@ async fillForm(
 
 ---
 
+### Feature: M4-F2 - Quick-Add via FAB Button on Dashboard
+
+**Milestone:** M4
+**PRD Reference:** Line 1849
+**Test Status:** ✅ Exists
+**Test File:** `/frontend/e2e/daily-records-quick-add.spec.ts`
+**Test Cases:**
+- `should open Quick Add modal from dashboard` (line 116)
+- `should display all form fields correctly` (line 133)
+- `should have today as default date` (line 154)
+- `should increment and decrement egg count` (line 168)
+- `should validate date cannot be in future` (line 198)
+- `should validate notes max length (500 characters)` (line 219)
+- `should show character count for notes` (line 238)
+- `should submit form successfully and close modal` (line 257)
+- `should reset form after closing` (line 303)
+- `should disable form while submitting` (line 334)
+- `should complete full workflow in less than 30 seconds` (line 375)
+- `should be responsive on mobile viewport` (line 416)
+
+**Execution Result:** ❌ Fail (0/12 tests pass, multiple test infrastructure bugs)
+
+#### Test Output
+
+```
+Running 13 tests using 4 workers
+
+✅ Using existing auth state from .auth/user.json
+  ✓  1 [setup] › e2e/auth.setup.ts:45:1 › authenticate (281ms)
+  ✘  All 12 tests FAILED
+
+Common errors:
+1. Test setup phase: expect(testCoopId).toBeTruthy() - Received: "" (line 72)
+2. Test flock creation: locator.fill: value: expected string, got undefined (CreateFlockModal.ts:54)
+3. Test timeout: waiting for "Add Flock" button (30s timeout)
+
+12 failed, 1 passed (57.3s)
+```
+
+#### Findings
+
+**Issue 1: Coop Creation Fails - Empty Coop ID (CRITICAL)**
+
+**Root Cause:** Test setup (beforeEach) creates a coop, but the coop ID is not captured correctly. The response interceptor captures the POST /api/coops response, but `createdCoopId` remains null/empty string.
+
+**Test Code (lines 46-72):**
+```typescript
+let createdCoopId: string | null = null;
+page.on('response', async (response) => {
+  if (
+    response.url().includes('/api/coops') &&
+    response.request().method() === 'POST' &&
+    response.status() === 201
+  ) {
+    try {
+      const data = await response.json();
+      if (data && data.id) {
+        createdCoopId = data.id;
+      }
+    } catch {
+      // Ignore JSON parsing errors
+    }
+  }
+});
+
+await coopsPage.clickAddButton();
+await createCoopModal.fillForm(testCoopName, 'Test location for quick add');
+await createCoopModal.submit();
+await coopsPage.waitForCoopCard(testCoopName);
+
+await page.waitForTimeout(500);
+testCoopId = createdCoopId || '';
+expect(testCoopId).toBeTruthy(); // ❌ FAILS - testCoopId is ""
+```
+
+**Possible Causes:**
+1. **Timing Issue:** Response interceptor registered too late (after API call completes)
+2. **Response Body Already Consumed:** Playwright may have consumed response body before test reads it
+3. **API Response Structure Changed:** Backend may return different structure than expected
+4. **Race Condition:** `createdCoopId` accessed before response handler completes
+
+**Impact:**
+- ALL 12 Quick-Add tests fail in setup phase
+- Test never reaches actual Quick-Add FAB button testing
+- Cannot verify any M4-F2 (Quick-Add via FAB) functionality
+- Same pattern likely affects other test files using response interception
+
+**Issue 2: Same Page Object Bug as M4-F1 (CreateFlockModal.fillForm)**
+
+**Root Cause:** Lines 101-107 call `createFlockModal.fillForm()` with 5 individual parameters (old signature), but Page Object expects single object parameter (new signature).
+
+**Test Code (lines 101-107):**
+```typescript
+await createFlockModal.fillForm(
+  testFlockIdentifier,  // string
+  getDaysAgoDate(30),   // string
+  5,  // hens: number
+  1,  // roosters: number
+  0   // chicks: number
+);
+```
+
+**Page Object Expected:**
+```typescript
+async fillForm(data: FlockTestData) {
+  await this.identifierInput.fill(data.identifier); // expects data.identifier
+  // ...
+}
+```
+
+This is the EXACT SAME bug as M4-F1. However, tests fail BEFORE reaching this code due to Issue 1.
+
+**Issue 3: Test Cannot Reach Quick-Add Testing Logic**
+
+Because tests fail during coop setup (line 72), the actual Quick-Add FAB button testing never executes. The test logic that validates:
+- ✅ FAB button appears on dashboard
+- ✅ Quick-Add modal opens when FAB clicked
+- ✅ Form fields display correctly (flock dropdown, date picker, egg counter, notes)
+- ✅ Default date is today
+- ✅ Egg count stepper increments/decrements
+- ✅ Form validation (future date, max notes length)
+- ✅ Character counter for notes
+- ✅ Submit creates record and closes modal
+- ✅ Form resets after closing
+- ✅ Submit button disables during submission
+- ✅ Full workflow completes in < 30 seconds (performance requirement)
+- ✅ Responsive on mobile viewport
+
+...is completely blocked by the coop setup failure.
+
+#### Recommendations
+
+**Priority: CRITICAL** - Fix test setup issues blocking all Quick-Add tests
+
+**Option A: Fix Response Interception Timing (Recommended)**
+
+1. **Register response handler BEFORE navigation/action:**
+```typescript
+// Register handler first
+let createdCoopId: string | null = null;
+const responsePromise = page.waitForResponse(
+  (response) =>
+    response.url().includes('/api/coops') &&
+    response.request().method() === 'POST' &&
+    response.status() === 201
+);
+
+// Then perform action
+await coopsPage.clickAddButton();
+await createCoopModal.fillForm(testCoopName, 'Test location for quick add');
+await createCoopModal.submit();
+
+// Wait for response and extract ID
+const response = await responsePromise;
+const data = await response.json();
+testCoopId = data.id;
+expect(testCoopId).toBeTruthy();
+```
+
+2. **Use `page.waitForResponse()` instead of `page.on('response')` for more reliable timing**
+
+**Option B: Extract Coop ID from UI Instead of API Response**
+
+```typescript
+await coopsPage.clickAddButton();
+await createCoopModal.fillForm(testCoopName, 'Test location for quick add');
+await createCoopModal.submit();
+await coopsPage.waitForCoopCard(testCoopName);
+
+// Extract coop ID from card data-testid attribute or URL
+await coopsPage.clickCoopCard(testCoopName);
+await page.waitForURL(/\/coops\/([a-f0-9-]+)/);
+const url = page.url();
+testCoopId = url.match(/\/coops\/([a-f0-9-]+)/)?.[1] || '';
+expect(testCoopId).toBeTruthy();
+```
+
+**Option C: Use Global Test Fixtures for Test Data Setup**
+
+Create shared fixtures that set up coops/flocks once per test worker instead of per test.
+
+**Next Steps:**
+
+1. **IMMEDIATE:** Fix response interception timing (Option A recommended)
+2. **THEN:** Fix CreateFlockModal.fillForm() signature (update lines 101-107 to use object syntax)
+3. **AFTER FIX:** Re-run test to validate Quick-Add functionality
+4. **VERIFY:** Check if other test files have same response interception pattern
+5. **DOCUMENT:** Update test best practices documentation
+
+**Application Status:**
+- ⚠️ Cannot verify - Tests blocked by setup infrastructure bugs
+- Application likely functional based on test file structure
+- Quick-Add feature cannot be validated until test infrastructure fixed
+
+#### Gap Analysis
+
+| Acceptance Criteria | Status | Notes |
+|---------------------|--------|-------|
+| FAB button visible on dashboard | ⚠️ Cannot verify | Test blocked in setup phase |
+| Quick-Add modal opens | ⚠️ Cannot verify | Test blocked in setup phase |
+| Form displays correctly | ⚠️ Cannot verify | Test blocked in setup phase |
+| Default date = today | ⚠️ Cannot verify | Test blocked in setup phase |
+| Egg count stepper works | ⚠️ Cannot verify | Test blocked in setup phase |
+| Date validation (no future) | ⚠️ Cannot verify | Test blocked in setup phase |
+| Notes validation (max 500 chars) | ⚠️ Cannot verify | Test blocked in setup phase |
+| Character counter for notes | ⚠️ Cannot verify | Test blocked in setup phase |
+| Submit creates record | ⚠️ Cannot verify | Test blocked in setup phase |
+| Modal closes after submit | ⚠️ Cannot verify | Test blocked in setup phase |
+| Form resets after close | ⚠️ Cannot verify | Test blocked in setup phase |
+| Submit button disabled during save | ⚠️ Cannot verify | Test blocked in setup phase |
+| Workflow completes in < 30s | ⚠️ Cannot verify | Test blocked in setup phase |
+| Mobile responsive | ⚠️ Cannot verify | Test blocked in setup phase |
+
+**Test Coverage:** 🔶 Comprehensive tests exist but blocked by infrastructure bugs (2 critical bugs)
+**Application Validation:** ⚠️ Unknown - Cannot execute tests
+
+**Risk Assessment:**
+- **Test Infrastructure:** CRITICAL - All 12 tests blocked
+- **Application Functionality:** UNKNOWN - Cannot validate until tests fixed
+- **User Impact:** UNKNOWN - Quick-Add is critical user flow (< 30s requirement from PRD)
+
+---
+
 ## Appendix A: Authentication Setup Status
 
 **Status:** ✅ Verified (per TASK-003)
