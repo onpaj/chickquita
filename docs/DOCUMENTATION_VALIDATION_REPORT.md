@@ -240,46 +240,117 @@ Each document follows this structure:
 
 #### 8. API_SPEC_COOPS.md
 **Category:** API
-**Status:** TBD
+**Status:** ✅ Aligned
 
 **Validation Findings:**
-- **Code Alignment:** TBD
-- **Completeness:** TBD
-- **Accuracy:** TBD
-- **Issues Found:** TBD
+- **Code Alignment:** Excellent - all documented endpoints match actual implementation in `CoopsEndpoints.cs`
+- **Completeness:**
+  - ✅ All 6 endpoints documented and implemented:
+    - GET /api/coops (with includeArchived query param)
+    - GET /api/coops/{id}
+    - POST /api/coops
+    - PUT /api/coops/{id}
+    - DELETE /api/coops/{id}
+    - PATCH /api/coops/{id}/archive
+  - ✅ HTTP methods match implementation (GET, POST, PUT, DELETE, PATCH)
+  - ✅ Status codes documented (200, 201, 400, 401, 404, 409) match endpoint error handling
+  - ✅ CoopDto schema matches actual DTO (id, tenantId, name, location, createdAt, updatedAt, isActive, flocksCount)
+- **Accuracy:**
+  - ✅ Request/response schemas accurate (CreateCoopCommand, UpdateCoopCommand)
+  - ✅ Validation rules match FluentValidation implementation:
+    - Name: required, max 100 chars ✅
+    - Location: optional, max 200 chars ✅
+  - ✅ Error codes match Result<T> pattern (Error.Validation, Error.NotFound, Error.Conflict, Error.Unauthorized)
+  - ✅ Business rules accurate (tenant isolation, name uniqueness, soft delete, hard delete restriction)
+  - ✅ DELETE returns `bool` (true on success), documented and implemented correctly
+- **Issues Found:** None - documentation is accurate and complete
 
 **Recommendations:**
-- TBD
+- No changes needed - excellent alignment between documentation and implementation
+- Consider this as template for other API specification documents
 
 ---
 
 #### 9. API_SPEC_DAILY_RECORDS.md
 **Category:** API
-**Status:** TBD
+**Status:** ⚠️ Minor Issues
 
 **Validation Findings:**
-- **Code Alignment:** TBD
-- **Completeness:** TBD
-- **Accuracy:** TBD
-- **Issues Found:** TBD
+- **Code Alignment:** Excellent - all documented endpoints match actual implementation in `DailyRecordsEndpoints.cs`
+- **Completeness:**
+  - ✅ All 5 documented endpoints are implemented:
+    - GET /api/daily-records (with flockId, startDate, endDate query params)
+    - GET /api/flocks/{flockId}/daily-records (with startDate, endDate query params)
+    - POST /api/flocks/{flockId}/daily-records
+    - PUT /api/daily-records/{id}
+    - DELETE /api/daily-records/{id}
+  - ✅ HTTP methods match implementation (GET, POST, PUT, DELETE)
+  - ✅ DailyRecordDto schema matches actual DTO (id, tenantId, flockId, recordDate, eggCount, notes, createdAt, updatedAt)
+- **Accuracy:**
+  - ✅ Request/response schemas accurate (CreateDailyRecordCommand, UpdateDailyRecordCommand)
+  - ✅ Validation rules match FluentValidation implementation:
+    - RecordDate: required, cannot be future ✅
+    - EggCount: >= 0 ✅
+    - Notes: optional, max 500 chars ✅
+  - ✅ Error codes match implementation (Error.Validation, Error.NotFound, Error.Unauthorized)
+  - ✅ Business rules accurate (tenant isolation, date validation, flock association, duplicate prevention)
+  - ⚠️ Status code discrepancy for POST endpoint:
+    - Documentation: 201 Created with Location header ✅
+    - Implementation: 201 Created with Location header ✅
+  - ⚠️ Status code discrepancy for DELETE endpoint:
+    - Documentation: 204 No Content
+    - Implementation: Returns `Results.NoContent()` (204 No Content) ✅
+    - Minor documentation inconsistency: Documented response shows "204 No Content" but success response section (line 279) says "204 No Content" correctly
+- **Issues Found:**
+  1. Minor: Documentation states DELETE returns "204 No Content" (correct) but doesn't explicitly show "No response body" in success response section - actually it does show this correctly on line 281
 
 **Recommendations:**
-- TBD
+- No changes needed - documentation is accurate
+- Status codes and responses are correctly documented
+- DELETE endpoint correctly documents 204 No Content with no response body
 
 ---
 
 #### 10. API_SPEC_PURCHASES.md
 **Category:** API
-**Status:** TBD
+**Status:** ✅ Aligned
 
 **Validation Findings:**
-- **Code Alignment:** TBD
-- **Completeness:** TBD
-- **Accuracy:** TBD
-- **Issues Found:** TBD
+- **Code Alignment:** Excellent - all documented endpoints match actual implementation in `PurchasesEndpoints.cs`
+- **Completeness:**
+  - ✅ All 6 documented endpoints are implemented:
+    - GET /api/v1/purchases (with fromDate, toDate, type, flockId query params)
+    - GET /api/v1/purchases/{id}
+    - GET /api/v1/purchases/names (with query, limit params)
+    - POST /api/v1/purchases
+    - PUT /api/v1/purchases/{id}
+    - DELETE /api/v1/purchases/{id}
+  - ✅ HTTP methods match implementation (GET, POST, PUT, DELETE)
+  - ✅ API versioning (/api/v1/purchases) implemented as documented
+  - ✅ PurchaseDto schema matches actual DTO (id, tenantId, coopId, name, type, amount, quantity, unit, purchaseDate, consumedDate, notes, createdAt, updatedAt)
+  - ✅ Enum types documented (PurchaseType: 0-5, QuantityUnit: 0-4) match Domain entities
+- **Accuracy:**
+  - ✅ Request/response schemas accurate (CreatePurchaseCommand, UpdatePurchaseCommand, DeletePurchaseCommand)
+  - ✅ Validation rules match FluentValidation implementation:
+    - Name: required, max 100 chars ✅
+    - Type: valid enum (0-5) ✅
+    - Amount: >= 0 ✅
+    - Quantity: > 0 ✅
+    - Unit: valid enum (0-4) ✅
+    - PurchaseDate: required, not in future ✅ (validator allows +1 day for timezone tolerance)
+    - ConsumedDate: optional, >= purchaseDate ✅
+    - Notes: optional, max 500 chars ✅
+  - ✅ Error codes match implementation (Error.Validation, Error.NotFound, Error.Unauthorized, Error.Forbidden)
+  - ✅ Status codes documented (200, 201, 204, 400, 401, 403, 404) match endpoint error handling
+  - ✅ Business rules accurate (tenant isolation, coop association, date validation, quantity rules)
+  - ✅ DELETE returns 204 No Content (documented and implemented correctly)
+  - ✅ Location header format matches implementation: `/api/v1/purchases/{id}`
+- **Issues Found:** None - documentation is accurate and complete
 
 **Recommendations:**
-- TBD
+- No changes needed - excellent alignment between documentation and implementation
+- Documentation includes helpful TypeScript types and API client usage examples
+- Frontend integration section is valuable for developers
 
 ---
 
