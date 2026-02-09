@@ -1,7 +1,7 @@
 # Chickquita Database Schema Documentation
 
-**Version:** 1.0.0
-**Last Updated:** 2026-02-08
+**Version:** 1.1.0
+**Last Updated:** 2026-02-09
 **Database:** Neon Postgres 16
 **ORM:** Entity Framework Core (Code First)
 
@@ -158,11 +158,12 @@ Stores chicken flock composition (hens, roosters, chicks).
 | `id` | UUID | No | gen_random_uuid() | Primary key |
 | `tenant_id` | UUID | No | - | Foreign key to tenants |
 | `coop_id` | UUID | No | - | Foreign key to coops |
-| `name` | VARCHAR(100) | No | - | Flock name |
-| `hens` | INTEGER | No | 0 | Number of adult female chickens |
-| `roosters` | INTEGER | No | 0 | Number of adult male chickens |
-| `chicks` | INTEGER | No | 0 | Number of young chickens |
-| `notes` | TEXT | Yes | NULL | Optional notes |
+| `identifier` | VARCHAR(50) | No | - | Flock identifier (unique per coop) |
+| `current_hens` | INTEGER | No | 0 | Number of adult female chickens |
+| `current_roosters` | INTEGER | No | 0 | Number of adult male chickens |
+| `current_chicks` | INTEGER | No | 0 | Number of young chickens |
+| `hatch_date` | TIMESTAMPTZ | No | - | Date when flock was hatched |
+| `is_active` | BOOLEAN | No | TRUE | Active status (false = archived) |
 | `created_at` | TIMESTAMPTZ | No | CURRENT_TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMPTZ | No | CURRENT_TIMESTAMP | Last update timestamp |
 
@@ -170,35 +171,39 @@ Stores chicken flock composition (hens, roosters, chicks).
 - PRIMARY KEY: `id`
 - FOREIGN KEY: `tenant_id` REFERENCES `tenants(id)` ON DELETE CASCADE
 - FOREIGN KEY: `coop_id` REFERENCES `coops(id)` ON DELETE CASCADE
+- UNIQUE: `coop_id, identifier` (per-coop identifier uniqueness)
 - INDEX: `tenant_id` (for RLS queries)
 - INDEX: `coop_id` (for coop-based queries)
+- INDEX: `hatch_date` (for date-based queries)
+- INDEX: `is_active` (for filtering active flocks)
 
 **Business Rules:**
-- Hens, roosters, chicks must be >= 0
+- Current hens, roosters, chicks must be >= 0
 - Chicks count in feed costs, not egg production
 - Can be matured (chicks → hens/roosters) with history tracking
+- Identifier must be unique per coop
 
 ---
 
 ### 4. flock_history
 
-Immutable history of flock composition changes (created when chicks are matured).
+Immutable history of flock composition snapshots (created when chicks are matured or composition changes).
+
+**Design Rationale:** FlockHistory stores snapshots of flock state at each change, not before/after deltas. Each record represents the complete flock composition at a specific point in time.
 
 | Column | Type | Nullable | Default | Description |
 |--------|------|----------|---------|-------------|
 | `id` | UUID | No | gen_random_uuid() | Primary key |
 | `tenant_id` | UUID | No | - | Foreign key to tenants |
 | `flock_id` | UUID | No | - | Foreign key to flocks |
-| `event_type` | VARCHAR(50) | No | - | Type of event (e.g., "ChickMaturation", "InitialComposition") |
-| `previous_hens` | INTEGER | No | 0 | Hens before change |
-| `previous_roosters` | INTEGER | No | 0 | Roosters before change |
-| `previous_chicks` | INTEGER | No | 0 | Chicks before change |
-| `new_hens` | INTEGER | No | 0 | Hens after change |
-| `new_roosters` | INTEGER | No | 0 | Roosters after change |
-| `new_chicks` | INTEGER | No | 0 | Chicks after change |
-| `notes` | TEXT | Yes | NULL | Optional notes (editable) |
-| `event_date` | TIMESTAMPTZ | No | CURRENT_TIMESTAMP | When the event occurred |
-| `created_at` | TIMESTAMPTZ | No | CURRENT_TIMESTAMP | Creation timestamp |
+| `reason` | VARCHAR(50) | No | - | Reason for composition change (e.g., "ChickMaturation", "InitialComposition") |
+| `hens` | INTEGER | No | 0 | Number of hens at this snapshot |
+| `roosters` | INTEGER | No | 0 | Number of roosters at this snapshot |
+| `chicks` | INTEGER | No | 0 | Number of chicks at this snapshot |
+| `notes` | VARCHAR(500) | Yes | NULL | Optional notes (editable) |
+| `change_date` | TIMESTAMPTZ | No | CURRENT_TIMESTAMP | When the composition change occurred |
+| `created_at` | TIMESTAMPTZ | No | CURRENT_TIMESTAMP | Record creation timestamp |
+| `updated_at` | TIMESTAMPTZ | No | CURRENT_TIMESTAMP | Last update timestamp (for notes field) |
 
 **Indexes:**
 - PRIMARY KEY: `id`
@@ -206,12 +211,13 @@ Immutable history of flock composition changes (created when chicks are matured)
 - FOREIGN KEY: `flock_id` REFERENCES `flocks(id)` ON DELETE CASCADE
 - INDEX: `tenant_id` (for RLS queries)
 - INDEX: `flock_id` (for flock history queries)
-- INDEX: `event_date DESC` (for chronological queries)
+- INDEX: `change_date DESC` (for chronological queries)
 
 **Business Rules:**
-- Immutable (except `notes` field)
-- First entry for each flock: `event_type = "InitialComposition"`
-- Maturation entries: `event_type = "ChickMaturation"`
+- Immutable (except `notes` field which can be edited)
+- First entry for each flock: `reason = "InitialComposition"`
+- Maturation entries: `reason = "ChickMaturation"`
+- Each record is a complete snapshot, not a delta/diff
 
 ---
 
@@ -234,7 +240,7 @@ Daily egg production records (offline-capable).
 - PRIMARY KEY: `id`
 - FOREIGN KEY: `tenant_id` REFERENCES `tenants(id)` ON DELETE CASCADE
 - FOREIGN KEY: `flock_id` REFERENCES `flocks(id)` ON DELETE CASCADE
-- UNIQUE: `tenant_id, flock_id, record_date` (one record per flock per day)
+- UNIQUE: `flock_id, record_date` (one record per flock per day)
 - INDEX: `tenant_id` (for RLS queries)
 - INDEX: `flock_id` (for flock-based queries)
 - INDEX: `record_date DESC` (for date range queries)
@@ -256,13 +262,13 @@ Expense tracking for chicken farming (feed, vitamins, bedding, veterinary, etc.)
 | `tenant_id` | UUID | No | - | Foreign key to tenants |
 | `coop_id` | UUID | Yes | NULL | Optional foreign key to coops |
 | `name` | VARCHAR(100) | No | - | Purchase name or description |
-| `type` | INTEGER | No | - | Purchase type enum (0-5) |
-| `amount` | DECIMAL(10, 2) | No | - | Amount paid (>= 0) |
-| `quantity` | DECIMAL(10, 2) | No | - | Quantity purchased (> 0) |
-| `unit` | INTEGER | No | - | Quantity unit enum (0-4) |
-| `purchase_date` | DATE | No | - | Date of purchase (date-only, UTC midnight) |
-| `consumed_date` | DATE | Yes | NULL | Date when item was consumed (optional) |
-| `notes` | TEXT | Yes | NULL | Optional notes (max 500 chars) |
+| `type` | VARCHAR(20) | No | - | Purchase type enum name (string) |
+| `amount` | DECIMAL(18, 2) | No | - | Amount paid (>= 0) |
+| `quantity` | DECIMAL(18, 2) | No | - | Quantity purchased (> 0) |
+| `unit` | VARCHAR(20) | No | - | Quantity unit enum name (string) |
+| `purchase_date` | TIMESTAMPTZ | No | - | Date of purchase (stored as TIMESTAMPTZ) |
+| `consumed_date` | TIMESTAMPTZ | Yes | NULL | Date when item was consumed (optional) |
+| `notes` | VARCHAR(500) | Yes | NULL | Optional notes (max 500 chars) |
 | `created_at` | TIMESTAMPTZ | No | CURRENT_TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMPTZ | No | CURRENT_TIMESTAMP | Last update timestamp |
 
@@ -287,20 +293,22 @@ Expense tracking for chicken farming (feed, vitamins, bedding, veterinary, etc.)
 
 ## Enumerations
 
+**Note:** EF Core converts enums to strings via `.HasConversion<string>()` configuration. Enum values are stored as VARCHAR (enum names like "Feed", "Vitamins"), not as INTEGER.
+
 ### PurchaseType
 
 Represents the type of purchase.
 
-| Value | Name | Description |
-|-------|------|-------------|
-| 0 | Feed | Chicken feed purchase |
-| 1 | Vitamins | Vitamins and supplements purchase |
-| 2 | Bedding | Bedding material purchase |
-| 3 | Toys | Toys and enrichment items purchase |
-| 4 | Veterinary | Veterinary care and medication purchase |
-| 5 | Other | Other miscellaneous purchases |
+| C# Enum Value | Name | Database Value | Description |
+|---------------|------|----------------|-------------|
+| 0 | Feed | "Feed" | Chicken feed purchase |
+| 1 | Vitamins | "Vitamins" | Vitamins and supplements purchase |
+| 2 | Bedding | "Bedding" | Bedding material purchase |
+| 3 | Toys | "Toys" | Toys and enrichment items purchase |
+| 4 | Veterinary | "Veterinary" | Veterinary care and medication purchase |
+| 5 | Other | "Other" | Other miscellaneous purchases |
 
-**Database Storage:** INTEGER
+**Database Storage:** VARCHAR(20) (enum name as string)
 
 ---
 
@@ -308,15 +316,15 @@ Represents the type of purchase.
 
 Represents the unit of quantity for purchased items.
 
-| Value | Name | Description |
-|-------|------|-------------|
-| 0 | Kg | Kilograms |
-| 1 | Pcs | Pieces |
-| 2 | L | Liters |
-| 3 | Package | Package (unspecified unit) |
-| 4 | Other | Other unit not listed |
+| C# Enum Value | Name | Database Value | Description |
+|---------------|------|----------------|-------------|
+| 0 | Kg | "Kg" | Kilograms |
+| 1 | Pcs | "Pcs" | Pieces |
+| 2 | L | "L" | Liters |
+| 3 | Package | "Package" | Package (unspecified unit) |
+| 4 | Other | "Other" | Other unit not listed |
 
-**Database Storage:** INTEGER
+**Database Storage:** VARCHAR(20) (enum name as string)
 
 ---
 
@@ -341,21 +349,24 @@ CREATE INDEX idx_coops_is_active ON coops(is_active);
 ```sql
 CREATE INDEX idx_flocks_tenant_id ON flocks(tenant_id);
 CREATE INDEX idx_flocks_coop_id ON flocks(coop_id);
+CREATE INDEX idx_flocks_hatch_date ON flocks(hatch_date);
+CREATE INDEX idx_flocks_is_active ON flocks(is_active);
+CREATE UNIQUE INDEX idx_flocks_coop_id_identifier ON flocks(coop_id, identifier);
 ```
 
 #### flock_history
 ```sql
 CREATE INDEX idx_flock_history_tenant_id ON flock_history(tenant_id);
 CREATE INDEX idx_flock_history_flock_id ON flock_history(flock_id);
-CREATE INDEX idx_flock_history_event_date ON flock_history(event_date DESC);
+CREATE INDEX idx_flock_history_change_date ON flock_history(change_date DESC);
 ```
 
 #### daily_records
 ```sql
 CREATE INDEX idx_daily_records_tenant_id ON daily_records(tenant_id);
 CREATE INDEX idx_daily_records_flock_id ON daily_records(flock_id);
-CREATE INDEX idx_daily_records_date ON daily_records(record_date DESC);
-CREATE UNIQUE INDEX idx_daily_records_unique ON daily_records(tenant_id, flock_id, record_date);
+CREATE INDEX idx_daily_records_record_date ON daily_records(record_date DESC);
+CREATE UNIQUE INDEX idx_daily_records_flock_id_record_date ON daily_records(flock_id, record_date);
 ```
 
 #### purchases
@@ -364,7 +375,7 @@ CREATE INDEX idx_purchases_tenant_id ON purchases(tenant_id);
 CREATE INDEX idx_purchases_coop_id ON purchases(coop_id);
 CREATE INDEX idx_purchases_purchase_date ON purchases(purchase_date DESC);
 CREATE INDEX idx_purchases_type ON purchases(type);
-CREATE INDEX idx_purchases_tenant_name ON purchases(tenant_id, name);
+CREATE INDEX idx_purchases_tenant_id_purchase_date ON purchases(tenant_id, purchase_date);
 ```
 
 ---
@@ -571,4 +582,4 @@ postgresql://[user]:[pass]@[endpoint]/[db]?sslmode=require&pgbouncer=true
 ---
 
 **Maintainers:** Chickquita Development Team
-**Last Updated:** 2026-02-08
+**Last Updated:** 2026-02-09
