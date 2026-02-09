@@ -2,9 +2,10 @@
 
 **Chickquita (Chickquita)** - Comprehensive testing approach for backend and frontend, covering unit, integration, and E2E tests.
 
-**Version:** 1.0
-**Date:** February 5, 2026
-**Status:** Approved
+**Version:** 1.1
+**Date:** February 9, 2026
+**Status:** Updated (Backend section revised to reflect EF Core/Postgres implementation)
+**Test Count:** 730+ backend tests (166 Domain, 336 Application, 119 Infrastructure, 109 API)
 
 ---
 
@@ -178,270 +179,408 @@ public class InlineAutoMoqDataAttribute : InlineAutoDataAttribute
 
 ### Domain Entity Tests
 
+Domain entity tests use **pure unit tests** with no external dependencies:
+
 ```csharp
-// Domain.Tests/Entities/FlockTests.cs
-public class FlockTests
+// Domain.Tests/Entities/CoopTests.cs (actual test patterns)
+public class CoopTests
 {
-    [Fact]
-    public void MatureChicks_WithValidInput_UpdatesComposition()
-    {
-        // Arrange
-        var flock = new Flock
-        {
-            Id = "flock-1",
-            CurrentHens = 10,
-            CurrentRoosters = 2,
-            CurrentChicks = 20,
-            History = new List<FlockHistory>()
-        };
-
-        // Act
-        flock.MatureChicks(
-            chicksCount: 15,
-            resultingHens: 12,
-            resultingRoosters: 3);
-
-        // Assert
-        flock.CurrentChicks.Should().Be(5);    // 20 - 15
-        flock.CurrentHens.Should().Be(22);     // 10 + 12
-        flock.CurrentRoosters.Should().Be(5);  // 2 + 3
-        flock.History.Should().HaveCount(1);
-        flock.History.First().ChangeType.Should().Be(ChangeType.Maturation);
-    }
+    private readonly Guid _validTenantId = Guid.NewGuid();
+    private const string ValidName = "Main Coop";
+    private const string ValidLocation = "North Field";
 
     [Fact]
-    public void MatureChicks_WithInsufficientChicks_ThrowsException()
+    public void Create_WithValidData_ShouldSucceed()
     {
-        // Arrange
-        var flock = new Flock { CurrentChicks = 5 };
-
-        // Act
-        var act = () => flock.MatureChicks(
-            chicksCount: 10,
-            resultingHens: 8,
-            resultingRoosters: 2);
+        // Arrange & Act
+        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation);
 
         // Assert
-        act.Should().Throw<InsufficientChicksException>()
-            .WithMessage("*pouze 5*");
+        coop.Should().NotBeNull();
+        coop.Id.Should().NotBeEmpty();
+        coop.TenantId.Should().Be(_validTenantId);
+        coop.Name.Should().Be(ValidName);
+        coop.Location.Should().Be(ValidLocation);
+        coop.IsActive.Should().BeTrue();
+        coop.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
     [Theory]
-    [InlineData(10, 8, 3)]  // Sum = 11, not 10
-    [InlineData(10, 5, 4)]  // Sum = 9, not 10
-    [InlineData(10, 0, 11)] // Sum = 11, not 10
-    public void MatureChicks_WithInvalidSum_ThrowsException(
-        int chicksCount,
-        int hens,
-        int roosters)
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_WithNullOrWhitespaceName_ShouldThrowArgumentException(
+        string? invalidName)
     {
-        // Arrange
-        var flock = new Flock { CurrentChicks = 20 };
-
-        // Act
-        var act = () => flock.MatureChicks(chicksCount, hens, roosters);
+        // Arrange & Act
+        var act = () => Coop.Create(_validTenantId, invalidName!);
 
         // Assert
-        act.Should().Throw<InvalidFlockCompositionException>();
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("Coop name cannot be empty.*")
+            .And.ParamName.Should().Be("name");
     }
 
     [Fact]
-    public void CalculateProductivity_WithNoHens_ReturnsZero()
+    public void Update_WithValidData_ShouldUpdateNameAndLocation()
     {
         // Arrange
-        var flock = new Flock
-        {
-            CurrentHens = 0,
-            DailyRecords = new List<DailyRecord>
-            {
-                new() { Date = DateTime.UtcNow, EggCount = 10 }
-            }
-        };
+        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation);
+        var originalCreatedAt = coop.CreatedAt;
+        Thread.Sleep(10); // Ensure time difference
+
+        var newName = "Updated Coop";
+        var newLocation = "South Field";
 
         // Act
-        var productivity = flock.CalculateProductivity(DateTime.UtcNow.AddDays(-7), DateTime.UtcNow);
+        coop.Update(newName, newLocation);
 
         // Assert
-        productivity.Should().Be(0);
+        coop.Name.Should().Be(newName);
+        coop.Location.Should().Be(newLocation);
+        coop.CreatedAt.Should().Be(originalCreatedAt);
+        coop.UpdatedAt.Should().BeAfter(originalCreatedAt);
+    }
+
+    [Fact]
+    public void Deactivate_ShouldSetIsActiveToFalse()
+    {
+        // Arrange
+        var coop = Coop.Create(_validTenantId, ValidName);
+        var originalUpdatedAt = coop.UpdatedAt;
+        Thread.Sleep(10);
+
+        // Act
+        coop.Deactivate();
+
+        // Assert
+        coop.IsActive.Should().BeFalse();
+        coop.UpdatedAt.Should().BeAfter(originalUpdatedAt);
+    }
+}
+
+// Domain.Tests/Entities/FlockTests.cs (composition tests)
+public class FlockTests
+{
+    [Fact]
+    public void Create_WithValidData_ShouldSucceed()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var hatchDate = DateTime.UtcNow.AddDays(-30);
+
+        // Act
+        var flock = Flock.Create(
+            tenantId, coopId, "Spring 2024",
+            hatchDate, hens: 10, roosters: 2, chicks: 5);
+
+        // Assert
+        flock.Should().NotBeNull();
+        flock.CurrentHens.Should().Be(10);
+        flock.CurrentRoosters.Should().Be(2);
+        flock.CurrentChicks.Should().Be(5);
+        flock.IsActive.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(-1, 0, 0)] // Negative hens
+    [InlineData(0, -1, 0)] // Negative roosters
+    [InlineData(0, 0, -1)] // Negative chicks
+    public void Create_WithNegativeComposition_ShouldThrowArgumentException(
+        int hens, int roosters, int chicks)
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+
+        // Act
+        var act = () => Flock.Create(
+            tenantId, coopId, "Test",
+            DateTime.UtcNow, hens, roosters, chicks);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void UpdateComposition_WithValidData_ShouldSucceed()
+    {
+        // Arrange
+        var flock = Flock.Create(
+            Guid.NewGuid(), Guid.NewGuid(), "Test",
+            DateTime.UtcNow, hens: 10, roosters: 2, chicks: 5);
+
+        // Act
+        flock.UpdateComposition(hens: 12, roosters: 3, chicks: 8, reason: "Purchase");
+
+        // Assert
+        flock.CurrentHens.Should().Be(12);
+        flock.CurrentRoosters.Should().Be(3);
+        flock.CurrentChicks.Should().Be(8);
     }
 }
 ```
 
-### Command Handler Tests (with AutoFixture)
+**Actual Test Files:**
+- `backend/tests/Chickquita.Domain.Tests/Entities/CoopTests.cs` - 24 tests
+- `backend/tests/Chickquita.Domain.Tests/Entities/FlockTests.cs` - Flock domain logic
+- `backend/tests/Chickquita.Domain.Tests/Entities/FlockHistoryTests.cs` - History immutability
+- `backend/tests/Chickquita.Domain.Tests/Entities/DailyRecordTests.cs` - Daily record validation
+- `backend/tests/Chickquita.Domain.Tests/Entities/PurchaseTests.cs` - Purchase domain logic
+
+### Command Handler Tests (Application Layer)
+
+Command handler tests use **Moq** for repository mocking and **AutoFixture** for test data generation:
 
 ```csharp
-// Application.Tests/Features/Flocks/MatureChicksCommandTests.cs
-public class MatureChicksCommandHandlerTests
+// Application.Tests/Features/Coops/Commands/CreateCoopCommandHandlerTests.cs (actual pattern)
+public class CreateCoopCommandHandlerTests
 {
-    [Theory, AutoMoqData]
-    public async Task Handle_WithValidCommand_ReturnsSuccess(
-        [Frozen] Mock<IFlockRepository> repositoryMock,
-        MatureChicksCommandHandler sut,
-        Flock flock,
-        MatureChicksCommand command)
+    private readonly IFixture _fixture;
+    private readonly Mock<ICoopRepository> _mockCoopRepository;
+    private readonly Mock<ICurrentUserService> _mockCurrentUserService;
+    private readonly Mock<IMapper> _mockMapper;
+    private readonly Mock<ILogger<CreateCoopCommandHandler>> _mockLogger;
+    private readonly CreateCoopCommandHandler _handler;
+
+    public CreateCoopCommandHandlerTests()
     {
-        // Arrange - AutoFixture generates test data
-        flock.Id = command.FlockId;
-        flock.CurrentChicks = 20;
-        flock.CurrentHens = 10;
-        flock.CurrentRoosters = 2;
+        _fixture = new Fixture().Customize(new AutoMoqCustomization());
 
-        repositoryMock
-            .Setup(r => r.GetByIdAsync(command.FlockId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(flock);
+        _mockCoopRepository = _fixture.Freeze<Mock<ICoopRepository>>();
+        _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
+        _mockMapper = _fixture.Freeze<Mock<IMapper>>();
+        _mockLogger = _fixture.Freeze<Mock<ILogger<CreateCoopCommandHandler>>>();
 
-        var validCommand = command with
+        _handler = new CreateCoopCommandHandler(
+            _mockCoopRepository.Object,
+            _mockCurrentUserService.Object,
+            _mockMapper.Object,
+            _mockLogger.Object);
+    }
+
+    [Fact]
+    public async Task Handle_WithValidData_ShouldCreateCoopSuccessfully()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var command = new CreateCoopCommand
         {
-            ChicksCount = 15,
-            ResultingHens = 12,
-            ResultingRoosters = 3
+            Name = "Main Coop",
+            Location = "North Field"
         };
 
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.ExistsByNameAsync(command.Name))
+            .ReturnsAsync(false);
+
+        var createdCoop = Coop.Create(tenantId, command.Name, command.Location);
+        _mockCoopRepository.Setup(x => x.AddAsync(It.IsAny<Coop>()))
+            .ReturnsAsync(createdCoop);
+
+        var expectedDto = new CoopDto
+        {
+            Id = createdCoop.Id,
+            TenantId = tenantId,
+            Name = command.Name,
+            Location = command.Location,
+            IsActive = true,
+            FlocksCount = 0
+        };
+
+        _mockMapper.Setup(x => x.Map<CoopDto>(It.IsAny<Coop>()))
+            .Returns(expectedDto);
+
         // Act
-        var result = await sut.Handle(validCommand, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.CurrentChicks.Should().Be(5);
-        result.Value.CurrentHens.Should().Be(22);
-        result.Value.CurrentRoosters.Should().Be(5);
+        result.Value.Name.Should().Be(command.Name);
+        result.Value.TenantId.Should().Be(tenantId);
 
-        repositoryMock.Verify(
-            r => r.UpdateAsync(flock, It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        _mockCoopRepository.Verify(
+            x => x.ExistsByNameAsync(command.Name), Times.Once);
+        _mockCoopRepository.Verify(
+            x => x.AddAsync(It.IsAny<Coop>()), Times.Once);
     }
 
-    [Theory, AutoMoqData]
-    public async Task Handle_WithNonExistentFlock_ReturnsFailure(
-        [Frozen] Mock<IFlockRepository> repositoryMock,
-        MatureChicksCommandHandler sut,
-        MatureChicksCommand command)
+    [Fact]
+    public async Task Handle_WithDuplicateName_ShouldReturnConflictError()
     {
         // Arrange
-        repositoryMock
-            .Setup(r => r.GetByIdAsync(command.FlockId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Flock?)null);
+        var tenantId = Guid.NewGuid();
+        var command = new CreateCoopCommand
+        {
+            Name = "Main Coop",
+            Location = "North Field"
+        };
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockCoopRepository.Setup(x => x.ExistsByNameAsync(command.Name))
+            .ReturnsAsync(true); // Simulate duplicate name
 
         // Act
-        var result = await sut.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
-        result.Error!.Code.Should().Be("NOT_FOUND");
+        result.Error.Code.Should().Be("Error.Conflict");
+        result.Error.Message.Should().Be("A coop with this name already exists");
+
+        _mockCoopRepository.Verify(
+            x => x.AddAsync(It.IsAny<Coop>()), Times.Never);
     }
 
-    [Theory]
-    [InlineAutoMoqData(10, 8, 3)]  // Invalid sum
-    [InlineAutoMoqData(10, 5, 4)]  // Invalid sum
-    public async Task Handle_WithInvalidSum_ThrowsDomainException(
-        int chicksCount,
-        int hens,
-        int roosters,
-        [Frozen] Mock<IFlockRepository> repositoryMock,
-        MatureChicksCommandHandler sut,
-        Flock flock,
-        MatureChicksCommand command)
+    [Fact]
+    public async Task Handle_WhenUserNotAuthenticated_ShouldReturnUnauthorizedError()
     {
         // Arrange
-        flock.Id = command.FlockId;
-        flock.CurrentChicks = 20;
-
-        repositoryMock
-            .Setup(r => r.GetByIdAsync(command.FlockId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(flock);
-
-        var invalidCommand = command with
+        var command = new CreateCoopCommand
         {
-            ChicksCount = chicksCount,
-            ResultingHens = hens,
-            ResultingRoosters = roosters
+            Name = "Main Coop",
+            Location = "North Field"
+        };
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(false);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Code.Should().Be("Error.Unauthorized");
+        _mockCoopRepository.Verify(
+            x => x.AddAsync(It.IsAny<Coop>()), Times.Never);
+    }
+}
+```
+
+**Actual Test Files:**
+- `backend/tests/Chickquita.Application.Tests/Features/Coops/Commands/CreateCoopCommandHandlerTests.cs`
+- `backend/tests/Chickquita.Application.Tests/Features/Flocks/Commands/CreateFlockCommandHandlerTests.cs`
+- `backend/tests/Chickquita.Application.Tests/Features/Purchases/Commands/CreatePurchaseCommandHandlerTests.cs`
+- `backend/tests/Chickquita.Application.Tests/Features/DailyRecords/Commands/CreateDailyRecordCommandHandlerTests.cs`
+
+### Validator Tests (FluentValidation)
+
+Validator tests use **FluentValidation.TestHelper** for concise assertion syntax:
+
+```csharp
+// Application.Tests/Features/Flocks/Commands/CreateFlockCommandValidatorTests.cs (actual pattern)
+public class CreateFlockCommandValidatorTests
+{
+    private readonly CreateFlockCommandValidator _validator;
+
+    public CreateFlockCommandValidatorTests()
+    {
+        _validator = new CreateFlockCommandValidator();
+    }
+
+    [Fact]
+    public void Validate_WithEmptyCoopId_ShouldHaveValidationError()
+    {
+        // Arrange
+        var command = new CreateFlockCommand
+        {
+            CoopId = Guid.Empty,
+            Identifier = "Test Flock",
+            HatchDate = DateTime.UtcNow.AddDays(-30),
+            InitialHens = 10,
+            InitialRoosters = 2,
+            InitialChicks = 0
         };
 
         // Act
-        var act = async () => await sut.Handle(invalidCommand, CancellationToken.None);
+        var result = _validator.TestValidate(command);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidFlockCompositionException>();
+        result.ShouldHaveValidationErrorFor(x => x.CoopId)
+            .WithErrorMessage("Coop ID is required.");
     }
-}
-```
-
-### Validator Tests
-
-```csharp
-// Application.Tests/Features/Flocks/MatureChicksCommandValidatorTests.cs
-public class MatureChicksCommandValidatorTests
-{
-    private readonly MatureChicksCommandValidator _validator = new();
 
     [Fact]
-    public void Validate_WithValidCommand_Succeeds()
+    public void Validate_WithEmptyIdentifier_ShouldHaveValidationError()
     {
         // Arrange
-        var command = new MatureChicksCommand(
-            FlockId: "flock-1",
-            Date: DateTime.UtcNow,
-            ChicksCount: 10,
-            ResultingHens: 8,
-            ResultingRoosters: 2,
-            Notes: null
-        );
+        var command = new CreateFlockCommand
+        {
+            CoopId = Guid.NewGuid(),
+            Identifier = string.Empty,
+            HatchDate = DateTime.UtcNow.AddDays(-30),
+            InitialHens = 10,
+            InitialRoosters = 2,
+            InitialChicks = 0
+        };
 
         // Act
-        var result = _validator.Validate(command);
+        var result = _validator.TestValidate(command);
 
         // Assert
-        result.IsValid.Should().BeTrue();
+        result.ShouldHaveValidationErrorFor(x => x.Identifier)
+            .WithErrorMessage("Flock identifier is required.");
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Validate_WithInvalidChicksCount_Fails(int chicksCount)
+    [InlineData(-1, 0, 0)] // Negative hens
+    [InlineData(0, -1, 0)] // Negative roosters
+    [InlineData(0, 0, -1)] // Negative chicks
+    public void Validate_WithNegativeComposition_ShouldHaveValidationError(
+        int hens, int roosters, int chicks)
     {
         // Arrange
-        var command = new MatureChicksCommand(
-            "flock-1",
-            DateTime.UtcNow,
-            chicksCount,
-            8,
-            2,
-            null
-        );
+        var command = new CreateFlockCommand
+        {
+            CoopId = Guid.NewGuid(),
+            Identifier = "Test",
+            HatchDate = DateTime.UtcNow,
+            InitialHens = hens,
+            InitialRoosters = roosters,
+            InitialChicks = chicks
+        };
 
         // Act
-        var result = _validator.Validate(command);
+        var result = _validator.TestValidate(command);
 
-        // Assert
+        // Assert - At least one validation error for negative values
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(command.ChicksCount));
     }
 
     [Fact]
-    public void Validate_WithInvalidSum_Fails()
+    public void Validate_WithAllZeroCounts_ShouldHaveValidationError()
     {
-        // Arrange - Sum is 11, but chicksCount is 10
-        var command = new MatureChicksCommand(
-            "flock-1",
-            DateTime.UtcNow,
-            10,
-            8,
-            3,
-            null
-        );
+        // Arrange - Business rule: at least one count must be > 0
+        var command = new CreateFlockCommand
+        {
+            CoopId = Guid.NewGuid(),
+            Identifier = "Test",
+            HatchDate = DateTime.UtcNow,
+            InitialHens = 0,
+            InitialRoosters = 0,
+            InitialChicks = 0
+        };
 
         // Act
-        var result = _validator.Validate(command);
+        var result = _validator.TestValidate(command);
 
         // Assert
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Součet"));
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage.Contains("at least one count"));
     }
 }
 ```
+
+**Actual Test Files:**
+- `backend/tests/Chickquita.Application.Tests/Features/Flocks/Commands/CreateFlockCommandValidatorTests.cs`
+- `backend/tests/Chickquita.Application.Tests/Features/Flocks/Commands/UpdateFlockCommandValidatorTests.cs`
+- `backend/tests/Chickquita.Application.Tests/Features/DailyRecords/Commands/CreateDailyRecordCommandValidatorTests.cs`
+- `backend/tests/Chickquita.Application.Tests/Features/Purchases/Commands/CreatePurchaseCommandValidatorTests.cs`
 
 ---
 
@@ -450,284 +589,429 @@ public class MatureChicksCommandValidatorTests
 ### Stack
 
 - **WebApplicationFactory** - In-memory test server
-- **Azurite** - Azure Table Storage Emulator
-- **xUnit** with collection fixtures
+- **EF Core InMemory Provider** - For fast API endpoint tests
+- **SQLite In-Memory** - For repository integration tests
+- **xUnit** with IClassFixture for test isolation
 
-### Test Setup
+### Test Infrastructure Setup
+
+**API Integration Tests** use `WebApplicationFactory` with EF Core InMemory database:
 
 ```csharp
-// Integration.Tests/TestUtilities/ChickquitaWebApplicationFactory.cs
-public class ChickquitaWebApplicationFactory : WebApplicationFactory<Program>
+// Api.Tests/Endpoints/CoopsEndpointsTests.cs (example)
+public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    private readonly WebApplicationFactory<Program> _factory;
+
+    public CoopsEndpointsTests(WebApplicationFactory<Program> factory)
     {
-        builder.ConfigureServices(services =>
+        _factory = factory;
+    }
+
+    // Helper: Replace production DbContext with InMemory database
+    private static void ReplaceWithInMemoryDatabase(IServiceCollection services)
+    {
+        var descriptor = services.SingleOrDefault(
+            d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
+        if (descriptor != null)
         {
-            // Remove production Table Storage
-            var descriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(TableServiceClient));
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
+            services.Remove(descriptor);
+        }
 
-            // Add Azure Table Storage Emulator (Azurite)
-            services.AddSingleton<TableServiceClient>(_ =>
-                new TableServiceClient("UseDevelopmentStorage=true"));
+        // Use unique database name for test isolation
+        var databaseName = $"TestDb_{Guid.NewGuid()}";
 
-            // Override configuration
-            services.Configure<JwtSettings>(options =>
-            {
-                options.Secret = "test-secret-key-for-testing-only-minimum-256-bits";
-                options.Issuer = "ChickquitaTest";
-                options.Audience = "ChickquitaTest";
-            });
+        services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+        {
+            options.UseInMemoryDatabase(databaseName);
+            options.EnableSensitiveDataLogging();
         });
 
-        builder.UseEnvironment("Testing");
+        // Bypass authentication for tests
+        services.AddAuthorization(options =>
+        {
+            options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .RequireAssertion(_ => true)
+                .Build();
+        });
+    }
+
+    // Helper: Mock current user service for tenant isolation
+    private static void ReplaceCurrentUserService(
+        IServiceCollection services,
+        Mock<ICurrentUserService> mock)
+    {
+        var descriptor = services.SingleOrDefault(
+            d => d.ServiceType == typeof(ICurrentUserService));
+        if (descriptor != null)
+        {
+            services.Remove(descriptor);
+        }
+
+        services.AddScoped(_ => mock.Object);
     }
 }
+```
 
-// Integration.Tests/TestUtilities/IntegrationTestBase.cs
-public abstract class IntegrationTestBase : IClassFixture<ChickquitaWebApplicationFactory>
+**Repository Integration Tests** use SQLite In-Memory database:
+
+```csharp
+// Infrastructure.Tests/Repositories/DailyRecordRepositoryTests.cs (example)
+public class DailyRecordRepositoryTests : IDisposable
 {
-    protected readonly HttpClient Client;
-    protected readonly ChickquitaWebApplicationFactory Factory;
-    protected readonly IFixture Fixture;
+    private readonly SqliteConnection _connection;
+    private readonly ApplicationDbContext _dbContext;
+    private readonly DailyRecordRepository _repository;
 
-    protected IntegrationTestBase(ChickquitaWebApplicationFactory factory)
+    public DailyRecordRepositoryTests()
     {
-        Factory = factory;
-        Client = factory.CreateClient();
-        Fixture = new Fixture().Customize(new AutoMoqCustomization());
+        // Use SQLite in-memory database for realistic DB behavior
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite(_connection)
+            .Options;
+
+        _dbContext = new ApplicationDbContext(options);
+        _dbContext.Database.EnsureCreated(); // Apply migrations/schema
+
+        _repository = new DailyRecordRepository(_dbContext);
+
+        // Seed required test data (tenants, coops, flocks)
+        SeedTestData();
     }
 
-    protected async Task<string> GetAuthTokenAsync()
+    public void Dispose()
     {
-        // Create test user and get JWT token
-        var email = $"test-{Guid.NewGuid()}@example.com";
-        var response = await Client.PostAsJsonAsync("/api/auth/register", new
-        {
-            Email = email,
-            Password = "Test123!"
-        });
-
-        response.EnsureSuccessStatusCode();
-
-        var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
-        return result!.AccessToken;
+        _dbContext.Dispose();
+        _connection.Close();
+        _connection.Dispose();
     }
 
-    protected void SetAuthToken(string token)
+    private void SeedTestData()
     {
-        Client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var tenant = Tenant.Create("clerk_user_test", "test@example.com");
+        _dbContext.Tenants.Add(tenant);
+        // ... seed coops, flocks, etc.
+        _dbContext.SaveChanges();
     }
 }
 ```
 
 ### API Endpoint Tests
 
+API integration tests use `WebApplicationFactory` with EF Core InMemory database and mock authentication:
+
 ```csharp
-// Integration.Tests/Features/Flocks/FlocksEndpointsTests.cs
-public class FlocksEndpointsTests : IntegrationTestBase
+// Api.Tests/Endpoints/CoopsEndpointsTests.cs (actual implementation pattern)
+public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    public FlocksEndpointsTests(ChickquitaWebApplicationFactory factory)
-        : base(factory) { }
+    private readonly WebApplicationFactory<Program> _factory;
+
+    public CoopsEndpointsTests(WebApplicationFactory<Program> factory)
+    {
+        _factory = factory;
+    }
 
     [Fact]
-    public async Task CreateFlock_WithValidData_Returns201()
+    public async Task CreateCoop_WithValidData_Returns201Created()
     {
-        // Arrange
-        var token = await GetAuthTokenAsync();
-        SetAuthToken(token);
+        // Arrange - Setup test factory with InMemory DB and mock user
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
 
-        // Create a coop first
-        var coopResponse = await Client.PostAsJsonAsync("/api/coops", new
+        var factory = _factory.WithWebHostBuilder(builder =>
         {
-            Name = "Test Kurník",
-            Location = "Test Location"
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
         });
-        var coop = await coopResponse.Content.ReadFromJsonAsync<CoopDto>();
 
-        var request = new
+        // Seed tenant data
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var client = factory.CreateClient();
+
+        var command = new CreateCoopCommand
         {
-            CoopId = coop!.Id,
-            Identifier = "Test Hejno",
-            HatchDate = DateTime.UtcNow.AddDays(-30),
-            InitialHens = 0,
-            InitialRoosters = 0,
-            InitialChicks = 20
+            Name = "Test Coop",
+            Location = "Test Location"
         };
 
         // Act
-        var response = await Client.PostAsJsonAsync("/api/flocks", request);
+        var response = await client.PostAsJsonAsync("/api/coops", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-
-        var flock = await response.Content.ReadFromJsonAsync<FlockDto>();
-        flock.Should().NotBeNull();
-        flock!.Identifier.Should().Be("Test Hejno");
-        flock.CurrentChicks.Should().Be(20);
-        flock.CurrentHens.Should().Be(0);
-    }
-
-    [Fact]
-    public async Task MatureChicks_WithValidData_Returns200()
-    {
-        // Arrange
-        var token = await GetAuthTokenAsync();
-        SetAuthToken(token);
-
-        var flock = await CreateTestFlockAsync();
-
-        var request = new
-        {
-            Date = DateTime.UtcNow,
-            ChicksCount = 15,
-            ResultingHens = 12,
-            ResultingRoosters = 3,
-            Notes = "First maturation"
-        };
-
-        // Act
-        var response = await Client.PostAsJsonAsync(
-            $"/api/flocks/{flock.Id}/mature-chicks",
-            request
-        );
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var result = await response.Content.ReadFromJsonAsync<FlockDto>();
+        var result = await response.Content.ReadFromJsonAsync<CoopDto>();
         result.Should().NotBeNull();
-        result!.CurrentChicks.Should().Be(5);  // 20 - 15
-        result.CurrentHens.Should().Be(12);
-        result.CurrentRoosters.Should().Be(3);
+        result!.Name.Should().Be("Test Coop");
+        result.Location.Should().Be("Test Location");
+        result.TenantId.Should().Be(tenantId);
+        result.IsActive.Should().BeTrue();
     }
 
     [Fact]
-    public async Task MatureChicks_WithInsufficientChicks_Returns400()
+    public async Task CreateCoop_WithInvalidData_Returns400BadRequest()
     {
         // Arrange
-        var token = await GetAuthTokenAsync();
-        SetAuthToken(token);
+        var tenantId = Guid.NewGuid();
+        var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
 
-        var flock = await CreateTestFlockAsync();
-
-        var request = new
+        var factory = _factory.WithWebHostBuilder(builder =>
         {
-            ChicksCount = 50,  // More than available (20)
-            ResultingHens = 40,
-            ResultingRoosters = 10
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenantId, "clerk_user_1");
+
+        var client = factory.CreateClient();
+
+        // Command with empty name (validation should fail)
+        var command = new CreateCoopCommand
+        {
+            Name = "",
+            Location = "Test Location"
         };
 
         // Act
-        var response = await Client.PostAsJsonAsync(
-            $"/api/flocks/{flock.Id}/mature-chicks",
-            request
-        );
+        var response = await client.PostAsJsonAsync("/api/coops", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
-        error.Should().NotBeNull();
-        error!.Error.Code.Should().Be("INSUFFICIENT_CHICKS");
     }
 
     [Fact]
-    public async Task GetFlocks_WithoutAuth_Returns401()
+    public async Task TenantIsolation_UserCannotSeeOtherTenantCoops()
     {
-        // Act
-        var response = await Client.GetAsync("/api/flocks");
+        // Arrange - Create two tenants with separate data
+        var tenant1Id = Guid.NewGuid();
+        var tenant2Id = Guid.NewGuid();
+        var mockCurrentUser1 = CreateMockCurrentUser("clerk_user_1", tenant1Id);
 
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        var factory = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                ReplaceWithInMemoryDatabase(services);
+                ReplaceCurrentUserService(services, mockCurrentUser1);
+            });
+        });
+
+        using var scope = factory.Services.CreateScope();
+        await SeedTenant(scope, tenant1Id, "clerk_user_1");
+        await SeedTenant(scope, tenant2Id, "clerk_user_2");
+        await SeedCoop(scope, tenant1Id, "Tenant 1 Coop", "Location 1");
+        await SeedCoop(scope, tenant2Id, "Tenant 2 Coop", "Location 2");
+
+        var client = factory.CreateClient();
+
+        // Act - Request as tenant1 user
+        var response = await client.GetAsync("/api/coops");
+
+        // Assert - Only tenant1's coops returned
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<List<CoopDto>>();
+        result.Should().NotBeNull();
+        result!.Should().AllSatisfy(c => c.TenantId.Should().Be(tenant1Id));
+        result.Should().NotContain(c => c.Name == "Tenant 2 Coop");
     }
 
-    private async Task<FlockDto> CreateTestFlockAsync()
+    // Helper Methods
+    private static Mock<ICurrentUserService> CreateMockCurrentUser(
+        string clerkUserId, Guid tenantId)
     {
-        var coopResponse = await Client.PostAsJsonAsync("/api/coops", new
-        {
-            Name = $"Test Coop {Guid.NewGuid()}",
-            Location = "Test"
-        });
-        var coop = await coopResponse.Content.ReadFromJsonAsync<CoopDto>();
+        var mock = new Mock<ICurrentUserService>();
+        mock.Setup(x => x.ClerkUserId).Returns(clerkUserId);
+        mock.Setup(x => x.TenantId).Returns(tenantId);
+        mock.Setup(x => x.IsAuthenticated).Returns(true);
+        return mock;
+    }
 
-        var flockResponse = await Client.PostAsJsonAsync("/api/flocks", new
-        {
-            CoopId = coop!.Id,
-            Identifier = $"Test-{Guid.NewGuid()}",
-            HatchDate = DateTime.UtcNow.AddDays(-30),
-            InitialChicks = 20
-        });
+    private static async Task SeedTenant(
+        IServiceScope scope, Guid tenantId, string clerkUserId)
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com");
+        typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, tenantId);
+        dbContext.Tenants.Add(tenant);
+        await dbContext.SaveChangesAsync();
+    }
 
-        return (await flockResponse.Content.ReadFromJsonAsync<FlockDto>())!;
+    private static async Task<Guid> SeedCoop(
+        IServiceScope scope, Guid tenantId, string name, string location)
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var coop = Coop.Create(tenantId, name, location);
+        dbContext.Coops.Add(coop);
+        await dbContext.SaveChangesAsync();
+        return coop.Id;
     }
 }
 ```
 
-### Repository Tests (with Azurite)
+### Repository Integration Tests (with SQLite In-Memory)
+
+Repository tests use **SQLite In-Memory** databases for realistic relational database behavior:
 
 ```csharp
-// Integration.Tests/Infrastructure/Repositories/FlockRepositoryTests.cs
-public class FlockRepositoryTests : IAsyncLifetime
+// Infrastructure.Tests/Repositories/DailyRecordRepositoryTests.cs (actual pattern)
+public class DailyRecordRepositoryTests : IDisposable
 {
-    private readonly TableServiceClient _tableServiceClient;
-    private readonly FlockRepository _sut;
-    private readonly string _testTableName;
+    private readonly SqliteConnection _connection;
+    private readonly ApplicationDbContext _dbContext;
+    private readonly DailyRecordRepository _repository;
+    private readonly Guid _tenantId;
+    private readonly Guid _flockId;
 
-    public FlockRepositoryTests()
+    public DailyRecordRepositoryTests()
     {
-        // Use Azurite (Azure Table Storage Emulator)
-        _tableServiceClient = new TableServiceClient("UseDevelopmentStorage=true");
-        _testTableName = $"TestFlocks{Guid.NewGuid():N}";
-        _sut = new FlockRepository(_tableServiceClient, _testTableName);
+        // Use SQLite in-memory database for testing
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite(_connection)
+            .Options;
+
+        _dbContext = new ApplicationDbContext(options);
+        _dbContext.Database.EnsureCreated(); // Apply schema
+
+        _repository = new DailyRecordRepository(_dbContext);
+
+        // Seed required test data
+        _tenantId = Guid.NewGuid();
+        var tenant = Tenant.Create("clerk_user_test", "test@example.com");
+        typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
+        _dbContext.Tenants.Add(tenant);
+
+        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location");
+        _dbContext.Coops.Add(coop);
+        _dbContext.SaveChanges();
+
+        var flock = Flock.Create(
+            _tenantId, coop.Id, "TEST-FLOCK",
+            DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        _dbContext.Flocks.Add(flock);
+        _dbContext.SaveChanges();
+        _flockId = flock.Id;
     }
 
-    public async Task InitializeAsync()
+    public void Dispose()
     {
-        await _tableServiceClient.CreateTableIfNotExistsAsync(_testTableName);
+        _dbContext.Dispose();
+        _connection.Close();
+        _connection.Dispose();
     }
 
-    public async Task DisposeAsync()
-    {
-        await _tableServiceClient.DeleteTableAsync(_testTableName);
-    }
-
-    [Theory, AutoMoqData]
-    public async Task AddAsync_WithValidFlock_StoresFlock(Flock flock)
-    {
-        // Arrange - AutoFixture generates flock
-
-        // Act
-        await _sut.AddAsync(flock, CancellationToken.None);
-
-        // Assert
-        var retrieved = await _sut.GetByIdAsync(flock.Id, CancellationToken.None);
-        retrieved.Should().NotBeNull();
-        retrieved!.Identifier.Should().Be(flock.Identifier);
-        retrieved.CurrentChicks.Should().Be(flock.CurrentChicks);
-    }
-
-    [Theory, AutoMoqData]
-    public async Task UpdateAsync_WithModifiedFlock_UpdatesStorage(Flock flock)
+    [Fact]
+    public async Task GetAllAsync_ReturnsAllDailyRecords_OrderedByDateDescending()
     {
         // Arrange
-        await _sut.AddAsync(flock, CancellationToken.None);
+        var record1 = DailyRecord.Create(
+            _tenantId, _flockId, DateTime.UtcNow.AddDays(-2), 10, "Record 1");
+        var record2 = DailyRecord.Create(
+            _tenantId, _flockId, DateTime.UtcNow.AddDays(-1), 15, "Record 2");
+        var record3 = DailyRecord.Create(
+            _tenantId, _flockId, DateTime.UtcNow, 12, "Record 3");
+
+        _dbContext.DailyRecords.AddRange(record1, record2, record3);
+        await _dbContext.SaveChangesAsync();
 
         // Act
-        flock.MatureChicks(10, 8, 2);
-        await _sut.UpdateAsync(flock, CancellationToken.None);
+        var result = await _repository.GetAllAsync();
 
         // Assert
-        var retrieved = await _sut.GetByIdAsync(flock.Id, CancellationToken.None);
-        retrieved.Should().NotBeNull();
-        retrieved!.CurrentChicks.Should().Be(flock.CurrentChicks);
-        retrieved.CurrentHens.Should().Be(flock.CurrentHens);
+        result.Should().HaveCount(3);
+        result[0].RecordDate.Should().Be(record3.RecordDate); // Most recent first
+        result[1].RecordDate.Should().Be(record2.RecordDate);
+        result[2].RecordDate.Should().Be(record1.RecordDate);
     }
+
+    [Fact]
+    public async Task AddAsync_AddsDailyRecord_Successfully()
+    {
+        // Arrange
+        var record = DailyRecord.Create(
+            _tenantId, _flockId, DateTime.UtcNow, 15, "Test record");
+
+        // Act
+        var result = await _repository.AddAsync(record);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Id.Should().NotBeEmpty();
+        result.EggCount.Should().Be(15);
+
+        var retrieved = await _repository.GetByIdAsync(result.Id);
+        retrieved.Should().NotBeNull();
+        retrieved!.Notes.Should().Be("Test record");
+    }
+
+    [Fact]
+    public async Task ExistsForFlockAndDateAsync_ReturnsTrue_WhenRecordExists()
+    {
+        // Arrange
+        var date = DateTime.UtcNow.Date;
+        var record = DailyRecord.Create(_tenantId, _flockId, date, 10, null);
+        _dbContext.DailyRecords.Add(record);
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var exists = await _repository.ExistsForFlockAndDateAsync(_flockId, date);
+
+        // Assert
+        exists.Should().BeTrue();
+    }
+}
+```
+
+**Data Integrity Tests** verify database constraints:
+
+```csharp
+// Infrastructure.Tests/Data/FlockDataIntegrityTests.cs (constraint testing)
+[Fact]
+public async Task Flock_CheckConstraint_HensCannotBeNegative()
+{
+    // Arrange
+    var flock = Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow, 10, 2, 5, null);
+    _dbContext.Flocks.Add(flock);
+    await _dbContext.SaveChangesAsync();
+
+    // Act - Try to set negative hens value
+    var flockEntity = await _dbContext.Flocks.FindAsync(flock.Id);
+    typeof(Flock).GetProperty("CurrentHens")!.SetValue(flockEntity, -1);
+
+    // Assert - Should throw on SaveChanges due to CHECK constraint
+    var act = async () => await _dbContext.SaveChangesAsync();
+    await act.Should().ThrowAsync<DbUpdateException>();
+}
+
+[Fact]
+public async Task Flock_UniqueConstraint_IdentifierMustBeUniquePerCoop()
+{
+    // Arrange
+    var flock1 = Flock.Create(_tenantId, _coopId, "DUPLICATE", DateTime.UtcNow, 10, 2, 5, null);
+    var flock2 = Flock.Create(_tenantId, _coopId, "DUPLICATE", DateTime.UtcNow, 8, 1, 3, null);
+
+    // Act
+    _dbContext.Flocks.Add(flock1);
+    await _dbContext.SaveChangesAsync();
+
+    _dbContext.Flocks.Add(flock2);
+    var act = async () => await _dbContext.SaveChangesAsync();
+
+    // Assert - Unique constraint violation
+    await act.Should().ThrowAsync<DbUpdateException>();
 }
 ```
 
@@ -1271,11 +1555,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-
-      - name: Start Azurite
-        run: |
-          npm install -g azurite
-          azurite --silent --location azurite --debug azurite/debug.log &
 
       - name: Restore dependencies
         run: dotnet restore
