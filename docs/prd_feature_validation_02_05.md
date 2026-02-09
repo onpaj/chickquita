@@ -475,6 +475,185 @@ curl -X PUT http://localhost:5100/api/v1/coops/{id} \
 
 ---
 
+### Feature: M2-F4 - Archive Coop
+
+**Milestone:** M2
+**PRD Reference:** Line 1767
+**Test Status:** ✅ Exists
+**Test File:** `/frontend/e2e/coops.spec.ts`
+**Test Cases:**
+- `should archive a coop` (line 354)
+- `should cancel archive` (line 374)
+
+**Execution Result:** ❌ Fail (0/2 tests pass - menu interaction issue)
+
+#### Test Output
+
+```
+Running 3 tests using 2 workers
+
+✅ Using existing auth state from .auth/user.json
+  ✓  1 [setup] › e2e/auth.setup.ts:45:1 › authenticate (245ms)
+  ✘  2 [chromium] › e2e/coops.spec.ts:354:5 › should archive a coop (30.6s)
+  ✘  3 [chromium] › e2e/coops.spec.ts:374:5 › should cancel archive (30.5s)
+
+  2 failed, 1 passed (32.4s)
+```
+
+**Error 1: should archive a coop (line 354) - Menu interaction failure**
+```
+Test timeout of 30000ms exceeded.
+Error: locator.click: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for getByRole('menuitem', { name: /archive|archivovat/i })
+  - locator resolved to <li tabindex="-1" role="menuitem" ...>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is not stable
+    - retrying click action
+    - waiting for element to be visible, enabled and stable
+  - element was detached from the DOM, retrying
+
+Error occurred at pages/CoopsPage.ts:51
+  49 |     await card.getByRole('button', { name: /more|více/i }).click();
+  50 |     // Then click archive in the menu
+> 51 |     await this.page.getByRole('menuitem', { name: /archive|archivovat/i }).click();
+```
+
+**Error 2: should cancel archive (line 374) - Modal close issue in beforeEach setup**
+```
+Test timeout of 30000ms exceeded while running "beforeEach" hook.
+Error: locator.waitFor: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for getByRole('dialog') to be hidden
+  59 × locator resolved to visible <div role="dialog" ...>
+
+Error occurred at pages/CreateCoopModal.ts:52
+  50 |
+  51 |   async waitForClose() {
+> 52 |     await this.modal.waitFor({ state: 'hidden' });
+```
+
+#### Findings
+
+**Test Infrastructure:**
+- ✅ Backend running successfully on port 5100
+- ✅ Frontend running on port 3100
+- ✅ Authentication setup working (auth.setup.ts passed in 245ms)
+- ✅ Tests properly configured with auth state (`.auth/user.json`)
+
+**Test Execution Results:**
+- ❌ **FAIL:** Archive coop (timeout 30.6s - menu interaction issue)
+- ❌ **FAIL:** Cancel archive (timeout 30.5s - beforeEach setup issue)
+
+**Issue Analysis:**
+
+**Issue 1: Menu Interaction Failure (same as M2-F3)**
+- Test clicks the "Více" (More) button on coop card (line 49 of CoopsPage.ts)
+- Test immediately tries to click "Archivovat" (Archive) menu item (line 51)
+- Menu item is unstable - appears briefly then gets detached from DOM
+- Test times out after multiple retry attempts
+- **Root Cause:** Same as M2-F3 Edit tests - missing wait for menu to stabilize after opening
+- **Impact:** Archive feature cannot be tested - both archive and cancel tests blocked
+
+**Issue 2: Modal Close Timing Issue (Test Setup)**
+- beforeEach creates a test coop for archiving (line 346-352)
+- After creating coop, test waits for create modal to close (line 351)
+- Modal remains visible after 30 seconds
+- **Root Cause:** Create coop modal not closing properly after successful creation
+- **Impact:** Blocks second test from running because setup fails
+
+**Application Behavior Validation:**
+- ⚠️ **UI Bug:** Menu interaction timing/stability issue (same as M2-F3)
+- ⚠️ **UI Bug:** Create coop modal not closing automatically after successful creation
+- ❓ **Cannot verify:** Archive functionality (test blocked by menu interaction)
+- ❓ **Cannot verify:** Cancel archive functionality (test blocked by setup issue)
+
+**Feature Coverage:**
+According to PRD line 1767, "Archive Coop" requires:
+- ❓ Mark coop as archived (cannot verify - test blocked)
+- ❓ Confirmation dialog before archiving (cannot verify - test blocked)
+- ❓ Cancel archive flow (cannot verify - test blocked)
+- ❓ Archived coops filtered from active list (cannot verify - test blocked)
+
+**Test Coverage:**
+- ✅ Tests exist for both archive and cancel flows
+- ✅ Tests use Page Object Model (CoopsPage)
+- ✅ Tests verify confirmation dialog appears
+- ❌ Tests cannot execute due to menu interaction issue
+- ❌ Test setup blocked by modal close issue
+
+#### Recommendations
+
+**Priority: HIGH** (Same menu interaction bug as M2-F3 blocking multiple features)
+
+**1. Fix Menu Interaction Timing Issue (Critical - blocks multiple tests):**
+
+This is the **same bug** as M2-F3. Fix applies to both Edit and Archive:
+
+Update `CoopsPage.ts` lines 48-52:
+```typescript
+async clickArchiveCoop(coopName: string) {
+  const card = await this.getCoopCard(coopName);
+  // Open the menu first
+  await card.getByRole('button', { name: /more|více/i }).click();
+  // Wait for menu to be visible and stable before clicking
+  const archiveMenuItem = this.page.getByRole('menuitem', { name: /archive|archivovat/i });
+  await archiveMenuItem.waitFor({ state: 'visible' });
+  // Add small delay for menu to stabilize (prevents "element was detached" error)
+  await this.page.waitForTimeout(200);
+  // Then click archive in the menu
+  await archiveMenuItem.click();
+}
+```
+
+**2. Fix Modal Close Issue in Test Setup:**
+
+Update `CreateCoopModal.ts` line 51-53 to add timeout option:
+```typescript
+async waitForClose() {
+  // Increase timeout to 10s and add better error handling
+  await this.modal.waitFor({ state: 'hidden', timeout: 10000 });
+}
+```
+
+OR investigate why create modal isn't closing automatically:
+- Check if success toast or notification is blocking modal close
+- Check if modal close is handled properly after successful API response
+- Consider using `page.waitForLoadState('networkidle')` before waiting for modal close
+
+**3. Add Explicit Wait for Menu in All Menu Interactions:**
+
+Apply the same fix to other menu operations in `CoopsPage.ts`:
+- `clickEditCoop` (line 38-44) - already has same issue per M2-F3
+- `clickDeleteCoop` (line 54-60) - likely has same issue
+- Any other menu-based operations
+
+**Alternative Approach - Use Keyboard Navigation:**
+Instead of clicking menu items, use keyboard navigation which is more stable:
+```typescript
+async clickArchiveCoop(coopName: string) {
+  const card = await this.getCoopCard(coopName);
+  const moreButton = card.getByRole('button', { name: /more|více/i });
+
+  // Focus the button and press Enter to open menu
+  await moreButton.focus();
+  await this.page.keyboard.press('Enter');
+
+  // Navigate to archive option with arrow keys
+  await this.page.keyboard.press('ArrowDown'); // assumes archive is first item
+  await this.page.keyboard.press('Enter');
+}
+```
+
+**Next Steps:**
+- ⚠️ **HIGH:** Fix menu interaction timing issue (blocks M2-F3 Edit and M2-F4 Archive)
+- ⚠️ **MEDIUM:** Fix modal close timing in test setup
+- ⚠️ **MEDIUM:** Consider refactoring all menu interactions to use consistent wait pattern
+- Re-run tests after fixes to verify archive functionality works correctly
+
+---
+
 ## Appendix A: Authentication Setup Status
 
 **Status:** ✅ Verified (per TASK-003)
