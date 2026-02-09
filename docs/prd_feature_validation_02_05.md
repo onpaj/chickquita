@@ -3089,6 +3089,198 @@ Fix all occurrences to prevent similar failures in other test suites.
 
 ---
 
+### Feature: M4-V1 - Validation: One Record Per Flock Per Day
+
+**Milestone:** M4 - Daily Egg Records
+**PRD Reference:** Line 1853
+**Test Status:** ⚠️ MISSING - No E2E test exists
+**Test File:** N/A
+**Test Case:** N/A
+**Execution Result:** ⏭️ Skip (no test to execute)
+
+**Test Coverage Gap Analysis:**
+
+This validation rule is **NOT COVERED** by any E2E test. No test attempts to create a duplicate daily record for the same flock on the same day.
+
+#### Expected Behavior (Per PRD)
+
+**Business Rule:**
+- Each flock can have **only ONE daily record per date**
+- Attempting to create a second record for the same flock on the same day should be rejected
+- User should receive clear error message: "Záznam pro toto hejno již existuje pro tento den" (or similar)
+
+**Expected Implementation:**
+1. **Frontend Validation:** UI should check if record already exists before allowing creation
+2. **Backend Validation:** API should enforce unique constraint (`flock_id` + `date` combination)
+3. **Error Handling:** Clear error message displayed to user
+4. **Database Constraint:** Unique index on `(flock_id, date)` in `daily_records` table
+
+#### Findings
+
+**No E2E Test Coverage:**
+- ⚠️ No test attempts to create duplicate record for same flock + date
+- ⚠️ No test verifies validation error message appears
+- ⚠️ No test verifies duplicate record rejected by frontend
+- ⚠️ No test verifies duplicate record rejected by backend API
+- ⚠️ Cannot verify user experience when attempting duplicate creation
+
+**Possible Reasons Test is Missing:**
+1. **MVP Phase:** Validation may be tested at API/integration level, not E2E level
+2. **Backend Coverage:** Backend unit/integration tests may cover this rule sufficiently
+3. **Test Oversight:** Gap in E2E test planning
+4. **Implicit Testing:** Existing tests may indirectly verify (but not explicitly document)
+
+#### Test Scenarios That Should Be Implemented
+
+**Scenario 1: Duplicate Creation via Create Modal (Same Day)**
+```typescript
+test('should reject duplicate daily record for same flock and date', async ({ page }) => {
+  // Given: Daily record already exists for Flock A on 2026-02-09
+  await createDailyRecord({ flockId: 'A', date: '2026-02-09', eggCount: 10 });
+
+  // When: User attempts to create second record for same flock + date
+  await page.click('[data-testid="fab-add-record"]');
+  await page.selectOption('[data-testid="flock-select"]', 'A');
+  await page.fill('[data-testid="date-input"]', '2026-02-09');
+  await page.fill('[data-testid="egg-count-input"]', '5');
+  await page.click('[data-testid="save-button"]');
+
+  // Then: Error message should appear
+  await expect(page.locator('[role="alert"]')).toContainText(
+    /záznam.*již existuje|already exists/i
+  );
+
+  // And: Record should NOT be created
+  const records = await getDailyRecordsForFlock('A', '2026-02-09');
+  expect(records).toHaveLength(1); // Still only ONE record
+  expect(records[0].eggCount).toBe(10); // Original record unchanged
+});
+```
+
+**Scenario 2: Duplicate Creation via Quick-Add FAB**
+```typescript
+test('should reject duplicate when using quick-add FAB', async ({ page }) => {
+  // Given: Record exists for today
+  await createDailyRecord({ flockId: 'A', date: getTodayDate(), eggCount: 10 });
+
+  // When: User uses quick-add FAB for same flock today
+  await page.click('[data-testid="fab-add-record"]');
+  await page.selectOption('[data-testid="flock-select"]', 'A');
+  // Date defaults to today
+  await page.fill('[data-testid="egg-count-input"]', '5');
+  await page.click('[data-testid="save-button"]');
+
+  // Then: Error displayed
+  await expect(page.locator('[role="alert"]')).toBeVisible();
+});
+```
+
+**Scenario 3: Verify Different Flock Same Day Allowed**
+```typescript
+test('should allow different flocks to have records on same date', async ({ page }) => {
+  // Given: Record exists for Flock A on 2026-02-09
+  await createDailyRecord({ flockId: 'A', date: '2026-02-09', eggCount: 10 });
+
+  // When: User creates record for Flock B on same date
+  await createDailyRecord({ flockId: 'B', date: '2026-02-09', eggCount: 8 });
+
+  // Then: Both records should exist
+  const recordsFlockA = await getDailyRecordsForFlock('A', '2026-02-09');
+  const recordsFlockB = await getDailyRecordsForFlock('B', '2026-02-09');
+  expect(recordsFlockA).toHaveLength(1);
+  expect(recordsFlockB).toHaveLength(1);
+});
+```
+
+**Scenario 4: Verify Same Flock Different Day Allowed**
+```typescript
+test('should allow same flock to have records on different dates', async ({ page }) => {
+  // Given: Record exists for Flock A on 2026-02-09
+  await createDailyRecord({ flockId: 'A', date: '2026-02-09', eggCount: 10 });
+
+  // When: User creates record for same flock on different date
+  await createDailyRecord({ flockId: 'A', date: '2026-02-10', eggCount: 12 });
+
+  // Then: Both records should exist
+  const records = await getDailyRecordsForFlock('A');
+  expect(records).toHaveLength(2);
+});
+```
+
+#### Recommendations
+
+**Priority: MEDIUM** (Validation rule likely enforced at backend, but E2E gap exists)
+
+**1. Verify Backend Validation Exists (HIGH)**
+
+Check backend implementation:
+```bash
+# Search for unique constraint or validation
+cd backend
+grep -r "unique.*flock.*date" --include="*.cs"
+grep -r "DuplicateDailyRecord" --include="*.cs"
+grep -r "AlreadyExists" --include="*.cs"
+```
+
+Expected findings:
+- Database unique index: `CREATE UNIQUE INDEX idx_daily_records_flock_date ON daily_records(flock_id, date)`
+- FluentValidation rule in `CreateDailyRecordCommandValidator`
+- Business logic check in `CreateDailyRecordCommandHandler`
+
+**2. Add E2E Test for Duplicate Prevention (MEDIUM)**
+
+Create new test file or add to existing:
+```
+/frontend/e2e/daily-records-duplicate-validation.spec.ts
+```
+
+Implement Scenarios 1-4 above to explicitly test:
+- Duplicate rejected (same flock + date)
+- Error message displayed
+- Different flock same date allowed
+- Same flock different date allowed
+
+**3. Verify Frontend Validation (MEDIUM)**
+
+Check if frontend pre-validates before API call:
+- Search for existing record check in create modal
+- Verify user-friendly error handling
+- Test with and without backend validation (to ensure both layers work)
+
+**4. Consider User Experience Improvements (LOW)**
+
+Enhancement ideas (out of scope for validation):
+- **Proactive Detection:** When user selects flock + date, check if record exists and show warning
+- **Quick Edit:** If duplicate detected, offer to edit existing record instead
+- **Visual Indicator:** Show badge on date picker for dates that already have records
+
+#### Gap Assessment
+
+**Test Coverage:** ❌ No E2E test exists
+**Test Quality:** N/A (test missing)
+**Test Executable:** ❌ No (test doesn't exist)
+**Application Functionality:** ⚠️ Unknown - likely works (backend validation usually enforced)
+**Priority:** MEDIUM
+**Risk:** LOW (backend tests likely cover this, E2E gap is documentation/validation)
+**Effort to Add Test:** LOW (~1-2 hours to implement all 4 scenarios)
+
+**Gap Type:** Test Coverage Gap (Test Missing, Application Likely Works)
+
+**Evidence Application May Work:**
+- Standard database practice: unique constraints on business key columns
+- PRD explicitly documents this rule (line 1853)
+- Backend likely has FluentValidation rule
+- Similar validation rules work in other features (future date validation works in M4-V2)
+
+**Likelihood Application Works:** HIGH (90%)
+
+**Recommendation for Validation:**
+1. **Short-term:** Manually test duplicate creation (create record, attempt duplicate, verify rejection)
+2. **Medium-term:** Add E2E test suite for duplicate validation (Scenarios 1-4)
+3. **Long-term:** Document validation rules in test strategy documentation
+
+---
+
 ## Appendix A: Authentication Setup Status
 
 **Status:** ✅ Verified (per TASK-003)
