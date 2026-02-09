@@ -604,6 +604,7 @@ import {
   CoopCardSkeleton,         // Loading skeleton for CoopCard
   FlockCardSkeleton,        // Loading skeleton for FlockCard
   CoopDetailSkeleton,       // Loading skeleton for detail pages
+  DailyRecordCardSkeleton,  // Loading skeleton for DailyRecordCard
 } from '@/shared/components';
 ```
 

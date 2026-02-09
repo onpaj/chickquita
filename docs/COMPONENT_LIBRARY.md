@@ -1,7 +1,9 @@
 # Chickquita Component Library Documentation
 
-**Version:** 1.0.0
-**Last Updated:** 2026-02-07
+**Version:** 1.0.1
+**Last Updated:** 2026-02-09
+
+> **Note:** This document is actively maintained and reflects current implementation in `frontend/src/shared/components/`.
 
 ## Table of Contents
 
@@ -17,6 +19,7 @@
    - [CoopCardSkeleton](#coopcardskeleton)
    - [FlockCardSkeleton](#flockcardskeleton)
    - [CoopDetailSkeleton](#coopdetailskeleton)
+   - [DailyRecordCardSkeleton](#dailyrecordcardskeleton)
 5. [Modal Configuration](#modal-configuration)
 6. [Design System Principles](#design-system-principles)
 7. [Usage Examples](#usage-examples)
@@ -353,6 +356,7 @@ interface StatCardProps {
   value: string | number;            // Main value (h4 typography)
   trend?: {
     value: number;                   // Trend percentage
+    label: string;                   // Trend label (e.g., "this week", "vs last month")
     direction: 'up' | 'down' | 'neutral'; // Trend direction
   };
   loading?: boolean;                 // Loading skeleton state
@@ -386,6 +390,7 @@ function DashboardStats() {
           value={stats?.totalEggs || 0}
           trend={{
             value: 12.5,
+            label: 'this week',
             direction: 'up',
           }}
           color="primary"
@@ -399,6 +404,7 @@ function DashboardStats() {
           value={`${stats?.costPerEgg} Kč`}
           trend={{
             value: 5.2,
+            label: 'vs last month',
             direction: 'down', // Lower cost is good
           }}
           color="success"
@@ -666,6 +672,47 @@ function CoopDetail({ id }) {
   }
 
   return <CoopDetailForm coop={coop} />;
+}
+```
+
+---
+
+### DailyRecordCardSkeleton
+
+**File:** `frontend/src/shared/components/DailyRecordCardSkeleton.tsx`
+
+#### Description
+Loading skeleton that matches the `DailyRecordCard` layout used in the Daily Records feature.
+
+#### Features
+- Card layout with elevation
+- Date header skeleton
+- Egg count display box skeleton with circular icon
+- Flock chip skeleton
+- Notes text skeleton (2 lines)
+- Matches padding and spacing of actual DailyRecordCard
+
+#### Usage Example
+
+```tsx
+import { DailyRecordCardSkeleton } from '@/shared/components';
+
+function DailyRecordsList() {
+  const { data: records, isLoading } = useDailyRecords(flockId);
+
+  if (isLoading) {
+    return (
+      <Grid container spacing={2}>
+        {[1, 2, 3].map((i) => (
+          <Grid item xs={12} sm={6} md={4} key={i}>
+            <DailyRecordCardSkeleton />
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
+
+  return <DailyRecordsGrid records={records} />;
 }
 ```
 
@@ -970,7 +1017,7 @@ function Dashboard() {
             icon={<Egg />}
             label="Total Eggs"
             value={data?.totalEggs || 0}
-            trend={{ value: 12.5, direction: 'up' }}
+            trend={{ value: 12.5, label: 'this week', direction: 'up' }}
             color="primary"
             loading={isLoading}
           />
@@ -980,7 +1027,7 @@ function Dashboard() {
             icon={<AttachMoney />}
             label="Cost Per Egg"
             value={`${data?.costPerEgg || 0} Kč`}
-            trend={{ value: 5.2, direction: 'down' }}
+            trend={{ value: 5.2, label: 'vs last month', direction: 'down' }}
             color="success"
             loading={isLoading}
           />
@@ -990,7 +1037,7 @@ function Dashboard() {
             icon={<TrendingUp />}
             label="Monthly Revenue"
             value={`${data?.revenue || 0} Kč`}
-            trend={{ value: 8.3, direction: 'up' }}
+            trend={{ value: 8.3, label: 'this month', direction: 'up' }}
             color="info"
             loading={isLoading}
           />
@@ -1100,5 +1147,5 @@ When creating new components, ensure:
 
 ---
 
-**Last Updated:** 2026-02-07
+**Last Updated:** 2026-02-09
 **Maintainers:** Chickquita Development Team
