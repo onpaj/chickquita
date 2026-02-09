@@ -113,3 +113,5 @@ secrets.json
 tasks/
 *.tmp
 *.bak
+BRIEF.md
+WORKLOG.md

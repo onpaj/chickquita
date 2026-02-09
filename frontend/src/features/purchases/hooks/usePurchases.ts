@@ -24,7 +24,7 @@ export function usePurchases(filters?: PurchaseFilterParams) {
   });
 
   return {
-    purchases: query.data,
+    purchases: Array.isArray(query.data) ? query.data : [],
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,

@@ -185,19 +185,21 @@ export default function DashboardPage() {
         {/* Only show if user has data (flocks exist) */}
         {hasData && (
           <Tooltip title={t('dashboard.quickActions.addDailyRecord')} placement="left">
-            <Fab
-              color="primary"
-              aria-label={t('dashboard.quickActions.addDailyRecordAriaLabel')}
-              onClick={handleAddDailyRecord}
-              disabled={flocks.length === 0}
-              sx={{
-                position: 'fixed',
-                bottom: 88, // Above bottom navigation (56px height + 32px spacing)
-                right: 16,
-              }}
-            >
-              <AddIcon />
-            </Fab>
+            <span>
+              <Fab
+                color="primary"
+                aria-label={t('dashboard.quickActions.addDailyRecordAriaLabel')}
+                onClick={handleAddDailyRecord}
+                disabled={flocks.length === 0}
+                sx={{
+                  position: 'fixed',
+                  bottom: 88, // Above bottom navigation (56px height + 32px spacing)
+                  right: 16,
+                }}
+              >
+                <AddIcon />
+              </Fab>
+            </span>
           </Tooltip>
         )}
 

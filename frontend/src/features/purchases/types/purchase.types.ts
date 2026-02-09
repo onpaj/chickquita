@@ -7,37 +7,41 @@
  * Represents the type of purchase for chicken farming.
  * Maps to backend enum: Chickquita.Domain.Entities.PurchaseType
  */
-export enum PurchaseType {
+export const PurchaseType = {
   /** Chicken feed purchase */
-  Feed = 0,
+  Feed: 0,
   /** Vitamins and supplements purchase */
-  Vitamins = 1,
+  Vitamins: 1,
   /** Bedding material purchase */
-  Bedding = 2,
+  Bedding: 2,
   /** Toys and enrichment items purchase */
-  Toys = 3,
+  Toys: 3,
   /** Veterinary care and medication purchase */
-  Veterinary = 4,
+  Veterinary: 4,
   /** Other miscellaneous purchases */
-  Other = 5,
-}
+  Other: 5,
+} as const;
+
+export type PurchaseType = (typeof PurchaseType)[keyof typeof PurchaseType];
 
 /**
  * Represents the unit of quantity for purchased items.
  * Maps to backend enum: Chickquita.Domain.Entities.QuantityUnit
  */
-export enum QuantityUnit {
+export const QuantityUnit = {
   /** Kilograms */
-  Kg = 0,
+  Kg: 0,
   /** Pieces */
-  Pcs = 1,
+  Pcs: 1,
   /** Liters */
-  L = 2,
+  L: 2,
   /** Package (unspecified unit) */
-  Package = 3,
+  Package: 3,
   /** Other unit not listed */
-  Other = 4,
-}
+  Other: 4,
+} as const;
+
+export type QuantityUnit = (typeof QuantityUnit)[keyof typeof QuantityUnit];
 
 /**
  * Data Transfer Object for Purchase entity.

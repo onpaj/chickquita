@@ -12,7 +12,7 @@ import {
   InputLabel,
   IconButton,
   Chip,
-  SelectChangeEvent,
+  type SelectChangeEvent,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';

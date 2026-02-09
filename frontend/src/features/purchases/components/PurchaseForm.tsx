@@ -34,18 +34,17 @@ import {
  */
 const purchaseFormSchema = z.object({
   type: z.nativeEnum(PurchaseType, {
-    required_error: 'validation.required',
-    invalid_type_error: 'validation.invalidType',
+    error: 'validation.required',
   }),
   name: z
     .string({
-      required_error: 'validation.required',
+      error: 'validation.required',
     })
     .min(1, 'validation.required')
     .max(100, { message: 'validation.maxLength' }),
   purchaseDate: z
     .string({
-      required_error: 'validation.required',
+      error: 'validation.required',
     })
     .min(1, 'validation.required')
     .refine(
@@ -59,21 +58,18 @@ const purchaseFormSchema = z.object({
     ),
   amount: z
     .number({
-      required_error: 'validation.required',
-      invalid_type_error: 'validation.invalidNumber',
+      error: 'validation.required',
     })
     .positive('validation.positiveNumber')
     .max(999999.99, { message: 'validation.maxAmount' }),
   quantity: z
     .number({
-      required_error: 'validation.required',
-      invalid_type_error: 'validation.invalidNumber',
+      error: 'validation.required',
     })
     .positive('validation.positiveNumber')
     .max(999999.99, { message: 'validation.maxQuantity' }),
   unit: z.nativeEnum(QuantityUnit, {
-    required_error: 'validation.required',
-    invalid_type_error: 'validation.invalidType',
+    error: 'validation.required',
   }),
   consumedDate: z
     .string()
