@@ -51,4 +51,16 @@ export class CreateCoopModal {
   async waitForClose() {
     await this.modal.waitFor({ state: 'hidden' });
   }
+
+  async isSubmitDisabled(): Promise<boolean> {
+    return await this.submitButton.isDisabled();
+  }
+
+  async getValidationError(): Promise<string | null> {
+    const isVisible = await this.errorMessage.isVisible();
+    if (!isVisible) {
+      return null;
+    }
+    return await this.errorMessage.textContent();
+  }
 }

@@ -197,11 +197,14 @@ test.describe('M2: Coop Management', () => {
 
       // Try to submit with empty name
       await createCoopModal.nameInput.clear();
-      await createCoopModal.submit();
 
-      // Modal should remain open with error
-      await expect(createCoopModal.modal).toBeVisible();
+      // Verify submit button is disabled when name is empty
+      await expect(createCoopModal.submitButton).toBeDisabled();
+
+      // Verify validation error message is visible
       await expect(createCoopModal.errorMessage).toBeVisible();
+      const errorText = await createCoopModal.getValidationError();
+      expect(errorText).toBeTruthy();
     });
 
     test('should cancel coop creation', async () => {
@@ -224,11 +227,14 @@ test.describe('M2: Coop Management', () => {
       // Try to create coop with name longer than 100 characters
       const longName = 'A'.repeat(101);
       await createCoopModal.fillForm(longName);
-      await createCoopModal.submit();
 
-      // Should show validation error
+      // Verify submit button is disabled when name is too long
+      await expect(createCoopModal.submitButton).toBeDisabled();
+
+      // Verify validation error message is visible
       await expect(createCoopModal.errorMessage).toBeVisible();
-      await expect(createCoopModal.modal).toBeVisible();
+      const errorText = await createCoopModal.getValidationError();
+      expect(errorText).toBeTruthy();
     });
   });
 
