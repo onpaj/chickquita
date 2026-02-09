@@ -2867,6 +2867,228 @@ This is the **FIRST** M4 feature to achieve perfect test execution without any b
 
 ---
 
+### Feature: M4-F5 - Delete Daily Record
+
+**Milestone:** M4 - Daily Egg Records
+**PRD Reference:** Line 1852
+**Test Status:** ✅ Exists (within full CRUD workflow test)
+**Test File:** `/frontend/e2e/daily-records-full-workflow.spec.ts`
+**Test Case:** DELETE section in "should complete full CRUD workflow on desktop" (lines 299-353)
+**Execution Result:** ❌ Fail (test setup blocked by infrastructure bug)
+
+**Test Execution Summary:**
+```
+Command: npx playwright test daily-records-full-workflow.spec.ts --project=chromium --grep "should complete full CRUD workflow on desktop"
+Date: 2026-02-09
+Duration: 11.9s total (test failed at 9.7s during setup)
+
+Results:
+  ✓ 1/2 authentication setup (229ms)
+  ✘ 1/2 full CRUD workflow (9.7s - failed in beforeEach)
+
+Pass Rate: 0% (delete logic never reached)
+```
+
+**Test Output:**
+```
+Error: locator.fill: value: expected string, got undefined
+   at pages/CreateFlockModal.ts:54
+   at CreateFlockModal.fillForm
+   at daily-records-full-workflow.spec.ts:121:5
+```
+
+#### Findings
+
+**Issue 1: Test Infrastructure Bug - Same as M4-F1 (CRITICAL)**
+
+- **Root Cause:** `CreateFlockModal.fillForm()` method signature mismatch
+- **Location:** Test file line 121 calls with 5 individual parameters, Page Object expects single object parameter
+- **Impact:** Test fails during flock setup in `beforeEach` hook - DELETE section never executes
+- **Same Bug Pattern:** This is the SAME bug affecting M4-F1 (Create Daily Record)
+- **First Identified:** Iteration 20 (M4-F1 validation)
+- **Still Not Fixed:** Bug persists, now blocking M4-F5 validation as well
+
+**Issue Details:**
+```typescript
+// Test file (line 121) - INCORRECT:
+await createFlockModal.fillForm(
+  testFlockIdentifier,  // string
+  getDaysAgoDate(30),   // string
+  5,                    // number (hens)
+  1,                    // number (roosters)
+  0                     // number (chicks)
+);
+
+// Page Object method (CreateFlockModal.ts:51) - EXPECTS:
+async fillForm(data: FlockTestData) {
+  await this.identifierInput.fill(data.identifier); // expects data.identifier
+  // ...
+}
+```
+
+**Test Coverage Analysis (Cannot Verify - Test Blocked):**
+
+The DELETE section (lines 299-353) is comprehensive and would test:
+
+1. **Delete Action Trigger:**
+   - Opens edit modal to access delete functionality (line 302)
+   - Verifies delete button visible in modal (lines 308-309)
+   - Clicks delete button to trigger confirmation dialog (line 310)
+
+2. **Confirmation Dialog:**
+   - Verifies dialog title "Smazat denní záznam" appears (line 313)
+   - Verifies confirmation message visible (lines 314-316)
+   - Verifies formatted date shown in confirmation (lines 318-321)
+
+3. **Delete Operation:**
+   - Waits for DELETE API response (lines 324-330)
+   - Expects `DELETE /api/flocks/{id}/daily-records/{id}` with status 204
+   - Confirms deletion by clicking "Smazat" button (lines 333-334)
+
+4. **Success Verification:**
+   - Both dialogs close (edit modal + confirmation dialog) (lines 340-341)
+   - Success toast "úspěšně smazán" appears (line 344)
+   - Record removed from list view (lines 347-351)
+
+**Cannot Verify Application Functionality:**
+- ⚠️ Delete button visibility in edit modal
+- ⚠️ Confirmation dialog appears
+- ⚠️ Delete API endpoint works (DELETE /api/flocks/{id}/daily-records/{id})
+- ⚠️ Record removal from UI after successful delete
+- ⚠️ Success feedback to user
+
+#### Recommendations
+
+**Priority: CRITICAL** (blocks M4 feature testing)
+
+**1. Fix Test Infrastructure Bug (HIGH PRIORITY - Blocks Multiple Features)**
+
+This bug affects BOTH M4-F1 and M4-F5 (and potentially other test files). Fix options:
+
+**Option A (Recommended):** Update test file to use new signature:
+```typescript
+// File: /frontend/e2e/daily-records-full-workflow.spec.ts
+// Line 121
+
+// Replace:
+await createFlockModal.fillForm(testFlockIdentifier, getDaysAgoDate(30), 5, 1, 0);
+
+// With:
+await createFlockModal.fillForm({
+  identifier: testFlockIdentifier,
+  hatchDate: getDaysAgoDate(30),
+  hens: 5,
+  roosters: 1,
+  chicks: 0
+});
+```
+
+**Option B:** Add backward compatible method overload in Page Object:
+```typescript
+// File: /frontend/e2e/pages/CreateFlockModal.ts
+// Add overload before existing fillForm method
+
+async fillForm(
+  identifierOrData: string | FlockTestData,
+  hatchDate?: string,
+  hens?: number,
+  roosters?: number,
+  chicks?: number
+) {
+  if (typeof identifierOrData === 'string') {
+    // Legacy signature - convert to object
+    return this.fillForm({
+      identifier: identifierOrData,
+      hatchDate: hatchDate!,
+      hens: hens!,
+      roosters: roosters!,
+      chicks: chicks!
+    });
+  }
+  // Continue with object parameter...
+}
+```
+
+**Option C:** Search and fix all affected test files project-wide:
+```bash
+cd /frontend/e2e
+grep -r "createFlockModal.fillForm" --include="*.spec.ts"
+# Update each file individually
+```
+
+**2. Re-run Test After Fix**
+
+After fixing the infrastructure bug, execute:
+```bash
+cd /frontend
+npx playwright test daily-records-full-workflow.spec.ts --project=chromium --grep "should complete full CRUD workflow on desktop"
+```
+
+Expected outcome: Test should pass through DELETE section and verify:
+- Delete confirmation dialog appears correctly
+- DELETE API endpoint succeeds (status 204)
+- Record removed from list after deletion
+- Success toast displays
+
+**3. Consider Test Design Improvement**
+
+Current test combines CREATE, READ, UPDATE, DELETE in single test case. Consider:
+- **Option A:** Keep combined (tests full workflow continuity)
+- **Option B:** Split into separate test cases for better isolation
+- **Option C:** Add dedicated delete-only test file (e.g., `daily-records-delete.spec.ts`)
+
+**Trade-offs:**
+- Combined test: Better workflow validation, but failures block subsequent steps
+- Separate tests: Better isolation, but requires more setup/teardown
+- Dedicated file: Clear organization, but may duplicate setup logic
+
+**4. Verify Delete Business Rules (After Fix)**
+
+Once test runs, verify application enforces:
+- Delete button accessible from edit modal
+- Confirmation required before deletion (no accidental deletes)
+- DELETE API endpoint returns 204 No Content
+- Record permanently removed from database
+- No orphaned data left behind
+
+**5. Search for Other Affected Test Files**
+
+Run comprehensive search:
+```bash
+cd /frontend/e2e
+grep -rn "createFlockModal.fillForm" --include="*.spec.ts"
+```
+
+Fix all occurrences to prevent similar failures in other test suites.
+
+#### Gap Assessment
+
+**Test Coverage:** ✅ Comprehensive DELETE test exists (lines 299-353)
+**Test Quality:** ✅ Good - tests dialog, API, UI removal, success feedback
+**Test Executable:** ❌ No - blocked by test infrastructure bug
+**Application Functionality:** ⚠️ Unknown - cannot verify due to test failure
+**Priority:** CRITICAL
+**Risk:** HIGH - Delete functionality cannot be validated
+**Effort to Fix:** LOW - Simple parameter refactoring
+
+**Gap Type:** Test Infrastructure Bug (Not Application Bug)
+
+**Evidence Application May Work:**
+- Delete button likely exists (referenced in test line 308)
+- Confirmation dialog likely implemented (referenced in test lines 313-316)
+- Backend DELETE endpoint likely exists (test expects it line 324-330)
+- Similar CRUD patterns work in M4-F4 (Edit Daily Record - 100% pass rate)
+
+**Likelihood Application Works:** HIGH (based on M4-F4 success and test expectations)
+
+**Next Steps:**
+1. Fix `CreateFlockModal.fillForm()` method signature issue (affects multiple M4 tests)
+2. Re-validate M4-F1 (Create Daily Record)
+3. Re-validate M4-F5 (Delete Daily Record)
+4. Search for other affected test files
+
+---
+
 ## Appendix A: Authentication Setup Status
 
 **Status:** ✅ Verified (per TASK-003)
