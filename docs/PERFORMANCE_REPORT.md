@@ -1,11 +1,11 @@
 # Performance Testing & Optimization Report
 
-> **⚠️ PERFORMANCE BASELINE REPORT - OUTDATED**
-> **Report Date:** 2026-02-07
-> **Status:** ⚠️ OUTDATED (Purchases feature added Feb 8-9)
+> **📊 CURRENT PERFORMANCE BASELINE REPORT**
+> **Report Date:** 2026-02-09 (Updated)
+> **Status:** ✅ Current (Includes Purchases feature, M1-M8 implementation complete)
 >
-> **Recommendation:** Regenerate after current sprint to capture updated baseline including Purchases feature (US-033 to US-043).
-> **Note:** Bundle size and metrics reflect codebase state before Purchases implementation. Current bundle size is likely higher.
+> **Note:** Bundle analysis reflects codebase state including Purchases feature (US-033 to US-043) and all features through Milestone 8 (Chick Maturation).
+> **Last Generated:** 2026-02-09
 
 **Story:** TESTING-003 - Performance Testing & Optimization
 **Environment:** Production Build (Vite 7.3.1)
@@ -18,7 +18,7 @@ This report documents the performance testing and optimization efforts for the C
 
 | Metric | Target | Current Status | Result |
 |--------|--------|----------------|--------|
-| Bundle Size (gzipped) | < 200 KB | ~274 KB | ⚠️ **EXCEEDS TARGET** |
+| Bundle Size (gzipped) | < 200 KB | ~324 KB | ⚠️ **EXCEEDS TARGET** |
 | First Contentful Paint | < 1.5s | Unable to measure* | ⏸️ **BLOCKED** |
 | Time to Interactive | < 3.5s | Unable to measure* | ⏸️ **BLOCKED** |
 | Largest Contentful Paint | < 2.5s | Unable to measure* | ⏸️ **BLOCKED** |
@@ -36,25 +36,26 @@ This report documents the performance testing and optimization efforts for the C
 - `index.js`: 900.63 KB (271.83 KB gzipped)
 - ⚠️ **Issue:** All dependencies bundled together, poor caching strategy
 
-### After Optimization
+### After Optimization (Updated 2026-02-09)
 **Code-Splitting Strategy Implemented:**
 
 | Chunk | Raw Size | Gzipped | Description |
 |-------|----------|---------|-------------|
-| react-vendor | 47 KB | 16.72 KB | React, ReactDOM, React Router |
-| mui-vendor | 298 KB | 92.23 KB | Material-UI components |
-| clerk-vendor | 80 KB | 20.86 KB | Clerk authentication |
-| query-vendor | 36 KB | 10.71 KB | TanStack Query |
-| i18n-vendor | 54 KB | 17.71 KB | i18next localization |
-| form-vendor | 87 B | 0.10 KB | React Hook Form + Zod |
-| charts-vendor | 85 B | 0.10 KB | Recharts |
-| index (app code) | 385 KB | 115.30 KB | Application code |
-| **TOTAL** | **900 KB** | **273.73 KB** | |
+| react-vendor | 47.17 KB | 16.72 KB | React, ReactDOM, React Router |
+| mui-vendor | 326.09 KB | 101.62 KB | Material-UI components |
+| clerk-vendor | 80.07 KB | 20.86 KB | Clerk authentication |
+| query-vendor | 35.82 KB | 10.71 KB | TanStack Query |
+| i18n-vendor | 54.49 KB | 17.71 KB | i18next localization |
+| form-vendor | 91.33 KB | 27.20 KB | React Hook Form + Zod |
+| charts-vendor | 0.09 KB | 0.10 KB | Recharts |
+| index (app code) | 444.45 KB | 128.62 KB | Application code |
+| index.css | 0.91 KB | 0.49 KB | Styles |
+| **TOTAL** | **1,080 KB** | **323.54 KB** | (excluding HTML) |
 
 ### Bundle Size Increase
-- Baseline (before TESTING stories): ~271.83 KB gzipped
-- Current: ~273.73 KB gzipped
-- **Increase: 1.9 KB (0.7%)** ✅ **PASS** (< 10% target)
+- Baseline (Feb 7, before Purchases): ~273.73 KB gzipped
+- Current (Feb 9, with Purchases & M1-M8): ~323.54 KB gzipped (CSS + JS chunks)
+- **Increase: 49.81 KB (18.2%)** ⚠️ **SIGNIFICANT INCREASE** from Purchases feature implementation
 
 ---
 
@@ -83,8 +84,8 @@ rollupOptions: {
 **Benefits:**
 - ✅ Vendor libraries cached separately from app code
 - ✅ React ecosystem (16.72 KB) loads first, can be cached long-term
-- ✅ Material-UI (92.23 KB) can be cached independently
-- ✅ Application updates only invalidate 115 KB main chunk
+- ✅ Material-UI (101.62 KB) can be cached independently
+- ✅ Application updates only invalidate 128.62 KB main chunk
 
 ### 2. Chunk Size Warning Threshold
 - Increased `chunkSizeWarningLimit` to 600 KB to suppress false warnings for legitimate vendor chunks
@@ -126,7 +127,7 @@ The Lighthouse test against the production preview server failed with `NO_FCP` (
 
 ### 1. Bundle Size Exceeds Target (⚠️ High Priority)
 
-**Issue:** Total gzipped bundle is 273 KB, exceeding the 200 KB target by 37%
+**Issue:** Total gzipped bundle is 323.54 KB, exceeding the 200 KB target by 62%
 
 **Impact:**
 - Slower initial load on slow 3G connections
@@ -139,7 +140,13 @@ The Lighthouse test against the production preview server failed with `NO_FCP` (
 4. **Remove unused dependencies** - Audit package.json for unused packages
 5. **Font optimization** - Use system fonts or subset custom fonts
 
-**Estimated Savings:** 50-70 KB gzipped (bringing total to ~200-220 KB)
+**Estimated Savings:** 80-120 KB gzipped (bringing total to ~200-240 KB)
+
+**Bundle Growth Analysis:**
+- MUI vendor chunk: +9.39 KB (from 92.23 KB → 101.62 KB) - More MUI components used
+- Form vendor chunk: +27.10 KB (from 0.10 KB → 27.20 KB) - Significant form handling in Purchases feature
+- App code (index): +13.32 KB (from 115.30 KB → 128.62 KB) - Purchases feature pages, components, API client
+- **Total Growth:** +49.81 KB from Purchases feature implementation (M5)
 
 ### 2. No Runtime Performance Metrics (🔒 Blocked)
 
@@ -281,15 +288,16 @@ Based on bundle size and typical PWA performance:
 ### Summary of Changes
 - ✅ Implemented manual code-splitting for vendor libraries
 - ✅ Optimized caching strategy with separate vendor chunks
-- ✅ Bundle size increase < 10% (0.7% actual)
-- ⚠️ Total bundle size exceeds 200 KB target (273 KB)
+- ⚠️ Bundle size increased 18.2% from Purchases feature (49.81 KB)
+- ⚠️ Total bundle size exceeds 200 KB target (323.54 KB, 62% over target)
 - ⏸️ Runtime metrics blocked by authentication redirect
 
 ### Acceptance Criteria Status
 
 | Criteria | Status | Notes |
 |----------|--------|-------|
-| Bundle size increase < 10% | ✅ PASS | 0.7% increase |
+| Bundle size increase < 10% | ❌ FAIL | 18.2% increase from Purchases feature |
+| Bundle size < 200 KB | ❌ FAIL | 323.54 KB (62% over target) |
 | First Contentful Paint < 1.5s | ⏸️ BLOCKED | Unable to measure (auth redirect) |
 | Time to Interactive < 3.5s | ⏸️ BLOCKED | Unable to measure (auth redirect) |
 | Largest Contentful Paint < 2.5s | ⏸️ BLOCKED | Unable to measure (auth redirect) |
@@ -332,19 +340,24 @@ Based on bundle size and typical PWA performance:
 - **Build Tool:** Rollup (via Vite)
 - **Browser:** Chrome Headless (Lighthouse)
 
-### Build Output (After Optimization)
+### Build Output (Updated 2026-02-09)
 ```
-dist/index.html                          0.87 kB │ gzip:   0.39 kB
+dist/index.html                          0.95 kB │ gzip:   0.40 kB
 dist/assets/index-DQ3P1g1z.css           0.91 kB │ gzip:   0.49 kB
-dist/assets/form-vendor-B-FRIktE.js      0.09 kB │ gzip:   0.10 kB
 dist/assets/charts-vendor-B-FRIktE.js    0.09 kB │ gzip:   0.10 kB
 dist/assets/query-vendor-BVAGMksN.js    35.82 kB │ gzip:  10.71 kB
 dist/assets/react-vendor-fzd2TgEV.js    47.17 kB │ gzip:  16.72 kB
 dist/assets/i18n-vendor-DWwMIbEQ.js     54.49 kB │ gzip:  17.71 kB
 dist/assets/clerk-vendor-BddxYGWf.js    80.07 kB │ gzip:  20.86 kB
-dist/assets/mui-vendor-ClT2G-rt.js     298.25 kB │ gzip:  92.23 kB
-dist/assets/index-LOIp9sRC.js          384.49 kB │ gzip: 115.30 kB
+dist/assets/form-vendor-B49rqemV.js     91.33 kB │ gzip:  27.20 kB
+dist/assets/mui-vendor-DSCFRh-2.js     326.09 kB │ gzip: 101.62 kB
+dist/assets/index-BYthgvG5.js          444.45 kB │ gzip: 128.62 kB
 ```
+
+**Notable Changes Since Feb 7:**
+- form-vendor: 0.09 KB → 91.33 KB (+91.24 KB raw, +27.10 KB gzipped)
+- mui-vendor: 298.25 KB → 326.09 KB (+27.84 KB raw, +9.39 KB gzipped)
+- index (app): 384.49 KB → 444.45 KB (+59.96 KB raw, +13.32 KB gzipped)
 
 ### References
 - [Vite Build Optimization Guide](https://vitejs.dev/guide/build.html)
