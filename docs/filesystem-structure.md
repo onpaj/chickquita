@@ -399,9 +399,13 @@ Chickquita.Tests/
 ### Overview
 
 The frontend follows **feature-based organization** aligned with backend vertical slices:
-- Each feature contains components, hooks, API calls, types, pages
-- Shared code in `shared/` directory
+- Each feature contains components, hooks, API calls, and types
+- Pages are located at `src/pages/` for better separation of concerns
+- Shared code in `shared/` directory and `components/` at root level
+- React Context providers in `src/contexts/` directory (alongside Zustand)
 - Configuration and setup in `lib/`
+
+**Note:** Frontend structure evolved during implementation for better separation of concerns - pages at root level, feature-specific components in features/.
 
 ```
 src/frontend/
@@ -434,153 +438,142 @@ src/
 ├── main.tsx                        # App entry point
 ├── App.tsx                         # Root component, routing setup
 ├── vite-env.d.ts                   # Vite TypeScript types
+├── pages/                          # Page components (routing destinations)
+│   ├── SignInPage.tsx              # Clerk <SignIn /> component
+│   ├── SignUpPage.tsx              # Clerk <SignUp /> component
+│   ├── DashboardPage.tsx           # Main dashboard page
+│   ├── CoopsPage.tsx               # Coops list page
+│   ├── CoopDetailPage.tsx          # Single coop detail
+│   ├── FlocksPage.tsx              # Flocks list page (within coop)
+│   ├── FlockDetailPage.tsx         # Single flock detail
+│   ├── DailyRecordsListPage.tsx    # Daily records list
+│   ├── SettingsPage.tsx            # User settings
+│   └── NotFoundPage.tsx            # 404 page
 ├── features/                       # Feature modules (vertical slices)
-│   ├── auth/
-│   │   ├── components/
-│   │   │   ├── ProtectedRoute.tsx  # Route wrapper for auth
-│   │   │   └── UserButton.tsx      # Clerk UserButton wrapper
-│   │   ├── hooks/
-│   │   │   └── useAuth.ts          # Wraps @clerk/clerk-react hooks
-│   │   ├── types/
-│   │   │   └── auth.types.ts
-│   │   ├── pages/
-│   │   │   ├── SignInPage.tsx      # Clerk <SignIn /> component
-│   │   │   └── SignUpPage.tsx      # Clerk <SignUp /> component
-│   │   └── store/
-│   │       └── authStore.ts        # Optional local auth state
 │   ├── coops/
 │   │   ├── components/
 │   │   │   ├── CoopCard.tsx
-│   │   │   ├── CoopForm.tsx
-│   │   │   └── CoopList.tsx
+│   │   │   ├── CreateCoopModal.tsx
+│   │   │   ├── EditCoopModal.tsx
+│   │   │   ├── DeleteCoopDialog.tsx
+│   │   │   ├── ArchiveCoopDialog.tsx
+│   │   │   └── CoopsEmptyState.tsx
 │   │   ├── hooks/
 │   │   │   ├── useCoops.ts
 │   │   │   ├── useCreateCoop.ts
-│   │   │   └── useUpdateCoop.ts
+│   │   │   ├── useUpdateCoop.ts
+│   │   │   ├── useDeleteCoop.ts
+│   │   │   └── useArchiveCoop.ts
 │   │   ├── api/
 │   │   │   └── coopsApi.ts
-│   │   ├── types/
-│   │   │   └── coop.types.ts
-│   │   └── pages/
-│   │       ├── CoopsPage.tsx
-│   │       └── CoopDetailPage.tsx
+│   │   └── types/
+│   │       └── coop.types.ts
 │   ├── flocks/
 │   │   ├── components/
 │   │   │   ├── FlockCard.tsx
-│   │   │   ├── FlockForm.tsx
+│   │   │   ├── CreateFlockModal.tsx
+│   │   │   ├── EditFlockModal.tsx
 │   │   │   ├── FlockHistoryTimeline.tsx
-│   │   │   └── MatureChicksModal.tsx
+│   │   │   ├── MatureChicksModal.tsx
+│   │   │   └── UpdateCompositionModal.tsx
 │   │   ├── hooks/
 │   │   │   ├── useFlocks.ts
 │   │   │   ├── useMatureChicks.ts
+│   │   │   ├── useUpdateComposition.ts
 │   │   │   └── useFlockHistory.ts
 │   │   ├── api/
 │   │   │   └── flocksApi.ts
-│   │   ├── types/
-│   │   │   └── flock.types.ts
-│   │   └── pages/
-│   │       └── FlockDetailPage.tsx
+│   │   └── types/
+│   │       └── flock.types.ts
 │   ├── purchases/
 │   │   ├── components/
 │   │   │   ├── PurchaseForm.tsx
-│   │   │   └── PurchaseList.tsx
+│   │   │   ├── PurchaseList.tsx
+│   │   │   └── PurchaseListSkeleton.tsx
 │   │   ├── hooks/
-│   │   │   └── usePurchases.ts
+│   │   │   ├── usePurchases.ts
+│   │   │   ├── useCreatePurchase.ts
+│   │   │   ├── useUpdatePurchase.ts
+│   │   │   ├── useDeletePurchase.ts
+│   │   │   └── usePurchaseAutocomplete.ts
 │   │   ├── api/
 │   │   │   └── purchasesApi.ts
-│   │   └── pages/
+│   │   ├── types/
+│   │   │   └── purchase.types.ts
+│   │   └── pages/                  # Feature-specific page
 │   │       └── PurchasesPage.tsx
-│   ├── daily-records/
+│   ├── dailyRecords/
 │   │   ├── components/
 │   │   │   ├── QuickAddModal.tsx       # FAB modal (< 30 sec target)
 │   │   │   ├── DailyRecordForm.tsx
+│   │   │   ├── DailyRecordCard.tsx
+│   │   │   ├── DailyRecordCardSkeleton.tsx
+│   │   │   ├── DeleteDailyRecordDialog.tsx
 │   │   │   └── RecordsList.tsx
 │   │   ├── hooks/
 │   │   │   ├── useDailyRecords.ts
+│   │   │   ├── useCreateDailyRecord.ts
+│   │   │   ├── useUpdateDailyRecord.ts
+│   │   │   ├── useDeleteDailyRecord.ts
 │   │   │   └── useQuickAdd.ts
 │   │   ├── api/
 │   │   │   └── dailyRecordsApi.ts
-│   │   └── pages/
-│   │       └── DailyRecordsPage.tsx
-│   ├── statistics/
-│   │   ├── components/
-│   │   │   ├── DashboardWidgets.tsx
-│   │   │   ├── EggCostChart.tsx
-│   │   │   ├── ProductivityChart.tsx
-│   │   │   └── CostBreakdownChart.tsx
-│   │   ├── hooks/
-│   │   │   ├── useDashboard.ts
-│   │   │   └── useEggCost.ts
-│   │   └── pages/
-│   │       ├── DashboardPage.tsx
-│   │       └── StatisticsPage.tsx
+│   │   └── types/
+│   │       └── dailyRecord.types.ts
 │   └── dashboard/
-│       └── pages/
-│           └── DashboardPage.tsx
+│       ├── components/
+│       │   ├── DashboardWidgets.tsx
+│       │   ├── EggCostChart.tsx
+│       │   ├── ProductivityChart.tsx
+│       │   └── CostBreakdownChart.tsx
+│       ├── hooks/
+│       │   ├── useDashboard.ts
+│       │   └── useEggCost.ts
+│       ├── api/
+│       │   └── statisticsApi.ts
+│       └── types/
+│           └── dashboard.types.ts
+├── components/                     # Root-level shared components
+│   ├── BottomNavigation.tsx        # Main bottom navigation
+│   ├── ProtectedRoute.tsx          # Route wrapper for auth
+│   ├── ResourceNotFound.tsx        # Resource not found message
+│   └── ToastProvider.tsx           # Toast notification provider
+├── contexts/                       # React Context providers
+│   └── ToastContext.ts             # Toast context definition
 ├── shared/                         # Shared across features
 │   ├── components/                 # Reusable UI components
-│   │   ├── layout/
-│   │   │   ├── AppLayout.tsx       # Main layout with bottom nav
-│   │   │   ├── Header.tsx
-│   │   │   ├── BottomNavigation.tsx
-│   │   │   └── Sidebar.tsx         # Desktop sidebar (lg+)
-│   │   ├── ui/                     # Generic UI components
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   ├── FAB.tsx             # Floating Action Button
-│   │   │   ├── Spinner.tsx
-│   │   │   └── Skeleton.tsx
-│   │   ├── forms/
-│   │   │   ├── FormInput.tsx
-│   │   │   ├── FormSelect.tsx
-│   │   │   ├── FormDatePicker.tsx
-│   │   │   └── NumberStepper.tsx   # +/- buttons for numbers
-│   │   └── feedback/
-│   │       ├── Toast.tsx
-│   │       ├── OfflineBanner.tsx
-│   │       └── SyncIndicator.tsx
-│   ├── hooks/                      # Shared custom hooks
-│   │   ├── useDebounce.ts
-│   │   ├── useLocalStorage.ts
-│   │   ├── useOnlineStatus.ts
-│   │   └── useMediaQuery.ts
-│   ├── utils/                      # Utility functions
-│   │   ├── formatters.ts           # Date, number, currency
-│   │   ├── validators.ts           # Common validations
-│   │   └── calculations.ts         # Egg cost, productivity
-│   ├── types/                      # Shared TypeScript types
-│   │   ├── api.types.ts            # API response types
-│   │   ├── common.types.ts
-│   │   └── index.ts
+│   │   ├── NumericStepper.tsx      # +/- buttons for numbers
+│   │   ├── IllustratedEmptyState.tsx   # Empty state with illustration
+│   │   ├── StatCard.tsx            # Dashboard statistics card
+│   │   ├── ConfirmationDialog.tsx  # Standardized confirmation dialog
+│   │   ├── CoopCardSkeleton.tsx    # Loading skeleton
+│   │   ├── FlockCardSkeleton.tsx   # Loading skeleton
+│   │   └── CoopDetailSkeleton.tsx  # Loading skeleton
 │   └── constants/
-│       ├── routes.ts               # Route paths
-│       ├── api.ts                  # API endpoints
-│       └── config.ts               # App configuration
+│       └── modalConfig.ts          # Modal configuration constants
+├── hooks/                          # Shared custom hooks
+│   ├── useDebounce.ts
+│   ├── useLocalStorage.ts
+│   ├── useOnlineStatus.ts
+│   └── useMediaQuery.ts
 ├── lib/                            # Third-party library setup
-│   ├── api/
-│   │   ├── axios.ts                # Axios instance with Clerk token interceptor
-│   │   └── queryClient.ts          # TanStack Query configuration
-│   ├── clerk/
-│   │   └── clerkConfig.ts          # Clerk provider configuration
-│   ├── pwa/
-│   │   ├── serviceWorker.ts        # SW registration
-│   │   ├── syncQueue.ts            # Background sync queue
-│   │   └── installPrompt.ts        # PWA install prompt logic
-│   └── db/
-│       ├── dexie.ts                # IndexedDB setup (Dexie.js)
-│       └── schema.ts               # DB schema definition
-├── store/                          # Global Zustand store
-│   ├── index.ts                    # Combined store
-│   ├── slices/
-│   │   ├── authSlice.ts            # Auth state
-│   │   ├── uiSlice.ts              # UI state (modals, toasts)
-│   │   └── syncSlice.ts            # Offline sync state
-│   └── middleware.ts               # Persistence middleware
-└── styles/
-    ├── theme.ts                    # MUI theme customization
-    ├── global.css                  # Global styles
-    └── breakpoints.ts              # Responsive breakpoints
+│   └── api/
+│       ├── apiClient.ts            # Axios instance with Clerk token interceptor
+│       └── queryClient.ts          # TanStack Query configuration
+├── theme/                          # Material-UI theme
+│   ├── index.ts                    # Theme exports
+│   └── theme.ts                    # MUI theme customization
+├── locales/                        # Internationalization
+│   ├── cs/
+│   │   └── translation.json        # Czech translations (primary)
+│   └── en/
+│       └── translation.json        # English translations
+└── assets/                         # Static assets
+    └── illustrations/              # SVG illustrations
+        ├── empty-coops.svg
+        ├── empty-flocks.svg
+        ├── empty-purchases.svg
+        └── empty-daily-records.svg
 ```
 
 ---
