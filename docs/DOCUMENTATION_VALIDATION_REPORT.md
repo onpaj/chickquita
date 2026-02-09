@@ -979,41 +979,319 @@ These documents should be preserved as-is with no consolidation needed.
 
 This section provides specific recommendations for merging or updating duplicate documentation.
 
-### Recommendation 1: [Consolidation Title]
-**Priority:** [High/Medium/Low]
+### Recommendation 1: Align Theme Documentation with Implementation
+**Priority:** High
 **Documents to Consolidate:**
-- `document1.md`
-- `document2.md`
+- `ui-layout-system.md` (needs updates)
+- Implementation source of truth: `frontend/src/theme/theme.ts`
 
-**Rationale:** TBD
+**Rationale:** Critical conflicts exist between documented theme values and actual implementation. Developers using `ui-layout-system.md` as reference will create components with incorrect typography, fonts, and button styling, leading to inconsistent UI and code review rejections. This causes developer friction and wastes time.
 
-**Primary Source of Truth:** TBD
+**Primary Source of Truth:** `frontend/src/theme/theme.ts` (actual implementation)
 
 **Action Items:**
-1. TBD
-2. TBD
+1. Update `ui-layout-system.md` Section "Typography" (lines ~80-95):
+   - Change h1: `2rem (32px)` → `2.5rem (40px)`
+   - Change h2: `1.5rem (24px)` → `2rem (32px)`
+   - Change h3: `1.25rem (20px)` → `1.75rem (28px)`
+   - Verify h4-h6 sizes match theme.ts
 
-**Content to Move:** TBD
+2. Update `ui-layout-system.md` Section "Typography - Font Family" (lines ~70-78):
+   - Change font stack from `"Inter", "-apple-system", ...` to `"Roboto", "-apple-system", "BlinkMacSystemFont", ...`
+   - Add note: "Roboto loaded via @fontsource/roboto package"
 
-**Content to Remove:** TBD
+3. Update `ui-layout-system.md` Section "Button Styling" (lines ~140-160):
+   - Change `textTransform: 'none'` → `textTransform: 'uppercase'`
+   - Add note explaining design decision: "Uppercase buttons for visual hierarchy and action emphasis"
+
+4. Update `ui-layout-system.md` Section "Bottom Navigation" (lines ~250-270):
+   - Change height from `56px` → `64px`
+   - Update touch target calculation examples to reflect new height
+
+5. Add disclaimer at top of `ui-layout-system.md`:
+   ```markdown
+   **Living Document:** This design system reflects the current implementation in `frontend/src/theme/theme.ts`.
+   Last Verified: 2026-02-09 | Review Frequency: After major UI changes
+   ```
+
+**Content to Move:** None (single-source document update)
+
+**Content to Remove:**
+- Remove Section "Pull-to-Refresh Pattern" (lines ~300-320) - not implemented, move to "Planned Features" section or separate future-design.md
+- Remove Number Stepper 56x56px sizing example - actual NumericStepper uses 48x48px IconButtons
+
+**Impact of Fix:** Eliminates confusion for developers, ensures design system documentation matches implementation, prevents UI inconsistencies.
 
 ---
 
-### Recommendation 2: [Consolidation Title]
-**Priority:** [High/Medium/Low]
+### Recommendation 2: Update Database Schema Documentation
+**Priority:** High
 **Documents to Consolidate:**
-- TBD
+- `DATABASE_SCHEMA.md` (needs updates)
+- Implementation source of truth: `backend/src/Chickquita.Infrastructure/Migrations/ApplicationDbContextModelSnapshot.cs`
 
-**Rationale:** TBD
+**Rationale:** Critical schema mismatches between documentation and actual database structure. Developers referencing `DATABASE_SCHEMA.md` will use incorrect column names (e.g., `hens` instead of `current_hens`), causing SQL errors or EF Core query failures. FlockHistory table structure differs fundamentally (event tracking vs single-state snapshots), which misrepresents the data model design.
 
-**Primary Source of Truth:** TBD
+**Primary Source of Truth:** EF Core migrations (ApplicationDbContextModelSnapshot.cs and individual migration files)
 
 **Action Items:**
-1. TBD
+1. Update `DATABASE_SCHEMA.md` Section 3 "Flocks Table" (lines ~120-150):
+   - Rename columns: `hens` → `current_hens`, `roosters` → `current_roosters`, `chicks` → `current_chicks`
+   - Add missing columns:
+     - `identifier` VARCHAR(50) NOT NULL - Unique identifier within coop
+     - `hatch_date` TIMESTAMPTZ - Date when flock was established
+     - `is_active` BOOLEAN NOT NULL DEFAULT true - Soft delete flag
+   - Remove `notes` field (not in actual schema)
 
-**Content to Move:** TBD
+2. Update `DATABASE_SCHEMA.md` Section 4 "FlockHistory Table" (lines ~150-180):
+   - Replace entire table structure with actual single-state snapshot model:
+     - Remove: `event_type`, `previous_hens`, `previous_roosters`, `previous_chicks`, `new_hens`, `new_roosters`, `new_chicks`, `event_date`
+     - Add actual columns: `reason` VARCHAR(50), `hens` INT, `roosters` INT, `chicks` INT, `change_date` TIMESTAMPTZ, `updated_at` TIMESTAMPTZ
+   - Add design rationale note: "FlockHistory stores snapshots of flock state at each change, not before/after deltas. This simplifies querying historical composition without calculating deltas."
 
-**Content to Remove:** TBD
+3. Update `DATABASE_SCHEMA.md` Section 5 "Enumerations" (lines ~180-200):
+   - Clarify that PurchaseType and QuantityUnit are stored as VARCHAR (enum names like "Feed", "Bedding") not INTEGER values
+   - Add note: "EF Core converts enums to strings via `.HasConversion<string>()` configuration for database storage"
+   - Keep integer enum value table but note it's for C# code reference, not database storage
+
+4. Update `DATABASE_SCHEMA.md` Section 6 "Daily Records Table" (lines ~200-220):
+   - Correct unique constraint from `(tenant_id, flock_id, record_date)` → `(flock_id, record_date)`
+   - Add note: "Tenant isolation enforced by RLS policy, not constraint. One record per flock per day."
+
+5. Update `DATABASE_SCHEMA.md` Section "Purchases Table" (lines ~220-240):
+   - Change decimal precision from `DECIMAL(10,2)` → `DECIMAL(18,2)` for `amount` and `quantity` columns
+
+**Content to Move:** None (single-source document update)
+
+**Content to Remove:**
+- Remove outdated event tracking model explanation from FlockHistory section
+- Remove incorrect before/after delta tracking examples
+
+**Impact of Fix:** Prevents developer confusion about actual schema structure, eliminates SQL/EF Core query errors, documents actual design decisions (single-state snapshots vs deltas).
+
+---
+
+### Recommendation 3: Rewrite Backend Testing Documentation for Postgres/EF Core
+**Priority:** Critical
+**Documents to Consolidate:**
+- `test-strategy.md` Backend Integration Tests section (lines 447-733)
+- Implementation source of truth: Actual backend test projects using EF Core
+
+**Rationale:** **CRITICAL MISMATCH** - Document extensively describes Azure Table Storage (Azurite) testing infrastructure, but actual backend uses Neon Postgres with Entity Framework Core. All code examples show `TableServiceClient` patterns instead of `DbContext` patterns. This makes the document actively misleading for developers writing backend tests. Following documented examples will result in non-functional test code.
+
+**Primary Source of Truth:** Actual backend test implementation pattern (EF Core InMemory provider or test database)
+
+**Action Items:**
+1. **REWRITE** `test-strategy.md` Section "Backend Integration Tests" (lines 447-733):
+   - Remove all Azurite references and Azure Table Storage code examples
+   - Replace with EF Core integration test patterns:
+     - In-memory database provider for fast unit-like tests
+     - Test database (Postgres TestContainers or dedicated test instance) for full integration tests
+     - `ApplicationDbContext` configuration examples
+     - Entity seeding patterns for test data
+
+2. Update repository test examples:
+   ```csharp
+   // BEFORE (WRONG - Table Storage):
+   var repository = new FlockRepository(tableServiceClient, logger);
+
+   // AFTER (CORRECT - EF Core):
+   var repository = new FlockRepository(dbContext, logger);
+   ```
+
+3. Update `ChickquitaWebApplicationFactory` configuration example:
+   - Remove Azurite connection string configuration
+   - Add EF Core test database configuration:
+     - UseInMemoryDatabase for unit tests
+     - UseNpgsql with test connection string for integration tests
+     - Show how to apply migrations or seed data
+
+4. Update test infrastructure setup section:
+   - Remove Azurite installation and Docker container instructions
+   - Add EF Core test providers setup:
+     - `Microsoft.EntityFrameworkCore.InMemory` package reference
+     - Optional: Docker Postgres container for integration tests
+     - Connection string configuration for test database
+
+5. Verify and update backend test count:
+   - Run `dotnet test` to get accurate count
+   - Update statistics section with actual test counts per project
+
+6. Update code examples to match actual patterns:
+   - Show actual test file structure from `backend/tests/`
+   - Reference real test classes (CoopTests.cs, CreateCoopCommandHandlerTests.cs, etc.)
+   - Demonstrate actual DbContext mocking/setup patterns used in codebase
+
+**Content to Move:**
+- Frontend testing sections (Vitest, Playwright) remain accurate - NO CHANGES
+- E2E testing sections remain accurate - NO CHANGES
+- Only backend integration testing section needs complete rewrite
+
+**Content to Remove:**
+- All Azurite references (Docker, configuration, connection strings)
+- All Azure Table Storage code examples and patterns
+- TableServiceClient and CloudTable API references
+
+**Impact of Fix:** Restores document accuracy and usefulness. Enables developers to write correct backend tests following actual patterns. Critical for onboarding new developers to backend testing practices.
+
+**Estimated Effort:** High - requires examining actual backend test implementations and rewriting ~300 lines of documentation.
+
+---
+
+### Recommendation 4: Add Cross-References Between Database Setup Documents
+**Priority:** Low
+**Documents to Consolidate:**
+- `neon-database-setup.md`
+- `database-connection-guide.md`
+- `NEON_SETUP_CHECKLIST.md`
+
+**Rationale:** These three documents are complementary (not duplicates) but lack cross-references, making it unclear which document to read first. Users may read only one document and miss important information in others. Adding navigation links improves documentation discoverability.
+
+**Primary Source of Truth:** All three documents remain as-is (no consolidation needed)
+
+**Action Items:**
+1. Add "Related Documentation" section to `neon-database-setup.md`:
+   ```markdown
+   ## Related Documentation
+   - After setup, see [database-connection-guide.md](./database-connection-guide.md) for .NET backend configuration
+   - Use [NEON_SETUP_CHECKLIST.md](./NEON_SETUP_CHECKLIST.md) to verify setup completion
+   ```
+
+2. Add "Related Documentation" section to `database-connection-guide.md`:
+   ```markdown
+   ## Related Documentation
+   - For initial Neon setup, see [neon-database-setup.md](./neon-database-setup.md)
+   - Use [NEON_SETUP_CHECKLIST.md](./NEON_SETUP_CHECKLIST.md) to verify configuration
+   ```
+
+3. Update `NEON_SETUP_CHECKLIST.md` introduction (after line 10):
+   ```markdown
+   ## Documentation References
+   This checklist combines steps from:
+   - [neon-database-setup.md](./neon-database-setup.md) - Neon platform setup
+   - [database-connection-guide.md](./database-connection-guide.md) - .NET configuration
+   ```
+
+4. **OPTIONAL:** Remove user story references (US-014, US-015) from `NEON_SETUP_CHECKLIST.md` for general audience
+5. **OPTIONAL:** Reset all checkboxes to unchecked state in `NEON_SETUP_CHECKLIST.md` for template usage
+
+**Content to Move:** None (only adding cross-references)
+
+**Content to Remove:** None (optional: remove US-XXX references)
+
+**Impact of Fix:** Improves documentation navigation, makes setup process clearer, ensures users don't miss critical steps.
+
+---
+
+### Recommendation 5: Create API Common Patterns Reference (Future Enhancement)
+**Priority:** Low (Optional)
+**Documents to Consolidate:**
+- `API_SPEC_COOPS.md`
+- `API_SPEC_DAILY_RECORDS.md`
+- `API_SPEC_PURCHASES.md`
+- Future: Any new API specification documents
+
+**Rationale:** All API specs share common patterns (Result<T> error codes, tenant isolation, validation format, JWT authentication). While this consistency is beneficial, extracting common patterns to a separate reference document would reduce duplication in future API specs and provide a central source of truth for API design conventions.
+
+**Primary Source of Truth:** New document `API_SPEC_COMMON_PATTERNS.md` (to be created)
+
+**Action Items:**
+1. **OPTIONAL:** Create `docs/API_SPEC_COMMON_PATTERNS.md` with sections:
+   - Common error codes and Result<T> pattern
+   - Standard status code usage (200, 201, 204, 400, 401, 403, 404, 409)
+   - JWT Bearer authentication pattern
+   - Tenant isolation rule explanation
+   - Request/response DTO conventions
+   - Validation rule format (FluentValidation examples)
+   - Pagination pattern (if implemented in future)
+
+2. Update existing API specs to reference common patterns:
+   ```markdown
+   ## Common Patterns
+   This API follows the common patterns documented in [API_SPEC_COMMON_PATTERNS.md](./API_SPEC_COMMON_PATTERNS.md):
+   - Error handling: Result<T> pattern
+   - Authentication: JWT Bearer tokens
+   - Tenant isolation: All operations scoped to user's tenant
+   ```
+
+3. For future API specs, reference common patterns instead of duplicating them in each document
+
+**Content to Move:**
+- Extract error code table (appears in all 3 specs) to common patterns doc
+- Extract authentication section (identical in all 3 specs) to common patterns doc
+- Extract tenant isolation business rule (repeated in all 3 specs) to common patterns doc
+
+**Content to Remove:**
+- None from existing documents (this is enhancement, not consolidation)
+- Future documents can be shorter by referencing common patterns
+
+**Impact of Fix:** Reduces future documentation duplication, provides central API design reference, makes API specs more maintainable as patterns evolve.
+
+**Note:** This is a **future enhancement**, not a critical fix. Current API specs are accurate and don't require changes. Only implement if/when 4+ API specs exist to justify extraction.
+
+---
+
+### Recommendation 6: Clarify Historical vs Living Documentation
+**Priority:** Low
+**Documents to Consolidate:**
+- `TEST_COVERAGE_M2.md` (historical)
+- `i18n-validation-flocks.md` (historical)
+- `TESTING-002_TEST_REPORT.md` (historical)
+- `ACCESSIBILITY_COMPLIANCE_REPORT.md` (historical)
+- `PERFORMANCE_REPORT.md` (historical)
+
+**Rationale:** Several documents are point-in-time reports (historical artifacts) that will naturally become outdated as development continues. These are valuable as baseline records but could confuse developers looking for current state. Adding clear header disclaimers prevents confusion without requiring document consolidation.
+
+**Primary Source of Truth:** Each document remains as historical artifact (no merging)
+
+**Action Items:**
+1. Add header disclaimer to `TEST_COVERAGE_M2.md` (after line 1):
+   ```markdown
+   **HISTORICAL REPORT - MILESTONE 2 ONLY**
+   Report Date: 2026-02-06 | Scope: Coops Management (M2)
+   For current comprehensive test coverage, consider generating TEST_COVERAGE_CURRENT.md
+   ```
+
+2. Add header disclaimer to `i18n-validation-flocks.md` (after line 1):
+   ```markdown
+   **HISTORICAL VALIDATION REPORT**
+   Report Date: 2026-02-07 | Scope: Flocks Feature i18n
+   For current translation keys reference, see [I18N_KEYS.md](./I18N_KEYS.md)
+   ```
+
+3. Add header disclaimer to `TESTING-002_TEST_REPORT.md` (after line 1):
+   ```markdown
+   **SNAPSHOT REPORT - EXECUTION DATE: 2026-02-07**
+   This report reflects cross-browser test execution as of February 7, 2026.
+   For test plan, see [TESTING-002_CROSS_BROWSER_DEVICE_TEST_PLAN.md](./TESTING-002_CROSS_BROWSER_DEVICE_TEST_PLAN.md)
+   ```
+
+4. Add header disclaimer to `ACCESSIBILITY_COMPLIANCE_REPORT.md` (after line 1):
+   ```markdown
+   **COMPLIANCE AUDIT REPORT**
+   Audit Date: 2026-02-07 | Status: ✅ Verified 2026-02-09
+   Next Audit: After major UI changes or new component additions
+   ```
+
+5. Add header disclaimer to `PERFORMANCE_REPORT.md` (after line 1):
+   ```markdown
+   **PERFORMANCE BASELINE REPORT**
+   Report Date: 2026-02-07 | Status: ⚠️ OUTDATED (Purchases feature added Feb 8-9)
+   Recommendation: Regenerate after current sprint to capture updated baseline
+   ```
+
+6. **OPTIONAL:** Create `docs/reports/` subdirectory and move historical reports there:
+   - `docs/reports/TEST_COVERAGE_M2_2026-02-06.md`
+   - `docs/reports/i18n-validation-flocks_2026-02-07.md`
+   - `docs/reports/TESTING-002_TEST_REPORT_2026-02-07.md`
+   - `docs/reports/ACCESSIBILITY_COMPLIANCE_2026-02-07.md`
+   - `docs/reports/PERFORMANCE_2026-02-07.md`
+
+**Content to Move:** None (optional: move to reports/ subdirectory)
+
+**Content to Remove:** None
+
+**Impact of Fix:** Clarifies document purpose (historical vs current), prevents confusion about staleness, maintains valuable baseline records without misleading developers.
 
 ---
 
