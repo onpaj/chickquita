@@ -1,5 +1,12 @@
 # E2E Authentication Setup Guide
 
+> **✅ Configuration Verified:** 2026-02-09
+> - npm scripts: `test:e2e:save-auth`, `test:e2e` exist ✓
+> - Auth setup file: `e2e/auth.setup.ts` exists ✓
+> - Manual auth script: `e2e/save-auth.js` exists ✓
+> - Storage state path: `.auth/user.json` configured in playwright.config.ts ✓
+> - All test projects use `storageState: '.auth/user.json'` with setup dependency ✓
+
 The e2e tests require authentication. There are two ways to set this up:
 
 ## Option 1: Manual Authentication (Recommended for Local Development)
