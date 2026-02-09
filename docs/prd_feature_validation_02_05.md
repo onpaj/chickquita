@@ -1431,6 +1431,257 @@ Since M3-F1, M3-F2, and M3-F3 all fail due to the same Page Object bug, fixing `
 
 ---
 
+### Feature: M3-F4 - Edit Basic Flock Info
+
+**Milestone:** M3
+**PRD Reference:** Line 1810
+**Test Status:** ✅ Exists
+**Test File:** `/frontend/e2e/flocks.spec.ts`
+**Test Cases:**
+- `should edit flock information` (line 264)
+- `should cancel flock edit` (line 301)
+- `should show validation errors on invalid edit data` (line 325)
+
+**Execution Result:** ⚠️ Partial Pass (2/4 tests pass, 1 backend bug identified)
+
+#### Test Output
+
+```
+Running 4 tests using 3 workers
+
+✅ Using existing auth state from .auth/user.json
+  ✓  1 [setup] › e2e/auth.setup.ts:45:1 › authenticate (234ms)
+  ✓  2 [chromium] › e2e/flocks.spec.ts:325:5 › Edit Flock › should show validation errors on invalid edit data (12.2s)
+  ✓  3 [chromium] › e2e/flocks.spec.ts:301:5 › Edit Flock › should cancel flock edit (12.8s)
+  ✘  4 [chromium] › e2e/flocks.spec.ts:264:5 › Edit Flock › should edit flock information (17.9s)
+
+  1 failed, 3 passed (19.9s)
+```
+
+**Error Message:**
+
+```
+TimeoutError: locator.waitFor: Timeout 5000ms exceeded.
+Call log:
+  - waiting for getByRole('dialog') to be hidden
+    15 × locator resolved to visible <div role="dialog" aria-modal="true"...
+
+   at pages/EditFlockModal.ts:76
+
+  74 |    */
+  75 |   async waitForClose() {
+> 76 |     await this.modal.waitFor({ state: 'hidden', timeout: 5000 });
+     |                      ^
+  77 |   }
+
+Error occurred at EditFlockModal.ts:76
+Called from editFlock at EditFlockModal.ts:62
+Called from test at flocks.spec.ts:284
+```
+
+**Error Context (page snapshot at failure):**
+
+The page snapshot shows:
+- Edit modal is still visible with "Upravit hejno" (Edit Flock) title
+- Form fields populated with edited values:
+  - Identifier: "Edited Flock 1770632481946"
+  - Hatch Date: "2024-01-15"
+- **Alert visible:** "Došlo k neočekávané chybě" (Unexpected error occurred)
+- Alert has "Zkusit znovu" (Try again) button
+
+#### Findings
+
+**Test Infrastructure:**
+- ✅ Backend running successfully on port 5100
+- ✅ Frontend running on port 3100
+- ✅ Authentication setup working (auth.setup.ts passed in 234ms)
+- ✅ Tests properly configured with auth state (`.auth/user.json`)
+
+**Test Execution Results:**
+- ✅ **PASS:** Show validation errors on invalid edit data (12.2s)
+- ✅ **PASS:** Cancel flock edit (12.8s)
+- ❌ **FAIL:** Edit flock information (17.9s - backend error during update)
+
+**Issue Analysis:**
+
+**Issue 1: Backend Update Request Fails (CRITICAL APPLICATION BUG)**
+
+**What Happened:**
+1. Test creates a flock with identifier "Test Flock 1770632478468"
+2. Test opens edit modal for the flock
+3. Test verifies pre-filled values are correct (identifier and hatch date)
+4. Test enters new values:
+   - New identifier: "Edited Flock 1770632481946"
+   - New hatch date: "2024-01-15"
+5. Test clicks "Uložit" (Save) button
+6. Backend responds with an error (causes alert to display)
+7. Edit modal stays open because backend rejected the update
+8. Test times out waiting for modal to close (expected behavior after successful save)
+
+**Root Cause:**
+The backend `PUT /coops/{coopId}/flocks/{flockId}` endpoint is rejecting the update request with an error. The exact error message is not visible in the test output, but the UI shows "Došlo k neočekávané chybě" (Unexpected error occurred), indicating a 500 Internal Server Error or validation failure from the backend.
+
+**Possible Backend Issues:**
+1. **Missing validation handling:** Backend may not properly validate that only identifier and hatch date can be edited (composition should not be editable)
+2. **Request mapping issue:** Backend may be expecting different field names or structure in the PUT request
+3. **Business logic error:** Backend may have a bug in the UpdateFlockCommand or UpdateFlockCommandHandler
+4. **Database constraint violation:** Update may violate unique constraint on identifier
+
+**Impact:**
+- **CRITICAL:** Users cannot edit basic flock information (identifier, hatch date)
+- Feature is completely non-functional
+- This is a blocker for MVP - basic CRUD operations must work
+
+**Issue 2: Composition Unchanged Verification Blocked (Page Object Bug)**
+
+Even if the backend update succeeded, the test would still fail at lines 295-298 due to the **same Page Object bug as M3-F1, M3-F2, M3-F3** - `getFlockComposition()` returns NaN values. However, this is a lower priority since the backend bug is blocking the entire feature.
+
+**Application Behavior Validation:**
+- ✅ Edit modal opens successfully
+- ✅ Current values pre-filled correctly (identifier and hatch date)
+- ✅ Form accepts new values for identifier and hatch date
+- ✅ Cancel flow works correctly
+- ✅ Validation errors display correctly for invalid data
+- ❌ **Backend rejects update request** - CRITICAL BUG
+- ⚠️ Cannot verify composition unchanged (Page Object bug)
+
+**Feature Coverage:**
+According to PRD line 1810, "Edit Basic Flock Info" requires:
+- ✅ Edit identifier (form accepts input, but backend rejects update)
+- ✅ Edit hatch date (form accepts input, but backend rejects update)
+- ❌ **Save changes to backend** - FAILS with error
+- ✅ Cancel edit flow works correctly
+- ✅ Validation errors display correctly
+- ⚠️ Verify composition cannot be edited via edit modal (cannot verify due to backend bug + Page Object bug)
+
+**Validation Rules Tested:**
+- ✅ Validation errors display for invalid data (empty identifier, etc.)
+- ✅ Cancel flow works without saving changes
+- ❌ **Backend update request fails** - blocking issue
+
+#### Recommendations
+
+**Priority: CRITICAL** (Core CRUD functionality is broken)
+
+**1. Investigate and Fix Backend Edit Flock Endpoint (CRITICAL - HIGHEST PRIORITY):**
+
+**Immediate Actions:**
+1. Check backend logs for the actual error message when `PUT /coops/{coopId}/flocks/{flockId}` is called
+2. Verify the request payload structure matches what backend expects
+3. Check UpdateFlockCommand and UpdateFlockCommandHandler for bugs
+4. Verify database constraints on flock identifier uniqueness
+
+**Debugging Steps:**
+```bash
+# Check backend logs during test execution
+cd /Users/pajgrtondrej/Work/GitHub/Chickquita/backend
+dotnet run --project src/Chickquita.Api --verbosity detailed
+
+# Run test again and capture backend error logs
+cd /Users/pajgrtondrej/Work/GitHub/Chickquita/frontend
+npx playwright test flocks.spec.ts --project=chromium --grep "should edit flock information"
+```
+
+**Likely Backend Issues to Check:**
+- Verify UpdateFlockCommand has correct property names (identifier, hatchDate)
+- Verify UpdateFlockCommandHandler maps fields correctly
+- Verify EF Core update query is generated correctly
+- Verify unique constraint validation on identifier within coop
+- Verify tenant_id is included in the WHERE clause (multi-tenancy)
+
+**2. Fix Page Object Composition Parsing (CRITICAL):**
+
+Once backend bug is fixed, the test will still fail at composition verification (lines 295-298) due to the **same Page Object bug affecting M3-F1, M3-F2, M3-F3**.
+
+See M3-F1 recommendations (report lines 1012-1119) for detailed fix to `FlocksPage.ts` `getFlockComposition()` method.
+
+**3. Add Backend Integration Test for Edit Flock (HIGH):**
+
+After fixing the backend bug, add backend integration test to prevent regression:
+```csharp
+[Fact]
+public async Task UpdateFlock_WithValidData_ShouldSucceed()
+{
+    // Arrange
+    var coop = await CreateTestCoop();
+    var flock = await CreateTestFlock(coop.Id, identifier: "Original Name");
+    var updateCommand = new UpdateFlockCommand
+    {
+        FlockId = flock.Id,
+        Identifier = "Updated Name",
+        HatchDate = new DateTime(2024, 1, 15)
+    };
+
+    // Act
+    var result = await Mediator.Send(updateCommand);
+
+    // Assert
+    result.IsSuccess.Should().BeTrue();
+    result.Value.Identifier.Should().Be("Updated Name");
+    result.Value.HatchDate.Should().Be(new DateTime(2024, 1, 15));
+    // Verify composition unchanged
+    result.Value.Hens.Should().Be(flock.Hens);
+    result.Value.Roosters.Should().Be(flock.Roosters);
+    result.Value.Chicks.Should().Be(flock.Chicks);
+}
+```
+
+**4. Enhance Error Message Display in Frontend (MEDIUM):**
+
+The generic error message "Došlo k neočekávané chybě" (Unexpected error occurred) doesn't help users understand what went wrong. Improve error handling to display specific backend error messages:
+```typescript
+try {
+  await apiClient.put(`/flocks/${flockId}`, updateData);
+  onSuccess();
+} catch (error) {
+  if (error.response?.data?.message) {
+    // Display specific backend error message
+    setError(error.response.data.message);
+  } else {
+    // Generic fallback
+    setError(t('errors.unexpected'));
+  }
+}
+```
+
+**5. Add Test for Editing with Same Identifier (LOW):**
+
+Verify that editing a flock with the same identifier (no change) is allowed:
+```typescript
+test('should allow saving without changing identifier', async () => {
+  // Create flock
+  const flock = testFlocks.basic();
+  await flocksPage.openCreateFlockModal();
+  await createFlockModal.createFlock(flock);
+
+  // Open edit modal
+  await flocksPage.clickEditFlock(flock.identifier);
+
+  // Edit only hatch date, keep identifier same
+  await editFlockModal.editFlock({
+    identifier: flock.identifier, // same as original
+    hatchDate: '2024-02-01'
+  });
+
+  // Should succeed
+  await flocksPage.waitForFlocksToLoad();
+  await expect(flocksPage.getFlockCard(flock.identifier)).toBeVisible();
+});
+```
+
+**Next Steps:**
+1. ❌ **CRITICAL:** Fix backend edit flock endpoint - investigate and resolve error
+2. ❌ **CRITICAL:** Fix Page Object composition parsing (blocks M3-F1, M3-F2, M3-F3, M3-F4)
+3. ⚠️ Add backend integration test for edit flock
+4. ⚠️ Enhance frontend error message display
+5. ⚠️ Add test for editing with same identifier
+6. Re-run tests after backend fix to verify 100% pass rate
+
+**Comparison to M2 Edit Coop Bug:**
+This issue is similar to **M2-F3 (Edit Coop)** which also had a backend bug where location updates were not persisted. Both M2 (Coop Management) and M3 (Flock Management) have backend update issues. This suggests a pattern - the backend update handlers may need a comprehensive review.
+
+---
+
 ## Appendix A: Authentication Setup Status
 
 **Status:** ✅ Verified (per TASK-003)
