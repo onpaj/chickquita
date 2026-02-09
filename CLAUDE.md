@@ -631,10 +631,11 @@ import {
 
 ### Design System Resources
 
-Additional design documentation:
-- `/docs/ui-layout-system.md` - Comprehensive UI/layout design system
-- `/docs/coding-standards.md` - Coding standards and conventions
-- `/docs/COMPONENT_LIBRARY.md` - Component library reference (NEW)
+For comprehensive architecture and design documentation, see the [Architecture Documentation](#architecture-documentation) table below, which includes:
+- UI/layout design system
+- Component library reference
+- Coding standards and conventions
+- Testing strategy and setup
 
 ---
 
@@ -643,3 +644,33 @@ Additional design documentation:
 For detailed API specifications, see:
 - `/docs/API_SPEC_COOPS.md` - Coops endpoints documentation
 - `/docs/ChickenTrack_PRD.md` - Product requirements document
+
+---
+
+## Architecture Documentation
+
+Comprehensive architecture and design documentation is available in the `docs/architecture/` directory:
+
+| Document | Description | Category |
+|----------|-------------|----------|
+| [technology-stack.md](docs/architecture/technology-stack.md) | Complete tech stack with versions, dependencies, and rationale | Architecture |
+| [filesystem-structure.md](docs/architecture/filesystem-structure.md) | Project directory structure and organization patterns | Architecture |
+| [COMPONENT_LIBRARY.md](docs/architecture/COMPONENT_LIBRARY.md) | Shared components, design system, theme configuration | UI/Components |
+| [ui-layout-system.md](docs/architecture/ui-layout-system.md) | Layout patterns, typography, spacing, breakpoints | UI/Design |
+| [coding-standards.md](docs/architecture/coding-standards.md) | Naming conventions, patterns, code quality standards | Development |
+| [test-strategy.md](docs/architecture/test-strategy.md) | Testing approach, coverage targets, test infrastructure | Testing |
+| [E2E_AUTH_SETUP.md](docs/architecture/E2E_AUTH_SETUP.md) | Playwright authentication setup for E2E tests | Testing |
+
+### Quick Reference by Topic
+
+**Architecture & Structure:**
+- [technology-stack.md](docs/architecture/technology-stack.md) - What technologies are used and why
+- [filesystem-structure.md](docs/architecture/filesystem-structure.md) - Where to find code
+
+**UI Development:**
+- [COMPONENT_LIBRARY.md](docs/architecture/COMPONENT_LIBRARY.md) - Reusable components and usage
+- [ui-layout-system.md](docs/architecture/ui-layout-system.md) - Design system implementation
+
+**Code Quality:**
+- [coding-standards.md](docs/architecture/coding-standards.md) - How to write consistent code
+- [test-strategy.md](docs/architecture/test-strategy.md) - How to test effectively
