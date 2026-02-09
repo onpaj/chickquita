@@ -1961,6 +1961,111 @@ M2-F4 (Archive Coop) failed due to a **menu interaction timing bug** that preven
 
 ---
 
+### Feature: M3-F6 - Initial Flock History
+
+**Milestone:** M3
+**PRD Reference:** Line 1811 - "Initial flock history record created automatically"
+**Test Status:** ⚠️ MISSING
+**Test File:** N/A
+**Test Case:** N/A
+**Execution Result:** ⏭️ Skip (No test exists)
+
+#### Findings
+
+**Test Coverage Gap:**
+- ❌ No E2E test exists to verify automatic initial history record creation
+- ❌ Cannot verify that first history entry equals initial flock composition
+- ❌ Cannot verify that history record is created immediately upon flock creation
+- ❌ Cannot verify history record immutability
+
+**PRD Requirements (Line 1811):**
+> "Initial flock history record created automatically on flock creation"
+
+**Expected Behavior:**
+1. When user creates a new flock with initial composition (e.g., 10 hens, 2 roosters, 5 chicks)
+2. System should automatically create first history record with:
+   - Same composition values (10 hens, 2 roosters, 5 chicks)
+   - Timestamp = flock creation timestamp
+   - Type = "Initial" or similar
+   - No modification allowed (immutable)
+3. This history entry should be visible in flock history view
+
+**Test Scenarios Missing:**
+1. Create flock → Navigate to history view → Verify first entry exists
+2. Verify first history entry composition matches initial flock composition
+3. Verify first history entry timestamp matches flock creation timestamp
+4. Verify first history entry is immutable (no edit/delete actions)
+
+**Why This Gap Matters:**
+- History tracking is a core domain requirement for Chickquita
+- Users need to track flock composition changes over time
+- Initial history record establishes baseline for all future changes
+- Without this test, we cannot verify this critical feature works
+
+**Possible Reasons Test is Missing:**
+1. History feature may not be fully implemented in UI yet (MVP phase)
+2. History may be tested at API/integration level but not E2E level
+3. History view may not exist in current UI implementation
+4. Test author may have prioritized other M3 features first
+
+#### Recommendations
+
+**Priority: MEDIUM**
+
+1. **Verify feature exists in application:**
+   - Manually check if flock history view/component exists in UI
+   - Check if `/coops/{id}/flocks/{id}/history` route exists
+   - Verify backend API endpoint `GET /coops/{coopId}/flocks/{flockId}/history` works
+
+2. **If feature exists - Create E2E test:**
+   ```typescript
+   test('should create initial history record automatically', async ({ page }) => {
+     // Given: User creates a new flock
+     await flocksPage.goto(testCoopId);
+     await flocksPage.clickCreateFlock();
+     await flocksPage.fillFlockForm({
+       identifier: 'History Test Flock',
+       hens: 10,
+       roosters: 2,
+       chicks: 5,
+       hatchDate: '2025-01-01'
+     });
+     await flocksPage.submitFlockForm();
+
+     // When: User navigates to flock history
+     const flockId = await flocksPage.getFirstFlockId();
+     await page.goto(`/coops/${testCoopId}/flocks/${flockId}/history`);
+
+     // Then: Initial history record exists
+     await expect(page.locator('[data-testid="history-record"]')).toHaveCount(1);
+
+     // And: History record matches initial composition
+     const historyRecord = page.locator('[data-testid="history-record"]').first();
+     await expect(historyRecord).toContainText('10 hens');
+     await expect(historyRecord).toContainText('2 roosters');
+     await expect(historyRecord).toContainText('5 chicks');
+     await expect(historyRecord).toContainText('Initial');
+   });
+   ```
+
+3. **If feature doesn't exist - Document as known gap:**
+   - Add to MVP backlog: "Implement flock history view/component"
+   - Add to test backlog: "Create E2E test for initial history record"
+   - Update PRD status to reflect implementation gap
+
+4. **Check backend implementation:**
+   - Verify `CreateFlockCommandHandler` creates history record
+   - Verify `FlockHistory` entity exists and is populated
+   - Check if history endpoint returns data: `GET /flocks/{id}/history`
+
+**Gap Assessment:**
+- **Coverage Impact:** MEDIUM - Core domain feature but may be post-MVP
+- **Risk Level:** LOW - If backend creates history automatically, risk is minimal
+- **Verification Strategy:** Backend/integration tests may provide sufficient coverage
+- **E2E Priority:** Can be deferred if backend tests exist and pass
+
+---
+
 ## Appendix A: Authentication Setup Status
 
 **Status:** ✅ Verified (per TASK-003)
