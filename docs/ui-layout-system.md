@@ -6,6 +6,8 @@
 **Date:** February 5, 2026
 **Status:** Approved
 
+**Living Document:** This design system reflects current implementation in `frontend/src/theme/theme.ts`. Last Verified: 2026-02-09
+
 ---
 
 ## Table of Contents
@@ -25,38 +27,51 @@
 ### Color Palette (MUI Theme)
 
 ```typescript
-// src/styles/theme.ts
+// src/theme/theme.ts
 import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
     primary: {
       main: '#FF6B35',      // Warm orange (chicken/farm theme)
-      light: '#FF9563',
-      dark: '#E55A2B',
+      light: '#FF9066',
+      dark: '#E55420',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#4ECDC4',      // Teal (fresh/clean)
-      light: '#7FD9D2',
-      dark: '#3AAFA9',
+      main: '#4A5568',      // Cool gray for balance
+      light: '#718096',
+      dark: '#2D3748',
+      contrastText: '#FFFFFF',
     },
     success: {
-      main: '#26C281',      // Green (eggs, productivity)
+      main: '#38A169',      // Green (eggs, productivity)
+      light: '#68D391',
+      dark: '#2F855A',
     },
     warning: {
-      main: '#F7B731',      // Yellow (alerts)
+      main: '#DD6B20',      // Orange (alerts)
+      light: '#F6AD55',
+      dark: '#C05621',
     },
     error: {
-      main: '#EE5A6F',      // Red (offline, errors)
+      main: '#E53E3E',      // Red (offline, errors)
+      light: '#FC8181',
+      dark: '#C53030',
+    },
+    info: {
+      main: '#3182CE',
+      light: '#63B3ED',
+      dark: '#2C5282',
     },
     background: {
-      default: '#F5F5F5',   // Light gray
+      default: '#F7FAFC',   // Light gray
       paper: '#FFFFFF',
     },
     text: {
-      primary: '#2C3E50',   // Dark blue-gray
-      secondary: '#7F8C8D', // Medium gray
+      primary: '#1A202C',   // Dark blue-gray
+      secondary: '#4A5568', // Medium gray
+      disabled: '#A0AEC0',
     },
   },
 });
@@ -64,43 +79,73 @@ const theme = createTheme({
 
 ### Typography
 
+**Font Family:** "Roboto" (primary) loaded via `@fontsource/roboto` package
+
 ```typescript
 typography: {
-  fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+  fontFamily: '"Roboto", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Arial", sans-serif',
   h1: {
-    fontSize: '2rem',       // 32px - Page titles
+    fontSize: '2.5rem',     // 40px - Page titles
     fontWeight: 700,
     lineHeight: 1.2,
+    letterSpacing: '-0.01562em',
   },
   h2: {
-    fontSize: '1.5rem',     // 24px - Section headers
-    fontWeight: 600,
+    fontSize: '2rem',       // 32px - Section headers
+    fontWeight: 700,
     lineHeight: 1.3,
+    letterSpacing: '-0.00833em',
   },
   h3: {
-    fontSize: '1.25rem',    // 20px - Card titles
+    fontSize: '1.75rem',    // 28px - Card titles
     fontWeight: 600,
     lineHeight: 1.4,
+    letterSpacing: '0em',
   },
   h4: {
-    fontSize: '1.125rem',   // 18px - Subsections
+    fontSize: '1.5rem',     // 24px - Subsections
     fontWeight: 600,
+    lineHeight: 1.4,
+    letterSpacing: '0.00735em',
+  },
+  h5: {
+    fontSize: '1.25rem',    // 20px
+    fontWeight: 600,
+    lineHeight: 1.5,
+    letterSpacing: '0em',
+  },
+  h6: {
+    fontSize: '1.125rem',   // 18px
+    fontWeight: 600,
+    lineHeight: 1.5,
+    letterSpacing: '0.0075em',
   },
   body1: {
     fontSize: '1rem',       // 16px - Main text
+    fontWeight: 400,
     lineHeight: 1.5,
+    letterSpacing: '0.00938em',
   },
   body2: {
     fontSize: '0.875rem',   // 14px - Secondary text
+    fontWeight: 400,
     lineHeight: 1.43,
+    letterSpacing: '0.01071em',
   },
   button: {
-    textTransform: 'none',  // No uppercase buttons
+    fontSize: '0.875rem',   // 14px
     fontWeight: 500,
+    lineHeight: 1.75,
+    letterSpacing: '0.02857em',
+    textTransform: 'uppercase',  // Default (overridden at component level)
   },
+
+  // Note: MuiButton component overrides textTransform to 'none' in components config
   caption: {
     fontSize: '0.75rem',    // 12px - Captions, hints
+    fontWeight: 400,
     lineHeight: 1.66,
+    letterSpacing: '0.03333em',
   },
 },
 ```
@@ -209,7 +254,7 @@ spacing={3}  // 24px gap
 │                             │
 │                             │
 ├─────────────────────────────┤
-│ Bottom Nav (56px fixed)     │
+│ Bottom Nav (64px fixed)     │
 └─────────────────────────────┘
 ```
 
@@ -273,7 +318,7 @@ const navItems = [
     bottom: 0,
     left: 0,
     right: 0,
-    height: 56,
+    height: 64,  // Updated to match theme.ts implementation
     borderTop: '1px solid',
     borderColor: 'divider',
   }}
@@ -296,7 +341,7 @@ const navItems = [
 ```
 
 **Bottom Nav Specs:**
-- Height: 56px
+- Height: 64px (defined in theme.ts)
 - Fixed position at bottom
 - Active item: primary color with label
 - Inactive: gray with icon only
@@ -433,7 +478,7 @@ const ProtectedRoute = ({ children }) => {
   aria-label="add"
   sx={{
     position: 'fixed',
-    bottom: { xs: 72, sm: 16 }, // Above bottom nav on mobile
+    bottom: { xs: 80, sm: 16 }, // Above bottom nav (64px + 16px margin) on mobile
     right: 16,
     zIndex: 1000,
   }}
@@ -494,7 +539,10 @@ const ProtectedRoute = ({ children }) => {
 
 ### 4. Number Stepper (Critical for Quick Entry)
 
+**Note:** The actual implementation uses the `NumericStepper` component with 48x48px IconButtons (standard touch target size), not 56x56px as shown in this example. See `frontend/src/shared/components/NumericStepper.tsx` for the implemented component.
+
 ```typescript
+// Example pattern - actual implementation may vary
 <Box
   display="flex"
   alignItems="center"
@@ -505,8 +553,8 @@ const ProtectedRoute = ({ children }) => {
     size="large"
     onClick={() => setValue(v => Math.max(0, v - 1))}
     sx={{
-      width: 56,
-      height: 56,
+      width: 48,  // Standard touch target size (48x48px)
+      height: 48,
       bgcolor: 'action.hover',
     }}
     aria-label="decrease"
@@ -526,15 +574,15 @@ const ProtectedRoute = ({ children }) => {
       },
       min: 0,
     }}
-    sx={{ width: 100 }}
+    sx={{ width: 80 }}  // 80px input width in actual implementation
   />
 
   <IconButton
     size="large"
     onClick={() => setValue(v => v + 1)}
     sx={{
-      width: 56,
-      height: 56,
+      width: 48,
+      height: 48,
       bgcolor: 'action.hover',
     }}
     aria-label="increase"
@@ -606,7 +654,7 @@ const ProtectedRoute = ({ children }) => {
     elevation={3}
     sx={{
       position: 'fixed',
-      bottom: { xs: 56, sm: 0 }, // Above bottom nav on mobile
+      bottom: { xs: 64, sm: 0 }, // Above bottom nav (64px) on mobile
       left: 0,
       right: 0,
       p: 1.5,
@@ -640,7 +688,7 @@ const ProtectedRoute = ({ children }) => {
   elevation={4}
   sx={{
     position: 'fixed',
-    bottom: { xs: 72, sm: 16 },
+    bottom: { xs: 80, sm: 16 }, // Above bottom nav (64px + 16px margin) on mobile
     left: 16,
     right: 16,
     p: 2,
@@ -679,8 +727,12 @@ const ProtectedRoute = ({ children }) => {
 
 ### 4. Pull-to-Refresh
 
+**Status:** 🚧 Planned Feature - Not Yet Implemented
+
+This pattern is documented for future implementation. Users can manually refresh by using standard browser refresh or the sync button in the UI.
+
 ```typescript
-// Custom implementation using touch events
+// Future implementation using touch events
 const [isPulling, setIsPulling] = useState(false);
 const [pullDistance, setPullDistance] = useState(0);
 
