@@ -2066,6 +2066,140 @@ M2-F4 (Archive Coop) failed due to a **menu interaction timing bug** that preven
 
 ---
 
+## M4: Daily Egg Records (8 Features)
+
+### Feature: M4-F1 - Create Daily Record
+
+**Milestone:** M4
+**PRD Reference:** Line 1848
+**Test Status:** ✅ Exists
+**Test File:** `/frontend/e2e/daily-records-full-workflow.spec.ts`
+**Test Cases:**
+- `should complete full CRUD workflow on desktop` (line 148) - CREATE section (lines 151-209)
+
+**Execution Result:** ❌ Fail (0/3 tests pass, test infrastructure bug)
+
+#### Test Output
+
+```
+Running 4 tests using 3 workers
+
+✅ Using existing auth state from .auth/user.json
+  ✓  1 [setup] › e2e/auth.setup.ts:45:1 › authenticate (256ms)
+  ✘  3 [chromium] › e2e/daily-records-full-workflow.spec.ts:476:3 › should complete full CRUD workflow on tablet viewport (12.1s)
+  ✘  4 [chromium] › e2e/daily-records-full-workflow.spec.ts:366:3 › should complete full CRUD workflow on mobile viewport (12.1s)
+  ✘  2 [chromium] › e2e/daily-records-full-workflow.spec.ts:148:3 › should complete full CRUD workflow on desktop (12.1s)
+
+Error (all 3 tests):
+  Error: locator.fill: value: expected string, got undefined
+  at pages/CreateFlockModal.ts:54
+
+3 failed, 1 passed (14.3s)
+```
+
+#### Findings
+
+**Issue 1: Test Infrastructure Bug - Method Signature Mismatch (CRITICAL)**
+
+**Root Cause:** The test file `daily-records-full-workflow.spec.ts` is calling `CreateFlockModal.fillForm()` with individual parameters (old signature), but the Page Object method now expects a single object parameter (new signature).
+
+**Test Code (line 121-127):**
+```typescript
+await createFlockModal.fillForm(
+  testFlockIdentifier,  // string
+  getDaysAgoDate(30),   // string
+  5,                    // hens: number
+  1,                    // roosters: number
+  0                     // chicks: number
+);
+```
+
+**Page Object Method (CreateFlockModal.ts line 51-54):**
+```typescript
+async fillForm(data: FlockTestData) {
+  await this.identifierInput.clear();
+  await this.identifierInput.fill(data.identifier); // expects data.identifier
+  // ...
+}
+```
+
+**Impact:**
+- ALL Daily Records E2E tests blocked (desktop, mobile, tablet viewports)
+- Test setup phase fails before reaching actual Daily Record creation steps
+- Cannot verify M4-F1 (Create Daily Record) functionality
+- Likely affects multiple test files that create flocks as test setup
+
+**Issue 2: Tests Cannot Reach Daily Record Creation Logic**
+
+Because the test fails during flock setup (beforeEach phase), the actual Daily Record creation test logic never executes. The CREATE section (lines 151-209) that validates:
+- Navigate to Daily Records page
+- Open create daily record modal
+- Fill form with flock selection, date, egg count
+- Submit and verify record created
+
+...is completely blocked by the Page Object method signature bug.
+
+#### Recommendations
+
+**Priority: HIGH** - Fix Page Object method signature mismatch
+
+**Option A: Update Test File to Use New Signature (Recommended)**
+Update `daily-records-full-workflow.spec.ts` line 121 to pass object:
+```typescript
+await createFlockModal.fillForm({
+  identifier: testFlockIdentifier,
+  hatchDate: getDaysAgoDate(30),
+  hens: 5,
+  roosters: 1,
+  chicks: 0
+});
+```
+
+**Option B: Restore Backward Compatible Method**
+Add method overload in `CreateFlockModal.ts` to accept both signatures:
+```typescript
+async fillForm(
+  dataOrIdentifier: FlockTestData | string,
+  hatchDate?: string,
+  hens?: number,
+  roosters?: number,
+  chicks?: number
+) {
+  // Handle both signatures
+}
+```
+
+**Option C: Search and Fix All Affected Test Files**
+1. Search for all calls to `createFlockModal.fillForm()` with 5 parameters
+2. Update all occurrences to use object syntax
+3. This is a project-wide refactoring task
+
+**Next Steps:**
+1. **IMMEDIATE:** Fix the method signature mismatch (Option A recommended)
+2. **AFTER FIX:** Re-run test to validate Daily Record creation functionality
+3. **VERIFY:** Check if other test files have same issue (search codebase)
+4. **DOCUMENT:** Update Page Object documentation with breaking changes
+
+**Application Status:**
+- ⚠️ Cannot verify - Test blocked by infrastructure bug
+- Application may be fully functional, but E2E test cannot execute
+
+#### Gap Analysis
+
+| Acceptance Criteria | Status | Notes |
+|---------------------|--------|-------|
+| Navigate to Daily Records | ⚠️ Cannot verify | Test blocked in setup phase |
+| Open create modal | ⚠️ Cannot verify | Test blocked in setup phase |
+| Fill form (flock, date, eggs) | ⚠️ Cannot verify | Test blocked in setup phase |
+| Submit and create record | ⚠️ Cannot verify | Test blocked in setup phase |
+| Verify record appears in list | ⚠️ Cannot verify | Test blocked in setup phase |
+| Backend API integration | ⚠️ Cannot verify | Test blocked in setup phase |
+
+**Test Coverage:** 🔶 Exists but blocked by infrastructure bug
+**Application Validation:** ⚠️ Unknown - Cannot execute test
+
+---
+
 ## Appendix A: Authentication Setup Status
 
 **Status:** ✅ Verified (per TASK-003)
