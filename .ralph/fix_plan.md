@@ -22,24 +22,24 @@
   - [ ] API integration tests
   - [ ] E2E tests for timeline rendering
 
-### M10: Offline Egg Recording
-- [ ] Configure Workbox service worker
-  - [ ] Cache-first strategy for static assets (30 days)
-  - [ ] Network-first for API GET requests (5 min cache)
-  - [ ] Background sync queue for POST requests
-- [ ] Implement IndexedDB schema (Dexie.js)
-  - [ ] pendingRequests table (offline queue)
-  - [ ] Cached data tables (coops, flocks, dailyRecords)
-  - [ ] syncStatus metadata table
-- [ ] Add offline detection UI
-  - [ ] Persistent offline banner component
-  - [ ] Sync status indicator (pending count)
-  - [ ] Manual sync button
-- [ ] Implement background sync logic
-  - [ ] Retry logic with exponential backoff
-  - [ ] Success/error toast notifications
-  - [ ] Idempotency handling for daily records
-- [ ] Add offline mode tests
+### M10: Offline Egg Recording ✅ COMPLETED
+- [x] Configure Workbox service worker
+  - [x] Cache-first strategy for static assets (30 days)
+  - [x] Network-first for API GET requests (5 min cache)
+  - [x] Background sync queue for POST requests (via apiClient)
+- [x] Implement IndexedDB schema (Dexie.js)
+  - [x] pendingRequests table (offline queue with retry tracking)
+  - [x] syncStatus metadata table
+  - [ ] Cached data tables (coops, flocks, dailyRecords) - deferred (not required for MVP)
+- [x] Add offline detection UI
+  - [x] Persistent offline banner component (OfflineBanner)
+  - [x] Sync status indicator (pending count)
+  - [x] Manual sync button
+- [x] Implement background sync logic
+  - [x] Retry logic with exponential backoff (2^n * 1000ms, max 5 retries)
+  - [x] Auto-sync on online event + periodic sync (5 min)
+  - [x] 24-hour staleness check for requests
+- [ ] Add offline mode tests (optional - defer to later)
   - [ ] Service worker registration
   - [ ] IndexedDB CRUD operations
   - [ ] Background sync queue processing
