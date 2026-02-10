@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import SignUpPage from './pages/SignUpPage'
 import SignInPage from './pages/SignInPage'
@@ -13,8 +14,10 @@ import { SettingsPage } from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import { BottomNavigation } from './components/BottomNavigation'
+import { OfflineBanner } from './shared/components/OfflineBanner'
 import { useApiClient } from './lib/useApiClient'
 import { useAuth } from '@clerk/clerk-react'
+import { startAutoSync } from './lib/syncManager'
 import { Box } from '@mui/material'
 
 function App() {
@@ -22,9 +25,17 @@ function App() {
   useApiClient()
   const { isSignedIn } = useAuth()
 
+  // Start offline sync manager
+  useEffect(() => {
+    startAutoSync()
+  }, [])
+
   return (
     <>
-      <Box sx={{ pb: isSignedIn ? 8 : 0 }}>
+      {/* Offline detection banner */}
+      {isSignedIn && <OfflineBanner />}
+
+      <Box sx={{ pb: isSignedIn ? 8 : 0, pt: isSignedIn ? 0 : 0 }}>
         <Routes>
           <Route path="/" element={<Navigate to="/sign-up" replace />} />
           <Route path="/sign-up/*" element={<SignUpPage />} />

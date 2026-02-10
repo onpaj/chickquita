@@ -356,6 +356,18 @@
       "adjustment": "Flock Adjustment"
     }
   },
+  "offline": {
+    "title": "Offline Mode",
+    "message": "Changes will be saved and synced when connection is restored",
+    "pending": "pending",
+    "sync": "Sync",
+    "syncing": "Syncing...",
+    "syncingMessage": "Uploading pending changes",
+    "synced": "All changes synced",
+    "syncedMessage": "Your data is up to date",
+    "syncError": "Sync failed",
+    "syncErrorMessage": "Some changes could not be synced"
+  },
   "settings": {
     "title": "Settings",
     "language": "Language",

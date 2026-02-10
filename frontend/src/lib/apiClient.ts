@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
 import { processApiError } from './errors';
+import { db } from './db';
 
 /**
  * API Client Configuration
@@ -78,13 +79,14 @@ apiClient.interceptors.request.use(
 );
 
 /**
- * Response interceptor for error handling
+ * Response interceptor for error handling and offline queue management
  *
  * This interceptor:
  * 1. Handles common HTTP errors (401, 403, 500, etc.)
  * 2. Provides consistent error messages
  * 3. Logs errors for debugging
  * 4. Processes errors into a standardized format
+ * 5. Queues failed POST/PUT/PATCH/DELETE requests when offline
  */
 apiClient.interceptors.response.use(
   (response) => {
@@ -92,6 +94,42 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
+    const config = error.config;
+
+    // Check if this is a network error (offline) and should be queued
+    const isNetworkError = !error.response && error.code === 'ERR_NETWORK';
+    const isModifyingRequest = config && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(config.method?.toUpperCase() || '');
+
+    if (isNetworkError && isModifyingRequest && config) {
+      try {
+        // Queue the request for later sync
+        const requestId = await db.queueRequest({
+          method: config.method?.toUpperCase() as any,
+          url: config.url || '',
+          body: config.data,
+          headers: config.headers as Record<string, string>
+        });
+
+        console.log(`📥 Queued offline request #${requestId}: ${config.method} ${config.url}`);
+
+        // Update sync status
+        const pendingCount = await db.pendingRequests.count();
+        await db.updateSyncStatus({
+          status: 'idle',
+          pendingCount
+        });
+
+        // Return a special offline error that components can detect
+        const offlineError = new Error('Request queued for offline sync');
+        (offlineError as any).isOfflineQueued = true;
+        (offlineError as any).requestId = requestId;
+        return Promise.reject(offlineError);
+      } catch (queueError) {
+        console.error('Failed to queue offline request:', queueError);
+        // Fall through to normal error handling
+      }
+    }
+
     // Process the error into a standardized format
     const processedError = processApiError(error);
 

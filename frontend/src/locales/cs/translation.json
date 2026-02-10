@@ -358,6 +358,18 @@
       "adjustment": "Úprava hejna"
     }
   },
+  "offline": {
+    "title": "Offline režim",
+    "message": "Změny budou uloženy a synchronizovány po obnovení připojení",
+    "pending": "čeká",
+    "sync": "Synchronizovat",
+    "syncing": "Synchronizuji...",
+    "syncingMessage": "Nahrávám neuložené změny",
+    "synced": "Vše synchronizováno",
+    "syncedMessage": "Vaše data jsou aktuální",
+    "syncError": "Synchronizace selhala",
+    "syncErrorMessage": "Některé změny se nepodařilo synchronizovat"
+  },
   "settings": {
     "title": "Nastavení",
     "language": "Jazyk",
