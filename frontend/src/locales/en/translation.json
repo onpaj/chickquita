@@ -340,6 +340,22 @@
       "endDateAfterStart": "End date must be the same or later than start date"
     }
   },
+  "flockHistory": {
+    "title": "Flock History",
+    "loadError": "Failed to load flock history",
+    "empty": "No history entries yet",
+    "editNotes": "Edit notes",
+    "notes": "Notes",
+    "composition": "Composition",
+    "hens": "hens",
+    "roosters": "roosters",
+    "chicks": "chicks",
+    "reason": {
+      "initial": "Initial State",
+      "maturation": "Chick Maturation",
+      "adjustment": "Flock Adjustment"
+    }
+  },
   "settings": {
     "title": "Settings",
     "language": "Language",

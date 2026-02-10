@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { coopsApi, type Coop } from '../api/coopsApi';
+import { coopsApi } from '../api/coopsApi';
 
 export function useCoops() {
   return useQuery({

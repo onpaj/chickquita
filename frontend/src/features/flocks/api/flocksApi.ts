@@ -115,4 +115,26 @@ export const flocksApi = {
     const response = await apiClient.patch<boolean>(`/coops/${coopId}/flocks/${flockId}/archive`);
     return response.data;
   },
+
+  /**
+   * Retrieves the full history timeline for a flock.
+   * Backend endpoint: GET /api/flocks/{flockId}/history
+   * Returns all FlockHistory entries sorted by changeDate DESC.
+   */
+  getHistory: async (flockId: string): Promise<FlockHistory[]> => {
+    const response = await apiClient.get<FlockHistory[]>(`/flocks/${flockId}/history`);
+    return response.data;
+  },
+
+  /**
+   * Updates the notes field on a flock history entry.
+   * Backend endpoint: PATCH /api/flock-history/{historyId}/notes
+   * This is the only mutable field on history records.
+   */
+  updateHistoryNotes: async (historyId: string, notes: string | null): Promise<FlockHistory> => {
+    const response = await apiClient.patch<FlockHistory>(`/flock-history/${historyId}/notes`, {
+      notes,
+    });
+    return response.data;
+  },
 };

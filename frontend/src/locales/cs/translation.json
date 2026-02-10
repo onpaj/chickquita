@@ -342,6 +342,22 @@
       "endDateAfterStart": "Datum konce musí být stejné nebo pozdější než datum začátku"
     }
   },
+  "flockHistory": {
+    "title": "Historie hejna",
+    "loadError": "Nepodařilo se načíst historii hejna",
+    "empty": "Zatím tu nejsou žádné záznamy historie",
+    "editNotes": "Upravit poznámky",
+    "notes": "Poznámky",
+    "composition": "Složení",
+    "hens": "slepic",
+    "roosters": "kohoutů",
+    "chicks": "kuřat",
+    "reason": {
+      "initial": "Počáteční stav",
+      "maturation": "Dospělost kuřat",
+      "adjustment": "Úprava hejna"
+    }
+  },
   "settings": {
     "title": "Nastavení",
     "language": "Jazyk",

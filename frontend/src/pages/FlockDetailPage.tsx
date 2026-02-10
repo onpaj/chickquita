@@ -82,6 +82,10 @@ export function FlockDetailPage() {
     );
   };
 
+  const handleViewHistory = () => {
+    navigate(`/coops/${coopId}/flocks/${flockId}/history`);
+  };
+
   if (isLoading) {
     return (
       <Container maxWidth="sm" sx={{ py: 3 }}>
@@ -303,7 +307,7 @@ export function FlockDetailPage() {
             <Button
               variant="outlined"
               startIcon={<HistoryIcon />}
-              disabled
+              onClick={handleViewHistory}
               sx={{ width: { xs: '100%', md: 'auto' } }}
             >
               {t('flocks.viewHistory')}

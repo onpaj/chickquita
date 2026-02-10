@@ -6,6 +6,7 @@ import CoopsPage from './pages/CoopsPage'
 import { CoopDetailPage } from './pages/CoopDetailPage'
 import FlocksPage from './pages/FlocksPage'
 import { FlockDetailPage } from './pages/FlockDetailPage'
+import { FlockHistoryPage } from './features/flocks/components/FlockHistoryPage'
 import { DailyRecordsListPage } from './pages/DailyRecordsListPage'
 import { PurchasesPage } from './features/purchases/pages/PurchasesPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -65,6 +66,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FlockDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/coops/:coopId/flocks/:flockId/history"
+            element={
+              <ProtectedRoute>
+                <FlockHistoryPage />
               </ProtectedRoute>
             }
           />
