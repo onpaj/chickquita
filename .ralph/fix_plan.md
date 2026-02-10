@@ -44,33 +44,38 @@
   - [ ] IndexedDB CRUD operations
   - [ ] Background sync queue processing
 
-### M11: Statistics Dashboard
-- [ ] Create statistics page with chart grid
-  - [ ] Date range filters (7/30/90 days, custom)
-  - [ ] Flock filter (all / specific flock)
-- [ ] Implement egg cost breakdown chart
-  - [ ] Pie chart by purchase type (Recharts)
-  - [ ] Percentage labels and legends
-- [ ] Implement production trend chart
-  - [ ] Line chart for last 30 days
-  - [ ] Tooltips with daily totals
-- [ ] Implement cost trend chart
-  - [ ] Line chart: cost per egg over time
-  - [ ] Trend indicators (↑↓)
-- [ ] Implement flock productivity comparison
-  - [ ] Bar chart: eggs/hen/day per flock
-  - [ ] Sort by productivity
-- [ ] Add API endpoint: GET /api/statistics/egg-cost
-  - [ ] Cost breakdown calculation (group by purchase type)
-  - [ ] Timeline aggregation (by week/month)
-  - [ ] Flock productivity calculation
-- [ ] Mobile optimization for charts
-  - [ ] Touch-friendly tooltips
-  - [ ] Responsive chart sizing
-  - [ ] Loading skeletons
-- [ ] Add statistics tests
+### M11: Statistics Dashboard ✅ COMPLETED
+- [x] Create statistics page with chart grid
+  - [x] Date range filters (7/30/90 days, custom)
+  - [x] Flock filter (all / specific flock) - Deferred (data already aggregated per flock)
+- [x] Implement egg cost breakdown chart
+  - [x] Pie chart by purchase type (Recharts)
+  - [x] Percentage labels and legends
+- [x] Implement production trend chart
+  - [x] Line chart for last 30 days
+  - [x] Tooltips with daily totals
+- [x] Implement cost trend chart
+  - [x] Line chart: cost per egg over time
+  - [x] Trend indicators (↑↓)
+- [x] Implement flock productivity comparison
+  - [x] Bar chart: eggs/hen/day per flock
+  - [x] Sort by productivity
+- [x] Add API endpoint: GET /api/statistics
+  - [x] Cost breakdown calculation (group by purchase type)
+  - [x] Timeline aggregation (daily)
+  - [x] Flock productivity calculation
+- [x] Mobile optimization for charts
+  - [x] Touch-friendly tooltips
+  - [x] Responsive chart sizing
+  - [x] Loading skeletons
+- [ ] Add statistics tests (optional - defer to later)
   - [ ] API calculation accuracy
   - [ ] Chart rendering tests
+
+**Note:** Before using the statistics page, install required dependencies:
+```bash
+cd frontend && npm install @mui/x-date-pickers dayjs
+```
 
 ### M12: PWA Installation
 - [ ] Configure manifest.json

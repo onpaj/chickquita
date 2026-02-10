@@ -387,6 +387,57 @@
     "maxAmount": "Maximum amount is 999999.99 CZK",
     "maxQuantity": "Maximum quantity is 999999.99"
   },
+  "statistics": {
+    "title": "Statistics",
+    "dateRange": {
+      "title": "Time Period",
+      "ariaLabel": "Select time period",
+      "last7Days": "7 days",
+      "last30Days": "30 days",
+      "last90Days": "90 days",
+      "custom": "Custom",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
+    "costBreakdown": {
+      "title": "Cost Breakdown",
+      "description": "Costs by purchase type",
+      "amount": "Amount",
+      "noData": "No data for selected period"
+    },
+    "productionTrend": {
+      "title": "Production Trend",
+      "description": "Egg production over time",
+      "eggs": "Eggs",
+      "yAxisLabel": "Number of Eggs",
+      "noData": "No data for selected period"
+    },
+    "costPerEggTrend": {
+      "title": "Cost Per Egg Trend",
+      "description": "Cost per egg over time",
+      "costPerEgg": "Cost Per Egg",
+      "yAxisLabel": "Cost (CZK)",
+      "noData": "No data for selected period"
+    },
+    "flockProductivity": {
+      "title": "Flock Productivity",
+      "description": "Productivity comparison between flocks",
+      "eggsPerHenPerDay": "Eggs/hen/day",
+      "totalEggs": "Total Eggs",
+      "henCount": "Hen Count",
+      "yAxisLabel": "Eggs/hen/day",
+      "highProductivity": "High",
+      "mediumProductivity": "Medium",
+      "lowProductivity": "Low",
+      "noData": "No data for selected period"
+    },
+    "emptyState": {
+      "noData": "No data for selected period"
+    },
+    "error": {
+      "loadFailed": "Failed to load statistics"
+    }
+  },
   "errors": {
     "generic": "Something went wrong",
     "unknown": "An unexpected error occurred",

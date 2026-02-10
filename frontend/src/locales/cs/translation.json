@@ -389,6 +389,57 @@
     "maxAmount": "Maximální částka je 999999.99 Kč",
     "maxQuantity": "Maximální množství je 999999.99"
   },
+  "statistics": {
+    "title": "Statistiky",
+    "dateRange": {
+      "title": "Časové období",
+      "ariaLabel": "Vyberte časové období",
+      "last7Days": "7 dní",
+      "last30Days": "30 dní",
+      "last90Days": "90 dní",
+      "custom": "Vlastní",
+      "startDate": "Od data",
+      "endDate": "Do data"
+    },
+    "costBreakdown": {
+      "title": "Rozdělení nákladů",
+      "description": "Náklady podle typu nákupu",
+      "amount": "Částka",
+      "noData": "Žádná data za vybrané období"
+    },
+    "productionTrend": {
+      "title": "Vývoj produkce",
+      "description": "Produkce vajec v čase",
+      "eggs": "Vajec",
+      "yAxisLabel": "Počet vajec",
+      "noData": "Žádná data za vybrané období"
+    },
+    "costPerEggTrend": {
+      "title": "Vývoj ceny za vejce",
+      "description": "Cena za vejce v čase",
+      "costPerEgg": "Cena za vejce",
+      "yAxisLabel": "Cena (Kč)",
+      "noData": "Žádná data za vybrané období"
+    },
+    "flockProductivity": {
+      "title": "Produktivita hejn",
+      "description": "Porovnání produktivity mezi hejny",
+      "eggsPerHenPerDay": "Vajec/slepice/den",
+      "totalEggs": "Celkem vajec",
+      "henCount": "Počet slepic",
+      "yAxisLabel": "Vajec/slepice/den",
+      "highProductivity": "Vysoká",
+      "mediumProductivity": "Střední",
+      "lowProductivity": "Nízká",
+      "noData": "Žádná data za vybrané období"
+    },
+    "emptyState": {
+      "noData": "Žádná data za vybrané období"
+    },
+    "error": {
+      "loadFailed": "Nepodařilo se načíst statistiky"
+    }
+  },
   "errors": {
     "generic": "Něco se pokazilo",
     "unknown": "Došlo k neočekávané chybě",
