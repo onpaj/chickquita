@@ -26,7 +26,8 @@
     "test:crossbrowser:firefox": "playwright test --config=playwright.crossbrowser.config.ts --project=firefox*",
     "test:crossbrowser:safari": "playwright test --config=playwright.crossbrowser.config.ts --project=safari*",
     "test:crossbrowser:mobile": "playwright test --config=playwright.crossbrowser.config.ts --project=mobile*",
-    "test:crossbrowser:breakpoints": "playwright test --config=playwright.crossbrowser.config.ts --project=breakpoint*"
+    "test:crossbrowser:breakpoints": "playwright test --config=playwright.crossbrowser.config.ts --project=breakpoint*",
+    "generate:icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.60.0",
@@ -76,6 +77,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "jsdom": "^28.0.0",
+    "sharp": "^0.34.5",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",

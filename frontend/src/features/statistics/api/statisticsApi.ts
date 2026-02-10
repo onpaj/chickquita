@@ -5,7 +5,7 @@
  */
 
 import apiClient from '@/lib/apiClient';
-import { StatisticsDto } from '../types';
+import type { StatisticsDto } from '../types';
 
 /**
  * Fetch statistics for a given date range

@@ -458,19 +458,33 @@
   },
   "pwa": {
     "install": {
-      "message": "Install Chickquita on your home screen for quick access",
-      "action": "Install",
-      "dismiss": "Dismiss"
+      "title": "Install App",
+      "description": "Install Chickquita on your home screen for quick access and offline use.",
+      "benefit1": "Quick access from home screen",
+      "benefit2": "Works without internet connection",
+      "benefit3": "Automatic data synchronization",
+      "benefit4": "Full-featured app without app store",
+      "install": "Install",
+      "dismiss": "Don't show again"
     },
     "ios": {
       "title": "Add to Home Screen",
-      "description": "To install the app on iPhone or iPad, follow these steps:",
-      "step1": "Tap the Share button",
-      "step1_detail": "In the Safari bottom menu",
-      "step2": "Select \"Add to Home Screen\"",
-      "step2_detail": "From the options menu",
-      "step3": "Confirm addition",
-      "step3_detail": "Tap \"Add\" in the top right corner"
+      "description": "To install Chickquita app on iPhone or iPad, follow these steps:",
+      "step1": {
+        "title": "Open share menu",
+        "description": "Tap the Share icon"
+      },
+      "step2": {
+        "title": "Find \"Add to Home Screen\"",
+        "description": "Scroll and select the option"
+      },
+      "step3": {
+        "title": "Confirm installation",
+        "description": "The app will be added to your home screen"
+      },
+      "benefit": "Once installed, the app will work even without internet connection!",
+      "dismiss": "Don't show again",
+      "gotIt": "Got it"
     }
   }
 }

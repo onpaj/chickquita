@@ -460,19 +460,33 @@
   },
   "pwa": {
     "install": {
-      "message": "Nainstalujte si Chickquita na domovskou obrazovku pro rychlý přístup",
-      "action": "Instalovat",
-      "dismiss": "Zavřít"
+      "title": "Nainstalovat aplikaci",
+      "description": "Nainstalujte si Chickquita na domovskou obrazovku pro rychlý přístup a práci bez připojení.",
+      "benefit1": "Rychlý přístup z domovské obrazovky",
+      "benefit2": "Funguje bez internetového připojení",
+      "benefit3": "Automatická synchronizace dat",
+      "benefit4": "Plnohodnotná aplikace bez obchodu",
+      "install": "Instalovat",
+      "dismiss": "Už nezobrazovat"
     },
     "ios": {
-      "title": "Přidání na domovskou obrazovku",
-      "description": "Pro instalaci aplikace na iPhone nebo iPad postupujte podle následujících kroků:",
-      "step1": "Klepněte na tlačítko Sdílet",
-      "step1_detail": "Ve spodní nabídce Safari",
-      "step2": "Vyberte \"Přidat na plochu\"",
-      "step2_detail": "V menu možností",
-      "step3": "Potvrďte přidání",
-      "step3_detail": "Klepněte na \"Přidat\" v pravém horním rohu"
+      "title": "Přidat na plochu",
+      "description": "Pro instalaci aplikace Chickquita na iPhone nebo iPad postupujte podle následujících kroků:",
+      "step1": {
+        "title": "Otevřete menu sdílení",
+        "description": "Klepněte na ikonu Sdílet"
+      },
+      "step2": {
+        "title": "Najděte možnost \"Přidat na plochu\"",
+        "description": "Posuňte se v menu a vyberte"
+      },
+      "step3": {
+        "title": "Potvrďte instalaci",
+        "description": "Aplikace se přidá na vaši domovskou obrazovku"
+      },
+      "benefit": "Po instalaci bude aplikace fungovat i bez připojení k internetu!",
+      "dismiss": "Už nezobrazovat",
+      "gotIt": "Rozumím"
     }
   }
 }

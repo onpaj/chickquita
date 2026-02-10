@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { CostBreakdownItem } from '../types';
+import type { CostBreakdownItem } from '../types';
 
 /**
  * Egg Cost Breakdown Chart Component
@@ -27,8 +27,8 @@ export function EggCostBreakdownChart({ data }: EggCostBreakdownChartProps) {
   const { t } = useTranslation();
 
   // Custom label renderer for pie slices
-  const renderLabel = (entry: CostBreakdownItem) => {
-    return `${entry.percentage.toFixed(1)}%`;
+  const renderLabel = (props: any) => {
+    return `${props.percentage.toFixed(1)}%`;
   };
 
   // Custom tooltip
@@ -95,13 +95,13 @@ export function EggCostBreakdownChart({ data }: EggCostBreakdownChartProps) {
             fill="#8884d8"
             dataKey="amount"
           >
-            {data.map((entry, index) => (
+            {data.map((_entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
           <Legend
-            formatter={(value, entry: any) => {
+            formatter={(_value, entry: any) => {
               const item = entry.payload;
               return `${t(`purchases.types.${item.type}`)} (${item.percentage.toFixed(1)}%)`;
             }}

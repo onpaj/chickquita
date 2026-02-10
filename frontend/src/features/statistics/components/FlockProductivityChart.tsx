@@ -11,7 +11,7 @@ import {
   Legend,
   Cell,
 } from 'recharts';
-import { FlockProductivityItem } from '../types';
+import type { FlockProductivityItem } from '../types';
 
 /**
  * Flock Productivity Chart Component

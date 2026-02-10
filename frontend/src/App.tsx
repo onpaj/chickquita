@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import SignUpPage from './pages/SignUpPage'
 import SignInPage from './pages/SignInPage'
@@ -15,53 +15,34 @@ import { SettingsPage } from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import { BottomNavigation } from './components/BottomNavigation'
-import { OfflineBanner } from './shared/components/OfflineBanner'
-import { InstallBanner } from './features/pwa/components/InstallBanner'
-import { IOSInstallModal } from './features/pwa/components/IOSInstallModal'
+import { OfflineBanner, PwaInstallPrompt, IosInstallPrompt } from './shared/components'
 import { useApiClient } from './lib/useApiClient'
 import { useAuth } from '@clerk/clerk-react'
 import { startAutoSync } from './lib/syncManager'
-import { usePWAInstall } from './hooks/usePWAInstall'
 import { Box } from '@mui/material'
 
 function App() {
   // Initialize API client with Clerk authentication
   useApiClient()
   const { isSignedIn } = useAuth()
-  const { showIOSInstructions } = usePWAInstall()
-  const [showIOSModal, setShowIOSModal] = useState(false)
 
   // Start offline sync manager
   useEffect(() => {
     startAutoSync()
   }, [])
 
-  // Show iOS install instructions after 5 seconds for iOS users
-  useEffect(() => {
-    if (showIOSInstructions && isSignedIn) {
-      const timer = setTimeout(() => {
-        const dismissed = localStorage.getItem('pwa_ios_dismissed') === 'true'
-        if (!dismissed) {
-          setShowIOSModal(true)
-        }
-      }, 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [showIOSInstructions, isSignedIn])
-
-  const handleCloseIOSModal = () => {
-    setShowIOSModal(false)
-    localStorage.setItem('pwa_ios_dismissed', 'true')
-  }
-
   return (
     <>
       {/* Offline detection banner */}
       {isSignedIn && <OfflineBanner />}
 
-      {/* PWA Install components */}
-      {isSignedIn && <InstallBanner />}
-      <IOSInstallModal open={showIOSModal} onClose={handleCloseIOSModal} />
+      {/* PWA Install prompts (auto-detect platform) */}
+      {isSignedIn && (
+        <>
+          <PwaInstallPrompt />
+          <IosInstallPrompt />
+        </>
+      )}
 
       <Box sx={{ pb: isSignedIn ? 8 : 0, pt: isSignedIn ? 0 : 0 }}>
         <Routes>

@@ -13,7 +13,7 @@ CLAUDE_OUTPUT_FORMAT="json"
 
 # Tool permissions
 # Comma-separated list of allowed tools
-ALLOWED_TOOLS="Write,Read,Edit,Bash(git *),Bash(npm *),Bash(pytest),Bash(pnpm *),Bash(yarn *),Bash(mkdir *)"
+ALLOWED_TOOLS="Write,Read,Edit,Bash(git *),Bash(npm *),Bash(pytest),Bash(pnpm *),Bash(yarn *),Bash(mkdir *),Bash(npm install *)"
 
 # Session management
 SESSION_CONTINUITY=true

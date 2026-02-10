@@ -6,7 +6,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { statisticsApi } from '../api/statisticsApi';
-import { StatisticsDto } from '../types';
+import type { StatisticsDto } from '../types';
 
 /**
  * Fetch statistics for a given date range

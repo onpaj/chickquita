@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import { CostPerEggTrendItem } from '../types';
+import type { CostPerEggTrendItem } from '../types';
 import dayjs from 'dayjs';
 
 /**

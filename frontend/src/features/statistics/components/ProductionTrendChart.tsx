@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { ProductionTrendItem } from '../types';
+import type { ProductionTrendItem } from '../types';
 import dayjs from 'dayjs';
 
 /**

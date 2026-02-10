@@ -19,14 +19,23 @@ export default defineConfig({
       manifest: {
         name: 'Chickquita - Evidence chovu slepic',
         short_name: 'Chickquita',
-        description: 'Sledování rentability chovu slepic',
+        description: 'Sledování rentability chovu slepic - mobilní aplikace pro evidenci snůšek vajec, nákupů a ekonomiky chovu',
         theme_color: '#FF6B35',
         background_color: '#FFFFFF',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
         scope: '/',
+        lang: 'cs-CZ',
+        dir: 'ltr',
+        categories: ['productivity', 'finance', 'utilities'],
         icons: [
+          {
+            src: '/icons/icon-72x72.png',
+            sizes: '72x72',
+            type: 'image/png',
+            purpose: 'any'
+          },
           {
             src: '/icons/icon-192x192.png',
             sizes: '192x192',
@@ -39,6 +48,10 @@ export default defineConfig({
             type: 'image/png',
             purpose: 'any maskable'
           }
+        ],
+        screenshots: [
+          // Screenshots would be added here for app stores
+          // Format: { src: '/screenshots/screenshot1.png', sizes: '540x720', type: 'image/png' }
         ]
       },
       workbox: {
