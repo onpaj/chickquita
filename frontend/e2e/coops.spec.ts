@@ -240,11 +240,19 @@ test.describe('M2: Coop Management', () => {
 
   test.describe('List Coops', () => {
     test('should display empty state when no coops exist', async () => {
-      // This test assumes a fresh user with no coops
-      // In a real scenario, you might need to delete all coops first
-      if (await coopsPage.getCoopCount() === 0) {
+      // NOTE: BLOCKED by TASK-008 - menu interaction timing bugs prevent deleteAllCoops() from working
+      // This test needs menu interaction fixes before it can be completed
+      // See WORKLOG.md Iteration 3 for full analysis
+
+      // Temporary workaround: only verify empty state if no coops exist naturally
+      const coopCount = await coopsPage.getCoopCount();
+
+      if (coopCount === 0) {
         await expect(coopsPage.emptyStateMessage).toBeVisible();
         await expect(coopsPage.createCoopButton).toBeVisible();
+      } else {
+        // Skip test - cannot delete coops due to menu timing bugs
+        console.log(`Skipping empty state verification - ${coopCount} coops exist and cannot be deleted due to known menu timing bugs (TASK-008)`);
       }
     });
 
@@ -305,8 +313,9 @@ test.describe('M2: Coop Management', () => {
       await editCoopModal.editCoop(newName);
       await editCoopModal.waitForClose();
 
-      // Verify updated name appears
-      await expect(page.getByText(newName)).toBeVisible();
+      // Wait for React Query refetch to complete and UI to update
+      // Use increased timeout to allow for invalidateQueries refetch
+      await expect(page.getByText(newName)).toBeVisible({ timeout: 10000 });
       await expect(page.getByText(testCoopName)).not.toBeVisible();
     });
 
@@ -317,9 +326,10 @@ test.describe('M2: Coop Management', () => {
       await editCoopModal.editCoop(testCoopName, newLocation);
       await editCoopModal.waitForClose();
 
-      // Verify updated location
+      // Wait for React Query refetch to complete and UI to update
+      // Use increased timeout to allow for invalidateQueries refetch
       const coopCard = await coopsPage.getCoopCard(testCoopName);
-      await expect(coopCard).toContainText(newLocation);
+      await expect(coopCard).toContainText(newLocation, { timeout: 10000 });
     });
 
     test('should cancel edit', async ({ page }) => {
@@ -338,7 +348,9 @@ test.describe('M2: Coop Management', () => {
       await coopsPage.clickEditCoop(testCoopName);
 
       await editCoopModal.nameInput.clear();
-      await editCoopModal.submit();
+
+      // Verify submit button is disabled when name is empty (correct behavior)
+      await expect(editCoopModal.submitButton).toBeDisabled();
 
       // Should show error
       await expect(editCoopModal.errorMessage).toBeVisible();

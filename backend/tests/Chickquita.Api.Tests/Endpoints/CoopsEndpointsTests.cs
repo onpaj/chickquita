@@ -313,6 +313,7 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         var result = await response.Content.ReadFromJsonAsync<CoopDto>();
         result.Should().NotBeNull();
         result!.Name.Should().Be("Updated Name");
+        result.Location.Should().Be("Updated Location");
     }
 
     [Fact]

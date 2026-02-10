@@ -21,41 +21,10 @@ export function useCreateCoop() {
 
   return useMutation({
     mutationFn: coopsApi.create,
-    onMutate: async (newCoop) => {
-      // Cancel any outgoing refetches to prevent them from overwriting our optimistic update
-      await queryClient.cancelQueries({ queryKey: ['coops'] });
-
-      // Snapshot the previous value
-      const previousCoops = queryClient.getQueryData<Coop[]>(['coops']);
-
-      // Optimistically update to the new value
-      queryClient.setQueryData<Coop[]>(['coops'], (old = []) => {
-        // Create an optimistic coop object with a temporary ID
-        const optimisticCoop: Coop = {
-          id: `temp-${Date.now()}`,
-          tenantId: 'pending',
-          name: newCoop.name,
-          location: newCoop.location,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          flocksCount: 0,
-        };
-        return [optimisticCoop, ...old];
-      });
-
-      // Return a context object with the snapshotted value
-      return { previousCoops };
-    },
-    onError: (_err, _newCoop, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousCoops) {
-        queryClient.setQueryData(['coops'], context.previousCoops);
-      }
-    },
-    onSettled: () => {
-      // Always refetch after error or success to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['coops'] });
+    onSuccess: async () => {
+      // Invalidate and immediately refetch to ensure UI updates with correct backend data
+      // refetchType: 'active' ensures immediate refetch even with refetchOnMount:false config
+      await queryClient.invalidateQueries({ queryKey: ['coops'], refetchType: 'active' });
     },
   });
 }
@@ -65,9 +34,11 @@ export function useUpdateCoop() {
 
   return useMutation({
     mutationFn: coopsApi.update,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['coops'] });
-      queryClient.invalidateQueries({ queryKey: ['coops', data.id] });
+    onSuccess: async (data) => {
+      // Invalidate and immediately refetch active queries to ensure UI updates
+      // refetchType: 'active' ensures immediate refetch even with refetchOnMount:false config
+      await queryClient.invalidateQueries({ queryKey: ['coops'], refetchType: 'active' });
+      await queryClient.invalidateQueries({ queryKey: ['coops', data.id], refetchType: 'active' });
     },
   });
 }

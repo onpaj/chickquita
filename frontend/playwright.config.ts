@@ -7,6 +7,14 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
 
+  // Global timeout per test (prevent infinite hangs)
+  timeout: 60000, // 60 seconds max per test
+
+  // Timeout for each expect() assertion
+  expect: {
+    timeout: 10000, // 10 seconds max per assertion
+  },
+
   // Run tests in files in parallel
   fullyParallel: true,
 

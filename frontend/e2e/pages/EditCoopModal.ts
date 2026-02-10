@@ -52,7 +52,7 @@ export class EditCoopModal {
   }
 
   async waitForClose() {
-    await this.modal.waitFor({ state: 'hidden' });
+    await this.modal.waitFor({ state: 'hidden', timeout: 5000 });
   }
 
   async getCurrentName(): Promise<string> {
