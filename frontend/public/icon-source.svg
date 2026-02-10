@@ -1,0 +1,39 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle for maskable icon (safe zone) -->
+  <circle cx="256" cy="256" r="256" fill="#FF6B35"/>
+
+  <!-- Chicken silhouette -->
+  <g transform="translate(100, 100)">
+    <!-- Body (egg shape) -->
+    <ellipse cx="156" cy="200" rx="80" ry="100" fill="white"/>
+
+    <!-- Head (circle) -->
+    <circle cx="156" cy="120" r="40" fill="white"/>
+
+    <!-- Beak -->
+    <path d="M 196 120 L 220 120 L 196 130 Z" fill="#FFA500"/>
+
+    <!-- Eye -->
+    <circle cx="170" cy="115" r="5" fill="#333"/>
+
+    <!-- Comb (crown) -->
+    <path d="M 140 95 Q 145 80 150 95 Q 155 80 160 95 Q 165 80 170 95" fill="#FF0000"/>
+
+    <!-- Wings -->
+    <ellipse cx="130" cy="180" rx="35" ry="60" fill="#FFE5CC" transform="rotate(-20 130 180)"/>
+    <ellipse cx="182" cy="180" rx="35" ry="60" fill="#FFE5CC" transform="rotate(20 182 180)"/>
+
+    <!-- Legs -->
+    <line x1="140" y1="290" x2="130" y2="320" stroke="#FFA500" stroke-width="8" stroke-linecap="round"/>
+    <line x1="172" y1="290" x2="182" y2="320" stroke="#FFA500" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- Feet (simple lines) -->
+    <line x1="130" y1="320" x2="120" y2="325" stroke="#FFA500" stroke-width="6" stroke-linecap="round"/>
+    <line x1="130" y1="320" x2="140" y2="325" stroke="#FFA500" stroke-width="6" stroke-linecap="round"/>
+    <line x1="182" y1="320" x2="172" y2="325" stroke="#FFA500" stroke-width="6" stroke-linecap="round"/>
+    <line x1="182" y1="320" x2="192" y2="325" stroke="#FFA500" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- Egg beside chicken (symbolizing egg production) -->
+    <ellipse cx="240" cy="250" rx="30" ry="40" fill="white" stroke="#FFE5CC" stroke-width="3"/>
+  </g>
+</svg>

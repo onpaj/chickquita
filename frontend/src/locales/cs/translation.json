@@ -457,5 +457,22 @@
     "duplicateName": "Položka s tímto názvem již existuje",
     "serverError": "Chyba serveru. Zkuste to prosím později.",
     "missingCoopId": "Chybí ID kurníku"
+  },
+  "pwa": {
+    "install": {
+      "message": "Nainstalujte si Chickquita na domovskou obrazovku pro rychlý přístup",
+      "action": "Instalovat",
+      "dismiss": "Zavřít"
+    },
+    "ios": {
+      "title": "Přidání na domovskou obrazovku",
+      "description": "Pro instalaci aplikace na iPhone nebo iPad postupujte podle následujících kroků:",
+      "step1": "Klepněte na tlačítko Sdílet",
+      "step1_detail": "Ve spodní nabídce Safari",
+      "step2": "Vyberte \"Přidat na plochu\"",
+      "step2_detail": "V menu možností",
+      "step3": "Potvrďte přidání",
+      "step3_detail": "Klepněte na \"Přidat\" v pravém horním rohu"
+    }
   }
 }

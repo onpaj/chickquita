@@ -455,5 +455,22 @@
     "duplicateName": "An item with this name already exists",
     "serverError": "Server error. Please try again later.",
     "missingCoopId": "Missing coop ID"
+  },
+  "pwa": {
+    "install": {
+      "message": "Install Chickquita on your home screen for quick access",
+      "action": "Install",
+      "dismiss": "Dismiss"
+    },
+    "ios": {
+      "title": "Add to Home Screen",
+      "description": "To install the app on iPhone or iPad, follow these steps:",
+      "step1": "Tap the Share button",
+      "step1_detail": "In the Safari bottom menu",
+      "step2": "Select \"Add to Home Screen\"",
+      "step2_detail": "From the options menu",
+      "step3": "Confirm addition",
+      "step3_detail": "Tap \"Add\" in the top right corner"
+    }
   }
 }
