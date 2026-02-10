@@ -169,6 +169,9 @@ app.MapCoopsEndpoints();
 // Map flocks endpoints
 app.MapFlocksEndpoints();
 
+// Map flock history endpoints
+app.MapFlockHistoryEndpoints();
+
 // Map daily records endpoints
 app.MapDailyRecordsEndpoints();
 

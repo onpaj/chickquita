@@ -50,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<ICoopRepository, CoopRepository>();
         services.AddScoped<IFlockRepository, FlockRepository>();
+        services.AddScoped<IFlockHistoryRepository, FlockHistoryRepository>();
         services.AddScoped<IStatisticsRepository, StatisticsRepository>();
         services.AddScoped<IDailyRecordRepository, DailyRecordRepository>();
         services.AddScoped<IPurchaseRepository, PurchaseRepository>();
