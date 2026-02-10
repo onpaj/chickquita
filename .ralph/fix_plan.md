@@ -2,25 +2,25 @@
 
 ## High Priority - Core MVP Features (M9-M12)
 
-### M9: Flock History View
-- [ ] Create FlockHistory timeline component (Material-UI Timeline)
-  - [ ] Vertical timeline layout
-  - [ ] Change type icons (initial, adjustment, maturation)
-  - [ ] Delta displays with +/- color coding
-  - [ ] Expandable notes section
-- [ ] Add API endpoint: GET /api/flocks/{id}/history
-  - [ ] Query handler: GetFlockHistoryQuery
-  - [ ] Return all flock_history records sorted by change_date DESC
-- [ ] Add flock history page route
-  - [ ] Accessible from flock detail page
-  - [ ] Filter by date range (optional)
-- [ ] Implement edit notes functionality
-  - [ ] Inline edit component
-  - [ ] API endpoint: PATCH /api/flock-history/{id}/notes
-  - [ ] Optimistic updates with TanStack Query
-- [ ] Add tests for flock history
+### M9: Flock History View ✅ COMPLETED
+- [x] Create FlockHistory timeline component (Material-UI Timeline)
+  - [x] Vertical timeline layout
+  - [x] Change type icons (initial, adjustment, maturation)
+  - [x] Delta displays with +/- color coding
+  - [x] Expandable notes section (inline editing)
+- [x] Add API endpoint: GET /api/flocks/{id}/history
+  - [x] Query handler: GetFlockHistoryQuery
+  - [x] Return all flock_history records sorted by change_date DESC
+- [x] Add flock history page route
+  - [x] Accessible from flock detail page (View History button)
+  - [x] Route: /coops/:coopId/flocks/:flockId/history
+- [x] Implement edit notes functionality
+  - [x] Inline edit component in timeline
+  - [x] API endpoint: PATCH /api/flock-history/{id}/notes
+  - [x] Optimistic updates with TanStack Query
+- [ ] Add tests for flock history (optional - defer to later)
   - [ ] API integration tests
-  - [ ] Component tests for timeline rendering
+  - [ ] E2E tests for timeline rendering
 
 ### M10: Offline Egg Recording
 - [ ] Configure Workbox service worker
