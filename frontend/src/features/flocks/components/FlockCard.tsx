@@ -171,7 +171,7 @@ export function FlockCard({
                   {t('flocks.hens')}:
                 </Typography>
               </Box>
-              <Typography variant="body2" fontWeight="medium">
+              <Typography variant="body2" fontWeight="medium" data-testid="flock-hens">
                 {flock.currentHens}
               </Typography>
             </Box>
@@ -193,7 +193,7 @@ export function FlockCard({
                   {t('flocks.roosters')}:
                 </Typography>
               </Box>
-              <Typography variant="body2" fontWeight="medium">
+              <Typography variant="body2" fontWeight="medium" data-testid="flock-roosters">
                 {flock.currentRoosters}
               </Typography>
             </Box>
@@ -215,7 +215,7 @@ export function FlockCard({
                   {t('flocks.chicks')}:
                 </Typography>
               </Box>
-              <Typography variant="body2" fontWeight="medium">
+              <Typography variant="body2" fontWeight="medium" data-testid="flock-chicks">
                 {flock.currentChicks}
               </Typography>
             </Box>
@@ -238,6 +238,7 @@ export function FlockCard({
                 fontWeight="bold"
                 color="primary"
                 sx={{ lineHeight: 1 }}
+                data-testid="flock-total"
               >
                 {totalAnimals}
               </Typography>

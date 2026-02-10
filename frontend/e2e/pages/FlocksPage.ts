@@ -143,20 +143,17 @@ export class FlocksPage {
   }> {
     const flockCard = this.getFlockCard(identifier);
 
-    // Extract numbers from the card text
-    const cardText = await flockCard.textContent() || '';
-
-    // Use regex to extract numbers
-    const hensMatch = cardText.match(/Slepice:|Hens:.*?(\d+)/);
-    const roostersMatch = cardText.match(/Kohouti:|Roosters:.*?(\d+)/);
-    const chicksMatch = cardText.match(/Kuřata:|Chicks:.*?(\d+)/);
-    const totalMatch = cardText.match(/Celkem:|Total:.*?(\d+)/);
+    // Read values directly from data-testid attributes
+    const hensText = await flockCard.locator('[data-testid="flock-hens"]').textContent() || '0';
+    const roostersText = await flockCard.locator('[data-testid="flock-roosters"]').textContent() || '0';
+    const chicksText = await flockCard.locator('[data-testid="flock-chicks"]').textContent() || '0';
+    const totalText = await flockCard.locator('[data-testid="flock-total"]').textContent() || '0';
 
     return {
-      hens: hensMatch ? parseInt(hensMatch[1]) : 0,
-      roosters: roostersMatch ? parseInt(roostersMatch[1]) : 0,
-      chicks: chicksMatch ? parseInt(chicksMatch[1]) : 0,
-      total: totalMatch ? parseInt(totalMatch[1]) : 0,
+      hens: parseInt(hensText, 10),
+      roosters: parseInt(roostersText, 10),
+      chicks: parseInt(chicksText, 10),
+      total: parseInt(totalText, 10),
     };
   }
 
