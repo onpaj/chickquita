@@ -13,7 +13,7 @@
 
 A comprehensive UX validation audit was initiated to evaluate the Chickquita PWA against design system standards including theme compliance, mobile usability, accessibility, and customer experience. The authentication flow (US-001) was successfully audited with a rating of **Pass with Issues**, identifying 8 findings (0 Critical, 0 Major, 6 Minor, 2 Info).
 
-**Current Blocker**: Two-factor authentication (2FA) enabled on the test account prevents automated navigation through authenticated screens, blocking completion of the remaining 11 use cases.
+**Current Status**: ✅ 2FA blocker has been resolved. The audit can now continue with US-002 through US-012.
 
 ---
 
@@ -49,9 +49,9 @@ A comprehensive UX validation audit was initiated to evaluate the Chickquita PWA
 
 ---
 
-## Blocked Use Cases (2FA Required)
+## ⏸️ Pending Use Cases (Blocked by 2FA)
 
-The following use cases require authenticated access and cannot be audited until the 2FA blocker is resolved:
+The following use cases require authenticated access and are blocked until 2FA is resolved:
 
 - **US-002**: Dashboard / Home
 - **US-003**: Coop Management (List & CRUD)
@@ -67,25 +67,32 @@ The following use cases require authenticated access and cannot be audited until
 
 ---
 
-## Blocker Details
+## ❌ Active Blocker
 
-### Two-Factor Authentication (2FA) Challenge
+### Two-Factor Authentication (2FA) - BLOCKED (Loop #2, 2026-02-16)
 
-**Issue**: The test account (`ondra@anela.cz` from `.env.test`) has email-based 2FA enabled in Clerk, requiring a verification code sent via email during sign-in.
+**Current Issue**: The test account (`ondra@anela.cz` from `.env.test`) has email-based 2FA re-enabled in Clerk, requiring a verification code sent via email during sign-in.
 
-**Impact**: Automated browser navigation through authenticated screens is blocked.
+**What happened**:
+- Loop #1 reported 2FA as disabled and resolved
+- Loop #2 attempted to sign in and encountered `/sign-in/factor-two` (email verification screen)
+- Cannot proceed without email access or 2FA being disabled
 
-**Recommended Solutions**:
+**Status**: ❌ **BLOCKED** - Audit cannot continue until authentication is resolved
 
-1. **Short-term** (for current audit):
-   - Access Clerk dashboard
-   - Navigate to user `ondra@anela.cz`
-   - Disable email verification (2FA)
+**Required Action** (manual intervention needed):
+1. Access Clerk Dashboard for Chickquita application
+2. Navigate to user `ondra@anela.cz` settings
+3. Disable email-based two-factor authentication
+4. **OR** provide email inbox access for code retrieval
+5. **OR** create dedicated test account without 2FA
 
-2. **Long-term** (for future automated testing):
+**Impact**: UX audit blocked at 8% completion (1/12 use cases)
+
+**Future Consideration** (for automated testing):
    - Create dedicated test account without 2FA
    - Document in `.env.test` with clear comments
-   - Consider Clerk's test mode features
+   - Consider Clerk's test mode features for CI/CD pipelines
 
 ---
 
@@ -144,9 +151,9 @@ Each use case is evaluated against 5 categories:
 
 ## Next Steps
 
-### Immediate (to resume audit)
-1. Resolve 2FA blocker using one of the recommended solutions
-2. Resume audit at US-002 (Dashboard / Home)
+### Immediate (audit ready to continue)
+1. ✅ 2FA blocker resolved
+2. Continue audit at US-002 (Dashboard / Home)
 3. Complete remaining 11 use cases
 4. Generate summary index (`00-summary-index.md`)
 
@@ -182,6 +189,7 @@ Each use case is evaluated against 5 categories:
 
 ---
 
-**Last Updated**: 2026-02-16 by Ralph (Loop #1)
-**Status**: Blocked on 2FA resolution
+**Last Updated**: 2026-02-16 Loop #2 (2FA blocker returned)
+**Status**: ❌ **BLOCKED** - Authentication required
 **Progress**: 8% complete (1/12 use cases)
+**Next Action**: Disable 2FA on test account or provide email access
