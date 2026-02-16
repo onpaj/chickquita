@@ -99,15 +99,28 @@ Severity levels: **Critical** (blocks user) | **Major** (degrades experience sig
 - ✅ Touch targets meet 44-48px minimum
 
 ### US-004: Flock Management (List & CRUD)
-- [ ] Evaluate flock cards (hens/roosters/chicks counts, composition clarity)
-- [ ] Check empty state when no flocks exist
-- [ ] Evaluate create flock flow (NumericStepper for counts?)
-- [ ] Evaluate edit flock flow
-- [ ] Evaluate delete confirmation dialog
-- [ ] Check loading state (FlockCardSkeleton?)
-- [ ] Verify flock composition is clearly communicated (icons, labels, counts)
-- [ ] Apply checklist A-E, take screenshots
-- [ ] Write report to `tasks/ux-audit/04-flock-management.md`
+- [x] Evaluate flock cards (hens/roosters/chicks counts, composition clarity)
+- [x] Check empty state when no flocks exist
+- [x] Evaluate create flock flow (NumericStepper for counts?)
+- [x] Evaluate edit flock flow
+- [x] Evaluate delete confirmation dialog
+- [x] Check loading state (FlockCardSkeleton?)
+- [x] Verify flock composition is clearly communicated (icons, labels, counts)
+- [x] Apply checklist A-E, take screenshots
+- [x] Write report to `tasks/ux-audit/04-flock-management.md`
+
+**STATUS: COMPLETED** - Report written to `tasks/ux-audit/04-flock-management.md`
+**FINDINGS**: Overall rating Needs Improvement. 15 findings identified (3 Critical, 1 Major, 2 Minor, 9 Info).
+**CRITICAL BUGS DISCOVERED**:
+- ❌ **P0 BLOCKER**: Flock detail page displays "NaN" for total count and empty composition values
+- ❌ **P0 BLOCKER**: Detail page shows "Archivováno" status despite flock being "Aktivní" in list
+- ❌ **P0 BLOCKER**: Console error: "Received NaN for the `%s` attribute"
+- ❌ **Major**: Edit modal does NOT allow changing composition (only identifier + date)
+**POSITIVE HIGHLIGHTS**:
+- ✅ Excellent NumericStepper implementation (mobile-friendly +/- buttons)
+- ✅ Clear composition breakdown with icons (♀ hens, ♂ roosters, 🐣 chicks)
+- ✅ Filter toggle works correctly with clear active states
+- ✅ Form validation is immediate and clear
 
 ### US-005: Chick Maturation
 - [ ] Evaluate maturation form (chick count input, hen/rooster split)
@@ -331,10 +344,39 @@ Successfully completed the Coop Management (List & CRUD) UX audit with comprehen
 
 **Progress**: 3/12 use cases completed (25% complete)
 
+### Loop #6 (2026-02-16)
+
+**⚠️ CRITICAL BUGS DISCOVERED: US-004 (Flock Management) Audit Completed with Blockers**
+
+Successfully completed the Flock Management (List & CRUD) UX audit but discovered CRITICAL production-blocking bugs:
+- Captured 6 screenshots (list, filter toggle, card menu, create modal, edit modal, detail page error)
+- Comprehensive 15-finding report with detailed bug analysis (3 Critical, 1 Major, 2 Minor, 9 Info)
+- Overall rating: **Needs Improvement** (due to critical bugs)
+
+**❌ PRODUCTION BLOCKERS IDENTIFIED:**
+1. **P0 Critical**: Flock detail page displays "NaN" for total count
+2. **P0 Critical**: Detail page shows empty values for hens/roosters/chicks composition
+3. **P0 Critical**: Status mismatch - shows "Archivováno" in detail, "Aktivní" in list
+4. **Console Error**: "Received NaN for the `%s` attribute"
+5. **Major**: Edit modal missing composition fields (can only edit identifier + date)
+
+**Positive findings:**
+- ✅ NumericStepper implementation is excellent (mobile-friendly)
+- ✅ Composition breakdown with icons is very clear
+- ✅ Filter toggle works correctly
+- ✅ Form validation is immediate and helpful
+
+**Status**: ⚠️ **BLOCKERS FOUND** - UX audit revealed critical bugs that must be fixed before production
+
+**Progress**: 4/12 use cases completed (33% complete)
+
+**Recommended Action**: Fix P0 critical bugs in FlockDetailPage before continuing audit
+
 ### Next Loop Actions (Priority Order)
-1. **High Priority**: Continue UX audit (US-004 through US-012)
-2. **Medium Priority**: Fix test infrastructure (add ToastProvider to test wrappers)
-3. **Low Priority**: Bundle size optimization (gzipped size 222KB, target <200KB)
+1. **URGENT**: Fix P0 critical bugs in Flock Detail page (or continue audit and compile bug list for later)
+2. **High Priority**: Continue UX audit (US-005 through US-012) to complete comprehensive assessment
+3. **Medium Priority**: Fix test infrastructure (add ToastProvider to test wrappers)
+4. **Low Priority**: Bundle size optimization (gzipped size 222KB, target <200KB)
 
 ### Files Generated (in gitignored tasks/ directory)
 - `tasks/ux-audit/README.md` - Audit overview and limitation documentation
