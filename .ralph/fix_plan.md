@@ -51,17 +51,27 @@ Severity levels: **Critical** (blocks user) | **Major** (degrades experience sig
 **STATUS: COMPLETED** - Report written to `tasks/ux-audit/01-authentication.md`
 **FINDINGS**: Overall rating Pass with Issues. Minor theme inconsistencies, good Czech localization, clear validation feedback.
 **NOTE**: 2FA blocker has been resolved. Automated login is now possible for subsequent use cases.
-**NOTE**: in case auth data are needed, use "ondra@anela.cz" as username and "duronduronduron" as password
+**NOTE**: do not use incognito mode on browser, you should already be logged in
 
 ### US-002: Dashboard / Home
-- [ ] Navigate to dashboard after login
-- [ ] Evaluate StatCard components (layout, trend indicators, readability)
-- [ ] Check bottom navigation visibility and active state indication
-- [ ] Verify app bar (64px, logo, actions)
-- [ ] Evaluate information density - key metrics visible without scrolling?
-- [ ] Check quick-access actions (FAB or shortcuts)
-- [ ] Apply checklist A-E, take screenshots
-- [ ] Write report to `tasks/ux-audit/02-dashboard.md`
+- [x] Navigate to dashboard after login
+- [x] Evaluate StatCard components (layout, trend indicators, readability)
+- [x] Check bottom navigation visibility and active state indication
+- [x] Verify app bar (64px, logo, actions)
+- [x] Evaluate information density - key metrics visible without scrolling?
+- [x] Check quick-access actions (FAB or shortcuts)
+- [x] Apply checklist A-E, take screenshots
+- [x] Write report to `tasks/ux-audit/02-dashboard.md`
+
+**STATUS: COMPLETED** - Report written to `tasks/ux-audit/02-dashboard.md`
+**FINDINGS**: Overall rating Pass with Issues. 12 findings identified (3 Major, 3 Minor, 6 Info).
+**KEY ISSUES**:
+- **Major**: Missing app bar (no logo, no top navigation context)
+- **Major**: FAB overlaps "Aktivních hejn" count
+- **Major**: Three StatCards show "Zatím nedostupné" (not available) instead of proper empty state
+- **Minor**: Duplicate "Přehled" heading (H1 + H6)
+- **Minor**: "Denní záznamy" bottom nav tab disabled without explanation
+- **Color Contrast Failure**: "Zatím nedostupné" text fails WCAG AA (3.36:1, needs 4.5:1)
 
 ### US-003: Coop Management (List & CRUD)
 - [ ] Evaluate coop list cards (layout, information hierarchy)
@@ -277,8 +287,23 @@ Error: useToast must be used within ToastProvider
 
 **Resolution deferred** per testing guidelines: "LIMIT testing to ~20% of effort, PRIORITIZE Implementation > Documentation > Tests"
 
+### Loop #4 (2026-02-16)
+
+**✅ SUCCESS: US-002 (Dashboard) Audit Completed**
+
+Successfully completed the Dashboard/Home UX audit with detailed findings analysis:
+- Captured 3 screenshots (overview, quick actions, full page)
+- Comprehensive 12-finding report written (3 Major, 3 Minor, 6 Info)
+- Overall rating: **Pass with Issues**
+- Key architectural issues identified: Missing app bar, FAB overlap, empty state handling
+- Color contrast WCAG AA failure identified: "Zatím nedostupné" text (3.36:1)
+
+**Status**: ✅ **ON TRACK** - 2FA blocker confirmed resolved, dashboard audit complete
+
+**Progress**: 2/12 use cases completed (17% complete)
+
 ### Next Loop Actions (Priority Order)
-1. **High Priority**: Continue UX audit (US-002 through US-012) - 2FA blocker resolved
+1. **High Priority**: Continue UX audit (US-003 through US-012)
 2. **Medium Priority**: Fix test infrastructure (add ToastProvider to test wrappers)
 3. **Low Priority**: Bundle size optimization (gzipped size 222KB, target <200KB)
 
