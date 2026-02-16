@@ -1,256 +1,215 @@
-# Ralph Fix Plan
+# Ralph Fix Plan - UX Validation Audit
 
-## High Priority - Core MVP Features (M9-M12)
+**PRD:** `tasks/prd-ux-validation-audit.md`
+**Goal:** Browse the running app (port 3100, 375x812px mobile viewport) and create a UX report per use case. **Analysis only - no code changes.**
+**Output:** `tasks/ux-audit/` directory with individual reports + summary index.
 
-### M9: Flock History View ✅ COMPLETED
-- [x] Create FlockHistory timeline component (Material-UI Timeline)
-  - [x] Vertical timeline layout
-  - [x] Change type icons (initial, adjustment, maturation)
-  - [x] Delta displays with +/- color coding
-  - [x] Expandable notes section (inline editing)
-- [x] Add API endpoint: GET /api/flocks/{id}/history
-  - [x] Query handler: GetFlockHistoryQuery
-  - [x] Return all flock_history records sorted by change_date DESC
-- [x] Add flock history page route
-  - [x] Accessible from flock detail page (View History button)
-  - [x] Route: /coops/:coopId/flocks/:flockId/history
-- [x] Implement edit notes functionality
-  - [x] Inline edit component in timeline
-  - [x] API endpoint: PATCH /api/flock-history/{id}/notes
-  - [x] Optimistic updates with TanStack Query
-- [ ] Add tests for flock history (optional - defer to later)
-  - [ ] API integration tests
-  - [ ] E2E tests for timeline rendering
+## Design Reference Documents
 
-### M10: Offline Egg Recording ✅ COMPLETED
-- [x] Configure Workbox service worker
-  - [x] Cache-first strategy for static assets (30 days)
-  - [x] Network-first for API GET requests (5 min cache)
-  - [x] Background sync queue for POST requests (via apiClient)
-- [x] Implement IndexedDB schema (Dexie.js)
-  - [x] pendingRequests table (offline queue with retry tracking)
-  - [x] syncStatus metadata table
-  - [ ] Cached data tables (coops, flocks, dailyRecords) - deferred (not required for MVP)
-- [x] Add offline detection UI
-  - [x] Persistent offline banner component (OfflineBanner)
-  - [x] Sync status indicator (pending count)
-  - [x] Manual sync button
-- [x] Implement background sync logic
-  - [x] Retry logic with exponential backoff (2^n * 1000ms, max 5 retries)
-  - [x] Auto-sync on online event + periodic sync (5 min)
-  - [x] 24-hour staleness check for requests
-- [ ] Add offline mode tests (optional - defer to later)
-  - [ ] Service worker registration
-  - [ ] IndexedDB CRUD operations
-  - [ ] Background sync queue processing
+| Document | Validates |
+|----------|-----------|
+| `docs/architecture/COMPONENT_LIBRARY.md` | Shared components, theme colors, skeletons, modal config |
+| `docs/architecture/ui-layout-system.md` | Layout patterns, touch targets, FAB, bottom nav, form standards |
+| `docs/architecture/coding-standards.md` | Component patterns, error/loading/empty state requirements |
+| `CLAUDE.md` | Performance budget, mobile breakpoints, i18n, daily logging < 30s |
 
-### M11: Statistics Dashboard ✅ COMPLETED
-- [x] Create statistics page with chart grid
-  - [x] Date range filters (7/30/90 days, custom)
-  - [x] Flock filter (all / specific flock) - Deferred (data already aggregated per flock)
-- [x] Implement egg cost breakdown chart
-  - [x] Pie chart by purchase type (Recharts)
-  - [x] Percentage labels and legends
-- [x] Implement production trend chart
-  - [x] Line chart for last 30 days
-  - [x] Tooltips with daily totals
-- [x] Implement cost trend chart
-  - [x] Line chart: cost per egg over time
-  - [x] Trend indicators (↑↓)
-- [x] Implement flock productivity comparison
-  - [x] Bar chart: eggs/hen/day per flock
-  - [x] Sort by productivity
-- [x] Add API endpoint: GET /api/statistics
-  - [x] Cost breakdown calculation (group by purchase type)
-  - [x] Timeline aggregation (daily)
-  - [x] Flock productivity calculation
-- [x] Mobile optimization for charts
-  - [x] Touch-friendly tooltips
-  - [x] Responsive chart sizing
-  - [x] Loading skeletons
-- [ ] Add statistics tests (optional - defer to later)
-  - [ ] API calculation accuracy
-  - [ ] Chart rendering tests
+## Validation Checklist (applied to every use case)
 
-**Note:** Before using the statistics page, install required dependencies:
-```bash
-cd frontend && npm install @mui/x-date-pickers dayjs
+- **A. Design System Compliance** - colors (#FF6B35 primary, #4A5568 secondary), 8px spacing grid, 12px border-radius on cards, Roboto typography hierarchy, shared component usage (NumericStepper, StatCard, ConfirmationDialog, IllustratedEmptyState)
+- **B. Mobile Usability** - touch targets 44-48px, 8px spacing between targets, bottom nav (64px, 5 sections), FAB above bottom nav (80px from bottom), fullscreen modals on mobile, no horizontal scroll at 375px
+- **C. Loading/Empty/Error States** - skeleton loaders (not spinners), IllustratedEmptyState with CTA button, inline form validation with clear messages, graceful network error handling
+- **D. Accessibility** - color contrast >= 4.5:1, aria-labels on icon buttons, visible focus states, semantic HTML (headings, landmarks), form fields with labels
+- **E. Customer Experience** - intuitive flow, clear action feedback (toasts, visual confirmation), consistent navigation, back navigation works, no dead ends, Czech language displays correctly
+
+## Report Template
+
+Each report follows this structure:
+```
+# UX Audit: [Use Case Name]
+## Summary (2-3 sentences)
+## Overall Rating: Pass / Pass with Issues / Needs Improvement / Fail
+## Screenshots (embedded with captions)
+## Findings Table (# | Issue | Severity | Category | Design Reference | Recommendation)
+## Detailed Notes
 ```
 
-### M12: PWA Installation ✅ COMPLETED
-- [x] Configure manifest.json
-  - [x] App name (Czech + English)
-  - [x] Icons (72x72, 192x192, 512x512)
-  - [x] Theme color (#FF6B35)
-  - [x] Display mode: standalone
-  - [ ] Screenshots for app stores (deferred - not required for MVP)
-- [x] Generate app icons
-  - [x] Multiple sizes (maskable + any purpose)
-  - [x] Favicon variants (32x32 PNG)
-  - [x] Script: `npm run generate:icons`
-- [x] Implement install prompt handler
-  - [x] Detect beforeinstallprompt event
-  - [x] Show after 2nd visit or 5 min usage
-  - [x] Custom install banner component (PwaInstallPrompt)
-- [x] Add iOS "Add to Home Screen" instructions
-  - [x] Detect iOS Safari
-  - [x] Step-by-step guide modal (IosInstallPrompt)
-  - [x] Visual stepper with icons
-- [x] Configure splash screen
-  - [x] Background: theme_color (via manifest)
-  - [x] Theme color meta tags
-  - [x] Apple mobile web app tags
-- [x] PWA meta tags in index.html
-  - [x] Viewport configuration
-  - [x] Apple touch icon
-  - [x] Open Graph tags
-- [ ] Lighthouse PWA audit (optional - defer to production deployment)
+Severity levels: **Critical** (blocks user) | **Major** (degrades experience significantly) | **Minor** (cosmetic/slight inconvenience) | **Info** (observation/suggestion)
 
-## Medium Priority - Performance & UX
+---
 
-### Performance Optimization
-- [ ] Bundle size analysis
-  - [ ] webpack-bundle-analyzer report
-  - [ ] Code splitting optimization
-  - [ ] Lazy loading for routes
-- [ ] Image optimization
-  - [ ] Convert to WebP format
-  - [ ] Lazy loading for images
-  - [ ] Responsive image srcset
-- [ ] API response optimization
-  - [ ] Database query analysis (EF Core)
-  - [ ] Indexing strategy review
-  - [ ] Response compression (gzip)
-- [ ] Lighthouse audit improvements
-  - [ ] Target >90 all categories
-  - [ ] Performance budget enforcement
+## Tasks
 
-### UX Enhancements
-- [ ] Loading states consistency
-  - [ ] Skeleton components for all major views
-  - [ ] Optimistic updates for mutations
-- [ ] Error handling improvements
-  - [ ] Global error boundary (React)
-  - [ ] User-friendly error messages (i18n)
-  - [ ] Retry mechanisms for failed requests
-- [ ] Accessibility audit
-  - [ ] ARIA labels for interactive elements
-  - [ ] Keyboard navigation support
-  - [ ] Screen reader testing
-- [ ] Touch target audit
-  - [ ] Ensure 48x48px minimum size
-  - [ ] 8px spacing between targets
+### US-001: Authentication (Sign In / Sign Up)
+- [x] Navigate to `/sign-in` and `/sign-up` at 375x812 viewport
+- [x] Evaluate Clerk hosted UI theme integration (does it match #FF6B35 theme?)
+- [x] Check authentication error messages clarity
+- [x] Verify redirect to dashboard after successful login
+- [x] Check mobile keyboard behavior with form fields
+- [x] Apply checklist A-E, take screenshots
+- [x] Write report to `tasks/ux-audit/01-authentication.md`
 
-## Low Priority - Nice-to-Have
+**STATUS: COMPLETED** - Report written to `tasks/ux-audit/01-authentication.md`
+**FINDINGS**: Overall rating Pass with Issues. Minor theme inconsistencies, good Czech localization, clear validation feedback.
+**NOTE**: Test account has 2FA enabled which blocks automated login for subsequent use cases.
 
-### Documentation
-- [ ] API documentation (OpenAPI/Swagger)
-- [ ] Component Storybook setup
-- [ ] User guide (Czech + English)
-- [ ] Developer onboarding guide
+### US-002: Dashboard / Home
+- [ ] Navigate to dashboard after login
+- [ ] Evaluate StatCard components (layout, trend indicators, readability)
+- [ ] Check bottom navigation visibility and active state indication
+- [ ] Verify app bar (64px, logo, actions)
+- [ ] Evaluate information density - key metrics visible without scrolling?
+- [ ] Check quick-access actions (FAB or shortcuts)
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/02-dashboard.md`
 
-### Developer Experience
-- [ ] Pre-commit hooks (lint, type-check)
-- [ ] Automatic code formatting (Prettier)
-- [ ] VSCode workspace settings
-- [ ] Debug configurations
+### US-003: Coop Management (List & CRUD)
+- [ ] Evaluate coop list cards (layout, information hierarchy)
+- [ ] Check empty state (IllustratedEmptyState with CTA?)
+- [ ] Evaluate create coop flow (form fields, validation, submission feedback)
+- [ ] Evaluate edit coop flow (pre-populated fields, save feedback)
+- [ ] Evaluate delete confirmation (ConfirmationDialog?)
+- [ ] Check loading state (CoopCardSkeleton?)
+- [ ] Verify FAB/add button placement and visibility
+- [ ] Apply checklist A-E, take screenshots of each state
+- [ ] Write report to `tasks/ux-audit/03-coop-management.md`
 
-### Monitoring & Logging
-- [ ] Application Insights integration
-- [ ] Custom event tracking
-  - [ ] User registration (via webhook)
-  - [ ] Daily record created
-  - [ ] Chick maturation
-  - [ ] Offline sync completed
-- [ ] Error rate alerts
-- [ ] Performance monitoring dashboard
+### US-004: Flock Management (List & CRUD)
+- [ ] Evaluate flock cards (hens/roosters/chicks counts, composition clarity)
+- [ ] Check empty state when no flocks exist
+- [ ] Evaluate create flock flow (NumericStepper for counts?)
+- [ ] Evaluate edit flock flow
+- [ ] Evaluate delete confirmation dialog
+- [ ] Check loading state (FlockCardSkeleton?)
+- [ ] Verify flock composition is clearly communicated (icons, labels, counts)
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/04-flock-management.md`
 
-## Future Enhancements (Post-MVP)
+### US-005: Chick Maturation
+- [ ] Evaluate maturation form (chick count input, hen/rooster split)
+- [ ] Check validation clarity (hens + roosters must equal chicks converted)
+- [ ] Verify NumericStepper usage for count inputs
+- [ ] Evaluate error feedback when validation fails
+- [ ] Check success feedback after maturation
+- [ ] Verify flock composition updates visually after maturation
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/05-chick-maturation.md`
 
-### High Priority Next Wave
-- [ ] Push notifications
-  - [ ] Daily reminder (19:00): "Log eggs"
-  - [ ] Sync completed notification
-  - [ ] Chicks ready to mature alert
-- [ ] Dark mode
-  - [ ] Theme toggle in settings
-  - [ ] Persist preference
-  - [ ] Material-UI theme switching
-- [ ] Swipe gestures
-  - [ ] Swipe to delete (with undo)
-  - [ ] Swipe to archive
-  - [ ] Pull to refresh
+### US-006: Flock History Timeline
+- [ ] Evaluate timeline visual design (chronological order, event type distinction)
+- [ ] Check readability of entries (dates, descriptions, composition changes)
+- [ ] Evaluate empty state when no history entries
+- [ ] Check scrolling behavior with many entries
+- [ ] Verify event types visually distinguished (creation, maturation, adjustment)
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/06-flock-history.md`
 
-### Medium Priority Future
-- [ ] Individual chicken tracking
-  - [ ] CRUD individual chickens
-  - [ ] Link to flock
-  - [ ] Notes and photos
-- [ ] Photo uploads
-  - [ ] Chicken photos
-  - [ ] Coop photos
-  - [ ] Receipt photos (Azure Blob Storage)
-- [ ] CSV/PDF exports
-  - [ ] Export daily records
-  - [ ] Export purchases
-  - [ ] Generate PDF reports
+### US-007: Daily Egg Records
+- [ ] Evaluate quick-add flow speed (target: < 30 seconds open-to-save)
+- [ ] Check NumericStepper usage for egg count
+- [ ] Evaluate date picker usability on mobile
+- [ ] Verify today's date is pre-selected
+- [ ] Evaluate records list (date, egg counts, flock association)
+- [ ] Check empty state for no records
+- [ ] Check loading state (DailyRecordCardSkeleton?)
+- [ ] Verify duplicate record prevention (one per flock per day)
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/07-daily-egg-records.md`
 
-### Low Priority Future
-- [ ] Voice input for notes
-- [ ] Calendar view for daily records
-- [ ] Social logins (Google, Facebook)
-- [ ] Multi-factor authentication (Clerk Pro)
+### US-008: Purchase Tracking
+- [ ] Evaluate purchase list cards (amount, category, date, description)
+- [ ] Check empty state for no purchases
+- [ ] Evaluate create purchase flow (category selection, amount input, date picker)
+- [ ] Verify currency formatting (CZK)
+- [ ] Check purchase categories are clear (feed, supplements, bedding, vet, equipment)
+- [ ] Evaluate autocomplete functionality
+- [ ] Evaluate filtering/sorting options
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/08-purchase-tracking.md`
 
-## Completed
+### US-009: Statistics Dashboard
+- [ ] Evaluate StatCard components (egg totals, costs, averages)
+- [ ] Check chart readability at 375px viewport (Recharts)
+- [ ] Evaluate chart interactions (tooltips, legend, tap behavior)
+- [ ] Verify data labels are legible on mobile
+- [ ] Check charts have proper titles and axis labels
+- [ ] Evaluate cost breakdown visualization (pie chart)
+- [ ] Check loading state for statistics data
+- [ ] Verify empty state when insufficient data
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/09-statistics-dashboard.md`
 
-- [x] M1: User Authentication (Clerk integration, JWT auth, tenant creation)
-- [x] M2: Coop Management (CRUD operations, archive, tenant isolation)
-- [x] M3: Basic Flock Creation (CRUD, initial composition, history tracking)
-- [x] M4: Daily Egg Records (Quick-add flow, validation, same-day edit rule)
-- [x] M5: Purchase Tracking (Full CRUD, type filtering, autocomplete)
-- [x] M6: Egg Cost Calculation Dashboard (Dashboard widgets, statistics, trends)
-- [x] M7: Flock Composition Editing (Adjustment flow, delta display, confirmation)
-- [x] M8: Chick Maturation (Maturation form, validation, history records)
-- [x] Project initialization (React + .NET setup, Docker, CI/CD)
-- [x] Database schema with RLS policies (Neon Postgres)
-- [x] Multi-tenant architecture implementation
-- [x] Clerk authentication integration (frontend + backend)
-- [x] Material-UI component library setup
-- [x] TanStack Query + Zustand state management
-- [x] react-i18next internationalization (Czech + English)
-- [x] Shared component library (NumericStepper, IllustratedEmptyState, etc.)
-- [x] Mobile-first responsive design
-- [x] Form validation (React Hook Form + Zod)
-- [x] E2E test infrastructure (Playwright)
+### US-010: Offline Mode & Sync
+- [ ] Evaluate offline banner/indicator visibility and clarity
+- [ ] Check cached data displays correctly when offline
+- [ ] Verify write operations queue gracefully (add record, add purchase)
+- [ ] Evaluate user feedback about pending sync items
+- [ ] Check sync indicator when going back online
+- [ ] Evaluate behavior for unsupported offline actions
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/10-offline-mode.md`
 
-## Notes
+### US-011: PWA Installation
+- [ ] Evaluate install prompt design and messaging
+- [ ] Check prompt is not shown on first visit (engagement-based trigger)
+- [ ] Verify dismiss behavior (respects dismissal via localStorage)
+- [ ] Evaluate iOS installation instructions (step-by-step visual guide)
+- [ ] Check prompt doesn't interfere with core app usage
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/11-pwa-installation.md`
 
-### Implementation Progress (as of 2026-02-09)
-- **67% MVP Complete:** M1-M8 implemented and tested
-- **33% Remaining:** M9-M12 pending (UI enhancements + PWA features)
-- **Next Priority:** Focus on M9 (Flock History View) as it provides immediate value for users tracking flock changes
+### US-012: Navigation & Overall Layout
+- [ ] Evaluate bottom navigation (5 sections, icons + labels, active state)
+- [ ] Check app bar consistency across all pages (64px, logo, actions)
+- [ ] Verify page transitions (no layout shift)
+- [ ] Check browser back button behavior on key pages
+- [ ] Evaluate location awareness (does user know where they are?)
+- [ ] Check safe area handling (status bar, home indicator)
+- [ ] Verify no content hidden behind fixed nav elements
+- [ ] Apply checklist A-E, take screenshots
+- [ ] Write report to `tasks/ux-audit/12-navigation-layout.md`
 
-### Key Learnings
-1. **Multi-tenancy:** RLS policies at database level + EF Core global filters provide defense-in-depth
-2. **Offline-first:** Service worker configuration requires careful cache strategy planning
-3. **Mobile-first:** Touch targets must be 48x48px minimum for usability
-4. **Performance:** Bundle size monitoring essential - lazy loading routes reduces initial load
-5. **Testing:** E2E tests with Playwright require proper Clerk authentication setup
-6. **Chick logic:** Remember - chicks count in costs but NOT in egg production calculations
+### Summary Index
+- [ ] Create `tasks/ux-audit/00-summary-index.md`
+- [ ] Aggregate all findings across 12 reports
+- [ ] Rank by severity (Critical > Major > Minor > Info)
+- [ ] Each finding references specific design document + criterion violated
+- [ ] Include total counts per severity level
+- [ ] Link to individual report files
 
-### Technical Debt
-- [ ] Database indexing strategy review (performance optimization)
-- [ ] API response caching strategy (reduce database load)
-- [ ] Frontend bundle size optimization (currently within budget but could improve)
-- [ ] Comprehensive E2E test coverage (currently covers happy paths only)
-- [ ] Error boundary implementation (catch React rendering errors)
+## Constraints
 
-### Security Checklist
-- [x] Row-Level Security (RLS) policies enforced
-- [x] Clerk JWT validation on all protected endpoints
-- [x] Input validation (frontend: Zod, backend: FluentValidation)
-- [x] SQL injection prevention (EF Core parameterized queries)
-- [ ] XSS protection (sanitize user inputs with DOMPurify)
-- [ ] HTTPS enforcement in production
-- [ ] CORS whitelist configuration
-- [ ] Rate limiting on API endpoints
+- **No code changes** - this is analysis and reporting only
+- **Mobile viewport only** - 375x812px for all evaluations
+- **Use Playwright MCP browser** to navigate and take screenshots
+- **Czech language** - verify UI text displays correctly (primary language)
+- **App must be running** on `http://localhost:3100` before starting
+
+---
+
+## Progress Summary (Loop #1 - 2026-02-16)
+
+### Completed
+- ✅ Created `tasks/ux-audit/` directory structure
+- ✅ Completed US-001 (Authentication) audit
+  - 3 screenshots captured (sign-in, sign-up, validation error)
+  - Comprehensive 8-finding report written
+  - Overall rating: **Pass with Issues**
+  - Key issues: Minor Clerk theme inconsistencies, English tagline on Czech UI
+
+### Blocker Encountered
+**Two-Factor Authentication (2FA)** is enabled on test account `ondra@anela.cz`, which requires email verification codes during sign-in. This blocks automated browser navigation through authenticated screens (US-002 through US-012).
+
+**Recommended Resolution**:
+1. Access Clerk dashboard
+2. Disable 2FA on `ondra@anela.cz` for testing purposes
+3. OR create dedicated `audit-user@chickquita.test` without 2FA
+
+### Next Loop Action
+- Resolve 2FA blocker (requires manual Clerk dashboard access or PRD adjustment)
+- Resume audit at US-002 (Dashboard / Home) once authenticated access is available
+
+### Files Generated (in gitignored tasks/ directory)
+- `tasks/ux-audit/README.md` - Audit overview and limitation documentation
+- `tasks/ux-audit/01-authentication.md` - Complete authentication audit report
+- `tasks/ux-audit/screenshots/` - 3 screenshots captured
+- `tasks/ux-audit/.gitkeep` - Directory structure documentation
