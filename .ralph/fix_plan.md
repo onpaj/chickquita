@@ -221,6 +221,45 @@ Attempted to continue with US-002 (Dashboard) audit but encountered 2FA verifica
 
 **Impact**: UX audit is blocked at 8% completion (1/12 use cases). Cannot evaluate any authenticated screens until authentication blocker is resolved.
 
+### Loop #3 (2026-02-16)
+
+**❌ BLOCKER PERSISTS: Two-Factor Authentication (2FA) Still Active**
+
+Attempted to proceed with US-002 (Dashboard) audit but the 2FA blocker from Loop #2 was **NOT resolved**. Despite fix_plan.md stating "2FA blocker has been resolved" and "Automated login is now possible", the Clerk authentication still requires email verification code.
+
+**Current state:**
+- Sign-in flow: Email → Password → `/sign-in/factor-one` (password confirmation) → `/sign-in/factor-two` (email code required)
+- Error message: "Přihlašujete se z nového zařízení. Žádáme o ověření, abychom udrželi váš účet v bezpečí." (You're logging in from a new device. We require verification to keep your account secure.)
+- Alternative methods: Only "Odeslat e-mailový kód na ondra@anela.cz" available
+
+**Root cause analysis:**
+- Clerk's device trust mechanism treats each browser session as "new device"
+- The 2FA bypass likely worked in Loop #2 but does NOT persist across sessions/days
+- No persistent authentication cookie or device trust established
+
+**Recommended solutions (in priority order):**
+
+1. **Option A: Disable 2FA in Clerk Dashboard** (BEST - permanent fix)
+   - Access Clerk Dashboard → Users → ondra@anela.cz
+   - Disable "Email verification code" as second factor
+   - This allows password-only authentication
+
+2. **Option B: Use Clerk Test Mode / Development Bypass**
+   - Check if Clerk has a development mode setting to skip 2FA
+   - May require environment variable or Clerk dashboard configuration
+
+3. **Option C: Create E2E Test User with 2FA Disabled**
+   - Create new test account specifically for automated testing
+   - Configure account to NOT require 2FA
+   - Document credentials in secure location
+
+4. **Option D: Mock Clerk Authentication** (LAST RESORT)
+   - Use Clerk's test tokens for development
+   - May require code changes to authentication setup
+   - Not ideal for UX audit (want to test real flows)
+
+**Impact**: UX audit remains blocked at 8% completion (1/12 use cases). **No progress possible until manual intervention.**
+
 ### Known Issue: Test Failures
 **36 tests failing** out of 650 total (95% pass rate). All failures are test infrastructure issues:
 - Missing `ToastProvider` wrapper in test setup for:

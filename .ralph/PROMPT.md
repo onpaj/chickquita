@@ -92,23 +92,6 @@ Tenant (User Account)
 - User retention rate 30+ days >60%
 - API response time <500ms (p95)
 
-## Implementation Status
-**Completed Milestones (M1-M8):**
-- ✅ M1: User Authentication (Clerk integration, JWT auth, tenant creation)
-- ✅ M2: Coop Management (CRUD, archive, tenant isolation)
-- ✅ M3: Basic Flock Creation (CRUD, initial composition, history)
-- ✅ M4: Daily Egg Records (Quick-add flow, validation, same-day edit)
-- ✅ M5: Purchase Tracking (Full CRUD, type filtering, autocomplete)
-- ✅ M6: Egg Cost Calculation Dashboard (Widgets, statistics, trends)
-- ✅ M7: Flock Composition Editing (Adjustment flow, delta display)
-- ✅ M8: Chick Maturation (Maturation form, validation, history records)
-
-**Pending Milestones (M9-M12):**
-- ❌ M9: Flock History View (Timeline UI for FlockHistory table)
-- ❌ M10: Offline Mode (Service worker, IndexedDB, background sync)
-- ❌ M11: Statistics Dashboard (Charts, cost breakdown, trends)
-- ❌ M12: PWA Installation (Manifest, icons, install prompt)
-
 ## Current Task
 Follow fix_plan.md and choose the most important item to implement next. Focus on completing the remaining milestones (M9-M12) to achieve MVP feature completeness.
 

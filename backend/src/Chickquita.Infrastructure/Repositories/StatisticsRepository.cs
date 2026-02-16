@@ -102,13 +102,16 @@ public class StatisticsRepository : IStatisticsRepository
 
     private async Task<List<CostBreakdownItemDto>> GetCostBreakdownAsync(DateOnly startDate, DateOnly endDate)
     {
+        var startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+        var endDateTime = endDate.ToDateTime(TimeOnly.MaxValue);
+
         var purchases = await _context.Purchases
-            .Where(p => p.PurchaseDate >= startDate && p.PurchaseDate <= endDate)
+            .Where(p => p.PurchaseDate >= startDateTime && p.PurchaseDate <= endDateTime)
             .GroupBy(p => p.Type)
             .Select(g => new
             {
                 Type = g.Key,
-                Amount = g.Sum(p => p.Price)
+                Amount = g.Sum(p => p.Amount)
             })
             .ToListAsync();
 
@@ -116,7 +119,7 @@ public class StatisticsRepository : IStatisticsRepository
 
         return purchases.Select(p => new CostBreakdownItemDto
         {
-            Type = p.Type,
+            Type = p.Type.ToString(),
             Amount = p.Amount,
             Percentage = totalAmount > 0 ? (p.Amount / totalAmount) * 100 : 0
         }).ToList();
@@ -124,8 +127,11 @@ public class StatisticsRepository : IStatisticsRepository
 
     private async Task<List<ProductionTrendItemDto>> GetProductionTrendAsync(DateOnly startDate, DateOnly endDate)
     {
+        var startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+        var endDateTime = endDate.ToDateTime(TimeOnly.MaxValue);
+
         return await _context.DailyRecords
-            .Where(dr => dr.RecordDate >= startDate && dr.RecordDate <= endDate)
+            .Where(dr => dr.RecordDate >= startDateTime && dr.RecordDate <= endDateTime)
             .GroupBy(dr => dr.RecordDate)
             .Select(g => new ProductionTrendItemDto
             {
@@ -138,9 +144,12 @@ public class StatisticsRepository : IStatisticsRepository
 
     private async Task<List<CostPerEggTrendItemDto>> GetCostPerEggTrendAsync(DateOnly startDate, DateOnly endDate)
     {
+        var startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+        var endDateTime = endDate.ToDateTime(TimeOnly.MaxValue);
+
         // Get cumulative costs and eggs by date
         var dailyRecords = await _context.DailyRecords
-            .Where(dr => dr.RecordDate >= startDate && dr.RecordDate <= endDate)
+            .Where(dr => dr.RecordDate >= startDateTime && dr.RecordDate <= endDateTime)
             .GroupBy(dr => dr.RecordDate)
             .Select(g => new
             {
@@ -151,12 +160,12 @@ public class StatisticsRepository : IStatisticsRepository
             .ToListAsync();
 
         var purchases = await _context.Purchases
-            .Where(p => p.PurchaseDate >= startDate && p.PurchaseDate <= endDate)
+            .Where(p => p.PurchaseDate >= startDateTime && p.PurchaseDate <= endDateTime)
             .GroupBy(p => p.PurchaseDate)
             .Select(g => new
             {
                 Date = g.Key,
-                Cost = g.Sum(p => p.Price)
+                Cost = g.Sum(p => p.Amount)
             })
             .ToListAsync();
 
@@ -191,13 +200,16 @@ public class StatisticsRepository : IStatisticsRepository
 
     private async Task<List<FlockProductivityItemDto>> GetFlockProductivityAsync(DateOnly startDate, DateOnly endDate)
     {
+        var startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+        var endDateTime = endDate.ToDateTime(TimeOnly.MaxValue);
+
         var flockStats = await _context.DailyRecords
-            .Where(dr => dr.RecordDate >= startDate && dr.RecordDate <= endDate)
+            .Where(dr => dr.RecordDate >= startDateTime && dr.RecordDate <= endDateTime)
             .Include(dr => dr.Flock)
-            .GroupBy(dr => new { dr.FlockId, dr.Flock!.Name })
+            .GroupBy(dr => new { dr.FlockId, dr.Flock!.Identifier })
             .Select(g => new
             {
-                FlockName = g.Key.Name,
+                FlockName = g.Key.Identifier,
                 TotalEggs = g.Sum(dr => dr.EggCount),
                 HenCount = g.Max(dr => dr.Flock!.CurrentHens) // Get current hen count
             })

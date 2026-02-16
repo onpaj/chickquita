@@ -13,7 +13,7 @@
 
 A comprehensive UX validation audit was initiated to evaluate the Chickquita PWA against design system standards including theme compliance, mobile usability, accessibility, and customer experience. The authentication flow (US-001) was successfully audited with a rating of **Pass with Issues**, identifying 8 findings (0 Critical, 0 Major, 6 Minor, 2 Info).
 
-**Current Status**: ✅ 2FA blocker has been resolved. The audit can now continue with US-002 through US-012.
+**Current Status**: ❌ **BLOCKED** - 2FA blocker persists. Manual intervention required to disable 2FA or provide email access.
 
 ---
 
@@ -69,30 +69,47 @@ The following use cases require authenticated access and are blocked until 2FA i
 
 ## ❌ Active Blocker
 
-### Two-Factor Authentication (2FA) - BLOCKED (Loop #2, 2026-02-16)
+### Two-Factor Authentication (2FA) - BLOCKED (Loop #3, 2026-02-16)
 
-**Current Issue**: The test account (`ondra@anela.cz` from `.env.test`) has email-based 2FA re-enabled in Clerk, requiring a verification code sent via email during sign-in.
+**Current Issue**: The test account (`ondra@anela.cz`) requires email-based 2FA verification on **every new browser session** due to Clerk's device trust mechanism.
 
 **What happened**:
-- Loop #1 reported 2FA as disabled and resolved
-- Loop #2 attempted to sign in and encountered `/sign-in/factor-two` (email verification screen)
-- Cannot proceed without email access or 2FA being disabled
+- Loop #1: Completed US-001 authentication audit
+- Loop #2: Reported 2FA blocker, stated as "resolved"
+- Loop #3: **2FA blocker persists** - Clerk treats each session as "new device" requiring email verification
+
+**Authentication Flow Observed**:
+1. Sign-in page → Enter email/password
+2. Redirect to `/sign-in/factor-one` (password confirmation)
+3. Redirect to `/sign-in/factor-two` (email verification code required)
+4. Error: "Přihlašujete se z nového zařízení" (logging in from new device)
+5. Cannot proceed without email inbox access
 
 **Status**: ❌ **BLOCKED** - Audit cannot continue until authentication is resolved
 
-**Required Action** (manual intervention needed):
-1. Access Clerk Dashboard for Chickquita application
-2. Navigate to user `ondra@anela.cz` settings
-3. Disable email-based two-factor authentication
-4. **OR** provide email inbox access for code retrieval
-5. **OR** create dedicated test account without 2FA
+**Recommended Solutions** (in priority order):
 
-**Impact**: UX audit blocked at 8% completion (1/12 use cases)
+1. **Option A: Disable 2FA in Clerk Dashboard** (BEST - permanent fix)
+   - Access Clerk Dashboard → Users → ondra@anela.cz
+   - Disable "Email verification code" as second factor
+   - Allows password-only authentication
 
-**Future Consideration** (for automated testing):
-   - Create dedicated test account without 2FA
-   - Document in `.env.test` with clear comments
-   - Consider Clerk's test mode features for CI/CD pipelines
+2. **Option B: Use Clerk Test Mode / Development Bypass**
+   - Check if Clerk has a development mode setting to skip 2FA
+   - May require environment variable or Clerk dashboard configuration
+
+3. **Option C: Create E2E Test User with 2FA Disabled**
+   - Create new test account specifically for automated testing
+   - Configure account to NOT require 2FA
+   - Document credentials in secure location
+
+4. **Option D: Provide Email Inbox Access**
+   - Allow automated retrieval of verification codes
+   - Not ideal for long-term solution
+
+**Impact**: UX audit blocked at 8% completion (1/12 use cases). **No further progress possible without manual intervention.**
+
+**Root Cause**: Clerk's device trust mechanism does not persist across browser sessions or days, treating each automation run as a new, untrusted device.
 
 ---
 
@@ -151,11 +168,12 @@ Each use case is evaluated against 5 categories:
 
 ## Next Steps
 
-### Immediate (audit ready to continue)
-1. ✅ 2FA blocker resolved
-2. Continue audit at US-002 (Dashboard / Home)
-3. Complete remaining 11 use cases
-4. Generate summary index (`00-summary-index.md`)
+### Immediate (BLOCKED - requires manual intervention)
+1. ❌ **Disable 2FA on test account** (see recommended solutions above)
+2. Verify authentication works without 2FA verification
+3. Continue audit at US-002 (Dashboard / Home)
+4. Complete remaining 11 use cases
+5. Generate summary index (`00-summary-index.md`)
 
 ### After Audit Completion
 1. Review all findings with product/design team
@@ -189,7 +207,7 @@ Each use case is evaluated against 5 categories:
 
 ---
 
-**Last Updated**: 2026-02-16 Loop #2 (2FA blocker returned)
-**Status**: ❌ **BLOCKED** - Authentication required
+**Last Updated**: 2026-02-16 Loop #3 (2FA blocker persists despite Loop #2 claiming resolution)
+**Status**: ❌ **BLOCKED** - Authentication requires 2FA email verification on every session
 **Progress**: 8% complete (1/12 use cases)
-**Next Action**: Disable 2FA on test account or provide email access
+**Next Action**: Disable 2FA in Clerk Dashboard for test account `ondra@anela.cz` (Option A recommended)

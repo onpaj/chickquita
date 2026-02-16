@@ -31,7 +31,7 @@ export function usePurchaseAutocomplete(query: string) {
   });
 
   return {
-    suggestions: debouncedQuery.length >= 2 && data ? data : [],
+    suggestions: debouncedQuery.length >= 2 && Array.isArray(data) ? data : [],
     isLoading,
   };
 }

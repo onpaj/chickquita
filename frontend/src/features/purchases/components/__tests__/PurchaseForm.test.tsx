@@ -306,6 +306,19 @@ describe('PurchaseForm', () => {
         expect(nameInput).toHaveValue('Krmivo Premium');
       });
     });
+
+    it('should render name autocomplete with empty suggestions without crash', () => {
+      const mockOnSubmit = vi.fn();
+
+      // Should render without error when suggestions is an empty array
+      expect(() => {
+        render(<PurchaseForm onSubmit={mockOnSubmit} />);
+      }).not.toThrow();
+
+      // The name input (Autocomplete) should be functional
+      const nameInput = screen.getByLabelText(/^name$/i);
+      expect(nameInput).toBeInTheDocument();
+    });
   });
 
   describe('Type Icons', () => {

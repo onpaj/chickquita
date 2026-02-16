@@ -115,3 +115,4 @@ tasks/
 *.bak
 BRIEF.md
 WORKLOG.md
+.ralph/

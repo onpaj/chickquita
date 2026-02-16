@@ -431,4 +431,88 @@ describe('usePurchaseAutocomplete', () => {
       expect(result.current.isLoading).toBe(false);
     });
   });
+
+  describe('non-array API response handling', () => {
+    it('should return empty array when API returns an object instead of array', async () => {
+      // Simulate API returning a non-array response (e.g., wrapped object)
+      vi.mocked(purchasesApi.getPurchaseNames).mockResolvedValue(
+        { names: ['Feed A'] } as unknown as string[]
+      );
+
+      const { result } = renderHook(() => usePurchaseAutocomplete('Fe'), {
+        wrapper: createWrapper(),
+      });
+
+      await delay(350);
+
+      await waitFor(() => {
+        expect(purchasesApi.getPurchaseNames).toHaveBeenCalledWith('Fe');
+      });
+
+      // Should return empty array, not the object
+      await waitFor(() => {
+        expect(Array.isArray(result.current.suggestions)).toBe(true);
+        expect(result.current.suggestions).toEqual([]);
+      });
+    });
+
+    it('should return empty array when API returns a string instead of array', async () => {
+      vi.mocked(purchasesApi.getPurchaseNames).mockResolvedValue(
+        'unexpected string' as unknown as string[]
+      );
+
+      const { result } = renderHook(() => usePurchaseAutocomplete('Fe'), {
+        wrapper: createWrapper(),
+      });
+
+      await delay(350);
+
+      await waitFor(() => {
+        expect(purchasesApi.getPurchaseNames).toHaveBeenCalledWith('Fe');
+      });
+
+      await waitFor(() => {
+        expect(Array.isArray(result.current.suggestions)).toBe(true);
+        expect(result.current.suggestions).toEqual([]);
+      });
+    });
+
+    it('should return empty array when API returns null', async () => {
+      vi.mocked(purchasesApi.getPurchaseNames).mockResolvedValue(
+        null as unknown as string[]
+      );
+
+      const { result } = renderHook(() => usePurchaseAutocomplete('Fe'), {
+        wrapper: createWrapper(),
+      });
+
+      await delay(350);
+
+      await waitFor(() => {
+        expect(purchasesApi.getPurchaseNames).toHaveBeenCalledWith('Fe');
+      });
+
+      await waitFor(() => {
+        expect(Array.isArray(result.current.suggestions)).toBe(true);
+        expect(result.current.suggestions).toEqual([]);
+      });
+    });
+
+    it('should return valid array when API returns proper string array', async () => {
+      const validNames = ['Feed Premium', 'Feed Standard'];
+      vi.mocked(purchasesApi.getPurchaseNames).mockResolvedValue(validNames);
+
+      const { result } = renderHook(() => usePurchaseAutocomplete('Fe'), {
+        wrapper: createWrapper(),
+      });
+
+      await delay(350);
+
+      await waitFor(() => {
+        expect(result.current.suggestions).toEqual(validNames);
+      });
+
+      expect(Array.isArray(result.current.suggestions)).toBe(true);
+    });
+  });
 });
