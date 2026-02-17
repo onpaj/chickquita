@@ -95,8 +95,33 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
                     Error.Conflict("A flock with this identifier already exists in the coop"));
             }
 
-            // Update the flock using domain method (does not modify composition)
+            // Update basic flock information
             flock.Update(request.Identifier, request.HatchDate);
+
+            // Update composition if provided and changed
+            if (request.CurrentHens.HasValue || request.CurrentRoosters.HasValue || request.CurrentChicks.HasValue)
+            {
+                var newHens = request.CurrentHens ?? flock.CurrentHens;
+                var newRoosters = request.CurrentRoosters ?? flock.CurrentRoosters;
+                var newChicks = request.CurrentChicks ?? flock.CurrentChicks;
+
+                var compositionChanged =
+                    newHens != flock.CurrentHens ||
+                    newRoosters != flock.CurrentRoosters ||
+                    newChicks != flock.CurrentChicks;
+
+                if (compositionChanged)
+                {
+                    flock.UpdateComposition(newHens, newRoosters, newChicks, "Manual update");
+
+                    _logger.LogInformation(
+                        "Updated composition for flock {FlockId}: Hens={Hens}, Roosters={Roosters}, Chicks={Chicks}",
+                        flock.Id,
+                        newHens,
+                        newRoosters,
+                        newChicks);
+                }
+            }
 
             // Save to database
             var updatedFlock = await _flockRepository.UpdateAsync(flock);

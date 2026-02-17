@@ -8,12 +8,16 @@ import {
   Button,
   Stack,
   CircularProgress,
+  Typography,
+  Box,
+  Divider,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useUpdateFlock } from '../hooks/useFlocks';
 import { useErrorHandler } from '../../../hooks/useErrorHandler';
 import { processApiError, ErrorType } from '../../../lib/errors';
 import type { Flock, UpdateFlockRequest } from '../api/flocksApi';
+import { NumericStepper } from '@/shared/components';
 import {
   DIALOG_CONFIG,
   isMobileViewport,
@@ -38,6 +42,9 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
 
   const [identifier, setIdentifier] = useState('');
   const [hatchDate, setHatchDate] = useState('');
+  const [hens, setHens] = useState(0);
+  const [roosters, setRoosters] = useState(0);
+  const [chicks, setChicks] = useState(0);
 
   const [identifierError, setIdentifierError] = useState('');
   const [hatchDateError, setHatchDateError] = useState('');
@@ -48,6 +55,9 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
     if (open && flock) {
       setIdentifier(flock.identifier);
       setHatchDate(flock.hatchDate.split('T')[0]); // Extract date part from ISO string
+      setHens(flock.currentHens);
+      setRoosters(flock.currentRoosters);
+      setChicks(flock.currentChicks);
       setIdentifierError('');
       setHatchDateError('');
     }
@@ -110,9 +120,9 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
       id: flock.id,
       identifier: identifier.trim(),
       hatchDate,
-      currentHens: flock.currentHens,
-      currentRoosters: flock.currentRoosters,
-      currentChicks: flock.currentChicks,
+      currentHens: hens,
+      currentRoosters: roosters,
+      currentChicks: chicks,
     };
 
     updateFlock(
@@ -228,6 +238,44 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
                 ...touchInputProps,
               }}
             />
+
+            <Divider />
+
+            {/* Composition Section */}
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                {t('flocks.form.composition')}
+              </Typography>
+
+              <Stack spacing={2}>
+                <NumericStepper
+                  label={t('flocks.hens')}
+                  value={hens}
+                  onChange={setHens}
+                  min={0}
+                  disabled={isPending}
+                  aria-label={t('flocks.hens')}
+                />
+
+                <NumericStepper
+                  label={t('flocks.roosters')}
+                  value={roosters}
+                  onChange={setRoosters}
+                  min={0}
+                  disabled={isPending}
+                  aria-label={t('flocks.roosters')}
+                />
+
+                <NumericStepper
+                  label={t('flocks.chicks')}
+                  value={chicks}
+                  onChange={setChicks}
+                  min={0}
+                  disabled={isPending}
+                  aria-label={t('flocks.chicks')}
+                />
+              </Stack>
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions sx={dialogActionsSx}>

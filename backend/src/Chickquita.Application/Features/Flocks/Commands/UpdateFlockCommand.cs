@@ -5,8 +5,8 @@ using MediatR;
 namespace Chickquita.Application.Features.Flocks.Commands;
 
 /// <summary>
-/// Command to update basic flock information (identifier and hatch date).
-/// Does not modify flock composition - use composition-specific commands for that.
+/// Command to update flock information (identifier, hatch date, and optionally composition).
+/// When composition differs from current values, a history entry is created with reason "Manual update".
 /// </summary>
 public sealed record UpdateFlockCommand : IRequest<Result<FlockDto>>
 {
@@ -24,4 +24,19 @@ public sealed record UpdateFlockCommand : IRequest<Result<FlockDto>>
     /// Gets or sets the new hatch date for the flock.
     /// </summary>
     public DateTime HatchDate { get; init; }
+
+    /// <summary>
+    /// Gets or sets the new number of hens. When null, current composition is preserved.
+    /// </summary>
+    public int? CurrentHens { get; init; }
+
+    /// <summary>
+    /// Gets or sets the new number of roosters. When null, current composition is preserved.
+    /// </summary>
+    public int? CurrentRoosters { get; init; }
+
+    /// <summary>
+    /// Gets or sets the new number of chicks. When null, current composition is preserved.
+    /// </summary>
+    public int? CurrentChicks { get; init; }
 }

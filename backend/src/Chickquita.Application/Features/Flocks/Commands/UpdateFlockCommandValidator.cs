@@ -27,5 +27,26 @@ public sealed class UpdateFlockCommandValidator : AbstractValidator<UpdateFlockC
             .WithMessage("Hatch date is required.")
             .LessThanOrEqualTo(DateTime.UtcNow)
             .WithMessage("Hatch date cannot be in the future.");
+
+        When(x => x.CurrentHens.HasValue, () =>
+        {
+            RuleFor(x => x.CurrentHens!.Value)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Hens count cannot be negative.");
+        });
+
+        When(x => x.CurrentRoosters.HasValue, () =>
+        {
+            RuleFor(x => x.CurrentRoosters!.Value)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Roosters count cannot be negative.");
+        });
+
+        When(x => x.CurrentChicks.HasValue, () =>
+        {
+            RuleFor(x => x.CurrentChicks!.Value)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Chicks count cannot be negative.");
+        });
     }
 }
