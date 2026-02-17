@@ -140,6 +140,8 @@ test.describe('Purchase CRUD Flow - Complete Lifecycle', () => {
     });
 
     test('should cancel purchase creation', async () => {
+      // Wait for purchases to load before capturing initial count
+      await purchasesPage.waitForPurchasesToLoad();
       const initialCount = await purchasesPage.getPurchaseCount();
 
       await purchasesPage.openCreatePurchaseModal();
@@ -159,7 +161,8 @@ test.describe('Purchase CRUD Flow - Complete Lifecycle', () => {
       // Modal should close
       await expect(purchaseFormModal.modal).not.toBeVisible();
 
-      // Purchase count should remain the same
+      // Wait for list to stabilize, then verify purchase count is unchanged
+      await purchasesPage.waitForPurchasesToLoad();
       const finalCount = await purchasesPage.getPurchaseCount();
       expect(finalCount).toBe(initialCount);
     });
