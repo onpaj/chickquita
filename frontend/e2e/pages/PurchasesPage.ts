@@ -22,7 +22,7 @@ export class PurchasesPage {
     this.purchaseCardsList = page.locator('[role="article"]');
     this.fromDateFilter = page.getByLabel(/od data|from date/i).last();
     this.toDateFilter = page.getByLabel(/do data|to date/i).last();
-    this.typeFilter = page.getByLabel(/typ(?! nákupu)|type(?! of)/i);
+    this.typeFilter = page.getByLabel(/typ(?! nákupu)|type(?! of)/i).first();
     this.flockFilter = page.getByLabel(/hejno|flock/i);
   }
 
