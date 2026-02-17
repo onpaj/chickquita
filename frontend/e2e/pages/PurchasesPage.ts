@@ -46,7 +46,7 @@ export class PurchasesPage {
    * Get a purchase card by its name
    */
   getPurchaseCard(purchaseName: string): Locator {
-    return this.purchaseCardsList.filter({ hasText: purchaseName });
+    return this.purchaseCardsList.filter({ hasText: purchaseName }).first();
   }
 
   /**
