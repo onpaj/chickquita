@@ -37,6 +37,7 @@
     "coops": "Kurníky",
     "purchases": "Nákupy",
     "dailyRecords": "Denní záznamy",
+    "statistics": "Statistiky",
     "settings": "Nastavení"
   },
   "dashboard": {
@@ -79,6 +80,8 @@
       "manageFlocksDesc": "Sledujte svá kuřecí hejna",
       "trackPurchases": "Sledovat nákupy",
       "trackPurchasesDesc": "Zaznamenejte náklady na chov",
+      "viewStatistics": "Zobrazit statistiky",
+      "viewStatisticsDesc": "Přehled produkce a nákladů",
       "addDailyRecordAriaLabel": "Přidat denní záznam"
     },
     "emptyState": {
@@ -383,7 +386,11 @@
     "title": "Nastavení",
     "language": "Jazyk",
     "profile": "Profil",
-    "theme": "Vzhled"
+    "theme": "Vzhled",
+    "signOut": "Odhlásit se",
+    "signOutConfirmTitle": "Odhlásit se?",
+    "signOutConfirmMessage": "Opravdu se chcete odhlásit?",
+    "signOutConfirmButton": "Odhlásit se"
   },
   "validation": {
     "required": "Toto pole je povinné",
@@ -400,6 +407,11 @@
   },
   "statistics": {
     "title": "Statistiky",
+    "summary": {
+      "totalEggs": "Celkem vajec",
+      "totalCost": "Celkové náklady",
+      "avgCostPerEgg": "Prům. cena/vejce"
+    },
     "dateRange": {
       "title": "Časové období",
       "ariaLabel": "Vyberte časové období",

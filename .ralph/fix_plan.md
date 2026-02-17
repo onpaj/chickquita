@@ -157,7 +157,7 @@ Stories are ordered by severity. Complete P0 stories first, then P1, then P2.
 - [ ] Verify "Statistiky" tab is active (not "Přehled") when on `/statistics`
 - [ ] Verify Dashboard quick actions include the new statistics link
 
-**STATUS:**
+**STATUS:** ✅ IMPLEMENTED — Statistics tab already in BottomNavigation (replaces Purchases), `getCurrentTab()` handles `/statistics`, StatCards for totalEggs/totalCost/avgCostPerEgg added to StatisticsPage above charts, "Zobrazit statistiky" quick action card added to DashboardPage. Translation keys added. TypeScript passes.
 
 ---
 
@@ -182,7 +182,7 @@ Stories are ordered by severity. Complete P0 stories first, then P1, then P2.
 - [ ] Verify "Odhlásit se" button is visible, tap it, verify confirmation dialog appears
 - [ ] Confirm dialog and verify user is redirected to sign-in page
 
-**STATUS:**
+**STATUS:** ✅ IMPLEMENTED — Added `useClerk` hook for signOut; added "Odhlásit se" outlined error button with LogoutIcon at bottom of Settings page; wired to ConfirmationDialog with title "Odhlásit se?", message "Opravdu se chcete odhlásit?", confirm button "Odhlásit se" (error color); added Czech and English translation keys. TypeScript passes.
 
 ---
 

@@ -7,6 +7,7 @@ import EggIcon from '@mui/icons-material/Egg';
 import HomeIcon from '@mui/icons-material/Home';
 import PetsIcon from '@mui/icons-material/Pets';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats';
 import { DashboardEmptyState } from '@/features/dashboard/components/DashboardEmptyState';
 import { TodaySummaryWidget } from '@/features/dashboard/components/TodaySummaryWidget';
@@ -74,11 +75,15 @@ export default function DashboardPage() {
       title: t('dashboard.quickActions.trackPurchases'),
       description: t('dashboard.quickActions.trackPurchasesDesc'),
       icon: <ShoppingCartIcon />,
-      onClick: () => {
-        // TODO: Implement when purchases feature is ready
-        console.log('Track Purchases - Coming soon');
-      },
-      disabled: true, // Will be enabled when purchases are implemented
+      onClick: () => navigate('/purchases'),
+      disabled: false,
+    },
+    {
+      title: t('dashboard.quickActions.viewStatistics'),
+      description: t('dashboard.quickActions.viewStatisticsDesc'),
+      icon: <BarChartIcon />,
+      onClick: () => navigate('/statistics'),
+      disabled: false,
     },
   ];
 

@@ -37,6 +37,7 @@
     "coops": "Coops",
     "purchases": "Purchases",
     "dailyRecords": "Daily Records",
+    "statistics": "Statistics",
     "settings": "Settings"
   },
   "dashboard": {
@@ -79,6 +80,8 @@
       "manageFlocksDesc": "Track your chicken flocks",
       "trackPurchases": "Track Purchases",
       "trackPurchasesDesc": "Record farming costs",
+      "viewStatistics": "View Statistics",
+      "viewStatisticsDesc": "Overview of production and costs",
       "addDailyRecordAriaLabel": "Add daily record"
     },
     "emptyState": {
@@ -381,7 +384,11 @@
     "title": "Settings",
     "language": "Language",
     "profile": "Profile",
-    "theme": "Theme"
+    "theme": "Theme",
+    "signOut": "Sign Out",
+    "signOutConfirmTitle": "Sign Out?",
+    "signOutConfirmMessage": "Are you sure you want to sign out?",
+    "signOutConfirmButton": "Sign Out"
   },
   "validation": {
     "required": "This field is required",
@@ -398,6 +405,11 @@
   },
   "statistics": {
     "title": "Statistics",
+    "summary": {
+      "totalEggs": "Total Eggs",
+      "totalCost": "Total Costs",
+      "avgCostPerEgg": "Avg. Cost/Egg"
+    },
     "dateRange": {
       "title": "Time Period",
       "ariaLabel": "Select time period",

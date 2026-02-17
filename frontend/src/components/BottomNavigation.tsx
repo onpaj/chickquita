@@ -2,8 +2,8 @@ import { BottomNavigation as MuiBottomNavigation, BottomNavigationAction, Paper 
 import {
   Dashboard as DashboardIcon,
   HomeWork as CoopsIcon,
-  ShoppingCart as PurchasesIcon,
   Assignment as DailyRecordsIcon,
+  BarChart as StatisticsIcon,
   Settings as SettingsIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -16,8 +16,8 @@ export function BottomNavigation() {
 
   const getCurrentTab = () => {
     if (location.pathname.startsWith('/coops')) return 'coops';
-    if (location.pathname.startsWith('/purchases')) return 'purchases';
     if (location.pathname.startsWith('/daily-records')) return 'daily-records';
+    if (location.pathname.startsWith('/statistics')) return 'statistics';
     if (location.pathname.startsWith('/settings')) return 'settings';
     return 'dashboard';
   };
@@ -30,11 +30,11 @@ export function BottomNavigation() {
       case 'coops':
         navigate('/coops');
         break;
-      case 'purchases':
-        navigate('/purchases');
-        break;
       case 'daily-records':
         navigate('/daily-records');
+        break;
+      case 'statistics':
+        navigate('/statistics');
         break;
       case 'settings':
         navigate('/settings');
@@ -84,14 +84,14 @@ export function BottomNavigation() {
           icon={<CoopsIcon />}
         />
         <BottomNavigationAction
-          label={t('navigation.purchases')}
-          value="purchases"
-          icon={<PurchasesIcon />}
-        />
-        <BottomNavigationAction
           label={t('navigation.dailyRecords')}
           value="daily-records"
           icon={<DailyRecordsIcon />}
+        />
+        <BottomNavigationAction
+          label={t('navigation.statistics')}
+          value="statistics"
+          icon={<StatisticsIcon />}
         />
         <BottomNavigationAction
           label={t('navigation.settings')}

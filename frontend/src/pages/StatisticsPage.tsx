@@ -17,6 +17,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/cs';
 import 'dayjs/locale/en';
+import EggIcon from '@mui/icons-material/Egg';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import { StatCard } from '@/shared/components';
 import { EggCostBreakdownChart } from '@/features/statistics/components/EggCostBreakdownChart';
 import { ProductionTrendChart } from '@/features/statistics/components/ProductionTrendChart';
 import { CostPerEggTrendChart } from '@/features/statistics/components/CostPerEggTrendChart';
@@ -149,6 +153,38 @@ export default function StatisticsPage() {
               )}
             </Box>
           </Paper>
+
+          {/* Summary StatCards */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+              gap: 2,
+              mb: 3,
+            }}
+          >
+            <StatCard
+              icon={<EggIcon />}
+              label={t('statistics.summary.totalEggs')}
+              value={stats?.summary.totalEggs ?? 0}
+              loading={isLoading}
+              color="primary"
+            />
+            <StatCard
+              icon={<AttachMoneyIcon />}
+              label={t('statistics.summary.totalCost')}
+              value={stats ? `${stats.summary.totalCost.toFixed(2)} Kč` : '—'}
+              loading={isLoading}
+              color="warning"
+            />
+            <StatCard
+              icon={<TrendingDownIcon />}
+              label={t('statistics.summary.avgCostPerEgg')}
+              value={stats ? `${stats.summary.avgCostPerEgg.toFixed(2)} Kč` : '—'}
+              loading={isLoading}
+              color="info"
+            />
+          </Box>
 
           {/* Error State */}
           {error && (
