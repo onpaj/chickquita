@@ -79,16 +79,17 @@ test.describe('M2: Coop Management', () => {
     });
 
     test('should successfully GET /api/coops and return valid data structure', async ({ page }) => {
-      // Intercept the API call
+      // Navigate away then back to trigger a fresh API call
       const responsePromise = page.waitForResponse(
         response => response.url().includes('/api/coops') &&
                    response.request().method() === 'GET' &&
                    !response.url().includes('/coops/'), // Exclude /coops/{id} endpoints
-        { timeout: 10000 }
+        { timeout: 30000 }
       );
 
-      // Reload to trigger fresh API call
-      await page.reload();
+      // Navigate away and back to force a fresh API call
+      await page.goto('/');
+      await coopsPage.goto();
 
       // Wait for response
       const response = await responsePromise;
@@ -111,6 +112,8 @@ test.describe('M2: Coop Management', () => {
 
     test('should handle empty coops list gracefully', async ({ page }) => {
       await page.waitForLoadState('networkidle');
+      // Wait for list to fully load (progressbar gone + coops or empty state visible)
+      await coopsPage.waitForListLoaded();
 
       // Page should display proper UI regardless of data
       const hasEmptyState = await coopsPage.isEmptyStateVisible();
@@ -161,18 +164,49 @@ test.describe('M2: Coop Management', () => {
     test('should create a coop with name only', async ({ page }) => {
       const coopName = `Test Coop ${Date.now()}`;
 
-      // Open create coop modal
+      // Track all network requests for debugging
+      const networkLog: string[] = [];
+      page.on('response', async response => {
+        if (response.url().includes('/api/coops')) {
+          networkLog.push(`${Date.now()} ${response.request().method()} ${response.url()} -> ${response.status()}`);
+        }
+      });
+
+      // Set up both promises BEFORE any action (to avoid race conditions)
+      const createResponsePromise = page.waitForResponse(
+        response => response.url().includes('/api/coops') &&
+                   response.request().method() === 'POST' &&
+                   response.status() === 201,
+        { timeout: 30000 }
+      );
+      const refetchPromise = coopsPage.prepareForRefetch();
+
+      // Open create coop modal, fill and submit form
       await coopsPage.openCreateCoopModal();
       await expect(createCoopModal.modal).toBeVisible();
-
-      // Fill and submit form
       await createCoopModal.createCoop(coopName);
+
+      // Wait for POST and GET refetch to complete
+      const postResponse = await createResponsePromise;
+      const postData = await postResponse.json().catch(() => null);
+      console.log('POST response data:', JSON.stringify(postData));
+
+      await refetchPromise;
+      console.log('Network log:', networkLog.join('\n'));
 
       // Modal should close
       await createCoopModal.waitForClose();
 
-      // Verify coop appears in the list
-      await expect(page.getByText(coopName)).toBeVisible();
+      // Additional wait to ensure React has re-rendered with new data
+      await page.waitForTimeout(2000);
+
+      // Check how many coops are in the DOM
+      const coopCount = await coopsPage.getCoopCount();
+      console.log(`Coop count in DOM: ${coopCount}`);
+      console.log(`Looking for: ${coopName}`);
+
+      // Verify coop appears in the list (with longer timeout for many coops)
+      await expect(page.getByText(coopName)).toBeVisible({ timeout: 30000 });
 
       // Verify empty state is not shown
       expect(await coopsPage.isEmptyStateVisible()).toBe(false);
@@ -182,13 +216,20 @@ test.describe('M2: Coop Management', () => {
       const coopName = `Coop with Location ${Date.now()}`;
       const location = 'Behind the house';
 
+      // Prepare to intercept the GET refetch before opening modal
+      const refetchPromise = coopsPage.prepareForRefetch();
+
       await coopsPage.openCreateCoopModal();
       await createCoopModal.createCoop(coopName, location);
       await createCoopModal.waitForClose();
 
-      // Verify coop with location appears
+      // Wait for the list to refresh
+      await refetchPromise;
+
+      // Verify coop with location appears (wait up to 30s for list to refresh)
+      await coopsPage.waitForCoopCard(coopName);
       const coopCard = await coopsPage.getCoopCard(coopName);
-      await expect(coopCard).toBeVisible();
+      await expect(coopCard).toBeVisible({ timeout: 30000 });
       await expect(coopCard).toContainText(location);
     });
 
@@ -239,10 +280,14 @@ test.describe('M2: Coop Management', () => {
   });
 
   test.describe('List Coops', () => {
-    test('should display empty state when no coops exist', async () => {
+    test('should display empty state when no coops exist', async ({ page }) => {
       // NOTE: BLOCKED by TASK-008 - menu interaction timing bugs prevent deleteAllCoops() from working
       // This test needs menu interaction fixes before it can be completed
       // See WORKLOG.md Iteration 3 for full analysis
+
+      // Wait for loading to complete
+      await page.waitForLoadState('networkidle');
+      await coopsPage.waitForListLoaded();
 
       // Temporary workaround: only verify empty state if no coops exist naturally
       const coopCount = await coopsPage.getCoopCount();
@@ -257,22 +302,28 @@ test.describe('M2: Coop Management', () => {
     });
 
     test('should display list of coops', async ({ page }) => {
-      // Create multiple coops
+      // Create multiple coops with unique timestamps
+      const ts = Date.now();
       const coops = [
-        { name: `Coop A ${Date.now()}`, location: 'North side' },
-        { name: `Coop B ${Date.now()}`, location: 'South side' },
-        { name: `Coop C ${Date.now()}` },
+        { name: `Coop A ${ts}`, location: 'North side' },
+        { name: `Coop B ${ts}`, location: 'South side' },
+        { name: `Coop C ${ts}` },
       ];
 
       for (const coop of coops) {
+        // Prepare refetch promise before opening modal (must be before the create action)
+        const refetchPromise = coopsPage.prepareForRefetch();
         await coopsPage.openCreateCoopModal();
         await createCoopModal.createCoop(coop.name, coop.location);
         await createCoopModal.waitForClose();
+        // Wait for the list to refresh before creating the next
+        await refetchPromise;
+        await coopsPage.waitForCoopCard(coop.name);
       }
 
       // Verify all coops are visible
       for (const coop of coops) {
-        await expect(page.getByText(coop.name)).toBeVisible();
+        await expect(page.getByText(coop.name)).toBeVisible({ timeout: 30000 });
       }
 
       // Verify count
@@ -296,9 +347,14 @@ test.describe('M2: Coop Management', () => {
     test.beforeEach(async () => {
       // Create a coop to edit
       testCoopName = `Editable Coop ${Date.now()}`;
+      // Prepare refetch promise before opening modal (must be before the create action)
+      const refetchPromise = coopsPage.prepareForRefetch();
       await coopsPage.openCreateCoopModal();
       await createCoopModal.createCoop(testCoopName, 'Original location');
       await createCoopModal.waitForClose();
+      await refetchPromise;
+      // Wait for the coop to appear in the list before the test starts
+      await coopsPage.waitForCoopCard(testCoopName);
     });
 
     test('should edit coop name', async ({ page }) => {
@@ -315,7 +371,7 @@ test.describe('M2: Coop Management', () => {
 
       // Wait for React Query refetch to complete and UI to update
       // Use increased timeout to allow for invalidateQueries refetch
-      await expect(page.getByText(newName)).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText(newName)).toBeVisible({ timeout: 30000 });
       await expect(page.getByText(testCoopName)).not.toBeVisible();
     });
 
@@ -329,7 +385,7 @@ test.describe('M2: Coop Management', () => {
       // Wait for React Query refetch to complete and UI to update
       // Use increased timeout to allow for invalidateQueries refetch
       const coopCard = await coopsPage.getCoopCard(testCoopName);
-      await expect(coopCard).toContainText(newLocation, { timeout: 10000 });
+      await expect(coopCard).toContainText(newLocation, { timeout: 30000 });
     });
 
     test('should cancel edit', async ({ page }) => {
@@ -364,9 +420,14 @@ test.describe('M2: Coop Management', () => {
     test.beforeEach(async () => {
       // Create a coop to archive
       testCoopName = `Archivable Coop ${Date.now()}`;
+      // Prepare refetch promise before opening modal (must be before the create action)
+      const refetchPromise = coopsPage.prepareForRefetch();
       await coopsPage.openCreateCoopModal();
       await createCoopModal.createCoop(testCoopName);
       await createCoopModal.waitForClose();
+      await refetchPromise;
+      // Wait for the coop to appear in the list before the test starts
+      await coopsPage.waitForCoopCard(testCoopName);
     });
 
     test('should archive a coop', async ({ page }) => {
@@ -411,9 +472,14 @@ test.describe('M2: Coop Management', () => {
     test.beforeEach(async () => {
       // Create a coop to delete
       testCoopName = `Deletable Coop ${Date.now()}`;
+      // Prepare refetch promise before opening modal (must be before the create action)
+      const refetchPromise = coopsPage.prepareForRefetch();
       await coopsPage.openCreateCoopModal();
       await createCoopModal.createCoop(testCoopName);
       await createCoopModal.waitForClose();
+      await refetchPromise;
+      // Wait for the coop to appear in the list before the test starts
+      await coopsPage.waitForCoopCard(testCoopName);
     });
 
     test('should delete an empty coop', async ({ page }) => {
@@ -457,12 +523,15 @@ test.describe('M2: Coop Management', () => {
       const coopName = `Mobile Coop ${Date.now()}`;
 
       // Create coop on mobile
+      const refetchPromise1 = coopsPage.prepareForRefetch();
       await coopsPage.openCreateCoopModal();
       await createCoopModal.createCoop(coopName, 'Mobile location');
       await createCoopModal.waitForClose();
+      await refetchPromise1;
 
-      // Verify coop appears
-      await expect(page.getByText(coopName)).toBeVisible();
+      // Verify coop appears (wait for list to refresh)
+      await coopsPage.waitForCoopCard(coopName);
+      await expect(page.getByText(coopName)).toBeVisible({ timeout: 30000 });
 
       // Edit on mobile
       await coopsPage.clickEditCoop(coopName);
@@ -476,9 +545,14 @@ test.describe('M2: Coop Management', () => {
       await page.setViewportSize({ width: 375, height: 667 });
 
       const coopName = `Touch Test ${Date.now()}`;
+      const refetchPromise = coopsPage.prepareForRefetch();
       await coopsPage.openCreateCoopModal();
       await createCoopModal.createCoop(coopName);
       await createCoopModal.waitForClose();
+      await refetchPromise;
+
+      // Wait for coop to appear in list
+      await coopsPage.waitForCoopCard(coopName);
 
       // Verify buttons are large enough (minimum 44x44px)
       const coopCard = await coopsPage.getCoopCard(coopName);
@@ -499,12 +573,15 @@ test.describe('M2: Coop Management', () => {
       // Create a coop with unique identifier
       const uniqueCoopName = `Tenant Test ${Date.now()}-${Math.random()}`;
 
+      const refetchPromise = coopsPage.prepareForRefetch();
       await coopsPage.openCreateCoopModal();
       await createCoopModal.createCoop(uniqueCoopName);
       await createCoopModal.waitForClose();
+      await refetchPromise;
 
-      // Verify coop is visible
-      await expect(page.getByText(uniqueCoopName)).toBeVisible();
+      // Verify coop is visible (wait for list to refresh)
+      await coopsPage.waitForCoopCard(uniqueCoopName);
+      await expect(page.getByText(uniqueCoopName)).toBeVisible({ timeout: 30000 });
 
       // Note: Testing that another user CANNOT see this coop requires
       // a second authenticated session, which is typically handled in

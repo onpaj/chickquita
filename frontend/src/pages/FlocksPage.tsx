@@ -271,6 +271,7 @@ export default function FlocksPage() {
       <Fab
         color="primary"
         aria-label={t('flocks.addFlock')}
+        data-testid="add-flock-fab"
         sx={{
           position: 'fixed',
           bottom: 80,

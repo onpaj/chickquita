@@ -73,7 +73,7 @@ export class EditFlockModal {
    * Wait for modal to close
    */
   async waitForClose() {
-    await this.modal.waitFor({ state: 'hidden', timeout: 15000 });
+    await this.modal.waitFor({ state: 'hidden', timeout: 30000 });
   }
 
   /**

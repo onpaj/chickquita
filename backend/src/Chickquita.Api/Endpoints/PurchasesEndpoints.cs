@@ -13,7 +13,7 @@ public static class PurchasesEndpoints
 {
     public static void MapPurchasesEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/v1/purchases")
+        var group = app.MapGroup("/api/purchases")
             .WithTags("Purchases")
             .RequireAuthorization();
 
@@ -187,7 +187,7 @@ public static class PurchasesEndpoints
             };
         }
 
-        return Results.Created($"/api/v1/purchases/{result.Value.Id}", result.Value);
+        return Results.Created($"/api/purchases/{result.Value.Id}", result.Value);
     }
 
     private static async Task<IResult> UpdatePurchase(

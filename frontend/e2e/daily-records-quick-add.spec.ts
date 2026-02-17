@@ -20,6 +20,7 @@ import { generateFlockIdentifier, getDaysAgoDate } from './fixtures/flock.fixtur
  * - < 30 second completion target
  */
 test.describe('Daily Records - Quick Add Modal', () => {
+  test.describe.configure({ mode: 'serial' });
   let coopsPage: CoopsPage;
   let createCoopModal: CreateCoopModal;
   let coopDetailPage: CoopDetailPage;
@@ -64,16 +65,16 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await coopsPage.clickAddButton();
     await createCoopModal.fillForm(testCoopName, 'Test location for quick add');
     await createCoopModal.submit();
-    await coopsPage.waitForCoopCard(testCoopName);
+    await createCoopModal.waitForClose();
 
-    // Wait for the coop ID to be captured
-    await page.waitForTimeout(500);
+    // Wait for the coop ID to be captured from the API response
+    await page.waitForTimeout(1000);
     testCoopId = createdCoopId || '';
     expect(testCoopId).toBeTruthy();
 
-    // Navigate to coop detail page
-    await coopsPage.clickCoopCard(testCoopName);
-    await coopDetailPage.waitForLoaded();
+    // Navigate directly to the flocks page for this coop
+    await page.goto(`/coops/${testCoopId}/flocks`);
+    await page.waitForLoadState('networkidle');
 
     // Create a test flock
     testFlockIdentifier = generateFlockIdentifier();
@@ -82,7 +83,7 @@ test.describe('Daily Records - Quick Add Modal', () => {
     let createdFlockId: string | null = null;
     page.on('response', async (response) => {
       if (
-        response.url().includes('/api/flocks') &&
+        response.url().includes('/flocks') &&
         response.request().method() === 'POST' &&
         response.status() === 201
       ) {
@@ -97,15 +98,18 @@ test.describe('Daily Records - Quick Add Modal', () => {
       }
     });
 
-    await coopDetailPage.clickAddFlockButton();
-    await createFlockModal.fillForm(
-      testFlockIdentifier,
-      getDaysAgoDate(30),
-      5, // hens
-      1, // roosters
-      0  // chicks
-    );
+    // Click the add flock FAB button
+    await page.getByTestId('add-flock-fab').click();
+    await createFlockModal.fillForm({
+      identifier: testFlockIdentifier,
+      hatchDate: getDaysAgoDate(30),
+      hens: 5,
+      roosters: 1,
+      chicks: 0,
+    });
     await createFlockModal.submit();
+    await createFlockModal.waitForClose();
+    await page.waitForLoadState('networkidle');
 
     // Wait for the flock ID to be captured
     await page.waitForTimeout(500);
@@ -118,12 +122,11 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Click on "Quick Add" button (or FAB if implemented)
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    // Click on the Quick Add FAB button
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
 
     await expect(quickAddButton).toBeVisible();
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     // Modal should open
@@ -135,9 +138,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     // Check all fields are present
@@ -155,9 +157,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     const dateInput = page.getByLabel(/datum/i);
@@ -169,9 +170,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     // Find the egg count stepper
@@ -199,9 +199,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     const dateInput = page.getByLabel(/datum/i);
@@ -220,9 +219,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     const notesInput = page.getByLabel(/poznámky/i);
@@ -239,9 +237,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     // Should show 0/500 initially
@@ -258,9 +255,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     // Select flock (first flock should be selected by default)
@@ -304,9 +300,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     // Fill in some data
@@ -335,9 +330,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     // Set egg count
@@ -379,9 +373,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.waitForLoadState('networkidle');
 
     // Open modal
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     // Fill form quickly (simulating user workflow)
@@ -420,9 +413,8 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const quickAddButton = page.locator('[aria-label*="Přidat denní záznam"]').or(
-      page.getByRole('button', { name: /zaznamenat vajíčka/i })
-    );
+    const quickAddButton = page.getByRole('button', { name: 'Přidat denní záznam' });
+    await expect(quickAddButton).toBeEnabled({ timeout: 30000 });
     await quickAddButton.click();
 
     // Modal should be fullscreen on mobile

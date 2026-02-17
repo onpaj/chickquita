@@ -53,7 +53,7 @@ export interface CreateFlockRequest {
  * Request payload for updating an existing flock.
  */
 export interface UpdateFlockRequest {
-  id: string;
+  flockId: string;
   identifier: string;
   hatchDate: string;
   currentHens: number;
@@ -110,19 +110,19 @@ export const flocksApi = {
   /**
    * Updates an existing flock's basic information.
    * Does not affect composition - use composition change endpoints for that.
-   * Note: Backend endpoint not yet implemented
+   * Backend endpoint: PUT /api/flocks/{id}
    */
-  update: async (coopId: string, data: UpdateFlockRequest): Promise<Flock> => {
-    const response = await apiClient.put<Flock>(`/coops/${coopId}/flocks/${data.id}`, data);
+  update: async (_coopId: string, data: UpdateFlockRequest): Promise<Flock> => {
+    const response = await apiClient.put<Flock>(`/flocks/${data.flockId}`, data);
     return response.data;
   },
 
   /**
    * Archives a flock (sets isActive to false).
-   * Note: Backend endpoint not yet implemented
+   * Backend endpoint: POST /api/flocks/{id}/archive
    */
-  archive: async (coopId: string, flockId: string): Promise<boolean> => {
-    const response = await apiClient.patch<boolean>(`/coops/${coopId}/flocks/${flockId}/archive`);
+  archive: async (_coopId: string, flockId: string): Promise<boolean> => {
+    const response = await apiClient.post<boolean>(`/flocks/${flockId}/archive`);
     return response.data;
   },
 

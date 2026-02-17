@@ -44,8 +44,10 @@ test.describe('Responsive Layout - Dashboard Page', () => {
       await page.goto('/dashboard');
       await page.waitForLoadState('networkidle');
 
-      // Verify page title is visible
-      const title = page.getByRole('heading', { level: 1 });
+      // Verify dashboard page title is visible
+      // Use name filter to avoid strict mode violation when other h1 elements are present
+      // (e.g. Clerk-hosted authentication components may inject their own headings)
+      const title = page.getByRole('heading', { level: 1, name: /přehled|dashboard/i });
       await expect(title).toBeVisible();
 
       // Verify no horizontal overflow

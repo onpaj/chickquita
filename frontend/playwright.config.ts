@@ -49,6 +49,10 @@ export default defineConfig({
 
     // Video on failure
     video: 'retain-on-failure',
+
+    // Block service workers to prevent cached API responses from interfering with tests
+    // The service worker caches GET /api/* responses for 5 min which causes stale data in tests
+    serviceWorkers: 'block',
   },
 
   // Configure projects for major browsers

@@ -15,6 +15,7 @@ import {
 import { generateCoopName } from './fixtures/coop.fixture';
 
 test.describe('Flock Management - Complete CRUD Journey', () => {
+  test.describe.configure({ mode: 'serial' });
   let coopsPage: CoopsPage;
   let coopDetailPage: CoopDetailPage;
   let flocksPage: FlocksPage;
@@ -151,9 +152,9 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
       // Wait for error message
       await expect(createFlockModal.errorMessage.first()).toBeVisible();
 
-      // Verify error message mentions future date
+      // Verify error message mentions future date (Czech: "budoucnosti", English: "future")
       const errorText = await createFlockModal.getErrorMessage();
-      expect(errorText.toLowerCase()).toContain('future' || 'budoucnosti');
+      expect(errorText.toLowerCase()).toMatch(/future|budoucnosti/);
     });
 
     test('should show validation error when all counts are zero', async () => {

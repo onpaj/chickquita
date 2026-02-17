@@ -117,7 +117,7 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
     }
 
     const request: UpdateFlockRequest = {
-      id: flock.id,
+      flockId: flock.id,
       identifier: identifier.trim(),
       hatchDate,
       currentHens: hens,

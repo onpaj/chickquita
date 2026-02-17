@@ -24,6 +24,7 @@ import { generateCoopName } from './fixtures/coop.fixture';
 
 // Run i18n tests only on chromium to avoid test duplication and speed up execution
 test.describe('Flock Internationalization (i18n)', () => {
+  test.describe.configure({ mode: 'serial' });
   // Only run on chromium for i18n validation
   test.use({ storageState: '.clerk/user.json' });
   let coopsPage: CoopsPage;
@@ -51,36 +52,43 @@ test.describe('Flock Internationalization (i18n)', () => {
     await coopsPage.goto();
     await page.waitForLoadState('networkidle', { timeout: 30000 });
 
+    testCoopName = generateCoopName('i18n Test Coop');
+
+    // Intercept POST /api/coops to capture the coop ID
+    let createdCoopId: string | null = null;
+    page.on('response', async (response) => {
+      if (
+        response.url().includes('/api/coops') &&
+        response.request().method() === 'POST' &&
+        response.status() === 201
+      ) {
+        try {
+          const data = await response.json();
+          if (data && data.id) {
+            createdCoopId = data.id;
+          }
+        } catch {
+          // Ignore JSON parsing errors
+        }
+      }
+    });
+
     await coopsPage.openCreateCoopModal();
     await page.waitForTimeout(500);
-
-    testCoopName = generateCoopName('i18n Test Coop');
     await createCoopModal.createCoop(testCoopName, 'Test Location for i18n');
+    await createCoopModal.waitForClose();
 
-    // Wait for coop to be created with longer timeout
-    await page.waitForTimeout(3000);
-    await page.waitForLoadState('networkidle', { timeout: 30000 });
-
-    // Ensure the modal is closed
-    await expect(createCoopModal.modal).not.toBeVisible({ timeout: 10000 });
-
-    // Navigate to the created coop to get its ID
-    const coopCard = await coopsPage.getCoopCard(testCoopName);
-    await expect(coopCard).toBeVisible({ timeout: 20000 });
-
-    // Force action to bypass any overlays
-    await coopCard.click({ force: true });
-    await page.waitForLoadState('networkidle', { timeout: 30000 });
-
-    // Extract coop ID from URL
+    // Wait for the coop ID to be captured from the API response
     await page.waitForTimeout(1000);
-    const url = page.url();
-    const match = url.match(/\/coops\/([a-f0-9-]+)/);
-    testCoopId = match ? match[1] : '';
+    testCoopId = createdCoopId || '';
 
     if (!testCoopId) {
-      throw new Error(`Could not extract coop ID from URL: ${url}`);
+      throw new Error(`Could not capture coop ID from API response`);
     }
+
+    // Navigate directly to the coop's flocks page using the captured ID
+    await page.goto(`/coops/${testCoopId}/flocks`);
+    await page.waitForLoadState('networkidle', { timeout: 30000 });
   });
 
   /**
@@ -126,12 +134,13 @@ test.describe('Flock Internationalization (i18n)', () => {
       await expect(createFlockModal.modalTitle).toHaveText('Přidat hejno');
 
       // Verify form labels
-      await expect(page.getByText('Identifikátor hejna')).toBeVisible();
-      await expect(page.getByText('Datum líhnutí')).toBeVisible();
-      await expect(page.getByText('Složení hejna')).toBeVisible();
-      await expect(page.getByText('Slepice')).toBeVisible();
-      await expect(page.getByText('Kohouti')).toBeVisible();
-      await expect(page.getByText('Kuřata')).toBeVisible();
+      const dialog = page.getByRole('dialog');
+      await expect(dialog.getByText('Identifikátor hejna').first()).toBeVisible();
+      await expect(dialog.getByText('Datum líhnutí').first()).toBeVisible();
+      await expect(dialog.getByText('Složení hejna').first()).toBeVisible();
+      await expect(dialog.getByText('Slepice').first()).toBeVisible();
+      await expect(dialog.getByText('Kohouti').first()).toBeVisible();
+      await expect(dialog.getByText('Kuřata').first()).toBeVisible();
 
       // Verify buttons
       await expect(createFlockModal.submitButton).toHaveText('Uložit');
@@ -185,11 +194,12 @@ test.describe('Flock Internationalization (i18n)', () => {
       await flocksPage.waitForFlocksToLoad();
 
       // Verify flock card labels in Czech
-      await expect(page.getByText('Slepice')).toBeVisible();
-      await expect(page.getByText('Kohouti')).toBeVisible();
-      await expect(page.getByText('Kuřata')).toBeVisible();
-      await expect(page.getByText('Celkem')).toBeVisible();
-      await expect(page.getByText('Aktivní')).toBeVisible();
+      const flockCard = page.getByTestId('flock-card').first();
+      await expect(flockCard.getByText('Slepice')).toBeVisible();
+      await expect(flockCard.getByText('Kohouti')).toBeVisible();
+      await expect(flockCard.getByText('Kuřata')).toBeVisible();
+      await expect(flockCard.getByText('Celkem')).toBeVisible();
+      await expect(flockCard.getByText('Aktivní')).toBeVisible();
     });
 
     test('should display archive dialog in Czech', async ({ page }) => {
@@ -249,12 +259,13 @@ test.describe('Flock Internationalization (i18n)', () => {
       await expect(createFlockModal.modalTitle).toHaveText('Add Flock');
 
       // Verify form labels
-      await expect(page.getByText('Flock Identifier')).toBeVisible();
-      await expect(page.getByText('Hatch Date')).toBeVisible();
-      await expect(page.getByText('Flock Composition')).toBeVisible();
-      await expect(page.getByText('Hens')).toBeVisible();
-      await expect(page.getByText('Roosters')).toBeVisible();
-      await expect(page.getByText('Chicks')).toBeVisible();
+      const dialog = page.getByRole('dialog');
+      await expect(dialog.getByText('Flock Identifier').first()).toBeVisible();
+      await expect(dialog.getByText('Hatch Date').first()).toBeVisible();
+      await expect(dialog.getByText('Flock Composition').first()).toBeVisible();
+      await expect(dialog.getByText('Hens').first()).toBeVisible();
+      await expect(dialog.getByText('Roosters').first()).toBeVisible();
+      await expect(dialog.getByText('Chicks').first()).toBeVisible();
 
       // Verify buttons
       await expect(createFlockModal.submitButton).toHaveText('Save');
@@ -308,11 +319,12 @@ test.describe('Flock Internationalization (i18n)', () => {
       await flocksPage.waitForFlocksToLoad();
 
       // Verify flock card labels in English
-      await expect(page.getByText('Hens')).toBeVisible();
-      await expect(page.getByText('Roosters')).toBeVisible();
-      await expect(page.getByText('Chicks')).toBeVisible();
-      await expect(page.getByText('Total')).toBeVisible();
-      await expect(page.getByText('Active')).toBeVisible();
+      const flockCard = page.getByTestId('flock-card').first();
+      await expect(flockCard.getByText('Hens')).toBeVisible();
+      await expect(flockCard.getByText('Roosters')).toBeVisible();
+      await expect(flockCard.getByText('Chicks')).toBeVisible();
+      await expect(flockCard.getByText('Total')).toBeVisible();
+      await expect(flockCard.getByText('Active')).toBeVisible();
     });
 
     test('should display archive dialog in English', async ({ page }) => {

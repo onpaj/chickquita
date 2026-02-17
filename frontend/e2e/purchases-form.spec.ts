@@ -63,7 +63,7 @@ test.describe('Purchase Form', () => {
       await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 30000 });
 
       // Verify purchase was created (check if it appears in the list)
-      await expect(page.getByText('Premium Chicken Feed')).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText('Premium Chicken Feed').first()).toBeVisible({ timeout: 10000 });
     });
 
     test('should show autocomplete suggestions when typing purchase name', async ({ page }) => {
