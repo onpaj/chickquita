@@ -13,7 +13,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Purchase Form', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to purchases page (assuming there's a modal or page with the form)
-    await page.goto('http://localhost:5173/purchases');
+    await page.goto('/purchases');
 
     // Wait for page to load
     await page.waitForLoadState('networkidle');
@@ -21,24 +21,26 @@ test.describe('Purchase Form', () => {
 
   test.describe('Create Purchase Flow', () => {
     test('should allow user to create a purchase via form', async ({ page }) => {
-      // Click "Add Purchase" button to open form
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      // Click "Add Purchase" button to open form (Czech: "Přidat nákup")
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await expect(addButton).toBeVisible();
       await addButton.click();
 
-      // Wait for form to appear
-      await expect(page.getByLabel(/purchase type/i)).toBeVisible();
+      // Wait for form to appear (Czech: "Typ nákupu")
+      await expect(page.getByLabel(/typ nákupu|purchase type/i)).toBeVisible();
 
-      // Fill in the form
-      await page.getByLabel(/purchase type/i).selectOption('0'); // Feed
-      await page.getByLabel(/^name$/i).fill('Premium Chicken Feed');
+      // Fill in the form - type field (Czech label)
+      await page.getByLabel(/typ nákupu|purchase type/i).selectOption('0'); // Feed
 
-      // Set purchase date
+      // Fill name field (Czech: "Název")
+      await page.getByLabel(/název|^name$/i).fill('Premium Chicken Feed');
+
+      // Set purchase date (Czech: "Datum nákupu")
       const today = new Date().toISOString().split('T')[0];
-      await page.getByLabel(/purchase date/i).fill(today);
+      await page.getByLabel(/datum nákupu|purchase date/i).fill(today);
 
-      // Set amount using NumericStepper
-      const amountSection = page.locator('text=Amount (CZK)').locator('..');
+      // Set amount using NumericStepper (Czech: "Částka (Kč)")
+      const amountSection = page.locator('text=Částka').locator('..');
       const amountIncrementButton = amountSection.getByRole('button').last();
 
       // Click increment button multiple times to set amount to 250
@@ -46,8 +48,8 @@ test.describe('Purchase Form', () => {
         await amountIncrementButton.click();
       }
 
-      // Set quantity using NumericStepper
-      const quantitySection = page.locator('text=Quantity').locator('..');
+      // Set quantity using NumericStepper (Czech: "Množství")
+      const quantitySection = page.locator('text=Množství').locator('..');
       const quantityIncrementButton = quantitySection.getByRole('button').last();
 
       // Click increment button to set quantity to 25
@@ -55,14 +57,14 @@ test.describe('Purchase Form', () => {
         await quantityIncrementButton.click();
       }
 
-      // Select unit
-      await page.getByLabel(/^unit$/i).selectOption('0'); // Kg
+      // Select unit (Czech: "Jednotka")
+      await page.getByLabel(/jednotka|^unit$/i).selectOption('0'); // Kg
 
-      // Add notes
-      await page.getByLabel(/notes/i).fill('Test purchase from E2E');
+      // Add notes (Czech: "Poznámky")
+      await page.getByLabel(/poznámky|notes/i).fill('Test purchase from E2E');
 
-      // Submit the form
-      const submitButton = page.getByRole('button', { name: /create|save/i });
+      // Submit the form (Czech: "Vytvořit" or "Uložit")
+      const submitButton = page.getByRole('button', { name: /vytvořit|uložit|create|save/i });
       await expect(submitButton).toBeEnabled();
       await submitButton.click();
 
@@ -74,15 +76,15 @@ test.describe('Purchase Form', () => {
     });
 
     test('should show autocomplete suggestions when typing purchase name', async ({ page }) => {
-      // Click "Add Purchase" button
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      // Click "Add Purchase" button (Czech: "Přidat nákup")
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
-      // Wait for form
-      await expect(page.getByLabel(/^name$/i)).toBeVisible();
+      // Wait for form (Czech: "Název")
+      await expect(page.getByLabel(/název|^name$/i)).toBeVisible();
 
       // Type in the name field to trigger autocomplete
-      const nameInput = page.getByLabel(/^name$/i);
+      const nameInput = page.getByLabel(/název|^name$/i);
       await nameInput.fill('Kr');
 
       // Wait for autocomplete suggestions
@@ -104,129 +106,130 @@ test.describe('Purchase Form', () => {
     });
 
     test('should display type icons for each purchase type', async ({ page }) => {
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
-      await expect(page.getByLabel(/purchase type/i)).toBeVisible();
+      await expect(page.getByLabel(/typ nákupu|purchase type/i)).toBeVisible();
 
       // Open the type dropdown
-      await page.getByLabel(/purchase type/i).click();
+      await page.getByLabel(/typ nákupu|purchase type/i).click();
 
-      // Verify all purchase types are present
-      await expect(page.getByText('Feed')).toBeVisible();
-      await expect(page.getByText('Vitamins')).toBeVisible();
-      await expect(page.getByText('Bedding')).toBeVisible();
-      await expect(page.getByText('Toys')).toBeVisible();
-      await expect(page.getByText('Veterinary')).toBeVisible();
-      await expect(page.getByText('Other')).toBeVisible();
+      // Verify all purchase types are present (Czech labels)
+      await expect(page.getByText('Krmivo')).toBeVisible();
+      await expect(page.getByText('Vitamíny')).toBeVisible();
+      await expect(page.getByText('Podestýlka')).toBeVisible();
+      await expect(page.getByText('Vybavení')).toBeVisible();
+      await expect(page.getByText('Veterinární péče')).toBeVisible();
+      await expect(page.getByText('Ostatní')).toBeVisible();
     });
   });
 
   test.describe('Form Validation', () => {
     test('should prevent submission with empty required fields', async ({ page }) => {
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
-      await expect(page.getByLabel(/purchase type/i)).toBeVisible();
+      await expect(page.getByLabel(/typ nákupu|purchase type/i)).toBeVisible();
 
       // Try to submit without filling required fields
-      const submitButton = page.getByRole('button', { name: /create|save/i });
+      // Submit button should be disabled (Czech: "Vytvořit")
+      const submitButton = page.getByRole('button', { name: /vytvořit|create/i });
 
       // Submit button should be disabled
       await expect(submitButton).toBeDisabled();
     });
 
     test('should validate that purchase date is not in the future', async ({ page }) => {
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
-      await expect(page.getByLabel(/purchase type/i)).toBeVisible();
+      await expect(page.getByLabel(/typ nákupu|purchase type/i)).toBeVisible();
 
-      // Fill in name
-      await page.getByLabel(/^name$/i).fill('Test');
+      // Fill in name (Czech: "Název")
+      await page.getByLabel(/název|^name$/i).fill('Test');
 
-      // Set a future date
+      // Set a future date (Czech: "Datum nákupu")
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 1);
       const futureDateStr = futureDate.toISOString().split('T')[0];
 
-      await page.getByLabel(/purchase date/i).fill(futureDateStr);
+      await page.getByLabel(/datum nákupu|purchase date/i).fill(futureDateStr);
 
       // Blur the field to trigger validation
-      await page.getByLabel(/purchase date/i).blur();
+      await page.getByLabel(/datum nákupu|purchase date/i).blur();
 
-      // Wait for error message
+      // Wait for error message (Czech: "Datum nákupu nemůže být v budoucnosti")
       await expect(
-        page.getByText(/purchase date cannot be in the future/i)
+        page.getByText(/datum nákupu nemůže být v budoucnosti|purchase date cannot be in the future/i)
       ).toBeVisible({ timeout: 2000 });
     });
 
     test('should require positive amount', async ({ page }) => {
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
-      await expect(page.getByLabel(/purchase type/i)).toBeVisible();
+      await expect(page.getByLabel(/typ nákupu|purchase type/i)).toBeVisible();
 
-      // Fill in minimum required fields
-      await page.getByLabel(/^name$/i).fill('Test Feed');
+      // Fill in minimum required fields (Czech: "Název")
+      await page.getByLabel(/název|^name$/i).fill('Test Feed');
 
       const today = new Date().toISOString().split('T')[0];
-      await page.getByLabel(/purchase date/i).fill(today);
+      await page.getByLabel(/datum nákupu|purchase date/i).fill(today);
 
       // Leave amount at 0 (default)
 
       // Submit button should be disabled because amount must be positive
-      const submitButton = page.getByRole('button', { name: /create|save/i });
+      const submitButton = page.getByRole('button', { name: /vytvořit|create/i });
       await expect(submitButton).toBeDisabled();
     });
 
     test('should require positive quantity', async ({ page }) => {
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
-      await expect(page.getByLabel(/purchase type/i)).toBeVisible();
+      await expect(page.getByLabel(/typ nákupu|purchase type/i)).toBeVisible();
 
-      // Fill in minimum required fields
-      await page.getByLabel(/^name$/i).fill('Test Feed');
+      // Fill in minimum required fields (Czech: "Název")
+      await page.getByLabel(/název|^name$/i).fill('Test Feed');
 
       const today = new Date().toISOString().split('T')[0];
-      await page.getByLabel(/purchase date/i).fill(today);
+      await page.getByLabel(/datum nákupu|purchase date/i).fill(today);
 
       // Set amount but leave quantity at 0
-      const amountSection = page.locator('text=Amount (CZK)').locator('..');
+      const amountSection = page.locator('text=Částka').locator('..');
       const amountIncrementButton = amountSection.getByRole('button').last();
       await amountIncrementButton.click();
 
       // Submit button should be disabled because quantity must be positive
-      const submitButton = page.getByRole('button', { name: /create|save/i });
+      const submitButton = page.getByRole('button', { name: /vytvořit|create/i });
       await expect(submitButton).toBeDisabled();
     });
   });
 
   test.describe('Accessibility', () => {
     test('should have proper ARIA labels', async ({ page }) => {
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
-      // Check for ARIA labels on form fields
-      await expect(page.getByLabel(/purchase type/i)).toHaveAttribute('aria-label');
-      await expect(page.getByLabel(/purchase date/i)).toHaveAttribute('aria-label');
-      await expect(page.getByLabel(/notes/i)).toHaveAttribute('aria-label');
+      // Check for ARIA labels on form fields (Czech labels)
+      await expect(page.getByLabel(/typ nákupu|purchase type/i)).toHaveAttribute('aria-label');
+      await expect(page.getByLabel(/datum nákupu|purchase date/i)).toHaveAttribute('aria-label');
+      await expect(page.getByLabel(/poznámky|notes/i)).toHaveAttribute('aria-label');
     });
 
     test('should support keyboard navigation', async ({ page }) => {
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
-      // Focus on first field
-      await page.getByLabel(/purchase type/i).focus();
+      // Focus on first field (Czech: "Typ nákupu")
+      await page.getByLabel(/typ nákupu|purchase type/i).focus();
 
       // Tab through fields
       await page.keyboard.press('Tab');
-      await expect(page.getByLabel(/^name$/i)).toBeFocused();
+      await expect(page.getByLabel(/název|^name$/i)).toBeFocused();
 
       await page.keyboard.press('Tab');
-      await expect(page.getByLabel(/purchase date/i)).toBeFocused();
+      await expect(page.getByLabel(/datum nákupu|purchase date/i)).toBeFocused();
 
       // Continue tabbing through the form
       await page.keyboard.press('Tab');
@@ -234,7 +237,7 @@ test.describe('Purchase Form', () => {
       await page.keyboard.press('Tab');
 
       // Should be able to reach submit button via keyboard
-      const submitButton = page.getByRole('button', { name: /create|save/i });
+      const submitButton = page.getByRole('button', { name: /vytvořit|uložit|create|save/i });
       await submitButton.focus();
       await expect(submitButton).toBeFocused();
     });
@@ -245,15 +248,15 @@ test.describe('Purchase Form', () => {
       // Set mobile viewport
       await page.setViewportSize({ width: 375, height: 667 });
 
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
-      // Form should be visible and usable
-      await expect(page.getByLabel(/purchase type/i)).toBeVisible();
-      await expect(page.getByLabel(/^name$/i)).toBeVisible();
+      // Form should be visible and usable (Czech labels)
+      await expect(page.getByLabel(/typ nákupu|purchase type/i)).toBeVisible();
+      await expect(page.getByLabel(/název|^name$/i)).toBeVisible();
 
       // NumericStepper buttons should be visible and touch-friendly
-      const amountSection = page.locator('text=Amount (CZK)').locator('..');
+      const amountSection = page.locator('text=Částka').locator('..');
       const amountButtons = amountSection.getByRole('button');
 
       // Verify buttons are visible
@@ -264,11 +267,11 @@ test.describe('Purchase Form', () => {
     test('should have touch-friendly input targets', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
 
-      const addButton = page.getByRole('button', { name: /add purchase/i });
+      const addButton = page.getByRole('button', { name: /přidat nákup|add purchase/i });
       await addButton.click();
 
       // Check that inputs have minimum touch target size (44px is iOS standard)
-      const nameInput = page.getByLabel(/^name$/i);
+      const nameInput = page.getByLabel(/název|^name$/i);
       const boundingBox = await nameInput.boundingBox();
 
       expect(boundingBox).toBeTruthy();
