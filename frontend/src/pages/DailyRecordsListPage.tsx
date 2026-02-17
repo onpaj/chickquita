@@ -34,14 +34,16 @@ export function DailyRecordsListPage() {
   const { isLoading: isLoadingCoops } = useCoops();
   const { data: dailyRecords, isLoading: isLoadingRecords } = useDailyRecords(filters);
 
-  // Create a map of flock IDs to identifiers for display
+  // Create a map of flock IDs to display labels (flockName + coopName) for filter dropdown
   const flockMap = useMemo(() => {
     const map = new Map<string, string>();
     if (dailyRecords) {
-      // Build map from the records we have
       dailyRecords.forEach((record) => {
         if (!map.has(record.flockId)) {
-          map.set(record.flockId, record.flockId);
+          const label = record.flockCoopName
+            ? `${record.flockName} (${record.flockCoopName})`
+            : record.flockName || record.flockId;
+          map.set(record.flockId, label);
         }
       });
     }

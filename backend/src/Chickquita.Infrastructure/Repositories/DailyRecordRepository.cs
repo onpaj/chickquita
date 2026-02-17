@@ -22,6 +22,7 @@ public class DailyRecordRepository : IDailyRecordRepository
     {
         return await _context.DailyRecords
             .Include(d => d.Flock)
+                .ThenInclude(f => f.Coop)
             .OrderByDescending(d => d.RecordDate)
             .ToListAsync();
     }
@@ -31,6 +32,7 @@ public class DailyRecordRepository : IDailyRecordRepository
     {
         return await _context.DailyRecords
             .Include(d => d.Flock)
+                .ThenInclude(f => f.Coop)
             .Where(d => d.FlockId == flockId)
             .OrderByDescending(d => d.RecordDate)
             .ToListAsync();
@@ -45,6 +47,7 @@ public class DailyRecordRepository : IDailyRecordRepository
 
         return await _context.DailyRecords
             .Include(d => d.Flock)
+                .ThenInclude(f => f.Coop)
             .Where(d => d.FlockId == flockId
                 && d.RecordDate >= startDateUtc
                 && d.RecordDate <= endDateUtc)
@@ -57,6 +60,7 @@ public class DailyRecordRepository : IDailyRecordRepository
     {
         return await _context.DailyRecords
             .Include(d => d.Flock)
+                .ThenInclude(f => f.Coop)
             .FirstOrDefaultAsync(d => d.Id == id);
     }
 

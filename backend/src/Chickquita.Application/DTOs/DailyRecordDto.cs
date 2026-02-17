@@ -21,6 +21,16 @@ public sealed class DailyRecordDto
     public Guid FlockId { get; set; }
 
     /// <summary>
+    /// The name/identifier of the flock this record belongs to.
+    /// </summary>
+    public string FlockName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The name of the coop this flock belongs to.
+    /// </summary>
+    public string FlockCoopName { get; set; } = string.Empty;
+
+    /// <summary>
     /// The date of the record (date only, time is ignored).
     /// </summary>
     public DateTime RecordDate { get; set; }

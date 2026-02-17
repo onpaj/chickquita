@@ -15,6 +15,10 @@ public sealed class DailyRecordMappingProfile : Profile
     public DailyRecordMappingProfile()
     {
         // DailyRecord -> DailyRecordDto
-        CreateMap<DailyRecord, DailyRecordDto>();
+        CreateMap<DailyRecord, DailyRecordDto>()
+            .ForMember(dest => dest.FlockName,
+                opt => opt.MapFrom(src => src.Flock != null ? src.Flock.Identifier : string.Empty))
+            .ForMember(dest => dest.FlockCoopName,
+                opt => opt.MapFrom(src => src.Flock != null && src.Flock.Coop != null ? src.Flock.Coop.Name : string.Empty));
     }
 }

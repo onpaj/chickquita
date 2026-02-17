@@ -102,8 +102,8 @@ public class StatisticsRepository : IStatisticsRepository
 
     private async Task<List<CostBreakdownItemDto>> GetCostBreakdownAsync(DateOnly startDate, DateOnly endDate)
     {
-        var startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
-        var endDateTime = endDate.ToDateTime(TimeOnly.MaxValue);
+        var startDateTime = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+        var endDateTime = DateTime.SpecifyKind(endDate.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
         var purchases = await _context.Purchases
             .Where(p => p.PurchaseDate >= startDateTime && p.PurchaseDate <= endDateTime)
@@ -127,8 +127,8 @@ public class StatisticsRepository : IStatisticsRepository
 
     private async Task<List<ProductionTrendItemDto>> GetProductionTrendAsync(DateOnly startDate, DateOnly endDate)
     {
-        var startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
-        var endDateTime = endDate.ToDateTime(TimeOnly.MaxValue);
+        var startDateTime = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+        var endDateTime = DateTime.SpecifyKind(endDate.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
         return await _context.DailyRecords
             .Where(dr => dr.RecordDate >= startDateTime && dr.RecordDate <= endDateTime)
@@ -144,8 +144,8 @@ public class StatisticsRepository : IStatisticsRepository
 
     private async Task<List<CostPerEggTrendItemDto>> GetCostPerEggTrendAsync(DateOnly startDate, DateOnly endDate)
     {
-        var startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
-        var endDateTime = endDate.ToDateTime(TimeOnly.MaxValue);
+        var startDateTime = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+        var endDateTime = DateTime.SpecifyKind(endDate.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
         // Get cumulative costs and eggs by date
         var dailyRecords = await _context.DailyRecords
@@ -200,8 +200,8 @@ public class StatisticsRepository : IStatisticsRepository
 
     private async Task<List<FlockProductivityItemDto>> GetFlockProductivityAsync(DateOnly startDate, DateOnly endDate)
     {
-        var startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
-        var endDateTime = endDate.ToDateTime(TimeOnly.MaxValue);
+        var startDateTime = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
+        var endDateTime = DateTime.SpecifyKind(endDate.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
         var flockStats = await _context.DailyRecords
             .Where(dr => dr.RecordDate >= startDateTime && dr.RecordDate <= endDateTime)

@@ -34,8 +34,7 @@ export function BottomNavigation() {
         navigate('/purchases');
         break;
       case 'daily-records':
-        // Placeholder for M4 - Daily Records not yet implemented
-        // navigate('/daily-records');
+        navigate('/daily-records');
         break;
       case 'settings':
         navigate('/settings');
@@ -93,13 +92,6 @@ export function BottomNavigation() {
           label={t('navigation.dailyRecords')}
           value="daily-records"
           icon={<DailyRecordsIcon />}
-          disabled
-          sx={{
-            opacity: 0.4,
-            '&.Mui-disabled': {
-              opacity: 0.4,
-            },
-          }}
         />
         <BottomNavigationAction
           label={t('navigation.settings')}

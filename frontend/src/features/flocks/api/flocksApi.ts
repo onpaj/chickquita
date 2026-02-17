@@ -79,11 +79,11 @@ export const flocksApi = {
 
   /**
    * Retrieves a specific flock by ID.
-   * Backend endpoint: GET /api/coops/{coopId}/flocks/{flockId}
+   * Backend endpoint: GET /api/flocks/{flockId}
    * Includes full composition history.
    */
-  getById: async (coopId: string, flockId: string): Promise<Flock> => {
-    const response = await apiClient.get<Flock>(`/coops/${coopId}/flocks/${flockId}`);
+  getById: async (_coopId: string, flockId: string): Promise<Flock> => {
+    const response = await apiClient.get<Flock>(`/flocks/${flockId}`);
     return response.data;
   },
 

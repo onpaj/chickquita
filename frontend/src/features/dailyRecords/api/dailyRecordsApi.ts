@@ -8,6 +8,8 @@ export interface DailyRecordDto {
   id: string;
   tenantId: string;
   flockId: string;
+  flockName: string;
+  flockCoopName: string;
   recordDate: string; // ISO 8601 date string (YYYY-MM-DD)
   eggCount: number;
   notes?: string;
