@@ -1,209 +1,209 @@
-# Ralph Fix Plan - Migrate E2E Auth to @clerk/testing
+# Ralph Fix Plan - E2E Test Failures Resolution
 
-**PRD:** `tasks/prd-e2e-clerk-testing.md`
-**Goal:** Replace fragile Clerk UI-based E2E authentication with `@clerk/testing` package. Eliminate manual login, remove legacy auth scripts, update all configs and workflows. After migration, `npm run test:e2e` must authenticate automatically without any manual browser interaction.
+**PRD:** `tasks/prd-e2e-test-failures.md`
+**Goal:** Investigate and resolve all 195 failing E2E tests across 10 spec files. Achieve a green test suite (100% pass rate for non-skipped tests). For each failure, determine whether the fix belongs in app code, test code, or test infrastructure. After each fix group, re-run the affected spec file to verify the fix resolves all related tests.
 **Browser:** `http://localhost:3100` (must be running before starting)
+**Viewport:** 375x812px (mobile portrait) for browser verification tasks
 
 ## Constraints
 
-- **Never commit `CLERK_SECRET_KEY`** — it must only exist in `.env.test.local` (gitignored) or CI secrets
-- **Do not fix failing E2E tests** — only migrate auth infrastructure; the 195 failing tests are tracked in `fix_plan-e2etests.md`
-- **Verify auth works after each step** — run a quick smoke test to confirm authentication still functions
+- **Run affected spec file after every fix** to verify the fix resolves all related tests
+- **Do not introduce regressions** — the 81 currently passing tests must remain green
+- **Shared root causes first** — fix the root cause, not individual symptoms; one fix may resolve dozens of user stories
+- **Prefer test code fixes** over app code changes unless the app has a genuine bug
 - **Never use `git push` without explicit user instruction**
-- **Do not change test logic in spec files** — only update auth-related paths (`.auth/` → `.clerk/`)
-- **Preserve all existing Playwright config structure** — only change auth-related settings
-- **Check @clerk/testing docs** for the correct API before writing code — the package API may differ from assumptions
-
+- **Do not change unrelated code** — fix only what the failing tests require
+- **Visual regression baselines** must be visually inspected before committing
+- **Use Playwright MCP browser** for E2E verification when needed
+- **For each FIX investigate root cause**. In case of invalid test, your goal is to fix the test. In case of application error, your goal is to fix that error. In both cases, do not mark story as completed unless test is successful
+- **E2E Authentication — CRITICAL**: Tests authenticate via `@clerk/testing` (programmatic Clerk API). The setup project `e2e/clerk.setup.ts` runs automatically before tests and bypasses MFA. **NEVER navigate to `/sign-in` or authenticate manually in the browser** — manual auth triggers MFA and will hang indefinitely. The only valid auth method is `clerk.signIn()` from `@clerk/testing/playwright`. Requires `CLERK_SECRET_KEY` in `frontend/.env.test.local` (see `docs/architecture/E2E_AUTH_SETUP.md`).
 ---
 
 ## Priority Order
 
-P0 is the core migration (install + new setup + config). P1 updates all consumers. P2 is cleanup and CI. P3 is docs.
+Stories are ordered by blast radius. P0 fixes unblock the most tests. Complete P0 first, then P1, then P2.
 
 ---
 
-## P0 — Core Migration (New Auth Infrastructure)
+## P0 — Infrastructure & Setup (Unblock 100+ tests)
 
-### STEP-001: Install @clerk/testing package
+### FIX-001: Fix purchases-form.spec.ts — URL, MUI Select interactions, and form validity
 
-**Source:** PRD US-001
-**Files:** `frontend/package.json`
+**Source:** PRD Group 9 (US-178 through US-188) — 11 tests
+**Common errors:** Hardcoded `localhost:5173`, `selectOption()` on MUI Select (custom combobox), 250 increment clicks for amount, submit button not disabled when form invalid
+**Files:** `frontend/e2e/purchases-form.spec.ts`, `frontend/src/features/purchases/components/PurchaseForm.tsx`, `frontend/src/features/purchases/pages/PurchasesPage.tsx`
 
-- [ ] Run `cd frontend && npm install @clerk/testing --save-dev`
-- [ ] Verify `@clerk/testing` appears in `devDependencies` in `package.json`
-- [ ] Verify no version conflicts with `@clerk/clerk-react@^5.60.0`
-- [ ] Run `npx tsc --noEmit` — confirm zero TypeScript errors
-
----
-
-### STEP-002: Configure environment variables
-
-**Source:** PRD US-006
-**Files:** `frontend/.env.test`
-
-- [ ] Read current `frontend/.env.test` to understand existing content
-- [ ] Update `frontend/.env.test` with new env var names:
-  - `CLERK_PUBLISHABLE_KEY` (same value as `VITE_CLERK_PUBLISHABLE_KEY`)
-  - `E2E_CLERK_USER_USERNAME` (test user email)
-  - `E2E_CLERK_USER_PASSWORD` (test user password)
-- [ ] Remove old env var names: `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`
-- [ ] Verify `*.local` pattern in `frontend/.gitignore` covers `.env.test.local`
-- [ ] **DO NOT** put `CLERK_SECRET_KEY` in `.env.test` — only in `.env.test.local`
-- [ ] Verify `.env.test.local` exists locally with `CLERK_SECRET_KEY=sk_test_...` (ask user if missing)
+- [x] Rewrote `purchases-form.spec.ts`: replaced hardcoded URL with `page.goto('/purchases')`, replaced `selectOption()` with MUI Select `click()` + `getByRole('option')` pattern, replaced 250 increment clicks with `page.locator('input[aria-label="..."]').fill()`, simplified ARIA and keyboard tests
+- [x] Added `onValidityChange` prop to `PurchaseForm` so form validity is emitted to parent
+- [x] Updated `PurchasesPage.tsx` DialogActions submit button: `disabled={isSubmitting || !isFormValid}` (was only `disabled={isSubmitting}`)
+- [x] TypeScript compiles clean (`npx tsc --noEmit`)
 
 ---
 
-### STEP-003: Create new clerk.setup.ts
+### FIX-002: Fix beforeEach "Add Coop" Button Selector Mismatch
 
-**Source:** PRD US-002
-**Files:** `frontend/e2e/clerk.setup.ts` (new file)
+**Source:** PRD Groups 5, 6, 8 (US-112–131, US-132–149, US-166–177) — 50 tests
+**Common error:** Timeout waiting for `getByRole('button', { name: /add coop|přidat kurník|create coop/i }).first()` in beforeEach hooks
+**Files:** `frontend/e2e/flocks-i18n.spec.ts`, `frontend/e2e/flocks.spec.ts`, `frontend/e2e/daily-records-quick-add.spec.ts`, app components rendering the "add coop" button
 
-- [ ] Check `@clerk/testing` docs: verify correct import paths for `clerkSetup` and `clerk` from `@clerk/testing/playwright`
-- [ ] Create `frontend/e2e/clerk.setup.ts` with:
-  - Load `.env.test` and `.env.test.local` env vars
-  - Call `clerkSetup()` to obtain Testing Token
-  - Call `clerk.signIn()` with `strategy: 'password'`, using `E2E_CLERK_USER_USERNAME` and `E2E_CLERK_USER_PASSWORD`
-  - Navigate to app and wait for authenticated redirect
-  - Save browser state to `.clerk/user.json` via `page.context().storageState()`
-  - Create `.clerk/` directory if it doesn't exist
-  - Throw clear error if required env vars are missing
-- [ ] Run `npx tsc --noEmit` — confirm no TypeScript errors in the new file
-
----
-
-### STEP-004: Update main playwright.config.ts
-
-**Source:** PRD US-003
-**Files:** `frontend/playwright.config.ts`
-
-- [ ] Change setup project `testMatch` from `/.*\.setup\.ts/` to target `clerk.setup.ts` specifically
-- [ ] Change all `storageState: '.auth/user.json'` to `storageState: '.clerk/user.json'` (5 occurrences: chromium, firefox, webkit, Mobile Chrome, Mobile Safari)
-- [ ] Verify all browser projects still depend on the setup project
-- [ ] Run `npx playwright test --project=setup --project=chromium --grep "dashboard"` (or similar) — verify new auth setup runs and at least one authenticated page loads
+- [ ] Read `frontend/e2e/flocks.spec.ts` — find the `beforeEach` hook and note the exact selector used for the "add coop" button
+- [ ] Read `frontend/e2e/flocks-i18n.spec.ts` — find the `beforeEach` hook selector
+- [ ] Read `frontend/e2e/daily-records-quick-add.spec.ts` — find the `beforeEach` hook selector
+- [ ] Open browser at 375x812px, navigate to coops page, take snapshot
+- [ ] Identify the actual button text/ARIA label rendered for adding a coop (check FAB, empty state CTA, and page buttons)
+- [ ] Compare actual label with test selector regex — determine the mismatch
+- [ ] Decide: fix the app button label/ARIA to match tests, OR fix the test selectors to match the app
+- [ ] Apply the fix consistently across all three spec files
+- [ ] Run `npx playwright test flocks.spec.ts` — verify all 18 tests pass
+- [ ] Run `npx playwright test flocks-i18n.spec.ts` — verify all 20 tests pass
+- [ ] Run `npx playwright test daily-records-quick-add.spec.ts` — verify all 12 tests pass
 
 ---
 
-### STEP-005: Update crossbrowser playwright.crossbrowser.config.ts
+### FIX-003: Fix Coops Page Heading Selector Mismatch
 
-**Source:** PRD US-004
-**Files:** `frontend/playwright.crossbrowser.config.ts`
+**Source:** PRD Group 3 (US-066–087) — 22 tests
+**Common error:** `expect(locator).toBeVisible()` failed — heading `/coops|kurníky/i` not found
+**Files:** `frontend/e2e/coops.spec.ts`, coops page component
 
-- [ ] Change setup project `testMatch` from `/.*\.setup\.ts/` to target `clerk.setup.ts`
-- [ ] Change shared `use.storageState` from `.auth/user.json` to `.clerk/user.json` (line 128)
-- [ ] Verify all browser/device/breakpoint projects still depend on `setup`
-
----
-
-## P1 — Update All Consumers
-
-### STEP-006: Update test files with hardcoded auth paths
-
-**Source:** PRD US-005
-**Files:** `frontend/e2e/flocks-i18n.spec.ts`
-
-- [ ] Change `test.use({ storageState: '.auth/user.json' })` to `test.use({ storageState: '.clerk/user.json' })` in `flocks-i18n.spec.ts` (line 28)
-- [ ] Search all `e2e/**/*.spec.ts` for remaining `.auth/` references — fix any found
-- [ ] Search all `e2e/**/*.spec.ts` for `auth.setup` references — confirm none remain
+- [ ] Read `frontend/e2e/coops.spec.ts` — find the heading selector pattern (`/coops|kurníky/i`)
+- [ ] Open browser at 375x812px, navigate to coops page, take snapshot
+- [ ] Identify the actual heading text rendered on the coops page (check h1, h2, etc.)
+- [ ] Compare actual heading with test selector regex — determine the mismatch
+- [ ] Decide: fix the app heading to match tests, OR fix the test selectors to match the app
+- [ ] Apply the fix
+- [ ] Run `npx playwright test coops.spec.ts` — verify all 22 tests pass
 
 ---
 
-### STEP-007: Update .gitignore
+### FIX-004: Fix "Add Purchase" Button Selector Mismatch
 
-**Source:** PRD US-007
-**Files:** `frontend/.gitignore`
+**Source:** PRD Group 2 (US-039–065) — 27 tests
+**Common error:** Timeout waiting for `getByLabel(/přidat nákup|add purchase/i).first()`
+**Files:** `frontend/e2e/purchases-crud.spec.ts`, purchases page component
 
-- [ ] Add `/.clerk/` entry to `frontend/.gitignore`
-- [ ] Verify `*.local` pattern already covers `.env.test.local` (line 4: `*.local` exists)
-- [ ] Keep `/.auth/` entry for safety (old directories may still exist locally)
-
----
-
-## P2 — Cleanup & CI
-
-### STEP-008: Remove legacy auth files
-
-**Source:** PRD US-008
-**Files:** `frontend/e2e/auth.setup.ts`, `frontend/e2e/save-auth.js`, `frontend/e2e/refresh-auth.mjs`, `frontend/package.json`
-
-- [ ] Delete `frontend/e2e/auth.setup.ts`
-- [ ] Delete `frontend/e2e/save-auth.js`
-- [ ] Delete `frontend/e2e/refresh-auth.mjs`
-- [ ] Remove `"test:e2e:save-auth"` script from `frontend/package.json` (line 19)
-- [ ] Search entire codebase for references to deleted files — fix any remaining imports or references
-- [ ] Delete `frontend/.auth/` directory if it exists locally
+- [ ] Read `frontend/e2e/purchases-crud.spec.ts` — find all selectors for the "add purchase" button (note: uses `getByLabel` not `getByRole`)
+- [ ] Open browser at 375x812px, navigate to purchases page, take snapshot
+- [ ] Identify the actual button element: check ARIA label, role, visible text for the add purchase action (FAB or button)
+- [ ] Compare actual ARIA label/role with test selector — determine the mismatch (likely `getByLabel` vs `getByRole`)
+- [ ] Decide: fix the app button ARIA label, OR fix the test selector method
+- [ ] Apply the fix consistently across all purchase test selectors
+- [ ] Run `npx playwright test purchases-crud.spec.ts` — verify all 27 tests pass
 
 ---
 
-### STEP-009: Update CI/CD workflow (ci-cd.yml)
+## P1 — Page-Level Selector Fixes (40+ tests)
 
-**Source:** PRD US-009
-**Files:** `.github/workflows/ci-cd.yml`
+### FIX-005: Fix Responsive Layout Test Selectors (Strict Mode + Navigation)
 
-- [ ] Add env vars to the `e2e-tests` job's "Run E2E tests" step (around line 196):
-  ```yaml
-  env:
-    CI: true
-    CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
-    CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-    E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
-    E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
-  ```
-- [ ] Verify no other jobs are affected
-- [ ] Verify the existing `continue-on-error: false` is preserved
+**Source:** PRD Group 1 (US-001–038) — 38 tests
+**Common error:** Strict mode violation — `getByRole('heading', { level: 1 })` resolves to 2 elements (app title "Chickquita" in AppBar + page heading). Also: bottom navigation element not found, timeouts.
+**Files:** `frontend/e2e/crossbrowser/responsive-layout.crossbrowser.spec.ts`, app layout components
 
----
-
-### STEP-010: Update crossbrowser workflow (crossbrowser-tests.yml)
-
-**Source:** PRD US-010
-**Files:** `.github/workflows/crossbrowser-tests.yml`
-
-- [ ] Add Clerk env vars to `test-chrome` job's test step (around line 118):
-  ```yaml
-  env:
-    CI: true
-    CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
-    CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-    E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
-    E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
-  ```
-- [ ] Add same env vars to `test-firefox` job's test step (around line 178)
-- [ ] Add same env vars to `test-safari` job's test step (around line 238)
-- [ ] Add same env vars to `test-mobile` job's test step (around line 296)
-- [ ] Add same env vars to `test-breakpoints` job's test step (around line 355)
-- [ ] Verify all existing `CI: true` env vars are preserved
+- [ ] Read `frontend/e2e/crossbrowser/responsive-layout.crossbrowser.spec.ts` — identify all selectors causing strict mode violations
+- [ ] Determine the root cause: the AppBar added in UX-009 introduces a second h1 "Chickquita" alongside page headings
+- [ ] Decide fix approach:
+  - Option A (app fix): Change "Chickquita" in AppBar from h1 to a non-heading element (span, div)
+  - Option B (test fix): Make selectors more specific (e.g. `page.getByRole('heading', { level: 1 }).filter(...)` or use `locator.first()`)
+- [ ] Fix the strict mode violation for Dashboard grid layout tests (line 42) — affects US-001, US-004, US-007, US-009 (5 viewports)
+- [ ] Fix the bottom navigation visibility tests (line 73) — identify actual bottom nav selector and update tests — affects US-002, US-003, US-005, US-006, US-008, US-010 (6 viewports)
+- [ ] Fix the Coops list layout tests (line 125) — affects US-011 through US-016 (6 viewports)
+- [ ] Fix the Create coop modal tests (line 179) — affects US-017 through US-022 (6 viewports)
+- [ ] Fix the Bottom navigation interaction tests (line 265) — affects US-023 through US-028 (6 viewports)
+- [ ] Fix the Vertical scrolling tests (line 296) — affects US-029 through US-034 (6 viewports)
+- [ ] Fix the Device-specific user journey tests (line 331) — affects US-035 through US-038 (4 devices)
+- [ ] Run `npx playwright test crossbrowser/responsive-layout.crossbrowser.spec.ts` — verify all 38 tests pass
 
 ---
 
-## P3 — Documentation
+### FIX-006: Fix Purchases Page Routing and Element Tests
 
-### STEP-011: Update E2E documentation
+**Source:** PRD Group 7 (US-150–165) — 16 tests
+**Common error:** Timeouts and elements not found when navigating to purchases page
+**Files:** `frontend/e2e/purchases-page.spec.ts`, purchases page components
 
-**Source:** PRD US-011
-**Files:** `docs/architecture/E2E_AUTH_SETUP.md`, `frontend/e2e/README.md`, `frontend/e2e/TEST_SETUP.md`
+- [ ] Read `frontend/e2e/purchases-page.spec.ts` — identify all failing selectors and navigation patterns
+- [ ] Open browser at 375x812px, navigate to `/purchases`, take snapshot
+- [ ] Compare actual page structure (headings, buttons, FAB, bottom nav) with test expectations
+- [ ] Fix route navigation test (line 22) — US-150
+- [ ] Fix bottom navigation to purchases test (line 30) — US-151: check if "Nákupy" tab still exists in bottom nav (it may have been replaced by "Statistiky" in UX-007)
+- [ ] Fix authentication protection test (line 48) — US-152
+- [ ] Fix FAB button tests (lines 63, 69, 81) — US-153, US-154, US-155
+- [ ] Fix CRUD flow tests (lines 97, 143, 186, 203, 228) — US-156 through US-160
+- [ ] Fix viewport tests (lines 247, 267) — US-161, US-162
+- [ ] Fix PurchaseList component tests (lines 282, 287) — US-163, US-164
+- [ ] Fix bottom nav highlight test (line 302) — US-165: update expected tab if nav changed
+- [ ] Run `npx playwright test purchases-page.spec.ts` — verify all 16 tests pass
 
-- [ ] Rewrite `docs/architecture/E2E_AUTH_SETUP.md`:
-  - Prerequisites: `@clerk/testing` package, `.env.test.local` with `CLERK_SECRET_KEY`
-  - Local setup: Just create `.env.test.local` and run `npm run test:e2e`
-  - CI setup: List required GitHub Secrets
-  - Troubleshooting: Missing secret key, expired tokens, network issues
-- [ ] Update `frontend/e2e/README.md` — replace old auth instructions with new `@clerk/testing` approach
-- [ ] Update `frontend/e2e/TEST_SETUP.md` — replace `.auth/user.json` references with `.clerk/user.json`, remove save-auth instructions
-- [ ] Remove references to `save-auth.js`, `refresh-auth.mjs`, and manual browser login from all docs
+---
+
+### FIX-007: Fix Daily Records List Page Heading Selector
+
+**Source:** PRD Group 10 (US-189–198) — 10 tests
+**Common error:** `expect(locator).toBeVisible()` failed — heading `/denní záznamy/i` not found
+**Files:** `frontend/e2e/daily-records-list.spec.ts`, daily records list page component
+
+- [ ] Read `frontend/e2e/daily-records-list.spec.ts` — find the heading selector pattern (`/denní záznamy/i`)
+- [ ] Open browser at 375x812px, navigate to daily records page, take snapshot
+- [ ] Identify the actual heading text rendered on the daily records page
+- [ ] Compare actual heading with test selector regex — determine the mismatch
+- [ ] Decide: fix the app heading to match tests, OR fix the test selectors to match the app
+- [ ] Apply the fix
+- [ ] Fix remaining test selectors if needed (filter options, quick filters, date range, skeletons)
+- [ ] Run `npx playwright test daily-records-list.spec.ts` — verify all 10 tests pass
+
+---
+
+## P2 — Visual Regression Baselines (25 tests)
+
+### FIX-008: Generate Visual Regression Baseline Snapshots
+
+**Source:** PRD Group 4 (US-088–111) — 25 tests
+**Common error:** `A snapshot doesn't exist at ... writing actual.` — baseline images not yet generated
+**Files:** `frontend/e2e/crossbrowser/visual-regression.crossbrowser.spec.ts`, snapshot directory
+
+- [ ] Read `frontend/e2e/crossbrowser/visual-regression.crossbrowser.spec.ts` to understand what pages/components are screenshotted
+- [ ] Ensure the app is running and all pages render correctly before generating baselines
+- [ ] Run `npx playwright test crossbrowser/visual-regression.crossbrowser.spec.ts --update-snapshots` to generate all baseline images
+- [ ] Review generated snapshot files in the snapshots directory:
+  - [ ] `sign-in-page` baseline — verify it looks correct (US-088)
+  - [ ] `dashboard-page` baseline — verify (US-089)
+  - [ ] `coops-page` baseline — verify (US-090)
+  - [ ] `settings-page` baseline — verify (US-091)
+  - [ ] `bottom-navigation` baseline — verify (US-092)
+  - [ ] `loading-skeleton` baseline — verify (US-093)
+  - [ ] `create-coop-modal` baseline — verify (US-094)
+  - [ ] Breakpoint baselines (320px, 480px, 768px, 1024px, 1920px) for dashboard and coops — verify (US-095 through US-104)
+  - [ ] `FAB-touch-target` baseline — verify touch target size is adequate (US-105)
+  - [ ] `text-contrast` baseline — verify WCAG contrast ratios (US-106)
+  - [ ] `czech-layout` baseline — verify Czech text renders correctly (US-107)
+  - [ ] `english-layout` baseline — verify English text renders correctly (US-108)
+  - [ ] `coop-card` baseline — verify (US-109)
+  - [ ] `empty-state` baseline — verify (US-110)
+  - [ ] `bottom-nav-touch-target` baseline — verify (US-111)
+- [ ] Run `npx playwright test crossbrowser/visual-regression.crossbrowser.spec.ts` (without --update-snapshots) — verify all 25 tests pass
+- [ ] Stage snapshot files for commit
 
 ---
 
 ## Final Verification
 
-After completing all steps:
+After completing all fix groups:
 
-- [ ] Run `npx tsc --noEmit` in `frontend/` — zero TypeScript errors
-- [ ] Run `npm run lint` in `frontend/` — zero lint errors
-- [ ] Run `npx playwright test --project=chromium` — auth setup completes successfully
-- [ ] Verify `.clerk/user.json` is created with valid cookies and localStorage
-- [ ] Verify at least one authenticated test passes (dashboard loads)
-- [ ] Verify no references to old files remain: search for `auth.setup`, `save-auth`, `refresh-auth`, `.auth/user.json`
-- [ ] Verify `CLERK_SECRET_KEY` does not appear in any committed file
+- [ ] Run full E2E test suite: `npx playwright test` — confirm 0 failures (195 previously failing tests now pass)
+- [ ] Verify 81 previously passing tests still pass (0 regressions)
+- [ ] Verify 18 skipped tests are still skipped (not newly broken)
+- [ ] Review total test count: expect 332 total, ~314 passing, 18 skipped
+- [ ] Run `npx tsc --noEmit` — zero TypeScript errors (if app code was changed)
+- [ ] Run `npm run build` — confirm production build succeeds (if app code was changed)
+- [ ] Open browser at 375x812px and spot-check key pages:
+  - [ ] Dashboard — renders without errors
+  - [ ] Coops — list and create modal work
+  - [ ] Flocks — list, create, edit work
+  - [ ] Purchases — list and create work
+  - [ ] Daily Records — list works
+  - [ ] Statistics — page loads
+  - [ ] Settings — page loads
 - [ ] Commit changes with appropriate message
 
 ---
@@ -211,24 +211,22 @@ After completing all steps:
 ## Progress Summary
 
 ### Current Status
-- **Steps**: 11
-- **Completed**: 0 / 11
-- **P0 Core Migration**: 0 / 5 (STEP-001 through STEP-005)
-- **P1 Consumers**: 0 / 2 (STEP-006 through STEP-007)
-- **P2 Cleanup & CI**: 0 / 3 (STEP-008 through STEP-010)
-- **P3 Documentation**: 0 / 1 (STEP-011)
+- **Total Failing Tests**: 195 (across 10 spec files)
+- **Fix Groups**: 8
+- **Completed**: 0 / 8
+- **P0 Infrastructure**: 0 / 4 (FIX-001 through FIX-004 — unblock ~110 tests)
+- **P1 Page-Level**: 0 / 3 (FIX-005 through FIX-007 — fix ~64 tests)
+- **P2 Baselines**: 0 / 1 (FIX-008 — generate 25 baselines)
 
-### Step → Files Mapping
-| Step | Description | Files Affected |
-|------|-------------|----------------|
-| STEP-001 | Install @clerk/testing | `package.json` |
-| STEP-002 | Configure env vars | `.env.test` |
-| STEP-003 | Create clerk.setup.ts | `e2e/clerk.setup.ts` (new) |
-| STEP-004 | Update main Playwright config | `playwright.config.ts` |
-| STEP-005 | Update crossbrowser config | `playwright.crossbrowser.config.ts` |
-| STEP-006 | Update hardcoded auth paths in tests | `e2e/flocks-i18n.spec.ts` |
-| STEP-007 | Update .gitignore | `.gitignore` |
-| STEP-008 | Remove legacy auth files | `e2e/auth.setup.ts`, `e2e/save-auth.js`, `e2e/refresh-auth.mjs`, `package.json` |
-| STEP-009 | Update CI/CD workflow | `.github/workflows/ci-cd.yml` |
-| STEP-010 | Update crossbrowser workflow | `.github/workflows/crossbrowser-tests.yml` |
-| STEP-011 | Update documentation | `docs/architecture/E2E_AUTH_SETUP.md`, `e2e/README.md`, `e2e/TEST_SETUP.md` |
+### Root Cause → Test Count Mapping
+| Fix Group | Root Cause | Tests Affected |
+|-----------|-----------|----------------|
+| FIX-001 | Hardcoded `localhost:5173` | 11 |
+| FIX-002 | "Add coop" button selector in beforeEach | 50 |
+| FIX-003 | Coops page heading mismatch | 22 |
+| FIX-004 | "Add purchase" button selector | 27 |
+| FIX-005 | Strict mode (dual h1) + nav selectors | 38 |
+| FIX-006 | Purchases page element selectors | 16 |
+| FIX-007 | Daily records heading mismatch | 10 |
+| FIX-008 | Missing visual regression baselines | 25 |
+| **Total** | | **199** (some overlap with shared root causes) |

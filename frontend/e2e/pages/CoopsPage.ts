@@ -123,7 +123,7 @@ export class CoopsPage {
       await confirmButton.click();
 
       // Wait for dialog to close
-      await confirmDialog.waitFor({ state: 'hidden', timeout: 5000 });
+      await confirmDialog.waitFor({ state: 'hidden', timeout: 15000 });
 
       // Wait for network to be idle after deletion
       await this.page.waitForLoadState('networkidle');

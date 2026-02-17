@@ -25,7 +25,7 @@ import { generateCoopName } from './fixtures/coop.fixture';
 // Run i18n tests only on chromium to avoid test duplication and speed up execution
 test.describe('Flock Internationalization (i18n)', () => {
   // Only run on chromium for i18n validation
-  test.use({ storageState: '.auth/user.json' });
+  test.use({ storageState: '.clerk/user.json' });
   let coopsPage: CoopsPage;
   let flocksPage: FlocksPage;
   let createFlockModal: CreateFlockModal;

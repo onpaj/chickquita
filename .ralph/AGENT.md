@@ -85,7 +85,7 @@ npm run test:ui
 ```bash
 cd frontend
 
-# Run all E2E tests (chromium)
+# Run all E2E tests (chromium) — auth via @clerk/testing runs automatically
 npm run test:e2e
 
 # Run with visible browser
@@ -99,10 +99,9 @@ npm run test:e2e:debug
 
 # Show last report
 npm run test:e2e:report
-
-# Save auth state for E2E (required before first run)
-npm run test:e2e:save-auth
 ```
+
+> **⚠️ Auth note:** E2E tests authenticate via `@clerk/testing` (programmatic Clerk sign-in that **bypasses MFA**). The setup project `e2e/clerk.setup.ts` runs automatically before all tests — no separate auth step is needed. **Never authenticate manually via the sign-in UI** — that triggers MFA and will block automated tests.
 
 ### Cross-Browser Tests (Playwright)
 
@@ -164,7 +163,7 @@ dotnet ef database update \
 
 ## Key Learnings
 
-- **E2E auth**: Playwright tests use stored auth state. Run `npm run test:e2e:save-auth` before first E2E run. See `docs/architecture/E2E_AUTH_SETUP.md`.
+- **E2E auth**: Tests use `@clerk/testing` (programmatic Clerk sign-in, bypasses MFA). Auth runs automatically via `e2e/clerk.setup.ts` — **never sign in manually via the browser UI** as that triggers MFA. Requires `CLERK_SECRET_KEY` in `frontend/.env.test.local`. See `docs/architecture/E2E_AUTH_SETUP.md`.
 - **RLS context**: Backend must call `SET app.current_tenant_id` before every query. EF Core global query filters provide additional safety.
 - **Tenant auto-creation**: `TenantResolutionMiddleware` auto-creates tenants if Clerk webhook failed — no manual intervention needed.
 - **Offline-first**: Daily records must work offline. Changes queue via Background Sync API (24h retention).

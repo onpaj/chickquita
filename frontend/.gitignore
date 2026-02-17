@@ -31,4 +31,5 @@ dist-ssr
 
 # E2E test artifacts
 /.auth/
+/.clerk/
 .env.test

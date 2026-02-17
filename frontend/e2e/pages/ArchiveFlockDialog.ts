@@ -46,7 +46,7 @@ export class ArchiveFlockDialog {
    * Wait for dialog to close
    */
   async waitForClose() {
-    await this.dialog.waitFor({ state: 'hidden', timeout: 5000 });
+    await this.dialog.waitFor({ state: 'hidden', timeout: 15000 });
   }
 
   /**

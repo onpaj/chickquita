@@ -53,6 +53,7 @@ export function PurchasesPage() {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<PurchaseDto | null>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   // CRUD hooks
   const { createPurchase, isCreating } = useCreatePurchase();
@@ -64,12 +65,14 @@ export function PurchasesPage() {
   // Handle create button click
   const handleCreateClick = () => {
     setEditingPurchase(null);
+    setIsFormValid(false);
     setIsModalOpen(true);
   };
 
   // Handle edit button click
   const handleEditClick = (purchase: PurchaseDto) => {
     setEditingPurchase(purchase);
+    setIsFormValid(false);
     setIsModalOpen(true);
   };
 
@@ -177,6 +180,7 @@ export function PurchasesPage() {
             isSubmitting={isSubmitting}
             coops={coopsForForm}
             formId={PURCHASE_FORM_ID}
+            onValidityChange={setIsFormValid}
           />
         </DialogContent>
         <DialogActions sx={dialogActionsSx}>
@@ -191,7 +195,7 @@ export function PurchasesPage() {
             type="submit"
             form={PURCHASE_FORM_ID}
             variant="contained"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isFormValid}
             startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : undefined}
             sx={touchButtonSx}
           >

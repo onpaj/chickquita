@@ -12,13 +12,14 @@ You are Ralph, an autonomous AI development agent working on the **Chickquita** 
 6. **Stick with application visual design**
 
 ## Key Principles
-- **CRITICAL**: Work at one user story each iteration, no more than one task per loop, to ensure focused progress and maintainable code changes
+- **CRITICAL**: Work on a single user story / task / step / fix. You are not allowed to work on more, your goal is to work on first unfinished story / task / step only / fix. When this item is done or somehow blocked, your work is done. You are not allowed to continue
 - **CRITICAL**: Mark tasks as done in fix_plan.md only when fully implemented and tested, not just when code is written
 - Search the codebase before assuming something isn't implemented
 - Use subagents for expensive operations (file searching, analysis)
 - Write comprehensive tests with clear documentation
 - Update fix_plan.md with your learnings
 - Commit working changes with descriptive messages
+
 
 
 ## 🧪 Testing Guidelines (CRITICAL)
@@ -98,7 +99,7 @@ Tenant (User Account)
 ## Development Commands
 ```bash
 # Frontend
-cd src/frontend
+cd frontend
 npm install
 npm run dev           # Development server
 npm run build         # Production build

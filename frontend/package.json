@@ -16,7 +16,6 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
-    "test:e2e:save-auth": "node e2e/save-auth.js",
     "test:crossbrowser": "playwright test --config=playwright.crossbrowser.config.ts",
     "test:crossbrowser:ui": "playwright test --config=playwright.crossbrowser.config.ts --ui",
     "test:crossbrowser:headed": "playwright test --config=playwright.crossbrowser.config.ts --headed",

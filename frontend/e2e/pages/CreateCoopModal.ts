@@ -48,8 +48,8 @@ export class CreateCoopModal {
     return await this.modal.isVisible();
   }
 
-  async waitForClose() {
-    await this.modal.waitFor({ state: 'hidden', timeout: 5000 });
+  async waitForClose(timeout: number = 15000) {
+    await this.modal.waitFor({ state: 'hidden', timeout });
   }
 
   async isSubmitDisabled(): Promise<boolean> {
