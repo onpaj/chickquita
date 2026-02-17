@@ -17,12 +17,14 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import HistoryIcon from '@mui/icons-material/History';
+import PetsIcon from '@mui/icons-material/Pets';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
 import EggIcon from '@mui/icons-material/Egg';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { Flock } from '../api/flocksApi';
+import { MatureChicksModal } from './MatureChicksModal';
 
 interface FlockCardProps {
   flock: Flock;
@@ -43,6 +45,7 @@ export function FlockCard({
   const theme = useTheme();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [isMatureChicksModalOpen, setIsMatureChicksModalOpen] = useState(false);
 
   const menuOpen = Boolean(anchorEl);
 
@@ -77,6 +80,12 @@ export function FlockCard({
     event.stopPropagation();
     handleMenuClose();
     onViewHistory?.(flock);
+  };
+
+  const handleMatureChicks = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    handleMenuClose();
+    setIsMatureChicksModalOpen(true);
   };
 
   return (
@@ -288,7 +297,26 @@ export function FlockCard({
           </ListItemIcon>
           <ListItemText>{t('flocks.viewHistory')}</ListItemText>
         </MenuItem>
+        <MenuItem
+          onClick={handleMatureChicks}
+          disabled={!flock.isActive || flock.currentChicks === 0}
+          aria-label={t('flocks.matureChicks.action')}
+        >
+          <ListItemIcon>
+            <PetsIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t('flocks.matureChicks.action')}</ListItemText>
+        </MenuItem>
       </Menu>
+
+      {/* Mature Chicks Modal */}
+      {isMatureChicksModalOpen && (
+        <MatureChicksModal
+          open={isMatureChicksModalOpen}
+          onClose={() => setIsMatureChicksModalOpen(false)}
+          flock={flock}
+        />
+      )}
     </>
   );
 }

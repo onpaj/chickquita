@@ -158,10 +158,19 @@
       "decrease": "Snížit"
     },
     "matureChicks": {
-      "title": "Převést kuřata na dospělé",
-      "chicksCount": "Počet kuřat",
-      "toHens": "Na slepice",
-      "toRoosters": "Na kohouty"
+      "title": "Dospění kuřat",
+      "description": "Dostupná kuřata k dospění: {{count}}",
+      "chicksCount": "Počet kuřat k dospění",
+      "chicksAvailable": "Dostupno: {{count}} kuřat",
+      "assignSubtitle": "Rozdělit na:",
+      "toHens": "Slepice",
+      "toRoosters": "Kohouti",
+      "total": "Celkem přiřazeno",
+      "sumError": "Součet slepic a kohoutů musí být {{count}}",
+      "confirm": "Potvrdit dospění",
+      "action": "Dospět kuřata",
+      "success": "Kuřata úspěšně dospěla",
+      "error": "Nepodařilo se provést dospění kuřat"
     },
     "create": {
       "success": "Hejno bylo úspěšně vytvořeno",

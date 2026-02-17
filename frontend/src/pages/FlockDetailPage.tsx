@@ -18,11 +18,13 @@ import {
   Edit as EditIcon,
   Archive as ArchiveIcon,
   History as HistoryIcon,
+  Pets as PetsIcon,
 } from '@mui/icons-material';
 import { useFlockDetail } from '../features/flocks/hooks/useFlocks';
 import { useArchiveFlock } from '../features/flocks/hooks/useFlocks';
 import { EditFlockModal } from '../features/flocks/components/EditFlockModal';
 import { ArchiveFlockDialog } from '../features/flocks/components/ArchiveFlockDialog';
+import { MatureChicksModal } from '../features/flocks/components/MatureChicksModal';
 import { ResourceNotFound } from '../components/ResourceNotFound';
 import { processApiError, ErrorType } from '../lib/errors';
 import { useErrorHandler } from '../hooks/useErrorHandler';
@@ -40,6 +42,7 @@ export function FlockDetailPage() {
   const { showSuccess } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
+  const [isMatureChicksModalOpen, setIsMatureChicksModalOpen] = useState(false);
 
   const dateLocale = i18n.language === 'cs' ? cs : enUS;
 
@@ -312,6 +315,15 @@ export function FlockDetailPage() {
             >
               {t('flocks.viewHistory')}
             </Button>
+            <Button
+              variant="outlined"
+              startIcon={<PetsIcon />}
+              onClick={() => setIsMatureChicksModalOpen(true)}
+              disabled={!flock.isActive || flock.currentChicks === 0}
+              sx={{ width: { xs: '100%', md: 'auto' } }}
+            >
+              {t('flocks.matureChicks.action')}
+            </Button>
           </Stack>
         </Stack>
       </Paper>
@@ -333,6 +345,15 @@ export function FlockDetailPage() {
           onConfirm={handleConfirmArchive}
           flockIdentifier={flock.identifier}
           isPending={isArchiving}
+        />
+      )}
+
+      {/* Mature Chicks Modal */}
+      {flock && isMatureChicksModalOpen && (
+        <MatureChicksModal
+          open={isMatureChicksModalOpen}
+          onClose={() => setIsMatureChicksModalOpen(false)}
+          flock={flock}
         />
       )}
     </Container>

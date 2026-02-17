@@ -69,6 +69,15 @@ public static class FlocksEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
+
+        // POST /api/flocks/{id}/mature-chicks - Mature chicks into hens/roosters
+        flocksGroup.MapPost("/{id:guid}/mature-chicks", MatureChicks)
+            .WithName("MatureChicks")
+            .WithOpenApi()
+            .Produces<FlockDto>()
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetFlocks(
@@ -200,6 +209,28 @@ public static class FlocksEndpoints
         [FromServices] IMediator mediator)
     {
         var command = new ArchiveFlockCommand { FlockId = id };
+        var result = await mediator.Send(command);
+
+        if (!result.IsSuccess)
+        {
+            return result.Error.Code switch
+            {
+                "Error.Unauthorized" => Results.Unauthorized(),
+                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
+                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
+                _ => Results.BadRequest(new { error = result.Error })
+            };
+        }
+
+        return Results.Ok(result.Value);
+    }
+
+    private static async Task<IResult> MatureChicks(
+        [FromRoute] Guid id,
+        [FromBody] MatureChicksCommand command,
+        [FromServices] IMediator mediator)
+    {
+        command.FlockId = id;
         var result = await mediator.Send(command);
 
         if (!result.IsSuccess)

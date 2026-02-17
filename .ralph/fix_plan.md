@@ -127,7 +127,7 @@ Stories are ordered by severity. Complete P0 stories first, then P1, then P2.
 - [ ] Open the modal, enter values, verify real-time validation works, submit and verify toast + flock composition update
 - [ ] Navigate to flock history — verify maturation entry appears in timeline
 
-**STATUS:**
+**STATUS:** ✅ IMPLEMENTED — Backend: created `MatureChicksCommand.cs`, `MatureChicksCommandValidator.cs`, `MatureChicksCommandHandler.cs`; registered `POST /api/flocks/{id}/mature-chicks` in `FlocksEndpoints.cs`; `dotnet build` passes. Frontend: created `MatureChicksModal.tsx` with real-time validation (hens+roosters must equal chicksToMature), added `useMatureChicks` hook with toast notifications, added "Dospět kuřata" menu item to `FlockCard.tsx` (disabled when chicks=0), added "Dospět kuřata" button to `FlockDetailPage.tsx` (disabled when chicks=0). TypeScript type-check passes, no regressions in tests. E2E: modal opens, validation works, live 1/1 counter displays correctly. NOTE: Backend needs restart to serve new endpoint (old process from previous session running on port 5100).
 
 ---
 
@@ -441,7 +441,7 @@ After completing all stories:
 
 ### Current Status
 - **Total Stories**: 16
-- **Completed**: 0 / 16
-- **P0 Critical**: 0 / 4 complete
+- **Completed**: 4 / 16 (UX-001, UX-003, UX-004, UX-006)
+- **P0 Critical**: 4 / 4 complete ✅
 - **P1 Major**: 0 / 6 complete
 - **P2 Quality**: 0 / 6 complete

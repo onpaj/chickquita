@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { flocksApi, type Flock } from '../api/flocksApi';
+import { flocksApi, type Flock, type MatureChicksRequest } from '../api/flocksApi';
 import { useToast } from '../../../hooks/useToast';
 
 /**
@@ -141,6 +141,35 @@ export function useUpdateFlock() {
       showError(
         t('flocks.update.error'),
         'flocks.update.error'
+      );
+    },
+  });
+}
+
+/**
+ * Hook for maturing chicks into adult hens and roosters.
+ * Invalidates flock queries and shows toast notifications on success/error.
+ */
+export function useMatureChicks() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  const { showSuccess, showError } = useToast();
+
+  return useMutation({
+    mutationFn: ({ flockId, data }: { flockId: string; data: MatureChicksRequest }) =>
+      flocksApi.matureChicks(flockId, data),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['flocks'] });
+      queryClient.invalidateQueries({ queryKey: ['flockHistory', variables.flockId] });
+      showSuccess(
+        t('flocks.matureChicks.success'),
+        'flocks.matureChicks.success'
+      );
+    },
+    onError: () => {
+      showError(
+        t('flocks.matureChicks.error'),
+        'flocks.matureChicks.error'
       );
     },
   });

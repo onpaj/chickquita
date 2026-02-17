@@ -158,10 +158,19 @@
       "decrease": "Decrease"
     },
     "matureChicks": {
-      "title": "Mature Chicks to Adults",
-      "chicksCount": "Number of Chicks",
-      "toHens": "To Hens",
-      "toRoosters": "To Roosters"
+      "title": "Mature Chicks",
+      "description": "Chicks available to mature: {{count}}",
+      "chicksCount": "Chicks to Mature",
+      "chicksAvailable": "Available: {{count}} chicks",
+      "assignSubtitle": "Assign to:",
+      "toHens": "Hens",
+      "toRoosters": "Roosters",
+      "total": "Total assigned",
+      "sumError": "Sum of hens and roosters must equal {{count}}",
+      "confirm": "Confirm Maturation",
+      "action": "Mature Chicks",
+      "success": "Chicks matured successfully",
+      "error": "Failed to mature chicks"
     },
     "create": {
       "success": "Flock created successfully",

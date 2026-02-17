@@ -62,6 +62,16 @@ export interface UpdateFlockRequest {
 }
 
 /**
+ * Request payload for maturing chicks into adult hens/roosters.
+ */
+export interface MatureChicksRequest {
+  chicksToMature: number;
+  hens: number;
+  roosters: number;
+  notes?: string;
+}
+
+/**
  * API client for flock-related operations.
  * All endpoints automatically include authentication via apiClient.
  */
@@ -135,6 +145,16 @@ export const flocksApi = {
     const response = await apiClient.patch<FlockHistory>(`/flock-history/${historyId}/notes`, {
       notes,
     });
+    return response.data;
+  },
+
+  /**
+   * Matures chicks into adult hens and roosters.
+   * Backend endpoint: POST /api/flocks/{flockId}/mature-chicks
+   * Creates an immutable FlockHistory entry with reason "Maturation".
+   */
+  matureChicks: async (flockId: string, data: MatureChicksRequest): Promise<Flock> => {
+    const response = await apiClient.post<Flock>(`/flocks/${flockId}/mature-chicks`, data);
     return response.data;
   },
 };
