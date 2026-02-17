@@ -7,6 +7,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
+  CircularProgress,
   useMediaQuery,
   useTheme,
   Button,
@@ -22,7 +24,11 @@ import {
   DIALOG_CONFIG,
   dialogTitleSx,
   dialogContentSx,
+  dialogActionsSx,
+  touchButtonSx,
 } from '@/shared/constants/modalConfig';
+
+const PURCHASE_FORM_ID = 'purchase-form';
 
 /**
  * PurchasesPage Component
@@ -170,9 +176,32 @@ export function PurchasesPage() {
             onSubmit={handleFormSubmit}
             isSubmitting={isSubmitting}
             coops={coopsForForm}
-            onCancel={handleModalClose}
+            formId={PURCHASE_FORM_ID}
           />
         </DialogContent>
+        <DialogActions sx={dialogActionsSx}>
+          <Button
+            onClick={handleModalClose}
+            disabled={isSubmitting}
+            sx={touchButtonSx}
+          >
+            {t('common.cancel')}
+          </Button>
+          <Button
+            type="submit"
+            form={PURCHASE_FORM_ID}
+            variant="contained"
+            disabled={isSubmitting}
+            startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : undefined}
+            sx={touchButtonSx}
+          >
+            {isSubmitting
+              ? t('common.saving')
+              : editingPurchase
+              ? t('common.save')
+              : t('common.create')}
+          </Button>
+        </DialogActions>
       </Dialog>
     </Container>
   );

@@ -115,6 +115,11 @@ export interface PurchaseFormProps {
    * Callback when cancel button is clicked
    */
   onCancel?: () => void;
+  /**
+   * Optional form id — when provided, action buttons are NOT rendered inside the form.
+   * Use this to render action buttons in DialogActions externally via form={formId}.
+   */
+  formId?: string;
 }
 
 /**
@@ -167,6 +172,7 @@ export function PurchaseForm({
   isSubmitting = false,
   coops,
   onCancel,
+  formId,
 }: PurchaseFormProps) {
   const { t } = useTranslation();
   const [nameInput, setNameInput] = useState('');
@@ -275,6 +281,7 @@ export function PurchaseForm({
   return (
     <Box
       component="form"
+      id={formId}
       onSubmit={handleSubmit(handleFormSubmit)}
       noValidate
       sx={{ width: '100%' }}
@@ -398,9 +405,9 @@ export function PurchaseForm({
               label={t('purchases.form.amount')}
               value={field.value}
               onChange={field.onChange}
-              min={0.01}
-              max={999999.99}
-              step={0.01}
+              min={1}
+              max={999999}
+              step={1}
               disabled={isSubmitting}
               error={!!errors.amount}
               helperText={errors.amount?.message ? t(errors.amount.message) : ''}
@@ -419,8 +426,8 @@ export function PurchaseForm({
               value={field.value}
               onChange={field.onChange}
               min={0.01}
-              max={999999.99}
-              step={0.01}
+              max={999999}
+              step={0.5}
               disabled={isSubmitting}
               error={!!errors.quantity}
               helperText={errors.quantity?.message ? t(errors.quantity.message) : ''}
@@ -544,33 +551,35 @@ export function PurchaseForm({
           )}
         />
 
-        {/* Form Actions */}
-        <Stack direction="row" spacing={2} justifyContent="flex-end">
-          {onCancel && (
+        {/* Form Actions — only rendered when formId is NOT provided */}
+        {!formId && (
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            {onCancel && (
+              <Button
+                onClick={onCancel}
+                disabled={isSubmitting}
+                sx={touchButtonSx}
+                aria-label={t('common.cancel')}
+              >
+                {t('common.cancel')}
+              </Button>
+            )}
             <Button
-              onClick={onCancel}
-              disabled={isSubmitting}
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting || !isValid}
+              startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : undefined}
               sx={touchButtonSx}
-              aria-label={t('common.cancel')}
+              aria-label={isEditMode ? t('common.save') : t('common.create')}
             >
-              {t('common.cancel')}
+              {isSubmitting
+                ? t('common.saving')
+                : isEditMode
+                ? t('common.save')
+                : t('common.create')}
             </Button>
-          )}
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isSubmitting || !isValid}
-            startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : undefined}
-            sx={touchButtonSx}
-            aria-label={isEditMode ? t('common.save') : t('common.create')}
-          >
-            {isSubmitting
-              ? t('common.saving')
-              : isEditMode
-              ? t('common.save')
-              : t('common.create')}
-          </Button>
-        </Stack>
+          </Stack>
+        )}
       </Stack>
     </Box>
   );
