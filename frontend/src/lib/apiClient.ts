@@ -102,12 +102,18 @@ apiClient.interceptors.response.use(
 
     if (isNetworkError && isModifyingRequest && config) {
       try {
+        // Extract record ID from URL patterns like /daily-records/{uuid}
+        const url = config.url || '';
+        const recordIdMatch = url.match(/\/daily-records\/([0-9a-f-]{36})/i);
+        const recordId = recordIdMatch ? recordIdMatch[1] : undefined;
+
         // Queue the request for later sync
         const requestId = await db.queueRequest({
           method: config.method?.toUpperCase() as any,
-          url: config.url || '',
+          url,
           body: config.data,
-          headers: config.headers as Record<string, string>
+          headers: config.headers as Record<string, string>,
+          recordId
         });
 
         console.log(`📥 Queued offline request #${requestId}: ${config.method} ${config.url}`);

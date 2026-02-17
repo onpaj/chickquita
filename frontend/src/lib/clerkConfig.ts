@@ -46,8 +46,8 @@ export const clerkAppearance: Appearance = {
         bold: 600,
       },
 
-      // Border radius to match Material-UI
-      borderRadius: '4px',
+      // Border radius (rounded corners per UX-016)
+      borderRadius: '12px',
 
       // Spacing
       spacingUnit: '8px',

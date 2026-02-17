@@ -73,7 +73,7 @@ export default function SignUpPage() {
             mt: 1,
           }}
         >
-          Chicken Farming Profitability Tracker
+          Sledujte ziskovost chovu slepic
         </Typography>
       </Box>
 

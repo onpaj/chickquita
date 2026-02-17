@@ -50,6 +50,7 @@ export function BottomNavigation() {
         left: 0,
         right: 0,
         zIndex: 1000,
+        paddingBottom: 'env(safe-area-inset-bottom)',
       }}
       elevation={3}
     >

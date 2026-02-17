@@ -13,7 +13,7 @@ CLAUDE_OUTPUT_FORMAT="json"
 
 # Tool permissions
 # Comma-separated list of allowed tools
-ALLOWED_TOOLS="Write,Read,Edit,Bash(git *),Bash(npm *),Bash(pytest),Bash(pnpm *),Bash(yarn *),Bash(mkdir *),Bash(npm install *),Bash(sed *)"
+ALLOWED_TOOLS="Write,Read,Edit,Bash(git *),Bash(npm *),Bash(pytest),Bash(pnpm *),Bash(yarn *),Bash(mkdir *),Bash(npm install *),Bash(sed *),Bash(grep *),mcp__playwright*,mcp__playwright__browser_run_code"
 
 # Session management
 SESSION_CONTINUITY=true

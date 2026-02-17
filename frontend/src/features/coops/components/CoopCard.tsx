@@ -18,6 +18,8 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { cs, enUS } from 'date-fns/locale';
 import { useArchiveCoop, useDeleteCoop } from '../hooks/useCoops';
 import { EditCoopModal } from './EditCoopModal';
 import { ArchiveCoopDialog } from './ArchiveCoopDialog';
@@ -33,7 +35,7 @@ interface CoopCardProps {
 }
 
 export function CoopCard({ coop }: CoopCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { mutate: archiveCoop, isPending: isArchiving } = useArchiveCoop();
   const { mutate: deleteCoop, isPending: isDeleting } = useDeleteCoop();
@@ -109,11 +111,8 @@ export function CoopCard({ coop }: CoopCardProps) {
     });
   };
 
-  const formattedDate = new Date(coop.createdAt).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const dateLocale = i18n.language === 'cs' ? cs : enUS;
+  const formattedDate = format(new Date(coop.createdAt), 'd. MMMM yyyy', { locale: dateLocale });
 
   return (
     <>

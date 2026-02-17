@@ -28,12 +28,15 @@ import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   FiberManualRecord as FiberManualRecordIcon,
+  History as HistoryIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import type { FlockHistory } from '../api/flocksApi';
 import { useUpdateFlockHistoryNotes } from '../hooks/useFlockHistory';
+import { IllustratedEmptyState } from '@/shared/components';
+import { formatCzechCount } from '@/lib/czechPlurals';
 
 interface FlockHistoryTimelineProps {
   history: FlockHistory[];
@@ -74,11 +77,11 @@ export function FlockHistoryTimeline({ history, loading, error }: FlockHistoryTi
 
   if (!history || history.length === 0) {
     return (
-      <Paper sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
-          {t('flockHistory.empty', 'No history entries yet')}
-        </Typography>
-      </Paper>
+      <IllustratedEmptyState
+        illustration={<HistoryIcon />}
+        title={t('flockHistory.empty', 'Zatím tu nejsou žádné záznamy historie')}
+        description={t('flockHistory.emptyDescription', 'Záznamy se vytvoří automaticky při změnách složení hejna')}
+      />
     );
   }
 
@@ -186,10 +189,10 @@ export function FlockHistoryTimeline({ history, loading, error }: FlockHistoryTi
                       {t(`flockHistory.reason.${entry.reason.toLowerCase()}`, entry.reason)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {t('flockHistory.composition', 'Composition')}: {entry.hens}{' '}
-                      {t('flockHistory.hens', 'hens')}, {entry.roosters}{' '}
-                      {t('flockHistory.roosters', 'roosters')}, {entry.chicks}{' '}
-                      {t('flockHistory.chicks', 'chicks')}
+                      {t('flockHistory.composition', 'Složení')}:{' '}
+                      {i18n.language === 'cs'
+                        ? `${formatCzechCount(entry.hens, 'slepice', 'slepice', 'slepic')}, ${formatCzechCount(entry.roosters, 'kohout', 'kohouti', 'kohoutů')}, ${formatCzechCount(entry.chicks, 'kuře', 'kuřata', 'kuřat')}`
+                        : `${entry.hens} ${t('flockHistory.hens', 'hens')}, ${entry.roosters} ${t('flockHistory.roosters', 'roosters')}, ${entry.chicks} ${t('flockHistory.chicks', 'chicks')}`}
                     </Typography>
                   </Box>
                   {!isEditing && (

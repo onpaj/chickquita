@@ -10,6 +10,10 @@ import { useTranslation } from 'react-i18next';
 import { db, type SyncStatus } from '@/lib/db';
 import { manualSync } from '@/lib/syncManager';
 
+interface OfflineBannerProps {
+  onVisibilityChange?: (visible: boolean) => void;
+}
+
 /**
  * Offline banner component that displays:
  * - Offline/online status
@@ -19,7 +23,7 @@ import { manualSync } from '@/lib/syncManager';
  *
  * Appears at the top of the screen when offline or when there are pending syncs.
  */
-export function OfflineBanner() {
+export function OfflineBanner({ onVisibilityChange }: OfflineBannerProps = {}) {
   const { t } = useTranslation();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
@@ -77,13 +81,16 @@ export function OfflineBanner() {
     setIsDismissed(true);
   };
 
-  // Don't show banner if dismissed and online with no pending syncs
-  if (isDismissed && isOnline && (!syncStatus || syncStatus.pendingCount === 0)) {
-    return null;
-  }
+  const shouldShow =
+    !(isDismissed && isOnline && (!syncStatus || syncStatus.pendingCount === 0)) &&
+    !(isOnline && (!syncStatus || syncStatus.pendingCount === 0));
 
-  // Don't show if online and no pending syncs
-  if (isOnline && (!syncStatus || syncStatus.pendingCount === 0)) {
+  // Notify parent when visibility changes
+  useEffect(() => {
+    onVisibilityChange?.(shouldShow);
+  }, [shouldShow, onVisibilityChange]);
+
+  if (!shouldShow) {
     return null;
   }
 

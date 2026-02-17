@@ -11,6 +11,7 @@ import {
   Chip,
   Skeleton,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -279,16 +280,23 @@ export function CoopDetailPage() {
             >
               {t('coops.archiveCoop')}
             </Button>
-            <Button
-              variant="text"
-              color="error"
-              startIcon={<DeleteIcon />}
-              onClick={handleDelete}
-              disabled={!coop.isActive || isDeleting || coop.flocksCount > 0}
-              sx={{ width: { xs: '100%', md: 'auto' } }}
+            <Tooltip
+              title={coop.flocksCount > 0 ? t('coops.deleteDisabledHasFlocks', 'Nejprve odstraňte všechna hejna') : !coop.isActive ? t('coops.deleteDisabledArchived', 'Kurník je archivován') : ''}
+              disableHoverListener={coop.isActive && !isDeleting && coop.flocksCount === 0}
             >
-              {t('common.delete')}
-            </Button>
+              <span>
+                <Button
+                  variant="text"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleDelete}
+                  disabled={!coop.isActive || isDeleting || coop.flocksCount > 0}
+                  sx={{ width: { xs: '100%', md: 'auto' } }}
+                >
+                  {t('common.delete')}
+                </Button>
+              </span>
+            </Tooltip>
           </Stack>
         </Stack>
       </Paper>

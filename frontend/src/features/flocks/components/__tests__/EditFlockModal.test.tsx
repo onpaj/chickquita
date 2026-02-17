@@ -121,12 +121,12 @@ describe('EditFlockModal', () => {
       expect(screen.getByLabelText(/Hatch Date/)).toBeInTheDocument();
     });
 
-    it('should NOT render composition fields (hens, roosters, chicks)', () => {
+    it('should render composition fields (hens, roosters, chicks)', () => {
       renderModal();
-      // Composition fields should not be editable in edit modal
-      expect(screen.queryByLabelText(/Hens/i)).not.toBeInTheDocument();
-      expect(screen.queryByLabelText(/Roosters/i)).not.toBeInTheDocument();
-      expect(screen.queryByLabelText(/Chicks/i)).not.toBeInTheDocument();
+      // Composition fields should be editable in edit modal (added in UX-002)
+      expect(screen.getByText('flocks.hens')).toBeInTheDocument();
+      expect(screen.getByText('flocks.roosters')).toBeInTheDocument();
+      expect(screen.getByText('flocks.chicks')).toBeInTheDocument();
     });
 
     it('should render cancel button', () => {

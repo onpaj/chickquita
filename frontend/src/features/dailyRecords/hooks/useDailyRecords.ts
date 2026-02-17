@@ -79,6 +79,8 @@ export function useCreateDailyRecord() {
             id: `temp-${Date.now()}`,
             tenantId: 'pending',
             flockId,
+            flockName: '',
+            flockCoopName: '',
             recordDate: data.recordDate,
             eggCount: data.eggCount,
             notes: data.notes,

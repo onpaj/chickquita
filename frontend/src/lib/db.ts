@@ -13,6 +13,7 @@ export interface PendingRequest {
   timestamp: string;
   retryCount: number;
   lastError?: string;
+  recordId?: string;
 }
 
 /**
@@ -43,6 +44,10 @@ class ChickquitaDB extends Dexie {
     // Define database schema
     this.version(1).stores({
       pendingRequests: '++id, method, url, timestamp, retryCount',
+      syncStatus: 'key, status, lastSync'
+    });
+    this.version(2).stores({
+      pendingRequests: '++id, method, url, timestamp, retryCount, recordId',
       syncStatus: 'key, status, lastSync'
     });
   }

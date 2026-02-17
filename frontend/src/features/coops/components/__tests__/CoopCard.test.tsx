@@ -28,6 +28,7 @@ vi.mock('react-i18next', () => ({
       if (key === 'common.delete') return 'Delete';
       return key;
     },
+    i18n: { language: 'cs' },
   }),
 }));
 

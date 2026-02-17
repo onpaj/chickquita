@@ -13,10 +13,38 @@ import CloseIcon from '@mui/icons-material/Close';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
 import { useTranslation } from 'react-i18next';
+import { DIALOG_CONFIG } from '@/shared/constants/modalConfig';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+const DISMISS_EXPIRY_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
+
+function isDismissed(): boolean {
+  try {
+    const raw = localStorage.getItem('pwa-install-dismissed');
+    if (!raw) return false;
+    // Legacy format: 'true'
+    if (raw === 'true') return true;
+    const parsed = JSON.parse(raw);
+    if (parsed.dismissed && parsed.expiresAt) {
+      if (Date.now() < parsed.expiresAt) return true;
+    }
+    // Expired — clear
+    localStorage.removeItem('pwa-install-dismissed');
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function setDismissed(): void {
+  localStorage.setItem(
+    'pwa-install-dismissed',
+    JSON.stringify({ dismissed: true, expiresAt: Date.now() + DISMISS_EXPIRY_MS })
+  );
 }
 
 /**
@@ -28,7 +56,7 @@ interface BeforeInstallPromptEvent extends Event {
  * Features:
  * - Auto-shows after 2nd visit or 5 minutes of usage
  * - Uses native browser install prompt
- * - Persists user dismissal to avoid annoyance
+ * - Persists user dismissal for 90 days (with expiry)
  * - Mobile-friendly dialog design
  *
  * @example
@@ -42,9 +70,8 @@ export function PwaInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    // Check if user has already dismissed the prompt
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
-    if (dismissed === 'true') {
+    // Check if user has already dismissed the prompt (with expiry check)
+    if (isDismissed()) {
       return;
     }
 
@@ -106,8 +133,7 @@ export function PwaInstallPrompt() {
   };
 
   const handleDismiss = () => {
-    // Mark as dismissed in localStorage to prevent future prompts
-    localStorage.setItem('pwa-install-dismissed', 'true');
+    setDismissed();
     setShowPrompt(false);
   };
 
@@ -124,8 +150,7 @@ export function PwaInstallPrompt() {
     <Dialog
       open={showPrompt}
       onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
+      {...DIALOG_CONFIG}
       PaperProps={{
         sx: {
           borderRadius: 2,

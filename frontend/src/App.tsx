@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import SignUpPage from './pages/SignUpPage'
 import SignInPage from './pages/SignInPage'
@@ -27,6 +27,7 @@ function App() {
   useApiClient()
   const { isSignedIn } = useAuth()
   const navigate = useNavigate()
+  const [bannerVisible, setBannerVisible] = useState(false)
 
   // Start offline sync manager
   useEffect(() => {
@@ -64,7 +65,7 @@ function App() {
       )}
 
       {/* Offline detection banner */}
-      {isSignedIn && <OfflineBanner />}
+      {isSignedIn && <OfflineBanner onVisibilityChange={setBannerVisible} />}
 
       {/* PWA Install prompts (auto-detect platform) */}
       {isSignedIn && (
@@ -74,7 +75,7 @@ function App() {
         </>
       )}
 
-      <Box sx={{ pb: isSignedIn ? 8 : 0 }}>
+      <Box sx={{ pb: isSignedIn ? 'calc(64px + env(safe-area-inset-bottom))' : 0, pt: bannerVisible ? '60px' : 0 }}>
         <Routes>
           <Route path="/" element={<Navigate to="/sign-up" replace />} />
           <Route path="/sign-up/*" element={<SignUpPage />} />
