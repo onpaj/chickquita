@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import SignUpPage from './pages/SignUpPage'
 import SignInPage from './pages/SignInPage'
 import DashboardPage from './pages/DashboardPage'
@@ -19,12 +19,14 @@ import { OfflineBanner, PwaInstallPrompt, IosInstallPrompt } from './shared/comp
 import { useApiClient } from './lib/useApiClient'
 import { useAuth } from '@clerk/clerk-react'
 import { startAutoSync } from './lib/syncManager'
-import { Box } from '@mui/material'
+import { Box, AppBar, Toolbar, Typography, IconButton } from '@mui/material'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 
 function App() {
   // Initialize API client with Clerk authentication
   useApiClient()
   const { isSignedIn } = useAuth()
+  const navigate = useNavigate()
 
   // Start offline sync manager
   useEffect(() => {
@@ -33,6 +35,34 @@ function App() {
 
   return (
     <>
+      {/* App Bar — only shown when signed in */}
+      {isSignedIn && (
+        <AppBar
+          position="sticky"
+          color="default"
+          elevation={1}
+          sx={{ top: 0, zIndex: 1100, height: 56 }}
+        >
+          <Toolbar sx={{ minHeight: '56px !important', px: 2 }}>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ flexGrow: 1, fontWeight: 700, color: 'primary.main', letterSpacing: 0.5 }}
+            >
+              Chickquita
+            </Typography>
+            <IconButton
+              onClick={() => navigate('/settings')}
+              aria-label="settings"
+              size="medium"
+              sx={{ p: 1 }}
+            >
+              <AccountCircleIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      )}
+
       {/* Offline detection banner */}
       {isSignedIn && <OfflineBanner />}
 
@@ -44,7 +74,7 @@ function App() {
         </>
       )}
 
-      <Box sx={{ pb: isSignedIn ? 8 : 0, pt: isSignedIn ? 0 : 0 }}>
+      <Box sx={{ pb: isSignedIn ? 8 : 0 }}>
         <Routes>
           <Route path="/" element={<Navigate to="/sign-up" replace />} />
           <Route path="/sign-up/*" element={<SignUpPage />} />

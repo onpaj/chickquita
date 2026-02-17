@@ -110,10 +110,6 @@ export default function DashboardPage() {
           <>
             {/* Statistics Widgets Section */}
             <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" gutterBottom fontWeight={600} sx={{ mb: 2 }}>
-                {t('dashboard.title')}
-              </Typography>
-
               <Box
                 sx={{
                   display: 'grid',
@@ -198,7 +194,7 @@ export default function DashboardPage() {
                 disabled={flocks.length === 0}
                 sx={{
                   position: 'fixed',
-                  bottom: 88, // Above bottom navigation (56px height + 32px spacing)
+                  bottom: 80, // Above bottom navigation (64px height + 16px spacing)
                   right: 16,
                 }}
               >
