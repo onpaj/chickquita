@@ -87,6 +87,9 @@ setup('authenticate with Clerk', async ({ page }) => {
 
   console.log('✅ Authentication successful');
 
+  // Force Czech language for E2E tests so selectors and option names match test data
+  await page.evaluate(() => localStorage.setItem('i18nextLng', 'cs'));
+
   // Create .clerk directory if it doesn't exist
   const clerkDir = path.dirname(clerkFile);
   if (!fs.existsSync(clerkDir)) {
