@@ -177,6 +177,7 @@ export function PurchasesPage() {
           <PurchaseForm
             initialData={editingPurchase || undefined}
             onSubmit={handleFormSubmit}
+            onCancel={handleModalClose}
             isSubmitting={isSubmitting}
             coops={coopsForForm}
             formId={PURCHASE_FORM_ID}
