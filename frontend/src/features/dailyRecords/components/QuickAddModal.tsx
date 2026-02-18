@@ -8,7 +8,12 @@ import {
   Stack,
   CircularProgress,
   TextField,
+  IconButton,
+  Slide,
 } from '@mui/material';
+import type { TransitionProps } from '@mui/material/transitions';
+import CloseIcon from '@mui/icons-material/Close';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCreateDailyRecord } from '../hooks/useDailyRecords';
 import { useErrorHandler } from '../../../hooks/useErrorHandler';
@@ -24,6 +29,13 @@ import {
   touchInputProps,
   FORM_FIELD_SPACING,
 } from '@/shared/constants/modalConfig';
+
+const SlideUp = React.forwardRef(function SlideUp(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 interface QuickAddModalProps {
   open: boolean;
@@ -112,6 +124,7 @@ export function QuickAddModal({
         flocks[0]?.id ||
         '';
       if (initialFlockId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFlockId(initialFlockId);
       }
     }
@@ -259,6 +272,7 @@ export function QuickAddModal({
       maxWidth={DIALOG_CONFIG.maxWidth}
       fullWidth={DIALOG_CONFIG.fullWidth}
       fullScreen={isMobileViewport()}
+      TransitionComponent={SlideUp}
       sx={{
         '& .MuiDialog-paper': {
           display: 'flex',
@@ -271,10 +285,19 @@ export function QuickAddModal({
         onSubmit={handleSubmit}
         style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
       >
-        <DialogTitle sx={dialogTitleSx}>
+        <DialogTitle sx={{ ...dialogTitleSx, pr: 6 }}>
           {t('dailyRecords.quickAdd.title')}
+          <IconButton
+            aria-label={t('common.close')}
+            onClick={handleClose}
+            disabled={isPending}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
         <DialogContent
+          dividers
           sx={{
             ...dialogContentSx,
             overflowY: 'auto',
@@ -393,6 +416,7 @@ export function QuickAddModal({
         </DialogContent>
         <DialogActions sx={dialogActionsSx}>
           <Button
+            variant="text"
             onClick={handleClose}
             disabled={isPending}
             sx={touchButtonSx}

@@ -83,11 +83,6 @@ describe('EditFlockModal', () => {
     );
   };
 
-  const getTodayDate = (): string => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
-
   const getFutureDate = (): string => {
     const future = new Date();
     future.setDate(future.getDate() + 1);
