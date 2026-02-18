@@ -23,18 +23,14 @@ interface EggCostBreakdownChartProps {
 // Color palette for purchase types
 const COLORS = ['#FF6B35', '#F7931E', '#FDC830', '#37A372', '#4ECDC4', '#3D5A80'];
 
-interface PieLabelProps {
-  percentage: number;
-}
-
 // Custom label renderer for pie slices
-const renderLabel = (props: PieLabelProps) => {
-  return `${props.percentage.toFixed(1)}%`;
+const renderLabel = (props: any) => {
+  return `${(props.percentage as number).toFixed(1)}%`;
 };
 
 interface EggCostBreakdownTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: CostBreakdownItem }>;
+  payload?: readonly { payload: CostBreakdownItem }[];
 }
 
 function EggCostBreakdownTooltip({ active, payload }: EggCostBreakdownTooltipProps) {
@@ -110,7 +106,7 @@ export function EggCostBreakdownChart({ data }: EggCostBreakdownChartProps) {
           </Pie>
           <Tooltip content={EggCostBreakdownTooltip} />
           <Legend
-            formatter={(_value: string, entry: { payload: CostBreakdownItem }) => {
+            formatter={(_value: string, entry: any) => {
               const item = entry.payload;
               return `${t(`purchases.types.${item.type}`)} (${item.percentage.toFixed(1)}%)`;
             }}

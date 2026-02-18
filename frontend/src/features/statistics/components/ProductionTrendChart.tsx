@@ -31,7 +31,7 @@ interface ProductionTrendChartProps {
 
 interface ProductionTrendTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: ProductionTrendItem }>;
+  payload?: readonly { payload: ProductionTrendItem }[];
 }
 
 function ProductionTrendTooltip({ active, payload }: ProductionTrendTooltipProps) {

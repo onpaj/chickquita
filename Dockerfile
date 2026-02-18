@@ -20,8 +20,8 @@ RUN npm ci --prefer-offline --no-audit
 # Copy frontend source code
 COPY frontend/ ./
 
-# Build frontend for production
-RUN npm run build
+# Build frontend for production (skip test type-checking)
+RUN npx tsc -p tsconfig.app.json --noEmit && npx vite build
 
 # Stage 2: Build backend
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS backend-build

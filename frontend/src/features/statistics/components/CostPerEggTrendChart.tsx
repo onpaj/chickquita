@@ -34,7 +34,7 @@ interface CostPerEggTrendChartProps {
 
 interface CostPerEggTrendTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: CostPerEggTrendItem }>;
+  payload?: readonly { payload: CostPerEggTrendItem }[];
 }
 
 function CostPerEggTrendTooltip({ active, payload }: CostPerEggTrendTooltipProps) {

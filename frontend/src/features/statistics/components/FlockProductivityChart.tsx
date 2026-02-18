@@ -38,7 +38,7 @@ const getColorByProductivity = (productivity: number): string => {
 
 interface FlockProductivityTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: FlockProductivityItem }>;
+  payload?: readonly { payload: FlockProductivityItem }[];
 }
 
 function FlockProductivityTooltip({ active, payload }: FlockProductivityTooltipProps) {
