@@ -304,7 +304,8 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
             {t('purchases.summary.thisMonth')}
           </Typography>
           <Typography variant="h4" fontWeight="bold">
-            {monthlySummary.toFixed(2)} {t('purchases.currency')}
+            <span>{monthlySummary.toFixed(2)}</span>{' '}
+            {t('purchases.currency')}
           </Typography>
         </CardContent>
       </Card>
