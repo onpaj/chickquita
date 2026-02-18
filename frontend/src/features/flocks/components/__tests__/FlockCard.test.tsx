@@ -18,7 +18,7 @@ vi.mock('react-router-dom', async () => {
 // Mock i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, params?: any) => {
+    t: (key: string, params?: unknown) => {
       const translations: Record<string, string> = {
         'flocks.active': 'Active',
         'flocks.archived': 'Archived',

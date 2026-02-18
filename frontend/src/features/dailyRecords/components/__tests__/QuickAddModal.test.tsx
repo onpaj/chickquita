@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
@@ -300,8 +300,6 @@ describe('QuickAddModal', () => {
     });
 
     it('should validate notes max length (500 characters)', async () => {
-      const user = userEvent.setup();
-
       render(
         <QuickAddModal
           open={true}
@@ -314,8 +312,9 @@ describe('QuickAddModal', () => {
       const notesInput = screen.getByLabelText(/poznámky/i);
       const longText = 'a'.repeat(501);
 
-      await user.type(notesInput, longText);
-      await user.tab(); // Trigger blur event
+      // Use fireEvent.change instead of userEvent.type to avoid timeout with 501 characters
+      fireEvent.change(notesInput, { target: { value: longText } });
+      fireEvent.blur(notesInput);
 
       await waitFor(() => {
         expect(screen.getByText(/maximální délka/i)).toBeInTheDocument();
@@ -352,13 +351,22 @@ describe('QuickAddModal', () => {
         { wrapper: createWrapper() }
       );
 
+      // Wait for auto-focus to complete (100ms timer moves focus to egg count input)
+      await waitFor(() => {
+        const eggCountInput = screen.getByLabelText('egg count increase')
+          .parentElement?.parentElement?.querySelector('input[type="number"]');
+        expect(document.activeElement).toBe(eggCountInput);
+      }, { timeout: 200 });
+
       // Fill in the form
       const incrementButton = screen.getByLabelText('egg count increase');
       await user.click(incrementButton);
       await user.click(incrementButton);
       await user.click(incrementButton); // Set egg count to 3
 
+      // Click the notes input to ensure focus before typing (avoid auto-focus race condition)
       const notesInput = screen.getByLabelText(/poznámky/i);
+      await user.click(notesInput);
       await user.type(notesInput, 'Test notes');
 
       // Submit

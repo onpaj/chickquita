@@ -39,7 +39,7 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
 
     /// <summary>
     /// Handles the ArchiveFlockCommand by setting IsActive = false.
-    /// This operation is idempotent - archiving an already archived flock succeeds.
+    /// Returns a validation error if the flock is already archived.
     /// </summary>
     /// <param name="request">The archive flock command.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
@@ -78,11 +78,16 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
                 return Result<FlockDto>.Failure(Error.NotFound("Flock not found"));
             }
 
-            // Archive the flock using domain method (idempotent - already archived is fine)
-            if (flock.IsActive)
+            // Reject if flock is already archived
+            if (!flock.IsActive)
             {
-                flock.Archive();
+                _logger.LogWarning(
+                    "ArchiveFlockCommand: Flock with ID {FlockId} is already archived",
+                    request.FlockId);
+                return Result<FlockDto>.Failure(Error.Validation("Flock is already archived"));
             }
+
+            flock.Archive();
 
             // Save to database
             var archivedFlock = await _flockRepository.UpdateAsync(flock);

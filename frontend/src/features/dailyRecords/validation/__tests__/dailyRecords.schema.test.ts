@@ -55,7 +55,7 @@ describe('createDailyRecordSchema', () => {
 
     it('should reject non-string flockId', () => {
       const invalidData = {
-        flockId: 12345 as any,
+        flockId: 12345 as unknown,
         recordDate: '2025-02-07',
         eggCount: 10,
       };
@@ -135,7 +135,7 @@ describe('createDailyRecordSchema', () => {
     it('should reject non-string recordDate', () => {
       const invalidData = {
         flockId: '123e4567-e89b-12d3-a456-426614174000',
-        recordDate: 20260207 as any,
+        recordDate: 20260207 as unknown,
         eggCount: 10,
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
@@ -210,7 +210,7 @@ describe('createDailyRecordSchema', () => {
       const invalidData = {
         flockId: '123e4567-e89b-12d3-a456-426614174000',
         recordDate: '2025-02-07',
-        eggCount: '10' as any,
+        eggCount: '10' as unknown,
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
@@ -296,7 +296,7 @@ describe('createDailyRecordSchema', () => {
         flockId: '123e4567-e89b-12d3-a456-426614174000',
         recordDate: '2025-02-07',
         eggCount: 10,
-        notes: 12345 as any,
+        notes: 12345 as unknown,
       };
       const result = createDailyRecordSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
@@ -346,7 +346,7 @@ describe('updateDailyRecordSchema', () => {
 
     it('should reject non-string id', () => {
       const invalidData = {
-        id: 12345 as any,
+        id: 12345 as unknown,
         eggCount: 10,
       };
       const result = updateDailyRecordSchema.safeParse(invalidData);
@@ -488,7 +488,7 @@ describe('getDailyRecordsParamsSchema', () => {
 
     it('should reject non-string flockId', () => {
       const invalidData = {
-        flockId: 12345 as any,
+        flockId: 12345 as unknown,
       };
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
@@ -560,7 +560,7 @@ describe('getDailyRecordsParamsSchema', () => {
 
     it('should reject non-string startDate', () => {
       const invalidData = {
-        startDate: 20260101 as any,
+        startDate: 20260101 as unknown,
       };
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
@@ -568,7 +568,7 @@ describe('getDailyRecordsParamsSchema', () => {
 
     it('should reject non-string endDate', () => {
       const invalidData = {
-        endDate: 20260228 as any,
+        endDate: 20260228 as unknown,
       };
       const result = getDailyRecordsParamsSchema.safeParse(invalidData);
       expect(result.success).toBe(false);

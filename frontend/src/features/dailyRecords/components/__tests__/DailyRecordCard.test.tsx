@@ -212,7 +212,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      const editButton = screen.getByLabelText('edit record');
+      const editButton = screen.getByLabelText('Upravit záznam');
       expect(editButton).toBeInTheDocument();
     });
 
@@ -231,7 +231,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      const editButton = screen.queryByLabelText('edit record');
+      const editButton = screen.queryByLabelText('Upravit záznam');
       expect(editButton).not.toBeInTheDocument();
     });
 
@@ -245,7 +245,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      const editButton = screen.queryByLabelText('edit record');
+      const editButton = screen.queryByLabelText('Upravit záznam');
       expect(editButton).not.toBeInTheDocument();
     });
 
@@ -264,7 +264,7 @@ describe('DailyRecordCard', () => {
         }
       );
 
-      const editButton = screen.getByLabelText('edit record');
+      const editButton = screen.getByLabelText('Upravit záznam');
       await user.click(editButton);
 
       expect(mockOnEdit).toHaveBeenCalledWith(todayRecord);
@@ -294,10 +294,11 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      // queryByText('') throws "Found multiple elements" because empty string matches many DOM nodes.
-      // Instead verify the notes Typography element (italic style) is not present.
-      const notesElement = container.querySelector('p.MuiTypography-body2');
-      expect(notesElement).not.toBeInTheDocument();
+      // When notes is empty, the notes Typography should not be rendered.
+      // The only p.MuiTypography-body2 element should be the "vajec" (eggs) label.
+      const body2Elements = container.querySelectorAll('p.MuiTypography-body2');
+      expect(body2Elements).toHaveLength(1);
+      expect(body2Elements[0].textContent).toBe('vajec');
     });
 
     it('should not render notes section when notes is whitespace', () => {

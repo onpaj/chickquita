@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PurchaseList } from '../PurchaseList';
@@ -108,7 +108,7 @@ describe('PurchaseList', () => {
         isLoading: true,
         error: null,
         refetch: vi.fn(),
-      } as any);
+      } as unknown as ReturnType<typeof useCoops>);
       vi.mocked(useDeletePurchase).mockReturnValue({
         deletePurchase: vi.fn(),
         isDeleting: false,
@@ -135,7 +135,7 @@ describe('PurchaseList', () => {
         isLoading: false,
         error: null,
         refetch: vi.fn(),
-      } as any);
+      } as unknown as ReturnType<typeof useCoops>);
       vi.mocked(useDeletePurchase).mockReturnValue({
         deletePurchase: vi.fn(),
         isDeleting: false,
@@ -161,7 +161,7 @@ describe('PurchaseList', () => {
         isLoading: false,
         error: null,
         refetch: vi.fn(),
-      } as any);
+      } as unknown as ReturnType<typeof useCoops>);
       vi.mocked(useDeletePurchase).mockReturnValue({
         deletePurchase: vi.fn(),
         isDeleting: false,
@@ -179,14 +179,13 @@ describe('PurchaseList', () => {
     it('should display purchase details correctly', () => {
       renderComponent();
 
-      const firstPurchaseCard = screen.getByText('Chicken Feed').closest('[role="article"]');
+      const firstPurchaseCard = screen.getByText('Chicken Feed').closest('li');
       expect(firstPurchaseCard).toBeInTheDocument();
 
-      if (firstPurchaseCard) {
-        const cardContent = within(firstPurchaseCard);
-        expect(cardContent.getByText('500.00')).toBeInTheDocument();
-        expect(cardContent.getByText('25')).toBeInTheDocument();
-      }
+      // Amount is rendered with currency key ("500.00 purchases.currency") and
+      // quantity with unit key ("25 purchases.units.kg"), so check textContent directly
+      expect(firstPurchaseCard?.textContent).toContain('500.00');
+      expect(firstPurchaseCard?.textContent).toContain('25');
     });
 
     it('should call onEdit when edit button is clicked', async () => {
@@ -259,7 +258,7 @@ describe('PurchaseList', () => {
         isLoading: false,
         error: null,
         refetch: vi.fn(),
-      } as any);
+      } as unknown as ReturnType<typeof useCoops>);
       vi.mocked(useDeletePurchase).mockReturnValue({
         deletePurchase: vi.fn(),
         isDeleting: false,
@@ -287,7 +286,7 @@ describe('PurchaseList', () => {
         isLoading: false,
         error: null,
         refetch: vi.fn(),
-      } as any);
+      } as unknown as ReturnType<typeof useCoops>);
       vi.mocked(useDeletePurchase).mockReturnValue({
         deletePurchase: vi.fn(),
         isDeleting: false,
@@ -353,7 +352,7 @@ describe('PurchaseList', () => {
         isLoading: false,
         error: null,
         refetch: vi.fn(),
-      } as any);
+      } as unknown as ReturnType<typeof useCoops>);
       vi.mocked(useDeletePurchase).mockReturnValue({
         deletePurchase: vi.fn(),
         isDeleting: false,
