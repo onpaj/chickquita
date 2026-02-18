@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   Card,
+  CardHeader,
   CardContent,
   Typography,
   Box,
@@ -118,11 +119,11 @@ export function CoopCard({ coop }: CoopCardProps) {
     <>
       <Card
         data-testid="coop-card"
-        elevation={2}
+        elevation={1}
         sx={{
           position: 'relative',
           cursor: 'pointer',
-          minHeight: 120,
+          borderRadius: 2,
           transition: 'box-shadow 0.3s ease',
           '&:hover': {
             boxShadow: 4,
@@ -132,17 +133,18 @@ export function CoopCard({ coop }: CoopCardProps) {
         role="article"
         aria-label={t('coops.coopCardAriaLabel', { coopName: coop.name })}
       >
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-            <Typography variant="h6" component="h2" sx={{ flexGrow: 1, pr: 1 }} id={`coop-title-${coop.id}`}>
+        <CardHeader
+          title={
+            <Typography variant="h6" component="h2" id={`coop-title-${coop.id}`}>
               {coop.name}
             </Typography>
+          }
+          action={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Chip
-                label={t('coops.active')}
-                color="success"
+                label={coop.isActive ? t('coops.active') : t('coops.archived')}
+                color={coop.isActive ? 'success' : 'default'}
                 size="small"
-                sx={{ height: 24 }}
               />
               <IconButton
                 size="small"
@@ -155,8 +157,9 @@ export function CoopCard({ coop }: CoopCardProps) {
                 <MoreVertIcon />
               </IconButton>
             </Box>
-          </Box>
-
+          }
+        />
+        <CardContent sx={{ pt: 0 }}>
           {coop.location && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
               <LocationOnIcon fontSize="small" color="action" />
@@ -166,7 +169,7 @@ export function CoopCard({ coop }: CoopCardProps) {
             </Box>
           )}
 
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             {t('coops.createdAt', { date: formattedDate })}
           </Typography>
         </CardContent>
