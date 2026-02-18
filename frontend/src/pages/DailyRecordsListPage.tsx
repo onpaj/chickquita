@@ -10,6 +10,8 @@ import {
   TextField,
   Button,
   Chip,
+  Card,
+  CardContent,
 } from '@mui/material';
 import {
   Egg as EggIcon,
@@ -119,22 +121,14 @@ export function DailyRecordsListPage() {
   const isLoading = isLoadingCoops || isLoadingRecords;
 
   return (
-    <Container sx={{ pb: 10 }}>
-      <Box sx={{ py: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {t('dailyRecords.title')}
-        </Typography>
+    <Container maxWidth="lg" sx={{ py: 3, pb: 10 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        {t('dailyRecords.title')}
+      </Typography>
 
-        {/* Filters Section */}
-        <Box
-          sx={{
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            p: 2,
-            mb: 3,
-            boxShadow: 1,
-          }}
-        >
+      {/* Filters Section */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
           <Box
             sx={{
               display: 'flex',
@@ -241,10 +235,43 @@ export function DailyRecordsListPage() {
               }}
             />
           </Box>
-        </Box>
+        </CardContent>
+      </Card>
 
-        {/* Records List */}
-        {isLoading ? (
+      {/* Records List */}
+      {isLoading ? (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+            },
+            gap: 2,
+          }}
+        >
+          {[1, 2, 3, 4, 5, 6].map((index) => (
+            <DailyRecordCardSkeleton key={index} />
+          ))}
+        </Box>
+      ) : !dailyRecords || dailyRecords.length === 0 ? (
+        <IllustratedEmptyState
+          illustration={<EggIcon sx={{ fontSize: 80, color: 'text.secondary' }} />}
+          title={t('dailyRecords.emptyState.title')}
+          description={
+            hasActiveFilters
+              ? t('dailyRecords.emptyState.noRecordsFiltered')
+              : t('dailyRecords.emptyState.noRecords')
+          }
+        />
+      ) : (
+        <>
+          {/* Results count */}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {t('dailyRecords.recordsCount', { count: dailyRecords.length })}
+          </Typography>
+
           <Box
             sx={{
               display: 'grid',
@@ -256,50 +283,17 @@ export function DailyRecordsListPage() {
               gap: 2,
             }}
           >
-            {[1, 2, 3, 4, 5, 6].map((index) => (
-              <DailyRecordCardSkeleton key={index} />
+            {dailyRecords.map((record) => (
+              <DailyRecordCard
+                key={record.id}
+                record={record}
+                flockIdentifier={flockMap.get(record.flockId)}
+                onEdit={handleEditRecord}
+              />
             ))}
           </Box>
-        ) : !dailyRecords || dailyRecords.length === 0 ? (
-          <IllustratedEmptyState
-            illustration={<EggIcon />}
-            title={t('dailyRecords.emptyState.title')}
-            description={
-              hasActiveFilters
-                ? t('dailyRecords.emptyState.noRecordsFiltered')
-                : t('dailyRecords.emptyState.noRecords')
-            }
-          />
-        ) : (
-          <>
-            {/* Results count */}
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {t('dailyRecords.recordsCount', { count: dailyRecords.length })}
-            </Typography>
-
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: '1fr',
-                  sm: 'repeat(2, 1fr)',
-                  md: 'repeat(3, 1fr)',
-                },
-                gap: 2,
-              }}
-            >
-              {dailyRecords.map((record) => (
-                <DailyRecordCard
-                  key={record.id}
-                  record={record}
-                  flockIdentifier={flockMap.get(record.flockId)}
-                  onEdit={handleEditRecord}
-                />
-              ))}
-            </Box>
-          </>
-        )}
-      </Box>
+        </>
+      )}
 
       {/* Edit Modal */}
       <EditDailyRecordModal

@@ -2,6 +2,12 @@ import axios from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
 import { processApiError } from './errors';
 import { db } from './db';
+import type { PendingRequest } from './db';
+
+interface OfflineQueuedError extends Error {
+  isOfflineQueued: boolean;
+  requestId: number | undefined;
+}
 
 /**
  * API Client Configuration
@@ -109,7 +115,7 @@ apiClient.interceptors.response.use(
 
         // Queue the request for later sync
         const requestId = await db.queueRequest({
-          method: config.method?.toUpperCase() as any,
+          method: config.method?.toUpperCase() as PendingRequest['method'],
           url,
           body: config.data,
           headers: config.headers as Record<string, string>,
@@ -126,9 +132,9 @@ apiClient.interceptors.response.use(
         });
 
         // Return a special offline error that components can detect
-        const offlineError = new Error('Request queued for offline sync');
-        (offlineError as any).isOfflineQueued = true;
-        (offlineError as any).requestId = requestId;
+        const offlineError = new Error('Request queued for offline sync') as OfflineQueuedError;
+        offlineError.isOfflineQueued = true;
+        offlineError.requestId = requestId;
         return Promise.reject(offlineError);
       } catch (queueError) {
         console.error('Failed to queue offline request:', queueError);

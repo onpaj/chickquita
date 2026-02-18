@@ -1,10 +1,10 @@
 import { Card, CardContent, Typography, Box, Chip, IconButton } from '@mui/material';
 import { Egg as EggIcon, Edit as EditIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { cs } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import type { DailyRecordDto } from '../api/dailyRecordsApi';
 import { useIsRecordPendingSync } from '../../../lib/useIsRecordPendingSync';
+import { useDateLocale } from '../../../hooks/useDateLocale';
 
 interface DailyRecordCardProps {
   record: DailyRecordDto;
@@ -26,9 +26,10 @@ interface DailyRecordCardProps {
  */
 export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecordCardProps) {
   const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const isPendingSync = useIsRecordPendingSync(record.id);
   const formattedDate = format(new Date(record.recordDate), 'dd. MM. yyyy', {
-    locale: cs,
+    locale: dateLocale,
   });
 
   // Check if record can be edited (same-day restriction)
@@ -44,14 +45,15 @@ export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecord
 
   return (
     <Card
+      elevation={1}
       sx={{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        transition: 'transform 0.2s, box-shadow 0.2s',
+        borderRadius: 2,
+        transition: 'box-shadow 0.2s',
         '&:hover': {
-          transform: 'translateY(-2px)',
           boxShadow: 3,
         },
       }}
@@ -76,10 +78,10 @@ export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecord
               sx={{
                 color: 'primary.main',
                 '&:hover': {
-                  bgcolor: 'primary.50',
+                  bgcolor: 'action.hover',
                 },
               }}
-              aria-label="edit record"
+              aria-label={t('dailyRecords.editRecord')}
             >
               <EditIcon />
             </IconButton>
@@ -94,16 +96,16 @@ export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecord
             gap: 1.5,
             mb: 2,
             p: 2,
-            bgcolor: 'primary.50',
+            bgcolor: 'action.hover',
             borderRadius: 2,
           }}
         >
           <EggIcon sx={{ fontSize: 32, color: 'primary.main' }} />
           <Box>
-            <Typography variant="h4" component="div" sx={{ fontWeight: 700 }}>
+            <Typography variant="h5" component="div" sx={{ fontWeight: 700, color: 'primary.main' }}>
               {record.eggCount}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="body2" color="text.secondary">
               {t('dailyRecords.eggsLabel')}
             </Typography>
           </Box>

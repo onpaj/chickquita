@@ -29,38 +29,43 @@ interface ProductionTrendChartProps {
   data: ProductionTrendItem[];
 }
 
+interface ProductionTrendTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: ProductionTrendItem }>;
+}
+
+function ProductionTrendTooltip({ active, payload }: ProductionTrendTooltipProps) {
+  const { t } = useTranslation();
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <Box
+        sx={{
+          backgroundColor: 'background.paper',
+          p: 1.5,
+          border: 1,
+          borderColor: 'divider',
+          borderRadius: 1,
+        }}
+      >
+        <Typography variant="body2" fontWeight={600}>
+          {dayjs(data.date).format('DD MMMM YYYY')}
+        </Typography>
+        <Typography variant="body2" color="primary">
+          {t('statistics.productionTrend.eggs')}: {data.eggs}
+        </Typography>
+      </Box>
+    );
+  }
+  return null;
+}
+
 export function ProductionTrendChart({ data }: ProductionTrendChartProps) {
   const { t } = useTranslation();
 
   // Format date for display
   const formatDate = (dateString: string) => {
     return dayjs(dateString).format('DD/MM');
-  };
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <Box
-          sx={{
-            backgroundColor: 'background.paper',
-            p: 1.5,
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2" fontWeight={600}>
-            {dayjs(data.date).format('DD MMMM YYYY')}
-          </Typography>
-          <Typography variant="body2" color="primary">
-            {t('statistics.productionTrend.eggs')}: {data.eggs}
-          </Typography>
-        </Box>
-      );
-    }
-    return null;
   };
 
   // Empty state
@@ -103,7 +108,7 @@ export function ProductionTrendChart({ data }: ProductionTrendChartProps) {
             }}
             style={{ fontSize: '12px' }}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={ProductionTrendTooltip} />
           <Legend />
           <Line
             type="monotone"

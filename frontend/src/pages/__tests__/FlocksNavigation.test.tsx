@@ -743,7 +743,7 @@ describe('Flocks Navigation and Routing', () => {
 
   describe('Back Navigation and Breadcrumbs', () => {
     it('should allow navigation back to coop detail from flocks page', async () => {
-      const user = userEvent.setup();
+      const _user = userEvent.setup();
       const queryClient = new QueryClient({
         defaultOptions: { queries: { retry: false } },
       });

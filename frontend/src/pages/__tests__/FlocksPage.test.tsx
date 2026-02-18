@@ -121,7 +121,7 @@ vi.mock('../../features/flocks/components/ArchiveFlockDialog', () => ({
 // Mock i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, params?: any) => {
+    t: (key: string, _params?: unknown) => {
       const translations: Record<string, string> = {
         'flocks.title': 'Flocks',
         'flocks.addFlock': 'Add Flock',
