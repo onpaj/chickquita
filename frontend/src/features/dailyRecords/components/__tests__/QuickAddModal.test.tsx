@@ -501,7 +501,7 @@ describe('QuickAddModal', () => {
       global.innerWidth = 400;
       global.dispatchEvent(new Event('resize'));
 
-      const { container } = render(
+      render(
         <QuickAddModal
           open={true}
           onClose={mockOnClose}
@@ -510,8 +510,8 @@ describe('QuickAddModal', () => {
         { wrapper: createWrapper() }
       );
 
-      // Check for fullScreen prop (MUI applies specific classes)
-      const dialog = container.querySelector('.MuiDialog-root');
+      // MUI Dialog renders via a portal into document.body, not into container
+      const dialog = document.querySelector('.MuiDialog-root');
       expect(dialog).toBeInTheDocument();
     });
   });
