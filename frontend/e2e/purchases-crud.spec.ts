@@ -34,7 +34,7 @@ test.describe('Purchase CRUD Flow - Complete Lifecycle', () => {
   });
 
   test.describe('Scenario 1: Create Purchase', () => {
-    test('should create a new purchase with all required fields', async ({ page }) => {
+    test('@smoke should create a new purchase with all required fields', async ({ page }) => {
       // Open create modal
       await purchasesPage.openCreatePurchaseModal();
       await expect(purchaseFormModal.modalTitle).toBeVisible();

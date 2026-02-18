@@ -25,7 +25,7 @@ test.describe('Daily Records - List Page with Filtering', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('should display empty state when no daily records exist', async ({ page }) => {
+  test('@smoke should display empty state when no daily records exist', async ({ page }) => {
     // Navigate to daily records page
     await page.goto('/daily-records');
     await page.waitForLoadState('networkidle');

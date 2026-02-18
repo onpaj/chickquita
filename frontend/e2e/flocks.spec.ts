@@ -93,7 +93,7 @@ test.describe('Flock Management - Complete CRUD Journey', () => {
   });
 
   test.describe('Create Flock', () => {
-    test('should create a flock with valid data', async () => {
+    test('@smoke should create a flock with valid data', async () => {
       await flocksPage.goto(testCoopId);
 
       // Open create modal

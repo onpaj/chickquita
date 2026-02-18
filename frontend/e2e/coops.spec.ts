@@ -161,7 +161,7 @@ test.describe('M2: Coop Management', () => {
   });
 
   test.describe('Create Coop', () => {
-    test('should create a coop with name only', async ({ page }) => {
+    test('@smoke should create a coop with name only', async ({ page }) => {
       const coopName = `Test Coop ${Date.now()}`;
 
       // Track all network requests for debugging

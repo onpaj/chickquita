@@ -251,7 +251,7 @@ test.describe('Daily Records - Quick Add Modal', () => {
     await expect(page.getByText(/9\/500 znaků/i)).toBeVisible();
   });
 
-  test('should submit form successfully and close modal', async ({ page }) => {
+  test('@smoke should submit form successfully and close modal', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 

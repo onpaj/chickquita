@@ -104,7 +104,7 @@ test.describe('Flock Internationalization (i18n)', () => {
   }
 
   test.describe('Czech Language (cs)', () => {
-    test('should display all flock UI elements in Czech', async ({ page }) => {
+    test('@smoke should display all flock UI elements in Czech', async ({ page }) => {
       // Set Czech language
       await changeLanguage(page, 'cs');
       await flocksPage.goto(testCoopId);

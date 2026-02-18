@@ -1,0 +1,201 @@
+name: 🎭 E2E Nightly Regression Tests
+
+on:
+  # Scheduled - Every night at 2:00 AM CET (1:00 AM UTC)
+  schedule:
+    - cron: '0 1 * * *'
+
+  # Manual trigger with optional test pattern filter
+  workflow_dispatch:
+    inputs:
+      test_pattern:
+        description: 'Test pattern filter (e.g. "coops" or "flocks", leave empty for all)'
+        required: false
+        default: ''
+        type: string
+      browser:
+        description: 'Browser to run tests on'
+        required: false
+        default: 'chromium'
+        type: choice
+        options:
+          - 'chromium'
+          - 'firefox'
+          - 'webkit'
+          - 'all'
+
+env:
+  STAGING_URL: https://chickquita-test.azurewebsites.net
+  NODE_VERSION: '20'
+
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  # Validate staging health before running tests
+  validate-staging-health:
+    name: 🏥 Validate Staging Health
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📊 Check Liveness Endpoint
+        run: |
+          echo "🔍 Checking liveness endpoint..."
+          http_code=$(curl -s -o /dev/null -w "%{http_code}" "${{ env.STAGING_URL }}/health/live")
+
+          if [ "$http_code" = "200" ]; then
+            echo "✅ Liveness check passed"
+          else
+            echo "❌ Liveness check failed with status $http_code"
+            exit 1
+          fi
+
+      - name: 📊 Check Readiness Endpoint
+        run: |
+          echo "🔍 Checking readiness endpoint..."
+          http_code=$(curl -s -o /dev/null -w "%{http_code}" "${{ env.STAGING_URL }}/health/ready")
+
+          if [ "$http_code" = "200" ]; then
+            echo "✅ Readiness check passed"
+          else
+            echo "❌ Readiness check failed with status $http_code"
+            exit 1
+          fi
+
+      - name: 📊 Check General Health Endpoint
+        run: |
+          echo "🔍 Checking general health endpoint..."
+          http_code=$(curl -s -o /dev/null -w "%{http_code}" "${{ env.STAGING_URL }}/health")
+
+          if [ "$http_code" = "200" ]; then
+            echo "✅ General health check passed"
+          else
+            echo "❌ General health check failed with status $http_code"
+            exit 1
+          fi
+
+      - name: 📝 Health Check Summary
+        run: |
+          echo "## 🏥 Staging Health Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Endpoint | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Liveness | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Readiness | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| General Health | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Staging URL:** ${{ env.STAGING_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "🕐 **Validated at:** $(date)" >> $GITHUB_STEP_SUMMARY
+
+  # Run E2E tests against staging
+  run-e2e-tests:
+    name: 🎭 Run E2E Tests
+    runs-on: ubuntu-latest
+    needs: validate-staging-health
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 📦 Install dependencies
+        working-directory: ./frontend
+        run: npm ci --prefer-offline --no-audit
+
+      - name: 🎭 Install Playwright browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: 🔐 Validate Clerk credentials
+        run: |
+          if [ -z "${{ secrets.CLERK_PUBLISHABLE_KEY }}" ] || [ -z "${{ secrets.CLERK_SECRET_KEY }}" ]; then
+            echo "❌ Clerk credentials are not configured!"
+            echo "Required secrets: CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY"
+            exit 1
+          fi
+          if [ -z "${{ secrets.E2E_CLERK_USER_USERNAME }}" ] || [ -z "${{ secrets.E2E_CLERK_USER_PASSWORD }}" ]; then
+            echo "❌ E2E user credentials are not configured!"
+            echo "Required secrets: E2E_CLERK_USER_USERNAME, E2E_CLERK_USER_PASSWORD"
+            exit 1
+          fi
+          echo "✅ Credentials validated"
+
+      - name: 🧪 Run E2E tests
+        id: run-tests
+        working-directory: ./frontend
+        continue-on-error: true
+        run: |
+          if [ -n "${{ github.event.inputs.test_pattern }}" ]; then
+            echo "🏃 Running tests matching pattern: ${{ github.event.inputs.test_pattern }}"
+            npx playwright test --grep "${{ github.event.inputs.test_pattern }}" --workers=1
+          else
+            echo "🏃 Running ALL E2E tests sequentially..."
+            npx playwright test --workers=1
+          fi
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.STAGING_URL }}
+          CI: true
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
+          E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
+
+      - name: 📊 Publish Test Results to GitHub
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: '🎭 E2E Nightly Test Results'
+          path: 'frontend/test-results/junit.xml'
+          reporter: 'java-junit'
+          fail-on-error: false
+          fail-on-empty: false
+
+      - name: 📊 Upload E2E test results and HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-nightly-results-${{ github.run_number }}
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 30
+
+      - name: 📸 Upload failure screenshots
+        uses: actions/upload-artifact@v4
+        if: always() && steps.run-tests.outcome == 'failure'
+        with:
+          name: e2e-nightly-failures-${{ github.run_number }}
+          path: frontend/test-results/
+          retention-days: 30
+
+      - name: 📝 Create test summary
+        if: always()
+        run: |
+          echo "## 🎭 E2E Nightly Regression Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Staging URL:** ${{ env.STAGING_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "🕐 **Executed at:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.run-tests.outcome }}" = "success" ]; then
+            echo "### ✅ All Tests Passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Tests Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Check artifacts for HTML report with failure details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 View Detailed Results" >> $GITHUB_STEP_SUMMARY
+          echo "Download artifact \`e2e-nightly-results-${{ github.run_number }}\` and open \`playwright-report/index.html\`." >> $GITHUB_STEP_SUMMARY
+
+      - name: ❌ Fail if tests failed
+        if: steps.run-tests.outcome == 'failure'
+        run: |
+          echo "❌ E2E tests failed! Check the HTML report artifact for details."
+          exit 1
