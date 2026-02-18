@@ -236,9 +236,8 @@ describe('CreateFlockModal', () => {
 
       await user.click(hatchDateInput);
       await user.clear(hatchDateInput);
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: futureDate } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: futureDate } });
+      fireEvent.blur(hatchDateInput);
       await user.tab(); // Blur the field
 
       await waitFor(() => {
@@ -254,9 +253,7 @@ describe('CreateFlockModal', () => {
       const today = getTodayDate();
 
       await user.click(hatchDateInput);
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: today } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: today } });
 
       // Verify no future date error appears
       expect(screen.queryByText('Hatch date cannot be in the future')).not.toBeInTheDocument();
@@ -291,9 +288,7 @@ describe('CreateFlockModal', () => {
       await user.type(identifierInput, 'Test Flock');
 
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
       // Try to submit with all counts at zero
       const saveButton = screen.getByRole('button', { name: 'Save' });
@@ -324,9 +319,7 @@ describe('CreateFlockModal', () => {
       await user.type(identifierInput, 'Test Flock');
 
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
       const hensInput = screen.getByLabelText(/Hens/);
       await user.clear(hensInput);
@@ -440,20 +433,15 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test Flock');
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
-      // Use increment buttons for reliable state updates - just one animal is enough
-      const incrementButtons = screen.getAllByLabelText(/Increase/);
-      await user.click(incrementButtons[0]); // Increment hens once
+      // Set hens count to 1
+      const hensInput = screen.getByLabelText(/Hens/);
+      await user.clear(hensInput);
+      await user.type(hensInput, '1');
 
       const saveButton = screen.getByRole('button', { name: 'Save' });
-
-      // Wait for button to be enabled
-      await waitFor(() => {
-        expect(saveButton).not.toBeDisabled();
-      }, { timeout: 3000 });
+      expect(saveButton).not.toBeDisabled();
 
       await user.click(saveButton);
 
@@ -482,19 +470,14 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, '  Test Flock  ');
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
-      // Use increment button for reliable state update
-      const incrementButtons = screen.getAllByLabelText(/Increase/);
-      await user.click(incrementButtons[0]); // hens
+      const hensInput = screen.getByLabelText(/Hens/);
+      await user.clear(hensInput);
+      await user.type(hensInput, '1');
 
       const saveButton = screen.getByRole('button', { name: 'Save' });
-
-      await waitFor(() => {
-        expect(saveButton).not.toBeDisabled();
-      }, { timeout: 3000 });
+      expect(saveButton).not.toBeDisabled();
 
       await user.click(saveButton);
 
@@ -540,19 +523,14 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test Flock');
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
-      // Use increment button for reliable state update
-      const incrementButtons = screen.getAllByLabelText(/Increase/);
-      await user.click(incrementButtons[0]); // hens
+      const hensInput = screen.getByLabelText(/Hens/);
+      await user.clear(hensInput);
+      await user.type(hensInput, '1');
 
       const saveButton = screen.getByRole('button', { name: 'Save' });
-
-      await waitFor(() => {
-        expect(saveButton).not.toBeDisabled();
-      }, { timeout: 3000 });
+      expect(saveButton).not.toBeDisabled();
 
       await user.click(saveButton);
 
@@ -601,9 +579,7 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test');
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
       // Use increment button for reliable state update
       const incrementButtons = screen.getAllByLabelText(/Increase/);
@@ -637,9 +613,7 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test');
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
       // Use increment button for reliable state update
       const incrementButtons = screen.getAllByLabelText(/Increase/);
@@ -720,9 +694,7 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test Flock');
-      await act(async () => {
-        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
-      });
+      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
       // Use increment button for reliable state update
       const incrementButtons = screen.getAllByLabelText(/Increase/);
