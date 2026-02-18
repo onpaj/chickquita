@@ -217,7 +217,6 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                   onChange={(e) => setFromDate(e.target.value)}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
-                  aria-label={t('purchases.filters.fromDate')}
                 />
                 <TextField
                   label={t('purchases.filters.toDate')}
@@ -226,7 +225,6 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                   onChange={(e) => setToDate(e.target.value)}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
-                  aria-label={t('purchases.filters.toDate')}
                 />
               </Stack>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -239,7 +237,7 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                     value={typeFilter === '' ? '' : String(typeFilter)}
                     onChange={handleTypeFilterChange}
                     label={t('purchases.filters.type')}
-                    aria-label={t('purchases.filters.type')}
+                    inputProps={{ 'aria-label': t('purchases.filters.type') }}
                   >
                     <MenuItem value="">
                       {t('common.all')}
@@ -274,7 +272,7 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                     onChange={handleFlockFilterChange}
                     label={t('purchases.filters.flock')}
                     disabled
-                    aria-label={t('purchases.filters.flock')}
+                    inputProps={{ 'aria-label': t('purchases.filters.flock') }}
                   >
                     <MenuItem value="">
                       {t('common.all')}
@@ -325,7 +323,6 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                 onChange={(e) => setFromDate(e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 fullWidth
-                aria-label={t('purchases.filters.fromDate')}
               />
               <TextField
                 label={t('purchases.filters.toDate')}
@@ -334,7 +331,6 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                 onChange={(e) => setToDate(e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 fullWidth
-                aria-label={t('purchases.filters.toDate')}
               />
             </Stack>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -347,7 +343,7 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                   value={typeFilter === '' ? '' : String(typeFilter)}
                   onChange={handleTypeFilterChange}
                   label={t('purchases.filters.type')}
-                  aria-label={t('purchases.filters.type')}
+                  inputProps={{ 'aria-label': t('purchases.filters.type') }}
                 >
                   <MenuItem value="">
                     {t('common.all')}
@@ -382,7 +378,7 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                   onChange={handleFlockFilterChange}
                   label={t('purchases.filters.flock')}
                   disabled
-                  aria-label={t('purchases.filters.flock')}
+                  inputProps={{ 'aria-label': t('purchases.filters.flock') }}
                 >
                   <MenuItem value="">
                     {t('common.all')}
