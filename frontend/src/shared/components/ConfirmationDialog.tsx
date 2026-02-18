@@ -24,6 +24,12 @@ import {
 
 interface ConfirmationDialogProps {
   /**
+   * Optional base ID for generating static ARIA attributes.
+   * When provided, sets aria-labelledby="{dialogId}-title" and aria-describedby="{dialogId}-description"
+   */
+  dialogId?: string;
+
+  /**
    * Whether the dialog is open
    */
   open: boolean;
@@ -115,6 +121,7 @@ interface ConfirmationDialogProps {
  * - Touch-friendly buttons (minHeight: 44px)
  */
 export function ConfirmationDialog({
+  dialogId,
   open,
   onClose,
   onConfirm,
@@ -135,6 +142,9 @@ export function ConfirmationDialog({
   const defaultCancelText = cancelText || t('common.cancel');
   const defaultPendingText = pendingText || t('common.processing');
 
+  const titleId = dialogId ? `${dialogId}-title` : undefined;
+  const descriptionId = dialogId ? `${dialogId}-description` : undefined;
+
   return (
     <Dialog
       open={open}
@@ -142,11 +152,13 @@ export function ConfirmationDialog({
       maxWidth={CONFIRMATION_DIALOG_CONFIG.maxWidth}
       fullWidth={CONFIRMATION_DIALOG_CONFIG.fullWidth}
       fullScreen={isMobileViewport()}
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
     >
-      <DialogTitle sx={dialogTitleSx}>{title}</DialogTitle>
+      <DialogTitle id={titleId} sx={dialogTitleSx}>{title}</DialogTitle>
 
       <DialogContent sx={dialogContentSx}>
-        <DialogContentText>
+        <DialogContentText id={descriptionId}>
           {message}
           {entityName && (
             <>

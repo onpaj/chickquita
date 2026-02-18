@@ -20,6 +20,7 @@ export function ArchiveFlockDialog({
 
   return (
     <ConfirmationDialog
+      dialogId="archive-flock-dialog"
       open={open}
       onClose={onClose}
       onConfirm={onConfirm}
