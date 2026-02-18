@@ -315,7 +315,6 @@ export function PurchaseForm({
               disabled={isSubmitting}
               inputProps={{
                 ...touchInputProps,
-                'aria-label': t('purchases.form.type'),
               }}
               InputProps={{
                 startAdornment: (
@@ -372,7 +371,6 @@ export function PurchaseForm({
                   inputProps={{
                     ...params.inputProps,
                     ...touchInputProps,
-                    'aria-label': t('purchases.form.name'),
                   }}
                 />
               )}
@@ -402,7 +400,6 @@ export function PurchaseForm({
               inputProps={{
                 max: getTodayDate(),
                 ...touchInputProps,
-                'aria-label': t('purchases.form.purchaseDate'),
               }}
             />
           )}
@@ -464,7 +461,6 @@ export function PurchaseForm({
               disabled={isSubmitting}
               inputProps={{
                 ...touchInputProps,
-                'aria-label': t('purchases.form.unit'),
               }}
             >
               {Object.entries(QuantityUnit)
@@ -501,7 +497,6 @@ export function PurchaseForm({
                 min: getMinConsumedDate(),
                 max: getTodayDate(),
                 ...touchInputProps,
-                'aria-label': t('purchases.form.consumedDate'),
               }}
             />
           )}
@@ -524,7 +519,6 @@ export function PurchaseForm({
                 disabled={isSubmitting}
                 inputProps={{
                   ...touchInputProps,
-                  'aria-label': t('purchases.form.coop'),
                 }}
               >
                 <MenuItem value="">
@@ -557,7 +551,6 @@ export function PurchaseForm({
               disabled={isSubmitting}
               inputProps={{
                 maxLength: 500,
-                'aria-label': t('purchases.form.notes'),
               }}
             />
           )}

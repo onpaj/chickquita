@@ -72,11 +72,11 @@ describe('PurchaseForm', () => {
 
       // Check for all required fields
       expect(screen.getByLabelText(/purchase type/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/^name$/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/purchase date/i)).toBeInTheDocument();
       expect(screen.getByText(/amount \(czk\)/i)).toBeInTheDocument();
       expect(screen.getByText(/^quantity$/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/^unit$/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^unit/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/consumed date/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/notes/i)).toBeInTheDocument();
 
@@ -93,7 +93,7 @@ describe('PurchaseForm', () => {
       expect(screen.getByText('Feed')).toBeInTheDocument();
 
       // Default values are set in the form
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
       expect(nameInput).toHaveValue('');
     });
 
@@ -119,7 +119,7 @@ describe('PurchaseForm', () => {
 
       // Wait for form to populate
       await waitFor(() => {
-        const nameInput = screen.getByLabelText(/^name$/i);
+        const nameInput = screen.getByLabelText(/name/i);
         expect(nameInput).toHaveValue('Test Feed');
       });
 
@@ -169,7 +169,7 @@ describe('PurchaseForm', () => {
 
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
       const submitButton = screen.getByRole('button', { name: /create/i });
 
       // Initially disabled (no name, amount=0, quantity=0)
@@ -210,7 +210,7 @@ describe('PurchaseForm', () => {
 
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
       await user.click(nameInput);
       await user.type(nameInput, 'Test');
 
@@ -224,7 +224,7 @@ describe('PurchaseForm', () => {
 
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
       await user.click(nameInput);
       await user.type(nameInput, 'Test');
 
@@ -238,7 +238,7 @@ describe('PurchaseForm', () => {
 
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
       await user.click(nameInput);
       await user.type(nameInput, 'Test');
 
@@ -271,7 +271,7 @@ describe('PurchaseForm', () => {
 
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
 
       // Type to trigger autocomplete
       await user.click(nameInput);
@@ -289,7 +289,7 @@ describe('PurchaseForm', () => {
 
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
 
       await user.click(nameInput);
       await user.type(nameInput, 'Kr');
@@ -316,7 +316,7 @@ describe('PurchaseForm', () => {
       }).not.toThrow();
 
       // The name input (Autocomplete) should be functional
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
       expect(nameInput).toBeInTheDocument();
     });
   });
@@ -352,7 +352,7 @@ describe('PurchaseForm', () => {
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
       // Fill in the form
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
       await user.click(nameInput);
       await user.type(nameInput, 'Test Feed');
 
@@ -411,7 +411,7 @@ describe('PurchaseForm', () => {
       render(<PurchaseForm onSubmit={mockOnSubmit} initialData={existingPurchase} />);
 
       // Update the name
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
       await user.clear(nameInput);
       await user.type(nameInput, 'Updated Name');
 
@@ -472,7 +472,7 @@ describe('PurchaseForm', () => {
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
       // All inputs should have minimum touch target height
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
       expect(nameInput).toBeInTheDocument();
 
       const submitButton = screen.getByRole('button', { name: /create/i });
@@ -486,15 +486,10 @@ describe('PurchaseForm', () => {
 
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
-      expect(screen.getByLabelText(/purchase type/i)).toHaveAttribute(
-        'aria-label',
-        'Purchase Type'
-      );
-      expect(screen.getByLabelText(/^name$/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/purchase date/i)).toHaveAttribute(
-        'aria-label',
-        'Purchase Date'
-      );
+      // Fields are accessible via their label elements (no redundant aria-label needed)
+      expect(screen.getByLabelText(/purchase type/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/purchase date/i)).toBeInTheDocument();
     });
 
     it('should support keyboard navigation', async () => {
@@ -502,7 +497,7 @@ describe('PurchaseForm', () => {
 
       render(<PurchaseForm onSubmit={mockOnSubmit} />);
 
-      const nameInput = screen.getByLabelText(/^name$/i);
+      const nameInput = screen.getByLabelText(/name/i);
 
       // Focus on name input
       nameInput.focus();
