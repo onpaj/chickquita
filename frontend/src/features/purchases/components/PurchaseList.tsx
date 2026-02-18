@@ -494,7 +494,8 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                     {t('purchases.list.amount')}:
                   </Typography>
                   <Typography variant="h6" fontWeight="bold" color="primary">
-                    {purchase.amount.toFixed(2)} {t('purchases.currency')}
+                    <span>{purchase.amount.toFixed(2)}</span>{' '}
+                    {t('purchases.currency')}
                   </Typography>
                 </Box>
                 <Box
@@ -508,7 +509,8 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                     {t('purchases.list.quantity')}:
                   </Typography>
                   <Typography variant="body2" fontWeight="medium">
-                    {purchase.quantity} {getUnitLabel(purchase.unit)}
+                    <span>{purchase.quantity}</span>{' '}
+                    {getUnitLabel(purchase.unit)}
                   </Typography>
                 </Box>
                 {purchase.coopId && (
