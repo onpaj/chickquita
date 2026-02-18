@@ -11,7 +11,6 @@ import {
   FormControl,
   InputLabel,
   IconButton,
-  Chip,
   type SelectChangeEvent,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -113,26 +112,6 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
         return <MoreHorizIcon />;
       default:
         return <ShoppingCartIcon />;
-    }
-  };
-
-  // Get label for purchase type
-  const getTypeLabel = (type: PurchaseType) => {
-    switch (type) {
-      case PurchaseType.Feed:
-        return t('purchases.types.feed');
-      case PurchaseType.Vitamins:
-        return t('purchases.types.vitamins');
-      case PurchaseType.Bedding:
-        return t('purchases.types.bedding');
-      case PurchaseType.Toys:
-        return t('purchases.types.toys');
-      case PurchaseType.Veterinary:
-        return t('purchases.types.veterinary');
-      case PurchaseType.Other:
-        return t('purchases.types.other');
-      default:
-        return t('purchases.types.other');
     }
   };
 
@@ -464,22 +443,6 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
               </Box>
 
               <Stack spacing={1}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    {t('purchases.list.type')}:
-                  </Typography>
-                  <Chip
-                    label={getTypeLabel(purchase.type)}
-                    size="small"
-                    sx={{ height: 24 }}
-                  />
-                </Box>
                 <Box
                   sx={{
                     display: 'flex',
