@@ -78,20 +78,26 @@ export function QuickAddModal({
   const [recordDate, setRecordDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
-  const [notes, setNotes] = useState<string>('');
+  const [notesLength, setNotesLength] = useState<number>(0);
   const [flockIdError, setFlockIdError] = useState('');
   const [eggCountError, setEggCountError] = useState('');
   const [recordDateError, setRecordDateError] = useState('');
   const [notesError, setNotesError] = useState('');
 
   const eggCountRef = useRef<HTMLInputElement>(null);
+  const notesRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-focus on egg count when modal opens
   useEffect(() => {
     if (open) {
       // Small delay to ensure modal is fully rendered
       const timer = setTimeout(() => {
-        eggCountRef.current?.focus();
+        // Only auto-focus if the user hasn't already started typing in a textarea
+        const activeEl = document.activeElement;
+        const isTextareaFocused = activeEl?.tagName === 'TEXTAREA';
+        if (!isTextareaFocused) {
+          eggCountRef.current?.focus();
+        }
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -116,7 +122,10 @@ export function QuickAddModal({
     setFlockId(getInitialFlockId());
     setEggCount(0);
     setRecordDate(new Date().toISOString().split('T')[0]);
-    setNotes('');
+    if (notesRef.current) {
+      notesRef.current.value = '';
+    }
+    setNotesLength(0);
     setFlockIdError('');
     setEggCountError('');
     setRecordDateError('');
@@ -166,7 +175,7 @@ export function QuickAddModal({
     const flockErr = validateFlockId(flockId);
     const eggErr = validateEggCount(eggCount);
     const dateErr = validateRecordDate(recordDate);
-    const notesErr = validateNotes(notes);
+    const notesErr = validateNotes(notesRef.current?.value ?? '');
 
     setFlockIdError(flockErr);
     setEggCountError(eggErr);
@@ -182,7 +191,7 @@ export function QuickAddModal({
       flocks.some((f) => f.id === flockId) &&
       eggCount >= 0 &&
       recordDate.length > 0 &&
-      notes.length <= MAX_NOTES_LENGTH
+      (notesRef.current?.value.length ?? 0) <= MAX_NOTES_LENGTH
     );
   };
 
@@ -190,6 +199,8 @@ export function QuickAddModal({
     if (!validate()) {
       return;
     }
+
+    const notesValue = notesRef.current?.value ?? '';
 
     // Save last used flock to localStorage
     localStorage.setItem(LAST_FLOCK_KEY, flockId);
@@ -200,7 +211,7 @@ export function QuickAddModal({
         data: {
           recordDate,
           eggCount,
-          notes: notes.trim() || undefined,
+          notes: notesValue.trim() || undefined,
         },
       },
       {
@@ -355,26 +366,28 @@ export function QuickAddModal({
 
             <TextField
               label={t('dailyRecords.notes')}
-              value={notes}
+              defaultValue=""
               onChange={(e) => {
-                setNotes(e.target.value);
                 if (notesError) {
                   setNotesError(validateNotes(e.target.value));
                 }
               }}
-              onBlur={() => {
-                setNotesError(validateNotes(notes));
+              onBlur={(e) => {
+                const value = e.target.value;
+                setNotesLength(value.length);
+                setNotesError(validateNotes(value));
               }}
               error={!!notesError}
               helperText={
                 notesError ||
-                `${notes.length}/${MAX_NOTES_LENGTH} ${t('common.characters')}`
+                `${notesLength}/${MAX_NOTES_LENGTH} ${t('common.characters')}`
               }
               fullWidth
               disabled={isPending}
               multiline
               rows={2}
-              inputProps={touchInputProps}
+              inputProps={{ ...touchInputProps }}
+              inputRef={notesRef}
             />
           </Stack>
         </DialogContent>
