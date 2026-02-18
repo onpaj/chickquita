@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CreateFlockModal } from '../CreateFlockModal';
@@ -55,6 +55,7 @@ describe('CreateFlockModal', () => {
   const testCoopId = 'test-coop-id-123';
 
   beforeEach(() => {
+    vi.clearAllMocks();
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -66,7 +67,6 @@ describe('CreateFlockModal', () => {
       mutate: mockCreateFlock,
       isPending: false,
     });
-    vi.clearAllMocks();
   });
 
   const renderModal = (open = true) => {
@@ -236,7 +236,9 @@ describe('CreateFlockModal', () => {
 
       await user.click(hatchDateInput);
       await user.clear(hatchDateInput);
-      await user.type(hatchDateInput, futureDate);
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: futureDate } });
+      });
       await user.tab(); // Blur the field
 
       await waitFor(() => {
@@ -252,7 +254,9 @@ describe('CreateFlockModal', () => {
       const today = getTodayDate();
 
       await user.click(hatchDateInput);
-      await user.type(hatchDateInput, today);
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: today } });
+      });
 
       // Verify no future date error appears
       expect(screen.queryByText('Hatch date cannot be in the future')).not.toBeInTheDocument();
@@ -287,7 +291,9 @@ describe('CreateFlockModal', () => {
       await user.type(identifierInput, 'Test Flock');
 
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
-      await user.type(hatchDateInput, getTodayDate());
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
       // Try to submit with all counts at zero
       const saveButton = screen.getByRole('button', { name: 'Save' });
@@ -318,7 +324,9 @@ describe('CreateFlockModal', () => {
       await user.type(identifierInput, 'Test Flock');
 
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
-      await user.type(hatchDateInput, getTodayDate());
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
       const hensInput = screen.getByLabelText(/Hens/);
       await user.clear(hensInput);
@@ -432,7 +440,9 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test Flock');
-      await user.type(hatchDateInput, getTodayDate());
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
       // Use increment buttons for reliable state updates - just one animal is enough
       const incrementButtons = screen.getAllByLabelText(/Increase/);
@@ -456,9 +466,9 @@ describe('CreateFlockModal', () => {
           coopId: testCoopId,
           identifier: 'Test Flock',
           hatchDate: getTodayDate(),
-          currentHens: 1,
-          currentRoosters: 0,
-          currentChicks: 0,
+          initialHens: 1,
+          initialRoosters: 0,
+          initialChicks: 0,
         } as CreateFlockRequest,
         expect.any(Object)
       );
@@ -472,7 +482,9 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, '  Test Flock  ');
-      await user.type(hatchDateInput, getTodayDate());
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
       // Use increment button for reliable state update
       const incrementButtons = screen.getAllByLabelText(/Increase/);
@@ -528,7 +540,9 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test Flock');
-      await user.type(hatchDateInput, getTodayDate());
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
       // Use increment button for reliable state update
       const incrementButtons = screen.getAllByLabelText(/Increase/);
@@ -587,7 +601,9 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test');
-      await user.type(hatchDateInput, getTodayDate());
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
       // Use increment button for reliable state update
       const incrementButtons = screen.getAllByLabelText(/Increase/);
@@ -621,7 +637,9 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test');
-      await user.type(hatchDateInput, getTodayDate());
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
       // Use increment button for reliable state update
       const incrementButtons = screen.getAllByLabelText(/Increase/);
@@ -702,7 +720,9 @@ describe('CreateFlockModal', () => {
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.type(identifierInput, 'Test Flock');
-      await user.type(hatchDateInput, getTodayDate());
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
       // Use increment button for reliable state update
       const incrementButtons = screen.getAllByLabelText(/Increase/);

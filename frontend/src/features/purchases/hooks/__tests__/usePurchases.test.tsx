@@ -210,7 +210,7 @@ describe('usePurchases', () => {
       await waitFor(() => expect(result.current.error).not.toBeNull());
 
       expect(result.current.error).toEqual(error);
-      expect(result.current.purchases).toBeUndefined();
+      expect(result.current.purchases).toEqual([]);
     });
 
     it('should cache results for 5 minutes (staleTime)', async () => {

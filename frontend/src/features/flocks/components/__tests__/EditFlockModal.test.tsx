@@ -61,6 +61,7 @@ describe('EditFlockModal', () => {
   };
 
   beforeEach(() => {
+    vi.clearAllMocks();
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -72,7 +73,6 @@ describe('EditFlockModal', () => {
       mutate: mockUpdateFlock,
       isPending: false,
     });
-    vi.clearAllMocks();
   });
 
   const renderModal = (open = true, flock = mockFlock) => {
@@ -330,7 +330,7 @@ describe('EditFlockModal', () => {
           {
             coopId: 'coop-456',
             data: {
-              id: 'flock-123',
+              flockId: 'flock-123',
               identifier: 'Updated Flock',
               hatchDate: '2024-02-01',
               currentHens: 10,
