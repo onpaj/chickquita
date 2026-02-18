@@ -10,8 +10,8 @@ export function PurchaseListSkeleton() {
       {/* Monthly Summary Skeleton */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Skeleton variant="text" width={120} height={16} sx={{ mb: 1 }} />
-          <Skeleton variant="text" width={150} height={40} />
+          <Skeleton data-testid="skeleton" variant="text" width={120} height={16} sx={{ mb: 1 }} />
+          <Skeleton data-testid="skeleton" variant="text" width={150} height={40} />
         </CardContent>
       </Card>
 
