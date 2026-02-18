@@ -290,12 +290,14 @@ describe('DailyRecordCard', () => {
   describe('Empty notes edge case', () => {
     it('should not render notes section when notes is empty string', () => {
       const recordWithEmptyNotes = { ...mockRecord, notes: '' };
-      render(<DailyRecordCard record={recordWithEmptyNotes} />, {
+      const { container } = render(<DailyRecordCard record={recordWithEmptyNotes} />, {
         wrapper: createWrapper(),
       });
 
-      const notesText = screen.queryByText('');
-      expect(notesText).not.toBeInTheDocument();
+      // queryByText('') throws "Found multiple elements" because empty string matches many DOM nodes.
+      // Instead verify the notes Typography element (italic style) is not present.
+      const notesElement = container.querySelector('p.MuiTypography-body2');
+      expect(notesElement).not.toBeInTheDocument();
     });
 
     it('should not render notes section when notes is whitespace', () => {
