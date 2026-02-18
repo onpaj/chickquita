@@ -7,7 +7,6 @@ import {
   Button,
   Stack,
   CircularProgress,
-  MenuItem,
   TextField,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -292,16 +291,21 @@ export function QuickAddModal({
               fullWidth
               disabled={isPending || flocks.length === 0}
               inputProps={touchInputProps}
+              SelectProps={{ native: true }}
             >
               {flocks.length === 0 ? (
-                <MenuItem value="" disabled>
+                <option value="" disabled>
                   {t('dailyRecords.noFlocks')}
-                </MenuItem>
+                </option>
               ) : (
                 flocks.map((flock) => (
-                  <MenuItem key={flock.id} value={flock.id}>
+                  <option
+                    key={flock.id}
+                    value={flock.id}
+                    onClick={() => setFlockId(flock.id)}
+                  >
                     {flock.identifier} ({flock.coopName})
-                  </MenuItem>
+                  </option>
                 ))
               )}
             </TextField>
