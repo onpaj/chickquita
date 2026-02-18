@@ -346,6 +346,7 @@ export function QuickAddModal({
               error={!!eggCountError}
               helperText={eggCountError}
               aria-label="egg count"
+              inputRef={eggCountRef}
             />
 
             <TextField
