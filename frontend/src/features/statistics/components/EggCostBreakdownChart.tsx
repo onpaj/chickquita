@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import type { PieLabelRenderProps } from 'recharts';
 import type { CostBreakdownItem } from '../types';
 
 /**
@@ -24,8 +25,9 @@ interface EggCostBreakdownChartProps {
 const COLORS = ['#FF6B35', '#F7931E', '#FDC830', '#37A372', '#4ECDC4', '#3D5A80'];
 
 // Custom label renderer for pie slices
-const renderLabel = (props: { percentage: number }) => {
-  return `${props.percentage.toFixed(1)}%`;
+// recharts passes `percent` as a 0-1 decimal; convert to percentage string
+const renderLabel = (props: PieLabelRenderProps) => {
+  return `${((props.percent ?? 0) * 100).toFixed(1)}%`;
 };
 
 interface EggCostBreakdownTooltipProps {
@@ -106,8 +108,8 @@ export function EggCostBreakdownChart({ data }: EggCostBreakdownChartProps) {
           </Pie>
           <Tooltip content={EggCostBreakdownTooltip} />
           <Legend
-            formatter={(_value: string, entry: { payload: CostBreakdownItem }) => {
-              const item = entry.payload;
+            formatter={(_value: string, entry: { payload?: unknown }) => {
+              const item = entry.payload as CostBreakdownItem;
               return `${t(`purchases.types.${item.type}`)} (${item.percentage.toFixed(1)}%)`;
             }}
           />
