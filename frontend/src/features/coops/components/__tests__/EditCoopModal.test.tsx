@@ -48,8 +48,11 @@ describe('EditCoopModal', () => {
   // Mock coop data for testing
   const mockCoop: Coop = {
     id: 'coop-123',
+    tenantId: 'tenant-123',
     name: 'Existing Coop',
     location: 'Existing Location',
+    isActive: true,
+    flocksCount: 0,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
