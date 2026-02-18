@@ -23,42 +23,51 @@ interface EggCostBreakdownChartProps {
 // Color palette for purchase types
 const COLORS = ['#FF6B35', '#F7931E', '#FDC830', '#37A372', '#4ECDC4', '#3D5A80'];
 
+interface PieLabelProps {
+  percentage: number;
+}
+
+// Custom label renderer for pie slices
+const renderLabel = (props: PieLabelProps) => {
+  return `${props.percentage.toFixed(1)}%`;
+};
+
+interface EggCostBreakdownTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: CostBreakdownItem }>;
+}
+
+function EggCostBreakdownTooltip({ active, payload }: EggCostBreakdownTooltipProps) {
+  const { t } = useTranslation();
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <Box
+        sx={{
+          backgroundColor: 'background.paper',
+          p: 1.5,
+          border: 1,
+          borderColor: 'divider',
+          borderRadius: 1,
+        }}
+      >
+        <Typography variant="body2" fontWeight={600}>
+          {t(`purchases.types.${data.type}`)}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {t('statistics.costBreakdown.amount')}: {data.amount.toFixed(2)} Kč
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {data.percentage.toFixed(1)}%
+        </Typography>
+      </Box>
+    );
+  }
+  return null;
+}
+
 export function EggCostBreakdownChart({ data }: EggCostBreakdownChartProps) {
   const { t } = useTranslation();
-
-  // Custom label renderer for pie slices
-  const renderLabel = (props: any) => {
-    return `${props.percentage.toFixed(1)}%`;
-  };
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <Box
-          sx={{
-            backgroundColor: 'background.paper',
-            p: 1.5,
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2" fontWeight={600}>
-            {t(`purchases.types.${data.type}`)}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t('statistics.costBreakdown.amount')}: {data.amount.toFixed(2)} Kč
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {data.percentage.toFixed(1)}%
-          </Typography>
-        </Box>
-      );
-    }
-    return null;
-  };
 
   // Empty state
   if (!data || data.length === 0) {
@@ -99,9 +108,9 @@ export function EggCostBreakdownChart({ data }: EggCostBreakdownChartProps) {
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={EggCostBreakdownTooltip} />
           <Legend
-            formatter={(_value, entry: any) => {
+            formatter={(_value: string, entry: { payload: CostBreakdownItem }) => {
               const item = entry.payload;
               return `${t(`purchases.types.${item.type}`)} (${item.percentage.toFixed(1)}%)`;
             }}

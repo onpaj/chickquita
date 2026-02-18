@@ -112,7 +112,6 @@ export function QuickAddModal({
         flocks[0]?.id ||
         '';
       if (initialFlockId) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFlockId(initialFlockId);
       }
     }
@@ -191,7 +190,7 @@ export function QuickAddModal({
       flocks.some((f) => f.id === flockId) &&
       eggCount >= 0 &&
       recordDate.length > 0 &&
-      (notesRef.current?.value.length ?? 0) <= MAX_NOTES_LENGTH
+      notesLength <= MAX_NOTES_LENGTH
     );
   };
 
@@ -368,6 +367,7 @@ export function QuickAddModal({
               label={t('dailyRecords.notes')}
               defaultValue=""
               onChange={(e) => {
+                setNotesLength(e.target.value.length);
                 if (notesError) {
                   setNotesError(validateNotes(e.target.value));
                 }

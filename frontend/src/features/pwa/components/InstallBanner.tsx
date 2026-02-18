@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Alert, Button, IconButton, Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import GetAppIcon from '@mui/icons-material/GetApp';
@@ -9,17 +9,14 @@ export function InstallBanner() {
   const { t } = useTranslation();
   const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
   const [dismissed, setDismissed] = useState(false);
-  const [showBanner, setShowBanner] = useState(false);
-
-  useEffect(() => {
-    // Show banner after 2nd visit or 5 minutes usage
+  const [showBanner, setShowBanner] = useState(() => {
     const visitCount = parseInt(localStorage.getItem('pwa_visit_count') || '0');
     const firstVisit = localStorage.getItem('pwa_first_visit');
 
     if (!firstVisit) {
       localStorage.setItem('pwa_first_visit', Date.now().toString());
       localStorage.setItem('pwa_visit_count', '1');
-      return;
+      return false;
     }
 
     localStorage.setItem('pwa_visit_count', (visitCount + 1).toString());
@@ -28,12 +25,11 @@ export function InstallBanner() {
     const fiveMinutes = 5 * 60 * 1000;
 
     if (visitCount >= 2 || timeSinceFirstVisit > fiveMinutes) {
-      const dismissed = localStorage.getItem('pwa_install_dismissed') === 'true';
-      if (!dismissed) {
-        setShowBanner(true);
-      }
+      return localStorage.getItem('pwa_install_dismissed') !== 'true';
     }
-  }, []);
+
+    return false;
+  });
 
   const handleInstall = async () => {
     const accepted = await promptInstall();

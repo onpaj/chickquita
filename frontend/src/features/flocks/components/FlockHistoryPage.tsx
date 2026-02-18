@@ -28,11 +28,11 @@ export function FlockHistoryPage() {
           edge="start"
           onClick={handleBack}
           aria-label={t('common.back', 'Back')}
-          sx={{ mr: 2 }}
+          sx={{ mr: 2, minWidth: 48, minHeight: 48 }}
         >
-          <ArrowBackIcon />
+          <ArrowBackIcon fontSize="large" />
         </IconButton>
-        <Typography variant="h5" component="h1" fontWeight="bold">
+        <Typography variant="h4" component="h1" fontWeight="bold">
           {t('flockHistory.title', 'Flock History')}
         </Typography>
       </Box>
