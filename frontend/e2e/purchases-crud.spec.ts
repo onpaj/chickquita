@@ -283,15 +283,18 @@ test.describe('Purchase CRUD Flow - Complete Lifecycle', () => {
   });
 
   test.describe('Scenario 3: Edit Purchase', () => {
-    const originalPurchase = {
-      type: 'Krmivo',
-      name: 'Purchase to Edit',
-      amount: 100,
-      quantity: 10,
-      unit: 'kg',
-    };
+    let originalPurchase: { type: string; name: string; amount: number; quantity: number; unit: string };
 
-    test.beforeEach(async () => {
+    test.beforeEach(async ({}, testInfo) => {
+      // Use workerIndex to create unique names and avoid parallel test interference
+      const uniqueSuffix = testInfo.workerIndex;
+      originalPurchase = {
+        type: 'Krmivo',
+        name: `Purchase to Edit ${uniqueSuffix}`,
+        amount: 100,
+        quantity: 10,
+        unit: 'kg',
+      };
       // Create a purchase to edit
       await purchasesPage.openCreatePurchaseModal();
       await purchaseFormModal.createPurchase(originalPurchase);
@@ -299,7 +302,7 @@ test.describe('Purchase CRUD Flow - Complete Lifecycle', () => {
       await purchasesPage.waitForPurchasesToLoad();
     });
 
-    test('should edit purchase name', async () => {
+    test('should edit purchase name', async ({}, testInfo) => {
       // Open edit modal
       await purchasesPage.clickEditPurchase(originalPurchase.name);
       await expect(purchaseFormModal.modalTitle).toBeVisible();
@@ -309,7 +312,7 @@ test.describe('Purchase CRUD Flow - Complete Lifecycle', () => {
       expect(currentValues.name).toBe(originalPurchase.name);
 
       // Edit the name
-      const newName = 'Updated Purchase Name';
+      const newName = `Updated Purchase Name ${testInfo.workerIndex}`;
       await purchaseFormModal.editPurchase({ name: newName });
 
       // Wait for modal to close
