@@ -142,6 +142,7 @@ vi.mock('react-i18next', () => ({
 const mockFlocks: Flock[] = [
   {
     id: 'flock-1',
+    tenantId: 'tenant-1',
     coopId: 'coop-1',
     identifier: 'Flock 1',
     hatchDate: '2024-01-01',
@@ -151,9 +152,11 @@ const mockFlocks: Flock[] = [
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+    history: [],
   },
   {
     id: 'flock-2',
+    tenantId: 'tenant-1',
     coopId: 'coop-1',
     identifier: 'Flock 2',
     hatchDate: '2024-02-01',
@@ -163,9 +166,11 @@ const mockFlocks: Flock[] = [
     isActive: true,
     createdAt: '2024-02-01T00:00:00Z',
     updatedAt: '2024-02-01T00:00:00Z',
+    history: [],
   },
   {
     id: 'flock-3',
+    tenantId: 'tenant-1',
     coopId: 'coop-1',
     identifier: 'Flock 3 (Archived)',
     hatchDate: '2023-01-01',
@@ -175,15 +180,17 @@ const mockFlocks: Flock[] = [
     isActive: false,
     createdAt: '2023-01-01T00:00:00Z',
     updatedAt: '2024-03-01T00:00:00Z',
+    history: [],
   },
 ];
 
 const mockCoop: Coop = {
   id: 'coop-1',
+  tenantId: 'tenant-1',
   name: 'Test Coop',
   location: 'Test Location',
-  capacity: 50,
   isActive: true,
+  flocksCount: 3,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };

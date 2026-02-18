@@ -43,7 +43,7 @@ jobs:
 
       - name: 🔎 Run type check
         working-directory: ./frontend
-        run: npx tsc --noEmit
+        run: npx tsc -b
 
       - name: 🧪 Run tests with coverage
         working-directory: ./frontend

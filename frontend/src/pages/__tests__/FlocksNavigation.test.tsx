@@ -3,7 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
-import type { UseAuthReturn } from '@clerk/clerk-react';
 import FlocksPage from '../FlocksPage';
 import { CoopDetailPage } from '../CoopDetailPage';
 import type { Flock } from '../../features/flocks/api/flocksApi';
@@ -163,6 +162,7 @@ vi.mock('react-i18next', () => ({
 const mockFlocks: Flock[] = [
   {
     id: 'flock-1',
+    tenantId: 'tenant-1',
     coopId: 'coop-1',
     identifier: 'Flock 1',
     hatchDate: '2024-01-01',
@@ -172,9 +172,11 @@ const mockFlocks: Flock[] = [
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+    history: [],
   },
   {
     id: 'flock-2',
+    tenantId: 'tenant-1',
     coopId: 'coop-1',
     identifier: 'Flock 2',
     hatchDate: '2024-02-01',
@@ -184,15 +186,17 @@ const mockFlocks: Flock[] = [
     isActive: true,
     createdAt: '2024-02-01T00:00:00Z',
     updatedAt: '2024-02-01T00:00:00Z',
+    history: [],
   },
 ];
 
 const mockCoop: Coop = {
   id: 'coop-1',
+  tenantId: 'tenant-1',
   name: 'Test Coop',
   location: 'Test Location',
-  capacity: 50,
   isActive: true,
+  flocksCount: 2,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };
@@ -205,7 +209,7 @@ describe('Flocks Navigation and Routing', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: true,
       isLoaded: true,
-    } as UseAuthReturn);
+    } as ReturnType<typeof useAuth>);
 
     mockUseFlocks.mockReturnValue({
       data: mockFlocks,
@@ -612,7 +616,7 @@ describe('Flocks Navigation and Routing', () => {
       vi.mocked(useAuth).mockReturnValue({
         isSignedIn: false,
         isLoaded: true,
-      } as UseAuthReturn);
+      } as ReturnType<typeof useAuth>);
 
       // Create a mock ProtectedRoute wrapper
       const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -660,7 +664,7 @@ describe('Flocks Navigation and Routing', () => {
       vi.mocked(useAuth).mockReturnValue({
         isSignedIn: false,
         isLoaded: false,
-      } as UseAuthReturn);
+      } as ReturnType<typeof useAuth>);
 
       const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         const { isLoaded } = useAuth();
@@ -702,7 +706,7 @@ describe('Flocks Navigation and Routing', () => {
       vi.mocked(useAuth).mockReturnValue({
         isSignedIn: true,
         isLoaded: true,
-      } as UseAuthReturn);
+      } as ReturnType<typeof useAuth>);
 
       const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         const { isLoaded, isSignedIn } = useAuth();

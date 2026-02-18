@@ -20,8 +20,8 @@ RUN npm ci --prefer-offline --no-audit
 # Copy frontend source code
 COPY frontend/ ./
 
-# Lint, type-check, and build frontend for production
-RUN npm run lint && npm run build
+# Build frontend for production (lint and type-check run in CI before this)
+RUN npm run build
 
 # Stage 2: Build backend
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS backend-build
