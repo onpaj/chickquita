@@ -1,10 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nextProvider } from 'react-i18next';
 import { DailyRecordCard } from '../DailyRecordCard';
 import i18n from '../../../../lib/i18n';
 import type { DailyRecordDto } from '../../api/dailyRecordsApi';
+
+beforeAll(async () => {
+  await i18n.changeLanguage('cs');
+});
 
 const createWrapper = () => {
   return ({ children }: { children: React.ReactNode }) => (
