@@ -421,6 +421,7 @@ export const theme = createTheme({
     MuiBottomNavigation: {
       styleOverrides: {
         root: {
+          borderRadius: 0,
           height: 64,
           boxShadow: '0px -2px 4px rgba(0, 0, 0, 0.1)',
         },
