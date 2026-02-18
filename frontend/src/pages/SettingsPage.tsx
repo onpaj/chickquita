@@ -80,6 +80,7 @@ export function SettingsPage() {
           </Typography>
           <ListItem
             component="button"
+            aria-label={t('settings.signOut')}
             onClick={() => setSignOutDialogOpen(true)}
             sx={{
               py: 1.5,
@@ -100,11 +101,8 @@ export function SettingsPage() {
               <LogoutIcon />
             </ListItemIcon>
             <ListItemText
-              primary={
-                <Typography variant="body1" color="error">
-                  {t('settings.signOut')}
-                </Typography>
-              }
+              primary={t('settings.signOut')}
+              primaryTypographyProps={{ variant: 'body1', color: 'error' }}
             />
           </ListItem>
         </CardContent>
