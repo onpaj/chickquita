@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -63,6 +63,13 @@ describe('QuickAddModal', () => {
   const mockOnClose = vi.fn();
   const mockMutate = vi.fn();
   const mockHandleError = vi.fn();
+
+  beforeAll(async () => {
+    // Ensure i18n uses Czech (cs) language for all tests in this file.
+    // The LanguageDetector may pick up 'en' from navigator in jsdom,
+    // but the tests expect Czech translations.
+    await i18n.changeLanguage('cs');
+  });
 
   beforeEach(() => {
     // Reset mocks
