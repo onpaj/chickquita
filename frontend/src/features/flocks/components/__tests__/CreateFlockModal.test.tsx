@@ -193,11 +193,10 @@ describe('CreateFlockModal', () => {
       renderModal();
 
       const identifierInput = screen.getByLabelText(/Identifier/);
-      const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
-      // Trigger required error by focusing on identifier then moving away
+      // Trigger required error by focusing on identifier then tabbing away
       await user.click(identifierInput);
-      await user.click(hatchDateInput); // Move focus away to trigger onBlur
+      await user.tab(); // Move focus away to trigger onBlur on identifier
 
       await waitFor(() => {
         expect(screen.getByText('This field is required')).toBeInTheDocument();
@@ -207,8 +206,10 @@ describe('CreateFlockModal', () => {
       await user.click(identifierInput);
       await user.type(identifierInput, 'Valid Identifier');
 
+      // The identifier error should be cleared; hatch date may still show its own error
       await waitFor(() => {
-        expect(screen.queryByText('This field is required')).not.toBeInTheDocument();
+        const identifierField = screen.getByLabelText(/Identifier/);
+        expect(identifierField.getAttribute('aria-invalid')).toBe('false');
       });
     });
   });
@@ -429,11 +430,14 @@ describe('CreateFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Identifier/);
+      // Set date first via fireEvent (userEvent.type doesn't work for date inputs in jsdom)
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
+      const identifierInput = screen.getByLabelText(/Identifier/);
       await user.type(identifierInput, 'Test Flock');
-      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
       // Set hens count to 1
       const hensInput = screen.getByLabelText(/Hens/);
@@ -466,11 +470,14 @@ describe('CreateFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Identifier/);
+      // Set date first via fireEvent (userEvent.type doesn't work for date inputs in jsdom)
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
+      const identifierInput = screen.getByLabelText(/Identifier/);
       await user.type(identifierInput, '  Test Flock  ');
-      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
       const hensInput = screen.getByLabelText(/Hens/);
       await user.clear(hensInput);
@@ -519,11 +526,14 @@ describe('CreateFlockModal', () => {
 
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Identifier/);
+      // Set date first via fireEvent (userEvent.type doesn't work for date inputs in jsdom)
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
+      const identifierInput = screen.getByLabelText(/Identifier/);
       await user.type(identifierInput, 'Test Flock');
-      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
       const hensInput = screen.getByLabelText(/Hens/);
       await user.clear(hensInput);
@@ -575,21 +585,21 @@ describe('CreateFlockModal', () => {
 
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Identifier/);
+      // Set date first via fireEvent (userEvent.type doesn't work for date inputs in jsdom)
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
+      const identifierInput = screen.getByLabelText(/Identifier/);
       await user.type(identifierInput, 'Test');
-      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
-      // Use increment button for reliable state update
-      const incrementButtons = screen.getAllByLabelText(/Increase/);
-      await user.click(incrementButtons[0]); // hens
+      const hensInput = screen.getByLabelText(/Hens/);
+      await user.clear(hensInput);
+      await user.type(hensInput, '1');
 
       const saveButton = screen.getByRole('button', { name: 'Save' });
-
-      await waitFor(() => {
-        expect(saveButton).not.toBeDisabled();
-      }, { timeout: 3000 });
+      expect(saveButton).not.toBeDisabled();
 
       await user.click(saveButton);
 
@@ -609,21 +619,21 @@ describe('CreateFlockModal', () => {
 
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Identifier/);
+      // Set date first via fireEvent (userEvent.type doesn't work for date inputs in jsdom)
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
+      const identifierInput = screen.getByLabelText(/Identifier/);
       await user.type(identifierInput, 'Test');
-      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
-      // Use increment button for reliable state update
-      const incrementButtons = screen.getAllByLabelText(/Increase/);
-      await user.click(incrementButtons[0]); // hens
+      const hensInput = screen.getByLabelText(/Hens/);
+      await user.clear(hensInput);
+      await user.type(hensInput, '1');
 
       const saveButton = screen.getByRole('button', { name: 'Save' });
-
-      await waitFor(() => {
-        expect(saveButton).not.toBeDisabled();
-      }, { timeout: 3000 });
+      expect(saveButton).not.toBeDisabled();
 
       await user.click(saveButton);
 
@@ -690,21 +700,21 @@ describe('CreateFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Identifier/);
+      // Set date first via fireEvent (userEvent.type doesn't work for date inputs in jsdom)
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
+      await act(async () => {
+        fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
+      });
 
+      const identifierInput = screen.getByLabelText(/Identifier/);
       await user.type(identifierInput, 'Test Flock');
-      fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
 
-      // Use increment button for reliable state update
-      const incrementButtons = screen.getAllByLabelText(/Increase/);
-      await user.click(incrementButtons[0]); // hens
+      const hensInput = screen.getByLabelText(/Hens/);
+      await user.clear(hensInput);
+      await user.type(hensInput, '1');
 
-      // Wait for form to be valid
       const saveButton = screen.getByRole('button', { name: 'Save' });
-      await waitFor(() => {
-        expect(saveButton).not.toBeDisabled();
-      }, { timeout: 3000 });
+      expect(saveButton).not.toBeDisabled();
 
       // Submit by pressing Enter in the form
       await user.keyboard('{Enter}');

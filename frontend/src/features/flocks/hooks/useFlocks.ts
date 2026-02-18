@@ -130,7 +130,7 @@ export function useUpdateFlock() {
         queryKey: ['flocks', variables.coopId]
       });
       queryClient.invalidateQueries({
-        queryKey: ['flocks', variables.coopId, variables.data.id]
+        queryKey: ['flocks', variables.coopId, variables.data.flockId]
       });
       showSuccess(
         t('flocks.update.success'),

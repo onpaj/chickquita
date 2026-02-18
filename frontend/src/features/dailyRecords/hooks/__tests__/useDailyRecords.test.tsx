@@ -20,7 +20,7 @@ vi.mock('../../api/dailyRecordsApi', () => ({
   },
 }));
 
-vi.mock('../../../hooks/useToast', () => ({
+vi.mock('../../../../hooks/useToast', () => ({
   useToast: () => ({
     showSuccess: vi.fn(),
     showError: vi.fn(),
