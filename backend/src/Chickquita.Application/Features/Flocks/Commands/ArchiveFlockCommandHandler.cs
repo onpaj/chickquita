@@ -78,14 +78,13 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
                 return Result<FlockDto>.Failure(Error.NotFound("Flock not found"));
             }
 
-            // If already archived, return success (idempotent)
+            // If already archived, return a validation error
             if (!flock.IsActive)
             {
-                _logger.LogInformation(
-                    "ArchiveFlockCommand: Flock with ID {FlockId} is already archived, returning success",
+                _logger.LogWarning(
+                    "ArchiveFlockCommand: Flock with ID {FlockId} is already archived",
                     request.FlockId);
-                var alreadyArchivedDto = _mapper.Map<FlockDto>(flock);
-                return Result<FlockDto>.Success(alreadyArchivedDto);
+                return Result<FlockDto>.Failure(Error.Validation("Flock is already archived"));
             }
 
             flock.Archive();
