@@ -53,6 +53,8 @@ export class PurchaseFormModal {
     if (data.type) {
       await this.typeSelect.click();
       await this.page.getByRole('option', { name: new RegExp(data.type, 'i') }).first().click();
+      // Wait for dropdown to close before interacting with next field (Mobile Safari needs this)
+      await this.page.waitForTimeout(300);
     }
 
     // Name (with autocomplete support)
