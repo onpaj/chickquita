@@ -360,26 +360,15 @@ describe('PurchaseForm', () => {
       await user.clear(purchaseDateInput);
       await user.type(purchaseDateInput, '2024-01-15');
 
-      // Set amount using NumericStepper
-      const amountLabel = screen.getByText(/amount \(czk\)/i);
-      const amountContainer = amountLabel.closest('div');
-      if (amountContainer) {
-        const incrementButtons = within(amountContainer).getAllByRole('button');
-        // Click increment button multiple times to set amount
-        for (let i = 0; i < 100; i++) {
-          await user.click(incrementButtons[1]); // Second button is increment
-        }
-      }
+      // Set amount by typing directly into the NumericStepper input field
+      const amountInput = screen.getByRole('spinbutton', { name: /amount/i });
+      await user.clear(amountInput);
+      await user.type(amountInput, '100');
 
-      // Set quantity using NumericStepper
-      const quantityLabel = screen.getByText(/^quantity$/i);
-      const quantityContainer = quantityLabel.closest('div');
-      if (quantityContainer) {
-        const incrementButtons = within(quantityContainer).getAllByRole('button');
-        for (let i = 0; i < 25; i++) {
-          await user.click(incrementButtons[1]);
-        }
-      }
+      // Set quantity by typing directly into the NumericStepper input field
+      const quantityInput = screen.getByRole('spinbutton', { name: /quantity/i });
+      await user.clear(quantityInput);
+      await user.type(quantityInput, '25');
 
       const submitButton = screen.getByRole('button', { name: /create/i });
 
