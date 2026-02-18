@@ -7,10 +7,14 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Box,
-  Button,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
+import LanguageIcon from '@mui/icons-material/Language';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useTranslation } from 'react-i18next';
 import { useClerk } from '@clerk/clerk-react';
@@ -38,39 +42,85 @@ export function SettingsPage() {
         {t('settings.title')}
       </Typography>
 
-      <Paper sx={{ p: 3, mt: 3 }}>
-        <Box>
-          <FormControl fullWidth>
-            <InputLabel id="language-select-label">
-              {t('settings.language')}
-            </InputLabel>
-            <Select
-              labelId="language-select-label"
-              id="language-select"
-              value={i18n.language}
-              label={t('settings.language')}
-              onChange={handleLanguageChange}
-            >
-              <MenuItem value="cs">Čeština</MenuItem>
-              <MenuItem value="en">English</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+      {/* Language & Display section */}
+      <Paper elevation={2} sx={{ mt: 3 }}>
+        <Typography
+          variant="overline"
+          color="text.secondary"
+          sx={{ display: 'block', px: 2, pt: 2, pb: 0.5 }}
+        >
+          {t('settings.language')}
+        </Typography>
+        <List disablePadding>
+          <ListItem sx={{ py: 1.5 }}>
+            <ListItemIcon sx={{ minWidth: 44 }}>
+              <LanguageIcon color="action" />
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <FormControl fullWidth size="small">
+                  <InputLabel id="language-select-label">
+                    {t('settings.language')}
+                  </InputLabel>
+                  <Select
+                    labelId="language-select-label"
+                    id="language-select"
+                    value={i18n.language}
+                    label={t('settings.language')}
+                    onChange={handleLanguageChange}
+                  >
+                    <MenuItem value="cs">Čeština</MenuItem>
+                    <MenuItem value="en">English</MenuItem>
+                  </Select>
+                </FormControl>
+              }
+            />
+          </ListItem>
+        </List>
       </Paper>
 
-      <Box sx={{ mt: 4 }}>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          fullWidth
-          startIcon={<LogoutIcon />}
-          onClick={() => setSignOutDialogOpen(true)}
-          sx={{ minHeight: 48 }}
+      {/* Account / danger zone section */}
+      <Paper elevation={2} sx={{ mt: 3 }}>
+        <Typography
+          variant="overline"
+          color="text.secondary"
+          sx={{ display: 'block', px: 2, pt: 2, pb: 0.5 }}
         >
-          {t('settings.signOut')}
-        </Button>
-      </Box>
+          {t('settings.profile')}
+        </Typography>
+        <Divider />
+        <List disablePadding>
+          <ListItem
+            component="button"
+            onClick={() => setSignOutDialogOpen(true)}
+            sx={{
+              py: 1.5,
+              minHeight: 56,
+              width: '100%',
+              border: 'none',
+              bgcolor: 'transparent',
+              cursor: 'pointer',
+              textAlign: 'left',
+              color: 'error.main',
+              '&:hover': {
+                bgcolor: 'error.light',
+                opacity: 0.9,
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 44, color: 'error.main' }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Typography variant="body1" color="error">
+                  {t('settings.signOut')}
+                </Typography>
+              }
+            />
+          </ListItem>
+        </List>
+      </Paper>
 
       <ConfirmationDialog
         open={signOutDialogOpen}
