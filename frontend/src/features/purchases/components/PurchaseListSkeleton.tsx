@@ -1,4 +1,15 @@
-import { Box, Card, CardContent, Skeleton, Stack } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Skeleton,
+  Stack,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Divider,
+} from '@mui/material';
 
 /**
  * Loading skeleton component that matches the PurchaseList layout.
@@ -21,79 +32,51 @@ export function PurchaseListSkeleton() {
           <Stack spacing={2}>
             <Skeleton variant="text" width={100} height={28} />
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
-              <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
+              <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1, flex: 1 }} />
+              <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1, flex: 1 }} />
             </Stack>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
-              <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
+              <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1, flex: 1 }} />
+              <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1, flex: 1 }} />
             </Stack>
           </Stack>
         </CardContent>
       </Card>
 
-      {/* Purchase Cards Skeleton */}
-      <Stack spacing={2}>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Card key={i} elevation={2}>
-            <CardContent>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  mb: 2,
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
-                  <Skeleton variant="rectangular" width={40} height={40} sx={{ borderRadius: 1 }} />
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Skeleton variant="text" width="60%" height={28} />
-                    <Skeleton variant="text" width="40%" height={20} />
+      {/* Purchase List Skeleton — matches List with Actions pattern */}
+      <Card>
+        <List disablePadding>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Box key={i}>
+              {i > 1 && <Divider component="li" />}
+              <ListItem
+                alignItems="flex-start"
+                secondaryAction={
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <Skeleton variant="circular" width={44} height={44} />
+                    <Skeleton variant="circular" width={44} height={44} />
                   </Box>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Skeleton variant="circular" width={44} height={44} />
-                  <Skeleton variant="circular" width={44} height={44} />
-                </Box>
-              </Box>
-
-              <Stack spacing={1}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Skeleton variant="text" width={80} height={20} />
-                  <Skeleton variant="rectangular" width={100} height={24} sx={{ borderRadius: 12 }} />
-                </Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Skeleton variant="text" width={80} height={20} />
-                  <Skeleton variant="text" width={120} height={28} />
-                </Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Skeleton variant="text" width={80} height={20} />
-                  <Skeleton variant="text" width={80} height={20} />
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        ))}
-      </Stack>
+                }
+                sx={{ pr: 14 }}
+              >
+                <ListItemAvatar>
+                  <Skeleton variant="circular" width={40} height={40} />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={<Skeleton variant="text" width="55%" height={24} />}
+                  secondary={
+                    <Stack component="span" spacing={0.25} sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <Skeleton variant="text" width="35%" height={20} />
+                      <Skeleton variant="text" width="40%" height={20} />
+                      <Skeleton variant="text" width="50%" height={20} />
+                    </Stack>
+                  }
+                />
+              </ListItem>
+            </Box>
+          ))}
+        </List>
+      </Card>
     </Box>
   );
 }

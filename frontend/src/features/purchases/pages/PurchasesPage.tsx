@@ -12,8 +12,13 @@ import {
   useMediaQuery,
   useTheme,
   Button,
+  IconButton,
+  Slide,
 } from '@mui/material';
+import type { TransitionProps } from '@mui/material/transitions';
+import { forwardRef } from 'react';
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { PurchaseList } from '../components/PurchaseList';
 import { PurchaseForm } from '../components/PurchaseForm';
@@ -29,6 +34,13 @@ import {
 } from '@/shared/constants/modalConfig';
 
 const PURCHASE_FORM_ID = 'purchase-form';
+
+const SlideUp = forwardRef(function SlideUp(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 /**
  * PurchasesPage Component
@@ -110,7 +122,7 @@ export function PurchasesPage() {
   }));
 
   return (
-    <Container sx={{ pb: 10, pt: 3 }}>
+    <Container maxWidth="lg" sx={{ pb: 10, pt: 3 }}>
       {/* Page Header */}
       <Box
         sx={{
@@ -120,7 +132,7 @@ export function PurchasesPage() {
           mb: 3,
         }}
       >
-        <Typography variant="h4" component="h1">
+        <Typography variant="h5" component="h1">
           {t('purchases.title')}
         </Typography>
 
@@ -151,7 +163,7 @@ export function PurchasesPage() {
           aria-label={t('purchases.addPurchase')}
           sx={{
             position: 'fixed',
-            bottom: 80,
+            bottom: { xs: 80, sm: 16 },
             right: 16,
             minWidth: 56,
             minHeight: 56,
@@ -167,13 +179,23 @@ export function PurchasesPage() {
         open={isModalOpen}
         onClose={handleModalClose}
         {...DIALOG_CONFIG}
+        fullScreen={isMobile}
+        TransitionComponent={SlideUp}
       >
-        <DialogTitle sx={dialogTitleSx}>
+        <DialogTitle sx={{ ...dialogTitleSx, pr: 6 }}>
           {editingPurchase
             ? t('purchases.editPurchase')
             : t('purchases.createPurchase')}
+          <IconButton
+            onClick={handleModalClose}
+            disabled={isSubmitting}
+            aria-label={t('common.close')}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        <DialogContent sx={dialogContentSx}>
+        <DialogContent dividers sx={dialogContentSx}>
           <PurchaseForm
             initialData={editingPurchase || undefined}
             onSubmit={handleFormSubmit}
