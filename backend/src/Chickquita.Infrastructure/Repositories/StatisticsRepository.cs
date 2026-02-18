@@ -130,16 +130,18 @@ public class StatisticsRepository : IStatisticsRepository
         var startDateTime = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
         var endDateTime = DateTime.SpecifyKind(endDate.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
-        return await _context.DailyRecords
+        var groups = await _context.DailyRecords
             .Where(dr => dr.RecordDate >= startDateTime && dr.RecordDate <= endDateTime)
             .GroupBy(dr => dr.RecordDate)
-            .Select(g => new ProductionTrendItemDto
-            {
-                Date = g.Key.ToString("yyyy-MM-dd"),
-                Eggs = g.Sum(dr => dr.EggCount)
-            })
-            .OrderBy(p => p.Date)
+            .Select(g => new { Date = g.Key, Eggs = g.Sum(dr => dr.EggCount) })
+            .OrderBy(g => g.Date)
             .ToListAsync();
+
+        return groups.Select(g => new ProductionTrendItemDto
+        {
+            Date = g.Date.ToString("yyyy-MM-dd"),
+            Eggs = g.Eggs
+        }).ToList();
     }
 
     private async Task<List<CostPerEggTrendItemDto>> GetCostPerEggTrendAsync(DateOnly startDate, DateOnly endDate)

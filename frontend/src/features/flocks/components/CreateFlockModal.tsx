@@ -78,7 +78,9 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
     if (!value) {
       return t('validation.required');
     }
-    const selectedDate = new Date(value);
+    // Parse as local date to avoid UTC timezone offset causing false "future date" errors
+    const [year, month, day] = value.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (selectedDate > today) {
@@ -190,6 +192,13 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
     submitFlock();
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !(e.target as HTMLElement).closest('button')) {
+      e.preventDefault();
+      submitFlock();
+    }
+  };
+
   const getTodayDate = (): string => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -210,7 +219,7 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
         },
       }}
     >
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <DialogTitle sx={dialogTitleSx}>{t('flocks.addFlock')}</DialogTitle>
         <DialogContent
           sx={{
@@ -405,9 +414,10 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
             {t('common.cancel')}
           </Button>
           <Button
-            type="submit"
+            type="button"
             variant="contained"
             disabled={isPending || !isFormValid()}
+            onClick={submitFlock}
             startIcon={isPending ? <CircularProgress size={20} color="inherit" /> : undefined}
             sx={touchButtonSx}
           >
