@@ -51,7 +51,6 @@ export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecord
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        borderRadius: 2,
         transition: 'box-shadow 0.2s',
         '&:hover': {
           boxShadow: 3,

@@ -25,7 +25,6 @@ export function QuickActionCard({
     <Card
       elevation={2}
       sx={{
-        borderRadius: 2,
         height: '100%',
         opacity: disabled ? 0.6 : 1,
       }}

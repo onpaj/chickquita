@@ -97,7 +97,6 @@ export function FlockCard({
         sx={{
           position: 'relative',
           cursor: 'pointer',
-          borderRadius: 2,
           transition: 'box-shadow 0.3s ease',
           '&:hover': {
             boxShadow: 4,
