@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   Card,
+  CardHeader,
   CardContent,
   Typography,
   Box,
@@ -92,10 +93,11 @@ export function FlockCard({
     <>
       <Card
         data-testid="flock-card"
-        elevation={2}
+        elevation={1}
         sx={{
           position: 'relative',
           cursor: 'pointer',
+          borderRadius: 2,
           transition: 'box-shadow 0.3s ease',
           '&:hover': {
             boxShadow: 4,
@@ -108,57 +110,42 @@ export function FlockCard({
           coopName,
         })}
       >
-        <CardContent>
-          {/* Header with title and status/menu */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              mb: 2,
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="h2"
-              sx={{ flexGrow: 1, pr: 1 }}
-              id={`flock-title-${flock.id}`}
-            >
+        <CardHeader
+          title={
+            <Typography variant="subtitle1" component="h2" id={`flock-title-${flock.id}`}>
               {flock.identifier}
             </Typography>
+          }
+          subheader={
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              aria-label={t('flocks.belongsToCoopAriaLabel', { coopName })}
+            >
+              {t('flocks.coop')}: {coopName}
+            </Typography>
+          }
+          action={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Chip
                 label={flock.isActive ? t('flocks.active') : t('flocks.archived')}
                 color={flock.isActive ? 'success' : 'default'}
                 size="small"
-                sx={{ height: 24 }}
               />
               <IconButton
+                size="small"
                 onClick={handleMenuClick}
                 aria-label={t('common.more')}
                 aria-expanded={menuOpen}
                 aria-haspopup="true"
                 aria-controls={menuOpen ? `flock-menu-${flock.id}` : undefined}
-                sx={{
-                  p: 1.5,
-                  minWidth: 48,
-                  minHeight: 48,
-                }}
               >
                 <MoreVertIcon />
               </IconButton>
             </Box>
-          </Box>
-
-          {/* Coop name */}
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mb: 2 }}
-            aria-label={t('flocks.belongsToCoopAriaLabel', { coopName })}
-          >
-            {t('flocks.coop')}: {coopName}
-          </Typography>
+          }
+        />
+        <CardContent sx={{ pt: 0 }}>
 
           {/* Composition */}
           <Stack spacing={1}>
