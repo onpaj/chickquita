@@ -201,7 +201,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VITE_API_URL=https://chickquita.azurewebsites.net
             VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY_PROD }}
 
       - name: 🏷️ Create and Push Git Tag

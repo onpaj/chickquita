@@ -260,7 +260,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VITE_API_URL=https://chickquita-test.azurewebsites.net
             VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY_STAGING }}
 
   # Deploy to Azure Web App (automatic, no approval needed)

@@ -16,12 +16,10 @@ interface OfflineQueuedError extends Error {
  * The Clerk JWT token is automatically attached to all requests and refreshed when needed.
  */
 
-// Get API base URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-if (!API_BASE_URL) {
-  throw new Error('Missing VITE_API_BASE_URL environment variable');
-}
+// Get API base URL from environment variables.
+// In development, VITE_API_BASE_URL points to the local backend (e.g. http://localhost:5100/api).
+// In production, FE and BE are served from the same container/origin, so we use a relative path.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
  * Axios instance with base configuration

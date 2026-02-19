@@ -7,10 +7,8 @@ FROM node:20-alpine AS frontend-build
 WORKDIR /app/frontend
 
 # Build args for Vite environment variables (injected at build time)
-ARG VITE_API_URL=http://localhost:8080
 ARG VITE_CLERK_PUBLISHABLE_KEY=
 
-ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
 
 # Copy package files and install dependencies
