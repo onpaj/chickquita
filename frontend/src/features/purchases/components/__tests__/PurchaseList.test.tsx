@@ -98,7 +98,7 @@ describe('PurchaseList', () => {
   describe('Loading State', () => {
     it('should display loading skeleton when data is loading', () => {
       vi.mocked(usePurchases).mockReturnValue({
-        purchases: undefined,
+        purchases: undefined as unknown as PurchaseDto[],
         isLoading: true,
         error: null,
         refetch: vi.fn(),

@@ -132,7 +132,7 @@ describe('EditCoopModal', () => {
     it('should pre-fill form with coop data when location is null', () => {
       const coopWithoutLocation: Coop = {
         ...mockCoop,
-        location: null,
+        location: undefined,
       };
 
       renderModal(true, coopWithoutLocation);

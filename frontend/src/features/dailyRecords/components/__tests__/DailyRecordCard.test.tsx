@@ -20,6 +20,8 @@ const mockRecord: DailyRecordDto = {
   id: 'record-1',
   tenantId: 'tenant-1',
   flockId: 'flock-1',
+  flockName: 'Hejno A',
+  flockCoopName: 'Test Coop',
   recordDate: '2024-02-15',
   eggCount: 12,
   notes: 'Good production today',

@@ -506,8 +506,8 @@ describe('QuickAddModal', () => {
   describe('Mobile responsive', () => {
     it('should render in fullScreen mode on mobile viewport', () => {
       // Mock mobile viewport
-      global.innerWidth = 400;
-      global.dispatchEvent(new Event('resize'));
+      window.innerWidth = 400;
+      window.dispatchEvent(new Event('resize'));
 
       render(
         <QuickAddModal

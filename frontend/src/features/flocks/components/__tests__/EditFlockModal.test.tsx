@@ -48,16 +48,17 @@ describe('EditFlockModal', () => {
   // Mock flock data for testing
   const mockFlock: Flock = {
     id: 'flock-123',
+    tenantId: 'tenant-1',
     coopId: 'coop-456',
     identifier: 'Existing Flock',
     hatchDate: '2024-01-15T00:00:00Z',
     currentHens: 10,
     currentRoosters: 2,
     currentChicks: 5,
-    totalEggsProduced: 100,
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+    history: [],
   };
 
   beforeEach(() => {

@@ -21,7 +21,7 @@ describe('ProtectedRoute', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: true,
       isLoaded: true,
-    } as ReturnType<typeof useAuth>);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <MemoryRouter initialEntries={['/protected']}>
@@ -41,7 +41,7 @@ describe('ProtectedRoute', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: false,
       isLoaded: true,
-    } as ReturnType<typeof useAuth>);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <MemoryRouter initialEntries={['/protected']}>
@@ -63,7 +63,7 @@ describe('ProtectedRoute', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: false,
       isLoaded: false,
-    } as ReturnType<typeof useAuth>);
+    } as unknown as ReturnType<typeof useAuth>);
 
     const { container } = render(
       <MemoryRouter initialEntries={['/protected']}>
@@ -85,7 +85,7 @@ describe('ProtectedRoute', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: true,
       isLoaded: true,
-    } as ReturnType<typeof useAuth>);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <MemoryRouter initialEntries={['/dashboard/settings']}>

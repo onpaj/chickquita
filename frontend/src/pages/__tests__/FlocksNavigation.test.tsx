@@ -209,7 +209,7 @@ describe('Flocks Navigation and Routing', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: true,
       isLoaded: true,
-    } as ReturnType<typeof useAuth>);
+    } as unknown as ReturnType<typeof useAuth>);
 
     mockUseFlocks.mockReturnValue({
       data: mockFlocks,
@@ -616,7 +616,7 @@ describe('Flocks Navigation and Routing', () => {
       vi.mocked(useAuth).mockReturnValue({
         isSignedIn: false,
         isLoaded: true,
-      } as ReturnType<typeof useAuth>);
+      } as unknown as ReturnType<typeof useAuth>);
 
       // Create a mock ProtectedRoute wrapper
       const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -664,7 +664,7 @@ describe('Flocks Navigation and Routing', () => {
       vi.mocked(useAuth).mockReturnValue({
         isSignedIn: false,
         isLoaded: false,
-      } as ReturnType<typeof useAuth>);
+      } as unknown as ReturnType<typeof useAuth>);
 
       const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         const { isLoaded } = useAuth();
@@ -706,7 +706,7 @@ describe('Flocks Navigation and Routing', () => {
       vi.mocked(useAuth).mockReturnValue({
         isSignedIn: true,
         isLoaded: true,
-      } as ReturnType<typeof useAuth>);
+      } as unknown as ReturnType<typeof useAuth>);
 
       const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         const { isLoaded, isSignedIn } = useAuth();

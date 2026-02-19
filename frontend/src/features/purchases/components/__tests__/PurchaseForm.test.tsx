@@ -330,7 +330,7 @@ describe('PurchaseForm', () => {
       // Open the type dropdown by clicking the button/trigger
       const typeSelectContainer = screen.getByLabelText(/purchase type/i).closest('.MuiFormControl-root');
       if (typeSelectContainer) {
-        const selectButton = within(typeSelectContainer).getByRole('combobox');
+        const selectButton = within(typeSelectContainer as HTMLElement).getByRole('combobox');
         await user.click(selectButton);
 
         // Check that all types are present in the dropdown

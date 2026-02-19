@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { dailyRecordsApi, type DailyRecordDto } from '../../api/dailyRecordsApi';
 
 /**
@@ -31,6 +31,8 @@ const mockDailyRecord: DailyRecordDto = {
   id: '123e4567-e89b-12d3-a456-426614174000',
   tenantId: '123e4567-e89b-12d3-a456-426614174001',
   flockId: '123e4567-e89b-12d3-a456-426614174002',
+  flockName: 'Test Flock',
+  flockCoopName: 'Test Coop',
   recordDate: '2024-01-15',
   eggCount: 25,
   notes: 'Good weather, productive day',
@@ -42,6 +44,8 @@ const mockDailyRecord2: DailyRecordDto = {
   id: '123e4567-e89b-12d3-a456-426614174003',
   tenantId: '123e4567-e89b-12d3-a456-426614174001',
   flockId: '123e4567-e89b-12d3-a456-426614174002',
+  flockName: 'Test Flock',
+  flockCoopName: 'Test Coop',
   recordDate: '2024-01-16',
   eggCount: 28,
   notes: 'Another good day',
