@@ -1,9 +1,10 @@
-name: 🔄 CI - Main Branch (Auto-deploy to Staging & Production)
+name: 🔄 CI - Main Branch (Auto-deploy to Production)
 
 on:
   push:
     branches: [main]
-
+  workflow_dispatch:
+    
 # Cancel previous runs for the same commit
 concurrency:
   group: main-branch-ci-${{ github.sha }}
@@ -243,107 +244,6 @@ jobs:
           echo "- **Version**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Tags**: ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Built at**: $(date)" >> $GITHUB_STEP_SUMMARY
-
-  # Deploy to Staging (automatic, no approval needed)
-  deploy-staging:
-    name: 🚀 Auto-deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [build-and-push]
-    outputs:
-      webapp-hostname: ${{ steps.deploy.outputs.hostname }}
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🔐 Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS_STAGING }}
-
-      - name: 🚀 Deploy to Azure Web App (Staging)
-        id: deploy
-        run: |
-          WEBAPP_NAME="chickquita-test"
-          VERSION="${{ needs.build-and-push.outputs.version }}"
-          DOCKER_IMAGE="${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:$VERSION"
-
-          echo "🎯 Deploying to staging: $WEBAPP_NAME"
-          echo "🐳 Docker image: $DOCKER_IMAGE"
-
-          az webapp config set \
-            --name $WEBAPP_NAME \
-            --resource-group rgHeblo \
-            --linux-fx-version "DOCKER|$DOCKER_IMAGE" \
-            --output none
-
-          az webapp config container set \
-            --name $WEBAPP_NAME \
-            --resource-group rgHeblo \
-            --container-image-name "$DOCKER_IMAGE" \
-            --container-registry-url https://index.docker.io/v1/ \
-            --output none
-
-          az webapp restart --name $WEBAPP_NAME --resource-group rgHeblo --output none
-          sleep 15
-
-          WEBAPP_HOSTNAME=$(az webapp show \
-            --name $WEBAPP_NAME \
-            --resource-group rgHeblo \
-            --query "defaultHostName" \
-            --output tsv)
-
-          echo "hostname=$WEBAPP_HOSTNAME" >> $GITHUB_OUTPUT
-          echo "WEBAPP_NAME=$WEBAPP_NAME" >> $GITHUB_ENV
-
-      - name: 🔧 Configure App Settings
-        run: |
-          az webapp config appsettings set \
-            --resource-group rgHeblo \
-            --name $WEBAPP_NAME \
-            --settings \
-              ASPNETCORE_ENVIRONMENT=Staging \
-              WEBSITES_PORT=8080 \
-              WEBSITES_ENABLE_APP_SERVICE_STORAGE=false \
-              DOCKER_REGISTRY_SERVER_URL=https://index.docker.io \
-              SCM_DO_BUILD_DURING_DEPLOYMENT=false \
-              APP_VERSION="${{ needs.build-and-push.outputs.version }}" \
-              DEPLOYMENT_SOURCE="CI-Main"
-
-      - name: ⏳ Wait for deployment to be ready
-        run: |
-          echo "⏳ Waiting for deployment to be ready..."
-          sleep 60
-
-          MAX_ATTEMPTS=20
-          ATTEMPT=1
-
-          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
-            echo "🔍 Health check attempt $ATTEMPT/$MAX_ATTEMPTS..."
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://${{ steps.deploy.outputs.hostname }}/health || echo "000")
-
-            if [ "$HTTP_CODE" = "200" ]; then
-              echo "✅ Deployment is ready! (attempt $ATTEMPT/$MAX_ATTEMPTS)"
-              break
-            fi
-
-            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-              echo "❌ Deployment failed to become ready after $MAX_ATTEMPTS attempts"
-              exit 1
-            fi
-
-            echo "⏳ Waiting... (HTTP $HTTP_CODE, attempt $ATTEMPT/$MAX_ATTEMPTS)"
-            sleep 15
-            ATTEMPT=$((ATTEMPT + 1))
-          done
-
-      - name: 📝 Deployment Summary
-        run: |
-          echo "## 🚀 Staging Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version**: ${{ needs.build-and-push.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **URL**: https://${{ steps.deploy.outputs.hostname }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment**: Staging" >> $GITHUB_STEP_SUMMARY
-          echo "- **Deployed at**: $(date)" >> $GITHUB_STEP_SUMMARY
 
   # Deploy to Production (automatic, no approval needed)
   deploy-production:

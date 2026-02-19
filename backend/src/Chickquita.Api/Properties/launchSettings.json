@@ -26,7 +26,7 @@
       "commandLineArgs": "ef database update --project ../Chickquita.Infrastructure --startup-project .",
       "workingDirectory": "$(ProjectDir)",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Test"
+        "ASPNETCORE_ENVIRONMENT": "E2ETests"
       }
     }
   }

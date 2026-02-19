@@ -10,6 +10,13 @@ using Chickquita.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load user secrets for non-Production environments (Development loads them by default;
+// E2ETests needs explicit setup so EF migrations can resolve the connection string)
+if (builder.Environment.EnvironmentName == "E2ETests")
+{
+    builder.Configuration.AddUserSecrets<Program>(optional: true);
+}
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
