@@ -61,6 +61,9 @@ builder.Services.AddSwaggerGen(options =>
     }
 });
 
+// Application Insights telemetry
+builder.Services.AddApplicationInsightsTelemetry();
+
 // Register Application layer services (MediatR, AutoMapper, FluentValidation)
 builder.Services.AddApplicationServices();
 
