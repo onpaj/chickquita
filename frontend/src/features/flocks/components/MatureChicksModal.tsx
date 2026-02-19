@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,17 +8,17 @@ import {
   Stack,
   CircularProgress,
   IconButton,
-  InputAdornment,
   Typography,
-  TextField,
   Alert,
+  Slide,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import type { TransitionProps } from '@mui/material/transitions';
+import CloseIcon from '@mui/icons-material/Close';
 import PetsIcon from '@mui/icons-material/Pets';
 import { useTranslation } from 'react-i18next';
 import { useMatureChicks } from '../hooks/useFlocks';
 import type { Flock } from '../api/flocksApi';
+import { NumericStepper } from '@/shared/components';
 import {
   DIALOG_CONFIG,
   isMobileViewport,
@@ -26,10 +26,15 @@ import {
   dialogContentSx,
   dialogActionsSx,
   touchButtonSx,
-  touchInputProps,
-  numberStepperButtonSx,
   FORM_FIELD_SPACING,
 } from '@/shared/constants/modalConfig';
+
+const SlideUp = React.forwardRef(function SlideUp(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 interface MatureChicksModalProps {
   open: boolean;
@@ -96,6 +101,7 @@ export function MatureChicksModal({ open, onClose, flock }: MatureChicksModalPro
       maxWidth={DIALOG_CONFIG.maxWidth}
       fullWidth={DIALOG_CONFIG.fullWidth}
       fullScreen={isMobileViewport()}
+      TransitionComponent={SlideUp}
       sx={{
         '& .MuiDialog-paper': {
           display: 'flex',
@@ -105,13 +111,22 @@ export function MatureChicksModal({ open, onClose, flock }: MatureChicksModalPro
       }}
     >
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <DialogTitle sx={dialogTitleSx}>
+        <DialogTitle sx={{ ...dialogTitleSx, pr: 6 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <PetsIcon />
             <span>{t('flocks.matureChicks.title')}</span>
           </Stack>
+          <IconButton
+            aria-label={t('common.close')}
+            onClick={handleClose}
+            disabled={isPending}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
         <DialogContent
+          dividers
           sx={{
             ...dialogContentSx,
             overflowY: 'auto',
@@ -124,39 +139,15 @@ export function MatureChicksModal({ open, onClose, flock }: MatureChicksModalPro
             </Typography>
 
             {/* Chicks to mature */}
-            <TextField
+            <NumericStepper
               label={t('flocks.matureChicks.chicksCount')}
               value={chicksToMature}
-              onChange={(e) => handleChicksChange(parseInt(e.target.value) || 1)}
-              fullWidth
+              onChange={handleChicksChange}
+              min={1}
+              max={flock.currentChicks}
               disabled={isPending}
-              type="number"
               helperText={t('flocks.matureChicks.chicksAvailable', { count: flock.currentChicks })}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => handleChicksChange(chicksToMature - 1)}
-                      disabled={isPending || chicksToMature <= 1}
-                      size="small"
-                      aria-label={t('flocks.form.decrease')}
-                      sx={numberStepperButtonSx}
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleChicksChange(chicksToMature + 1)}
-                      disabled={isPending || chicksToMature >= flock.currentChicks}
-                      size="small"
-                      aria-label={t('flocks.form.increase')}
-                      sx={numberStepperButtonSx}
-                    >
-                      <AddIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              inputProps={{ min: 1, max: flock.currentChicks, ...touchInputProps }}
+              aria-label={t('flocks.matureChicks.chicksCount')}
             />
 
             <Typography variant="subtitle2" color="text.secondary">
@@ -164,73 +155,25 @@ export function MatureChicksModal({ open, onClose, flock }: MatureChicksModalPro
             </Typography>
 
             {/* Hens */}
-            <TextField
+            <NumericStepper
               label={t('flocks.matureChicks.toHens')}
               value={hens}
-              onChange={(e) => handleHensChange(parseInt(e.target.value) || 0)}
-              fullWidth
+              onChange={handleHensChange}
+              min={0}
+              max={chicksToMature}
               disabled={isPending}
-              type="number"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => handleHensChange(hens - 1)}
-                      disabled={isPending || hens <= 0}
-                      size="small"
-                      aria-label={t('flocks.form.decrease')}
-                      sx={numberStepperButtonSx}
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleHensChange(hens + 1)}
-                      disabled={isPending || hens >= chicksToMature}
-                      size="small"
-                      aria-label={t('flocks.form.increase')}
-                      sx={numberStepperButtonSx}
-                    >
-                      <AddIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              inputProps={{ min: 0, max: chicksToMature, ...touchInputProps }}
+              aria-label={t('flocks.matureChicks.toHens')}
             />
 
             {/* Roosters */}
-            <TextField
+            <NumericStepper
               label={t('flocks.matureChicks.toRoosters')}
               value={roosters}
-              onChange={(e) => handleRoostersChange(parseInt(e.target.value) || 0)}
-              fullWidth
+              onChange={handleRoostersChange}
+              min={0}
+              max={chicksToMature}
               disabled={isPending}
-              type="number"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => handleRoostersChange(roosters - 1)}
-                      disabled={isPending || roosters <= 0}
-                      size="small"
-                      aria-label={t('flocks.form.decrease')}
-                      sx={numberStepperButtonSx}
-                    >
-                      <RemoveIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleRoostersChange(roosters + 1)}
-                      disabled={isPending || roosters >= chicksToMature}
-                      size="small"
-                      aria-label={t('flocks.form.increase')}
-                      sx={numberStepperButtonSx}
-                    >
-                      <AddIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              inputProps={{ min: 0, max: chicksToMature, ...touchInputProps }}
+              aria-label={t('flocks.matureChicks.toRoosters')}
             />
 
             {/* Real-time total display */}
@@ -256,7 +199,7 @@ export function MatureChicksModal({ open, onClose, flock }: MatureChicksModalPro
           </Stack>
         </DialogContent>
         <DialogActions sx={dialogActionsSx}>
-          <Button onClick={handleClose} disabled={isPending} sx={touchButtonSx}>
+          <Button variant="text" onClick={handleClose} disabled={isPending} sx={touchButtonSx}>
             {t('common.cancel')}
           </Button>
           <Button

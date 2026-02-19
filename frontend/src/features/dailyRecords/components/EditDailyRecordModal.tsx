@@ -9,8 +9,13 @@ import {
   CircularProgress,
   TextField,
   Alert,
+  IconButton,
+  Slide,
 } from '@mui/material';
+import type { TransitionProps } from '@mui/material/transitions';
 import { Delete as DeleteIcon } from '@mui/icons-material';
+import CloseIcon from '@mui/icons-material/Close';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUpdateDailyRecord } from '../hooks/useDailyRecords';
 import { useErrorHandler } from '../../../hooks/useErrorHandler';
@@ -28,6 +33,13 @@ import {
 } from '@/shared/constants/modalConfig';
 import type { DailyRecordDto } from '../api/dailyRecordsApi';
 import { DeleteDailyRecordDialog } from './DeleteDailyRecordDialog';
+
+const SlideUp = React.forwardRef(function SlideUp(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 interface EditDailyRecordModalProps {
   open: boolean;
@@ -90,9 +102,9 @@ export function EditDailyRecordModal({
   const eggCountRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill form when record changes
-   
   useEffect(() => {
     if (record && open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEggCount(record.eggCount);
       setNotes(record.notes || '');
       setEggCountError('');
@@ -216,6 +228,7 @@ export function EditDailyRecordModal({
       maxWidth={DIALOG_CONFIG.maxWidth}
       fullWidth={DIALOG_CONFIG.fullWidth}
       fullScreen={isMobileViewport()}
+      TransitionComponent={SlideUp}
       sx={{
         '& .MuiDialog-paper': {
           display: 'flex',
@@ -228,10 +241,19 @@ export function EditDailyRecordModal({
         onSubmit={handleSubmit}
         style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
       >
-        <DialogTitle sx={dialogTitleSx}>
+        <DialogTitle sx={{ ...dialogTitleSx, pr: 6 }}>
           {t('dailyRecords.edit.title')}
+          <IconButton
+            aria-label={t('common.close')}
+            onClick={handleClose}
+            disabled={isPending}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
         <DialogContent
+          dividers
           sx={{
             ...dialogContentSx,
             overflowY: 'auto',
@@ -320,6 +342,7 @@ export function EditDailyRecordModal({
             {t('common.delete')}
           </Button>
           <Button
+            variant="text"
             onClick={handleClose}
             disabled={isPending}
             sx={touchButtonSx}

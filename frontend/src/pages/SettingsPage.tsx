@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import {
   Container,
-  Paper,
+  Card,
+  CardContent,
   Typography,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Box,
-  Button,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
+import LanguageIcon from '@mui/icons-material/Language';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useTranslation } from 'react-i18next';
 import { useClerk } from '@clerk/clerk-react';
@@ -23,8 +27,7 @@ export function SettingsPage() {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleLanguageChange = (event: SelectChangeEvent) => {
-    const newLanguage = event.target.value;
-    i18n.changeLanguage(newLanguage);
+    i18n.changeLanguage(event.target.value);
   };
 
   const handleSignOutConfirm = async () => {
@@ -38,39 +41,72 @@ export function SettingsPage() {
         {t('settings.title')}
       </Typography>
 
-      <Paper sx={{ p: 3, mt: 3 }}>
-        <Box>
-          <FormControl fullWidth>
-            <InputLabel id="language-select-label">
-              {t('settings.language')}
-            </InputLabel>
-            <Select
-              labelId="language-select-label"
-              id="language-select"
-              value={i18n.language}
-              label={t('settings.language')}
-              onChange={handleLanguageChange}
-            >
-              <MenuItem value="cs">Čeština</MenuItem>
-              <MenuItem value="en">English</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Paper>
+      {/* Language section */}
+      <Card elevation={1} sx={{ mt: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+            {t('settings.language')}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <LanguageIcon color="action" />
+            <FormControl fullWidth size="small">
+              <InputLabel id="language-select-label">
+                {t('settings.language')}
+              </InputLabel>
+              <Select
+                labelId="language-select-label"
+                id="language-select"
+                value={i18n.language}
+                label={t('settings.language')}
+                onChange={handleLanguageChange}
+              >
+                <MenuItem value="cs">Čeština</MenuItem>
+                <MenuItem value="en">English</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </CardContent>
+      </Card>
 
-      <Box sx={{ mt: 4 }}>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          fullWidth
-          startIcon={<LogoutIcon />}
-          onClick={() => setSignOutDialogOpen(true)}
-          sx={{ minHeight: 48 }}
-        >
-          {t('settings.signOut')}
-        </Button>
-      </Box>
+      {/* Profile / sign-out section */}
+      <Card elevation={1} sx={{ mt: 2 }}>
+        <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={{ px: 2, pt: 2, pb: 1 }}
+          >
+            {t('settings.profile')}
+          </Typography>
+          <ListItem
+            component="button"
+            aria-label={t('settings.signOut')}
+            onClick={() => setSignOutDialogOpen(true)}
+            sx={{
+              py: 1.5,
+              minHeight: 56,
+              width: '100%',
+              border: 'none',
+              bgcolor: 'transparent',
+              cursor: 'pointer',
+              textAlign: 'left',
+              color: 'error.main',
+              '&:hover': {
+                bgcolor: 'error.light',
+                opacity: 0.9,
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 44, color: 'error.main' }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary={t('settings.signOut')}
+              primaryTypographyProps={{ variant: 'body1', color: 'error' }}
+            />
+          </ListItem>
+        </CardContent>
+      </Card>
 
       <ConfirmationDialog
         open={signOutDialogOpen}

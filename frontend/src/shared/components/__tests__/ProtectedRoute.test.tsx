@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import type { UseAuthReturn } from '@clerk/clerk-react';
 import { ProtectedRoute } from '../ProtectedRoute';
 
 // Mock Clerk's useAuth hook
@@ -22,7 +21,7 @@ describe('ProtectedRoute', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: true,
       isLoaded: true,
-    } as UseAuthReturn);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <MemoryRouter initialEntries={['/protected']}>
@@ -42,7 +41,7 @@ describe('ProtectedRoute', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: false,
       isLoaded: true,
-    } as UseAuthReturn);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <MemoryRouter initialEntries={['/protected']}>
@@ -64,7 +63,7 @@ describe('ProtectedRoute', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: false,
       isLoaded: false,
-    } as UseAuthReturn);
+    } as unknown as ReturnType<typeof useAuth>);
 
     const { container } = render(
       <MemoryRouter initialEntries={['/protected']}>
@@ -86,7 +85,7 @@ describe('ProtectedRoute', () => {
     vi.mocked(useAuth).mockReturnValue({
       isSignedIn: true,
       isLoaded: true,
-    } as UseAuthReturn);
+    } as unknown as ReturnType<typeof useAuth>);
 
     render(
       <MemoryRouter initialEntries={['/dashboard/settings']}>

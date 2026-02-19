@@ -32,6 +32,37 @@ interface CostPerEggTrendChartProps {
   data: CostPerEggTrendItem[];
 }
 
+interface CostPerEggTrendTooltipProps {
+  active?: boolean;
+  payload?: readonly { payload: CostPerEggTrendItem }[];
+}
+
+function CostPerEggTrendTooltip({ active, payload }: CostPerEggTrendTooltipProps) {
+  const { t } = useTranslation();
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <Box
+        sx={{
+          backgroundColor: 'background.paper',
+          p: 1.5,
+          border: 1,
+          borderColor: 'divider',
+          borderRadius: 1,
+        }}
+      >
+        <Typography variant="body2" fontWeight={600}>
+          {dayjs(data.date).format('DD MMMM YYYY')}
+        </Typography>
+        <Typography variant="body2" color="primary">
+          {t('statistics.costPerEggTrend.costPerEgg')}: {data.costPerEgg.toFixed(2)} Kč
+        </Typography>
+      </Box>
+    );
+  }
+  return null;
+}
+
 export function CostPerEggTrendChart({ data }: CostPerEggTrendChartProps) {
   const { t } = useTranslation();
 
@@ -56,32 +87,6 @@ export function CostPerEggTrendChart({ data }: CostPerEggTrendChartProps) {
   };
 
   const trend = calculateTrend();
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <Box
-          sx={{
-            backgroundColor: 'background.paper',
-            p: 1.5,
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2" fontWeight={600}>
-            {dayjs(data.date).format('DD MMMM YYYY')}
-          </Typography>
-          <Typography variant="body2" color="primary">
-            {t('statistics.costPerEggTrend.costPerEgg')}: {data.costPerEgg.toFixed(2)} Kč
-          </Typography>
-        </Box>
-      );
-    }
-    return null;
-  };
 
   // Empty state
   if (!data || data.length === 0) {
@@ -137,7 +142,7 @@ export function CostPerEggTrendChart({ data }: CostPerEggTrendChartProps) {
             tickFormatter={(value) => `${value.toFixed(2)} Kč`}
             style={{ fontSize: '12px' }}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={CostPerEggTrendTooltip} />
           <Legend />
           <Line
             type="monotone"

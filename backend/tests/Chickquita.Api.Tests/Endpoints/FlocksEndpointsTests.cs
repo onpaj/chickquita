@@ -566,7 +566,7 @@ public class FlocksEndpointsTests : IClassFixture<WebApplicationFactory<Program>
     }
 
     [Fact]
-    public async Task ArchiveFlock_WithAlreadyArchivedFlock_Returns400BadRequest()
+    public async Task ArchiveFlock_WithAlreadyArchivedFlock_Returns200Idempotent()
     {
         // Arrange
         var tenantId = Guid.NewGuid();
@@ -598,8 +598,11 @@ public class FlocksEndpointsTests : IClassFixture<WebApplicationFactory<Program>
         // Act
         var response = await client.PostAsync($"/api/flocks/{flockId}/archive", null);
 
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        // Assert - idempotent: archiving an already-archived flock returns 200 OK
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<FlockDto>();
+        result.Should().NotBeNull();
+        result!.IsActive.Should().BeFalse();
     }
 
     [Fact]

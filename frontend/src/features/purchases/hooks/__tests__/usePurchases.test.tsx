@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { purchasesApi } from '../../api/purchasesApi';
 import type { PurchaseDto, CreatePurchaseDto, UpdatePurchaseDto } from '../../types/purchase.types';
 import { PurchaseType, QuantityUnit } from '../../types/purchase.types';
@@ -210,7 +210,7 @@ describe('usePurchases', () => {
       await waitFor(() => expect(result.current.error).not.toBeNull());
 
       expect(result.current.error).toEqual(error);
-      expect(result.current.purchases).toBeUndefined();
+      expect(result.current.purchases).toEqual([]);
     });
 
     it('should cache results for 5 minutes (staleTime)', async () => {

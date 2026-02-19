@@ -438,7 +438,7 @@ chickquita/
 - Webhook: `POST /api/webhooks/clerk` for user sync
 
 ### Azure Resources
-- Resource Group: `chickquita-rg`
+- Resource Group: `rgHeblo`
 - Container Apps: For hosting the application
 - Application Insights: For monitoring and logging
 - Key Vault: For secrets (Neon connection string, Clerk keys)

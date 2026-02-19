@@ -1,3 +1,4 @@
+import React from 'react';
 import { Box, IconButton, TextField, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -13,6 +14,7 @@ interface NumericStepperProps {
   error?: boolean;
   helperText?: string;
   'aria-label'?: string;
+  inputRef?: React.Ref<HTMLInputElement>;
 }
 
 /**
@@ -40,6 +42,7 @@ export function NumericStepper({
   error = false,
   helperText,
   'aria-label': ariaLabel,
+  inputRef,
 }: NumericStepperProps) {
   const handleDecrement = () => {
     const newValue = Math.max(min, value - step);
@@ -114,6 +117,7 @@ export function NumericStepper({
           onChange={handleInputChange}
           disabled={disabled}
           error={error}
+          inputRef={inputRef}
           inputProps={{
             min,
             max,

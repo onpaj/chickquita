@@ -31,12 +31,13 @@ import {
   History as HistoryIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { cs } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import type { FlockHistory } from '../api/flocksApi';
 import { useUpdateFlockHistoryNotes } from '../hooks/useFlockHistory';
 import { IllustratedEmptyState } from '@/shared/components';
 import { formatCzechCount } from '@/lib/czechPlurals';
+import { useDateLocale } from '@/hooks/useDateLocale';
+import { useToast } from '@/hooks/useToast';
 
 interface FlockHistoryTimelineProps {
   history: FlockHistory[];
@@ -54,6 +55,8 @@ interface FlockHistoryTimelineProps {
  */
 export function FlockHistoryTimeline({ history, loading, error }: FlockHistoryTimelineProps) {
   const { t, i18n } = useTranslation();
+  const dateLocale = useDateLocale();
+  const { showError } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editNotes, setEditNotes] = useState('');
 
@@ -103,8 +106,8 @@ export function FlockHistoryTimeline({ history, loading, error }: FlockHistoryTi
       });
       setEditingId(null);
       setEditNotes('');
-    } catch (err) {
-      console.error('Failed to update notes:', err);
+    } catch {
+      showError(t('flockHistory.notesUpdateError', 'Failed to update notes'));
     }
   };
 
@@ -160,16 +163,15 @@ export function FlockHistoryTimeline({ history, loading, error }: FlockHistoryTi
         const previousEntry = history[index + 1];
         const deltas = calculateDeltas(entry, previousEntry);
         const isEditing = editingId === entry.id;
-        const locale = i18n.language === 'cs' ? cs : undefined;
 
         return (
           <TimelineItem key={entry.id}>
             <TimelineOppositeContent color="text.secondary" sx={{ flex: 0.3 }}>
               <Typography variant="body2" fontWeight="medium">
-                {format(new Date(entry.changeDate), 'dd. MMM yyyy', { locale })}
+                {format(new Date(entry.changeDate), 'dd. MMM yyyy', { locale: dateLocale })}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {format(new Date(entry.createdAt), 'HH:mm', { locale })}
+                {format(new Date(entry.createdAt), 'HH:mm', { locale: dateLocale })}
               </Typography>
             </TimelineOppositeContent>
 

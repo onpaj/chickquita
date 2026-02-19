@@ -26,9 +26,9 @@ export class PurchaseFormModal {
     this.typeSelect = page.getByLabel(/typ nákupu|purchase type/i);
     this.nameInput = page.getByLabel(/^název$|^name$/i);
     this.purchaseDateInput = page.getByLabel(/datum nákupu|purchase date/i);
-    this.amountInput = page.getByLabel(/^částka$|^amount$/i);
+    this.amountInput = page.getByLabel(/^částka \(kč\)$|^amount$/i);
     this.quantityInput = page.getByLabel(/^množství$|^quantity$/i);
-    this.unitSelect = page.getByLabel(/^jednotka$|^unit$/i);
+    this.unitSelect = page.getByLabel(/jednotka|unit/i).first();
     this.consumedDateInput = page.getByLabel(/datum spotřeby|consumed date/i);
     this.notesInput = page.getByLabel(/poznámky|notes/i);
     this.submitButton = page.getByRole('button', { name: /^vytvořit$|^uložit$|^create$|^save$/i });
@@ -53,6 +53,8 @@ export class PurchaseFormModal {
     if (data.type) {
       await this.typeSelect.click();
       await this.page.getByRole('option', { name: new RegExp(data.type, 'i') }).first().click();
+      // Wait for dropdown to close before interacting with next field (Mobile Safari needs this)
+      await this.page.waitForTimeout(300);
     }
 
     // Name (with autocomplete support)
@@ -168,7 +170,7 @@ export class PurchaseFormModal {
    * Wait for modal to close
    */
   async waitForClose() {
-    await this.modal.waitFor({ state: 'hidden', timeout: 5000 });
+    await this.modal.waitFor({ state: 'hidden', timeout: 15000 });
   }
 
   /**

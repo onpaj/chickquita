@@ -40,9 +40,6 @@ i18n
       lookupLocalStorage: 'i18nextLng',
     },
 
-    // Default language (Czech)
-    lng: 'cs',
-
     // Supported languages
     supportedLngs: ['cs', 'en'],
 

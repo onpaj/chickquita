@@ -1,106 +1,116 @@
 # E2E Authentication Setup Guide
 
-> **✅ Configuration Verified:** 2026-02-09
-> - npm scripts: `test:e2e:save-auth`, `test:e2e` exist ✓
-> - Auth setup file: `e2e/auth.setup.ts` exists ✓
-> - Manual auth script: `e2e/save-auth.js` exists ✓
-> - Storage state path: `.auth/user.json` configured in playwright.config.ts ✓
-> - All test projects use `storageState: '.auth/user.json'` with setup dependency ✓
+> **✅ Updated:** 2026-02-17 — Migrated to `@clerk/testing` (automated auth, no manual browser login)
+> - Auth package: `@clerk/testing` ✓
+> - Auth setup file: `e2e/clerk.setup.ts` ✓
+> - Storage state path: `.clerk/user.json` configured in `playwright.config.ts` ✓
+> - All test projects use `storageState: '.clerk/user.json'` with setup dependency ✓
 
-The e2e tests require authentication. There are two ways to set this up:
+The E2E tests use **`@clerk/testing`** for automated authentication. No manual browser interaction is required — authentication happens programmatically using Clerk's Testing Token mechanism.
 
-## Option 1: Manual Authentication (Recommended for Local Development)
+## How It Works
 
-This is the quickest way to get started:
+1. `clerkSetup()` fetches a Testing Token from Clerk Backend API using `CLERK_SECRET_KEY`
+2. `clerk.signIn()` signs in programmatically using the testing token (bypasses bot protection)
+3. The authenticated browser state is saved to `.clerk/user.json`
+4. All test projects reuse this state, so authentication runs only once per test run
 
-1. **Make sure the dev server is running:**
-   ```bash
-   npm run dev
-   ```
+## Prerequisites
 
-2. **In a separate terminal, run the auth save script:**
-   ```bash
-   npm run test:e2e:save-auth
-   ```
+- `@clerk/testing` package (installed as devDependency)
+- A Clerk **development** instance (secret keys from production instances will fail)
+- A test user account in your Clerk dev instance
 
-3. **A browser window will open automatically:**
-   - Log in with your test account credentials
-   - Wait until you see the dashboard (make sure you're fully logged in)
-   - Close the browser window
+## Local Development Setup
 
-4. **Authentication state is now saved** to `.auth/user.json`
+### Step 1: Create `.env.test.local`
 
-5. **Run the tests:**
-   ```bash
-   npm run test:e2e
-   ```
+Create `frontend/.env.test.local` (already gitignored via `*.local` pattern):
 
-**Note:** You only need to do this once. The auth state will be reused for all test runs until it expires.
+```env
+CLERK_SECRET_KEY=sk_test_your_key_here
+```
 
-## Option 2: Automated Authentication (Recommended for CI/CD)
+Get the `CLERK_SECRET_KEY` from your Clerk dashboard → API Keys → Secret keys.
 
-For automated testing without manual intervention:
+> **⚠️ NEVER commit `CLERK_SECRET_KEY`** — keep it only in `.env.test.local`
 
-1. **Create a test user account** in your Clerk dashboard (if you haven't already)
+### Step 2: Verify `.env.test`
 
-2. **Set environment variables:**
+`frontend/.env.test` should contain (already configured):
 
-   **On macOS/Linux:**
-   ```bash
-   export TEST_USER_EMAIL="your-test-user@example.com"
-   export TEST_USER_PASSWORD="your-test-password"
-   ```
+```env
+CLERK_PUBLISHABLE_KEY=pk_test_...
+E2E_CLERK_USER_USERNAME=your-test-user@example.com
+E2E_CLERK_USER_PASSWORD=your-test-password
+```
 
-   **On Windows (PowerShell):**
-   ```powershell
-   $env:TEST_USER_EMAIL="your-test-user@example.com"
-   $env:TEST_USER_PASSWORD="your-test-password"
-   ```
+### Step 3: Run E2E tests
 
-   **Or add to `.env.test` file:**
-   ```env
-   TEST_USER_EMAIL=your-test-user@example.com
-   TEST_USER_PASSWORD=your-test-password
-   ```
+```bash
+cd frontend
 
-3. **Run the tests:**
-   ```bash
-   npm run test:e2e
-   ```
+# Make sure dev server is running (in a separate terminal)
+npm run dev
 
-The auth setup will run automatically before tests and save the state to `.auth/user.json`.
+# In another terminal, run E2E tests
+npm run test:e2e
+```
+
+The `clerk.setup.ts` project runs first, authenticates automatically, and saves state to `.clerk/user.json`. All other browser projects then reuse this state.
+
+## CI/CD Setup (GitHub Actions)
+
+Add these secrets to your GitHub repository (Settings → Secrets and variables → Actions):
+
+| Secret | Description |
+|--------|-------------|
+| `CLERK_PUBLISHABLE_KEY` | Publishable key from Clerk dashboard |
+| `CLERK_SECRET_KEY` | Secret key from Clerk dashboard (dev instance only!) |
+| `E2E_CLERK_USER_USERNAME` | Test user email address |
+| `E2E_CLERK_USER_PASSWORD` | Test user password |
+
+These secrets are automatically passed to E2E test steps in both `ci-cd.yml` and `crossbrowser-tests.yml`.
 
 ## Troubleshooting
 
-### "Authentication required" error
-- **Solution:** Run `npm run test:e2e:save-auth` to create the auth state file manually
+### `CLERK_SECRET_KEY is not set`
 
-### Auth state expired
-- **Solution:** Delete `.auth/user.json` and run the save-auth script again
-  ```bash
-  rm .auth/user.json
-  npm run test:e2e:save-auth
-  ```
+Create `frontend/.env.test.local` with your secret key:
+```env
+CLERK_SECRET_KEY=sk_test_...
+```
 
-### Tests fail with Clerk errors
-- **Solution:** Make sure:
-  - Backend is running on `http://localhost:5100`
-  - Frontend is running on `http://localhost:3100`
-  - Your test account has verified email
-  - Clerk publishable key in `.env.development` is correct
+### `E2E_CLERK_USER_USERNAME is not set`
 
-## For CI/CD (GitHub Actions)
+Check `frontend/.env.test` has the test user credentials.
 
-Add these secrets to your GitHub repository:
-- `TEST_USER_EMAIL`
-- `TEST_USER_PASSWORD`
+### `Authentication failed - still on authentication page`
 
-The automated auth setup will handle authentication during CI test runs.
+- Verify the test user exists in your Clerk dev instance
+- Confirm the email/password in `.env.test` are correct
+- Make sure the test user's email is verified in Clerk
+
+### `Secret key must be from development instance`
+
+`@clerk/testing` only works with development Clerk instances. Do not use production secret keys.
+
+### `Network issues / Testing token fetch failed`
+
+- Check internet connectivity
+- Verify `CLERK_PUBLISHABLE_KEY` matches your Clerk dev instance
+- Check Clerk status at https://status.clerk.com
+
+### `.clerk/user.json` not created
+
+- Ensure the `setup` project runs first (check `dependencies: ['setup']` in configs)
+- Look for errors in the setup project output during `npm run test:e2e`
 
 ## Security Notes
 
-- `.auth/user.json` contains authentication tokens - it's gitignored
-- `.env.test` contains test credentials - it's gitignored
-- Never commit these files to version control
+- `.clerk/user.json` contains authentication tokens — it's gitignored (`/.clerk/`)
+- `.env.test` contains test credentials — it's gitignored
+- `.env.test.local` contains `CLERK_SECRET_KEY` — gitignored via `*.local` pattern
 - Use dedicated test accounts, not production accounts
+- Only use development Clerk instances for testing
 - Rotate test credentials periodically

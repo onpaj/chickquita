@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -120,6 +120,10 @@ export interface PurchaseFormProps {
    * Use this to render action buttons in DialogActions externally via form={formId}.
    */
   formId?: string;
+  /**
+   * Called whenever form validity changes. Used by parent to disable/enable an external submit button.
+   */
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 /**
@@ -173,6 +177,7 @@ export function PurchaseForm({
   coops,
   onCancel,
   formId,
+  onValidityChange,
 }: PurchaseFormProps) {
   const { t } = useTranslation();
   const [nameInput, setNameInput] = useState('');
@@ -237,6 +242,13 @@ export function PurchaseForm({
       }
     }
   }, [consumedDate, purchaseDate, setValue]);
+
+  // Notify parent of validity changes (used to enable/disable external submit button)
+  const onValidityChangeRef = useRef(onValidityChange);
+  onValidityChangeRef.current = onValidityChange;
+  useEffect(() => {
+    onValidityChangeRef.current?.(isValid);
+  }, [isValid]);
 
   const handleFormSubmit = (data: PurchaseFormData) => {
     if (isEditMode && initialData) {
@@ -303,7 +315,6 @@ export function PurchaseForm({
               disabled={isSubmitting}
               inputProps={{
                 ...touchInputProps,
-                'aria-label': t('purchases.form.type'),
               }}
               InputProps={{
                 startAdornment: (
@@ -360,7 +371,6 @@ export function PurchaseForm({
                   inputProps={{
                     ...params.inputProps,
                     ...touchInputProps,
-                    'aria-label': t('purchases.form.name'),
                   }}
                 />
               )}
@@ -390,7 +400,6 @@ export function PurchaseForm({
               inputProps={{
                 max: getTodayDate(),
                 ...touchInputProps,
-                'aria-label': t('purchases.form.purchaseDate'),
               }}
             />
           )}
@@ -452,7 +461,6 @@ export function PurchaseForm({
               disabled={isSubmitting}
               inputProps={{
                 ...touchInputProps,
-                'aria-label': t('purchases.form.unit'),
               }}
             >
               {Object.entries(QuantityUnit)
@@ -489,7 +497,6 @@ export function PurchaseForm({
                 min: getMinConsumedDate(),
                 max: getTodayDate(),
                 ...touchInputProps,
-                'aria-label': t('purchases.form.consumedDate'),
               }}
             />
           )}
@@ -512,7 +519,6 @@ export function PurchaseForm({
                 disabled={isSubmitting}
                 inputProps={{
                   ...touchInputProps,
-                  'aria-label': t('purchases.form.coop'),
                 }}
               >
                 <MenuItem value="">
@@ -545,7 +551,6 @@ export function PurchaseForm({
               disabled={isSubmitting}
               inputProps={{
                 maxLength: 500,
-                'aria-label': t('purchases.form.notes'),
               }}
             />
           )}

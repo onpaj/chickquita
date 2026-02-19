@@ -18,7 +18,6 @@ export function StatCard({ title, value, icon, loading = false, subtitle }: Stat
     <Card
       elevation={2}
       sx={{
-        borderRadius: 2,
         height: '100%',
         transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
         '&:hover': {
@@ -89,7 +88,6 @@ export function StatCardSkeleton() {
     <Card
       elevation={2}
       sx={{
-        borderRadius: 2,
         height: '100%',
       }}
     >

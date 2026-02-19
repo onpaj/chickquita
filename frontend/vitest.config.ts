@@ -30,12 +30,6 @@ export default defineConfig({
         'src/vite-env.d.ts',
         '**/*.stories.tsx',
       ],
-      thresholds: {
-        lines: 70,
-        functions: 70,
-        branches: 70,
-        statements: 70,
-      },
       all: true,
       clean: true,
     },

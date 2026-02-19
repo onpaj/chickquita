@@ -80,7 +80,8 @@ export default function CoopsPage() {
 
   return (
     <Container
-      sx={{ pb: 10 }}
+      maxWidth="lg"
+      sx={{ py: 3 }}
       onTouchStart={(e) => {
         const touch = e.touches[0];
         const startY = touch.clientY;
@@ -98,7 +99,7 @@ export default function CoopsPage() {
         }, { once: true });
       }}
     >
-      <Box sx={{ py: 3 }}>
+      <Box>
         <Typography variant="h4" component="h1" gutterBottom>
           {t('coops.title')}
         </Typography>
@@ -144,7 +145,7 @@ export default function CoopsPage() {
         aria-label={t('coops.addCoop')}
         sx={{
           position: 'fixed',
-          bottom: 80,
+          bottom: { xs: 80, sm: 16 },
           right: 16,
         }}
         onClick={() => setIsModalOpen(true)}

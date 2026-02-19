@@ -36,6 +36,44 @@ const getColorByProductivity = (productivity: number): string => {
   return '#FF6B35'; // Low: Orange/Red
 };
 
+interface FlockProductivityTooltipProps {
+  active?: boolean;
+  payload?: readonly { payload: FlockProductivityItem }[];
+}
+
+function FlockProductivityTooltip({ active, payload }: FlockProductivityTooltipProps) {
+  const { t } = useTranslation();
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <Box
+        sx={{
+          backgroundColor: 'background.paper',
+          p: 1.5,
+          border: 1,
+          borderColor: 'divider',
+          borderRadius: 1,
+        }}
+      >
+        <Typography variant="body2" fontWeight={600}>
+          {data.flockName}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {t('statistics.flockProductivity.eggsPerHenPerDay')}:{' '}
+          {data.eggsPerHenPerDay.toFixed(2)}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {t('statistics.flockProductivity.totalEggs')}: {data.totalEggs}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {t('statistics.flockProductivity.henCount')}: {data.henCount}
+        </Typography>
+      </Box>
+    );
+  }
+  return null;
+}
+
 export function FlockProductivityChart({ data }: FlockProductivityChartProps) {
   const { t } = useTranslation();
 
@@ -43,39 +81,6 @@ export function FlockProductivityChart({ data }: FlockProductivityChartProps) {
   const sortedData = [...(data || [])].sort(
     (a, b) => b.eggsPerHenPerDay - a.eggsPerHenPerDay
   );
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <Box
-          sx={{
-            backgroundColor: 'background.paper',
-            p: 1.5,
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2" fontWeight={600}>
-            {data.flockName}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t('statistics.flockProductivity.eggsPerHenPerDay')}:{' '}
-            {data.eggsPerHenPerDay.toFixed(2)}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t('statistics.flockProductivity.totalEggs')}: {data.totalEggs}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {t('statistics.flockProductivity.henCount')}: {data.henCount}
-          </Typography>
-        </Box>
-      );
-    }
-    return null;
-  };
 
   // Empty state
   if (!data || data.length === 0) {
@@ -119,7 +124,7 @@ export function FlockProductivityChart({ data }: FlockProductivityChartProps) {
             }}
             style={{ fontSize: '12px' }}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={FlockProductivityTooltip} />
           <Legend />
           <Bar
             dataKey="eggsPerHenPerDay"

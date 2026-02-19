@@ -48,19 +48,21 @@ describe('EditFlockModal', () => {
   // Mock flock data for testing
   const mockFlock: Flock = {
     id: 'flock-123',
+    tenantId: 'tenant-1',
     coopId: 'coop-456',
     identifier: 'Existing Flock',
     hatchDate: '2024-01-15T00:00:00Z',
     currentHens: 10,
     currentRoosters: 2,
     currentChicks: 5,
-    totalEggsProduced: 100,
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+    history: [],
   };
 
   beforeEach(() => {
+    vi.clearAllMocks();
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
@@ -72,7 +74,6 @@ describe('EditFlockModal', () => {
       mutate: mockUpdateFlock,
       isPending: false,
     });
-    vi.clearAllMocks();
   });
 
   const renderModal = (open = true, flock = mockFlock) => {
@@ -81,11 +82,6 @@ describe('EditFlockModal', () => {
         <EditFlockModal open={open} onClose={mockOnClose} flock={flock} />
       </QueryClientProvider>
     );
-  };
-
-  const getTodayDate = (): string => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
   };
 
   const getFutureDate = (): string => {
@@ -330,7 +326,7 @@ describe('EditFlockModal', () => {
           {
             coopId: 'coop-456',
             data: {
-              id: 'flock-123',
+              flockId: 'flock-123',
               identifier: 'Updated Flock',
               hatchDate: '2024-02-01',
               currentHens: 10,

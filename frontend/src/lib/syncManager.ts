@@ -87,9 +87,9 @@ export async function syncPendingRequests(): Promise<{
         result.synced++;
         console.log(`✓ Synced: ${request.method} ${request.url}`);
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Failure: Update retry count
-        const errorMessage = error?.message || 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         await db.updateRequestRetry(request.id!, errorMessage);
         result.failed++;
         result.errors.push(errorMessage);
@@ -113,14 +113,15 @@ export async function syncPendingRequests(): Promise<{
       errorMessage: result.errors.length > 0 ? result.errors[0] : undefined
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Critical error during sync process
     console.error('Critical error during sync:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown sync error';
     await db.updateSyncStatus({
       status: 'error',
-      errorMessage: error?.message || 'Unknown sync error'
+      errorMessage
     });
-    result.errors.push(error?.message || 'Unknown sync error');
+    result.errors.push(errorMessage);
   }
 
   return result;

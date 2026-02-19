@@ -40,6 +40,8 @@ describe('DeleteDailyRecordDialog', () => {
     id: 'record-1',
     tenantId: 'tenant-1',
     flockId: 'flock-1',
+    flockName: 'Test Flock',
+    flockCoopName: 'Test Coop',
     recordDate: '2026-02-07',
     eggCount: 10,
     notes: 'Test notes',

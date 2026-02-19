@@ -63,12 +63,12 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         };
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/v1/purchases", command);
+        var response = await client.PostAsJsonAsync("/api/purchases", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         response.Headers.Location.Should().NotBeNull();
-        response.Headers.Location!.ToString().Should().StartWith("/api/v1/purchases/");
+        response.Headers.Location!.ToString().Should().StartWith("/api/purchases/");
 
         var result = await response.Content.ReadFromJsonAsync<PurchaseDto>();
         result.Should().NotBeNull();
@@ -110,7 +110,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         };
 
         // Act
-        var response = await client.PostAsJsonAsync("/api/v1/purchases", command);
+        var response = await client.PostAsJsonAsync("/api/purchases", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -140,7 +140,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/api/v1/purchases");
+        var response = await client.GetAsync("/api/purchases");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -172,7 +172,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync($"/api/v1/purchases/{purchaseId}");
+        var response = await client.GetAsync($"/api/purchases/{purchaseId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -205,7 +205,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         var invalidId = Guid.NewGuid();
 
         // Act
-        var response = await client.GetAsync($"/api/v1/purchases/{invalidId}");
+        var response = await client.GetAsync($"/api/purchases/{invalidId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -245,7 +245,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         };
 
         // Act
-        var response = await client.PutAsJsonAsync($"/api/v1/purchases/{purchaseId}", updateCommand);
+        var response = await client.PutAsJsonAsync($"/api/purchases/{purchaseId}", updateCommand);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -290,7 +290,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         };
 
         // Act
-        var response = await client.PutAsJsonAsync($"/api/v1/purchases/{purchaseId}", updateCommand);
+        var response = await client.PutAsJsonAsync($"/api/purchases/{purchaseId}", updateCommand);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -319,7 +319,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.DeleteAsync($"/api/v1/purchases/{purchaseId}");
+        var response = await client.DeleteAsync($"/api/purchases/{purchaseId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -348,7 +348,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         var invalidId = Guid.NewGuid();
 
         // Act
-        var response = await client.DeleteAsync($"/api/v1/purchases/{invalidId}");
+        var response = await client.DeleteAsync($"/api/purchases/{invalidId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -378,7 +378,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         var client = factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/api/v1/purchases/names?query=Feed&limit=10");
+        var response = await client.GetAsync("/api/purchases/names?query=Feed&limit=10");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -427,7 +427,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
         var client2 = factory2.CreateClient();
 
         // Act - Tenant 2 tries to access Tenant 1's purchase
-        var response = await client2.GetAsync($"/api/v1/purchases/{purchase1Id}");
+        var response = await client2.GetAsync($"/api/purchases/{purchase1Id}");
 
         // Assert - Should return 404 (not found, not forbidden, to prevent info disclosure)
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

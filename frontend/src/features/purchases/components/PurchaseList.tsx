@@ -11,7 +11,12 @@ import {
   FormControl,
   InputLabel,
   IconButton,
-  Chip,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Avatar,
+  Divider,
   type SelectChangeEvent,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -33,12 +38,139 @@ interface PurchaseListProps {
   onEdit?: (purchase: PurchaseDto) => void;
 }
 
+interface PurchaseFiltersProps {
+  fromDate: string;
+  toDate: string;
+  typeFilter: PurchaseType | '';
+  flockIdFilter: string;
+  onFromDateChange: (value: string) => void;
+  onToDateChange: (value: string) => void;
+  onTypeFilterChange: (event: SelectChangeEvent<string>) => void;
+  onFlockFilterChange: (event: SelectChangeEvent<string>) => void;
+}
+
+function PurchaseFilters({
+  fromDate,
+  toDate,
+  typeFilter,
+  flockIdFilter,
+  onFromDateChange,
+  onToDateChange,
+  onTypeFilterChange,
+  onFlockFilterChange,
+}: PurchaseFiltersProps) {
+  const { t } = useTranslation();
+
+  return (
+    <Card sx={{ mb: 3 }}>
+      <CardContent>
+        <Stack spacing={2}>
+          <Typography variant="h6" component="h2">
+            {t('purchases.filters.title')}
+          </Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <TextField
+              label={t('purchases.filters.fromDate')}
+              type="date"
+              value={fromDate}
+              onChange={(e) => onFromDateChange(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+            <TextField
+              label={t('purchases.filters.toDate')}
+              type="date"
+              value={toDate}
+              onChange={(e) => onToDateChange(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+          </Stack>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <FormControl fullWidth>
+              <InputLabel id="type-filter-label">
+                {t('purchases.filters.type')}
+              </InputLabel>
+              <Select
+                labelId="type-filter-label"
+                value={typeFilter === '' ? '' : String(typeFilter)}
+                onChange={onTypeFilterChange}
+                label={t('purchases.filters.type')}
+              >
+                <MenuItem value="">
+                  {t('common.all')}
+                </MenuItem>
+                <MenuItem value={String(PurchaseType.Feed)}>
+                  {t('purchases.types.feed')}
+                </MenuItem>
+                <MenuItem value={String(PurchaseType.Vitamins)}>
+                  {t('purchases.types.vitamins')}
+                </MenuItem>
+                <MenuItem value={String(PurchaseType.Bedding)}>
+                  {t('purchases.types.bedding')}
+                </MenuItem>
+                <MenuItem value={String(PurchaseType.Toys)}>
+                  {t('purchases.types.toys')}
+                </MenuItem>
+                <MenuItem value={String(PurchaseType.Veterinary)}>
+                  {t('purchases.types.veterinary')}
+                </MenuItem>
+                <MenuItem value={String(PurchaseType.Other)}>
+                  {t('purchases.types.other')}
+                </MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="flock-filter-label">
+                {t('purchases.filters.flock')}
+              </InputLabel>
+              <Select
+                labelId="flock-filter-label"
+                value={flockIdFilter}
+                onChange={onFlockFilterChange}
+                label={t('purchases.filters.flock')}
+                disabled
+              >
+                <MenuItem value="">
+                  {t('common.all')}
+                </MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Get icon for purchase type
+ */
+function getPurchaseTypeIcon(type: PurchaseType) {
+  switch (type) {
+    case PurchaseType.Feed:
+      return <ShoppingCartIcon />;
+    case PurchaseType.Vitamins:
+      return <MedicationIcon />;
+    case PurchaseType.Bedding:
+      return <BedIcon />;
+    case PurchaseType.Toys:
+      return <ToyTrainIcon />;
+    case PurchaseType.Veterinary:
+      return <LocalHospitalIcon />;
+    case PurchaseType.Other:
+      return <MoreHorizIcon />;
+    default:
+      return <ShoppingCartIcon />;
+  }
+}
+
 /**
  * PurchaseList component displays a filterable list of purchases.
  * Features:
  * - Filter by date range, type, and flock
  * - Summary card showing total spent this month
- * - Purchase cards with type icon, name, date, amount, quantity
+ * - Purchase items with type icon, name, date, amount, quantity
  * - Edit and delete actions
  * - Empty state and loading skeleton
  */
@@ -95,46 +227,6 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
       })
       .reduce((sum, p) => sum + p.amount, 0);
   }, [purchases]);
-
-  // Get icon for purchase type
-  const getTypeIcon = (type: PurchaseType) => {
-    switch (type) {
-      case PurchaseType.Feed:
-        return <ShoppingCartIcon />;
-      case PurchaseType.Vitamins:
-        return <MedicationIcon />;
-      case PurchaseType.Bedding:
-        return <BedIcon />;
-      case PurchaseType.Toys:
-        return <ToyTrainIcon />;
-      case PurchaseType.Veterinary:
-        return <LocalHospitalIcon />;
-      case PurchaseType.Other:
-        return <MoreHorizIcon />;
-      default:
-        return <ShoppingCartIcon />;
-    }
-  };
-
-  // Get label for purchase type
-  const getTypeLabel = (type: PurchaseType) => {
-    switch (type) {
-      case PurchaseType.Feed:
-        return t('purchases.types.feed');
-      case PurchaseType.Vitamins:
-        return t('purchases.types.vitamins');
-      case PurchaseType.Bedding:
-        return t('purchases.types.bedding');
-      case PurchaseType.Toys:
-        return t('purchases.types.toys');
-      case PurchaseType.Veterinary:
-        return t('purchases.types.veterinary');
-      case PurchaseType.Other:
-        return t('purchases.types.other');
-      default:
-        return t('purchases.types.other');
-    }
-  };
 
   // Get label for quantity unit
   const getUnitLabel = (unit: QuantityUnit) => {
@@ -202,89 +294,16 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
   if (!purchases || purchases.length === 0) {
     return (
       <Box>
-        {/* Filters */}
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Stack spacing={2}>
-              <Typography variant="h6" component="h2">
-                {t('purchases.filters.title')}
-              </Typography>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <TextField
-                  label={t('purchases.filters.fromDate')}
-                  type="date"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  aria-label={t('purchases.filters.fromDate')}
-                />
-                <TextField
-                  label={t('purchases.filters.toDate')}
-                  type="date"
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  aria-label={t('purchases.filters.toDate')}
-                />
-              </Stack>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <FormControl fullWidth>
-                  <InputLabel id="type-filter-label">
-                    {t('purchases.filters.type')}
-                  </InputLabel>
-                  <Select
-                    labelId="type-filter-label"
-                    value={typeFilter === '' ? '' : String(typeFilter)}
-                    onChange={handleTypeFilterChange}
-                    label={t('purchases.filters.type')}
-                    aria-label={t('purchases.filters.type')}
-                  >
-                    <MenuItem value="">
-                      {t('common.all')}
-                    </MenuItem>
-                    <MenuItem value={String(PurchaseType.Feed)}>
-                      {t('purchases.types.feed')}
-                    </MenuItem>
-                    <MenuItem value={String(PurchaseType.Vitamins)}>
-                      {t('purchases.types.vitamins')}
-                    </MenuItem>
-                    <MenuItem value={String(PurchaseType.Bedding)}>
-                      {t('purchases.types.bedding')}
-                    </MenuItem>
-                    <MenuItem value={String(PurchaseType.Toys)}>
-                      {t('purchases.types.toys')}
-                    </MenuItem>
-                    <MenuItem value={String(PurchaseType.Veterinary)}>
-                      {t('purchases.types.veterinary')}
-                    </MenuItem>
-                    <MenuItem value={String(PurchaseType.Other)}>
-                      {t('purchases.types.other')}
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-                <FormControl fullWidth>
-                  <InputLabel id="flock-filter-label">
-                    {t('purchases.filters.flock')}
-                  </InputLabel>
-                  <Select
-                    labelId="flock-filter-label"
-                    value={flockIdFilter}
-                    onChange={handleFlockFilterChange}
-                    label={t('purchases.filters.flock')}
-                    disabled
-                    aria-label={t('purchases.filters.flock')}
-                  >
-                    <MenuItem value="">
-                      {t('common.all')}
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Stack>
-            </Stack>
-          </CardContent>
-        </Card>
+        <PurchaseFilters
+          fromDate={fromDate}
+          toDate={toDate}
+          typeFilter={typeFilter}
+          flockIdFilter={flockIdFilter}
+          onFromDateChange={setFromDate}
+          onToDateChange={setToDate}
+          onTypeFilterChange={handleTypeFilterChange}
+          onFlockFilterChange={handleFlockFilterChange}
+        />
 
         <IllustratedEmptyState
           illustration={<ShoppingCartIcon sx={{ fontSize: 80, color: 'text.secondary' }} />}
@@ -304,234 +323,91 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
             {t('purchases.summary.thisMonth')}
           </Typography>
           <Typography variant="h4" fontWeight="bold">
-            {monthlySummary.toFixed(2)} {t('purchases.currency')}
+            <span>{monthlySummary.toFixed(2)}</span>{' '}
+            {t('purchases.currency')}
           </Typography>
         </CardContent>
       </Card>
 
       {/* Filters */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Stack spacing={2}>
-            <Typography variant="h6" component="h2">
-              {t('purchases.filters.title')}
-            </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
-                label={t('purchases.filters.fromDate')}
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                aria-label={t('purchases.filters.fromDate')}
-              />
-              <TextField
-                label={t('purchases.filters.toDate')}
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                aria-label={t('purchases.filters.toDate')}
-              />
-            </Stack>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <FormControl fullWidth>
-                <InputLabel id="type-filter-label">
-                  {t('purchases.filters.type')}
-                </InputLabel>
-                <Select
-                  labelId="type-filter-label"
-                  value={typeFilter === '' ? '' : String(typeFilter)}
-                  onChange={handleTypeFilterChange}
-                  label={t('purchases.filters.type')}
-                  aria-label={t('purchases.filters.type')}
-                >
-                  <MenuItem value="">
-                    {t('common.all')}
-                  </MenuItem>
-                  <MenuItem value={String(PurchaseType.Feed)}>
-                    {t('purchases.types.feed')}
-                  </MenuItem>
-                  <MenuItem value={String(PurchaseType.Vitamins)}>
-                    {t('purchases.types.vitamins')}
-                  </MenuItem>
-                  <MenuItem value={String(PurchaseType.Bedding)}>
-                    {t('purchases.types.bedding')}
-                  </MenuItem>
-                  <MenuItem value={String(PurchaseType.Toys)}>
-                    {t('purchases.types.toys')}
-                  </MenuItem>
-                  <MenuItem value={String(PurchaseType.Veterinary)}>
-                    {t('purchases.types.veterinary')}
-                  </MenuItem>
-                  <MenuItem value={String(PurchaseType.Other)}>
-                    {t('purchases.types.other')}
-                  </MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel id="flock-filter-label">
-                  {t('purchases.filters.flock')}
-                </InputLabel>
-                <Select
-                  labelId="flock-filter-label"
-                  value={flockIdFilter}
-                  onChange={handleFlockFilterChange}
-                  label={t('purchases.filters.flock')}
-                  disabled
-                  aria-label={t('purchases.filters.flock')}
-                >
-                  <MenuItem value="">
-                    {t('common.all')}
-                  </MenuItem>
-                </Select>
-              </FormControl>
-            </Stack>
-          </Stack>
-        </CardContent>
-      </Card>
+      <PurchaseFilters
+        fromDate={fromDate}
+        toDate={toDate}
+        typeFilter={typeFilter}
+        flockIdFilter={flockIdFilter}
+        onFromDateChange={setFromDate}
+        onToDateChange={setToDate}
+        onTypeFilterChange={handleTypeFilterChange}
+        onFlockFilterChange={handleFlockFilterChange}
+      />
 
-      {/* Purchase Cards */}
-      <Stack spacing={2}>
-        {purchases.map((purchase) => (
-          <Card
-            key={purchase.id}
-            elevation={2}
-            sx={{
-              transition: 'box-shadow 0.3s ease',
-              '&:hover': {
-                boxShadow: 4,
-              },
-            }}
-            role="article"
-            aria-label={t('purchases.purchaseCardAriaLabel', { name: purchase.name })}
-          >
-            <CardContent>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  mb: 2,
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: 40,
-                      height: 40,
-                      borderRadius: 1,
-                      backgroundColor: 'primary.main',
-                      color: 'primary.contrastText',
-                    }}
-                  >
-                    {getTypeIcon(purchase.type)}
+      {/* Purchase List */}
+      <Card>
+        <List disablePadding>
+          {purchases.map((purchase, index) => (
+            <Box key={purchase.id}>
+              {index > 0 && <Divider component="li" />}
+              <ListItem
+                alignItems="flex-start"
+                secondaryAction={
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <IconButton
+                      edge="end"
+                      onClick={() => onEdit?.(purchase)}
+                      aria-label={t('common.edit')}
+                      sx={{ minWidth: 44, minHeight: 44 }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleDeleteClick(purchase)}
+                      aria-label={t('common.delete')}
+                      color="error"
+                      sx={{ minWidth: 44, minHeight: 44 }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
                   </Box>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="h6" component="h3">
+                }
+                sx={{ pr: 14 }}
+              >
+                <ListItemAvatar>
+                  <Avatar sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+                    {getPurchaseTypeIcon(purchase.type)}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={
+                    <Typography variant="subtitle1" component="span" fontWeight="medium">
                       {purchase.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {formatDate(purchase.purchaseDate)}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <IconButton
-                    onClick={() => onEdit?.(purchase)}
-                    aria-label={t('common.edit')}
-                    sx={{
-                      minWidth: 44,
-                      minHeight: 44,
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => handleDeleteClick(purchase)}
-                    aria-label={t('common.delete')}
-                    color="error"
-                    sx={{
-                      minWidth: 44,
-                      minHeight: 44,
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-              </Box>
-
-              <Stack spacing={1}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    {t('purchases.list.type')}:
-                  </Typography>
-                  <Chip
-                    label={getTypeLabel(purchase.type)}
-                    size="small"
-                    sx={{ height: 24 }}
-                  />
-                </Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    {t('purchases.list.amount')}:
-                  </Typography>
-                  <Typography variant="h6" fontWeight="bold" color="primary">
-                    {purchase.amount.toFixed(2)} {t('purchases.currency')}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    {t('purchases.list.quantity')}:
-                  </Typography>
-                  <Typography variant="body2" fontWeight="medium">
-                    {purchase.quantity} {getUnitLabel(purchase.unit)}
-                  </Typography>
-                </Box>
-                {purchase.coopId && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Typography variant="body2" color="text.secondary">
-                      {t('purchases.list.flock')}:
-                    </Typography>
-                    <Typography variant="body2" fontWeight="medium">
-                      {flockMap.get(purchase.coopId) || t('purchases.list.unknownFlock')}
-                    </Typography>
-                  </Box>
-                )}
-              </Stack>
-            </CardContent>
-          </Card>
-        ))}
-      </Stack>
+                  }
+                  secondary={
+                    <Stack component="span" spacing={0.25} sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="body2" color="text.secondary" component="span">
+                        {formatDate(purchase.purchaseDate)}
+                      </Typography>
+                      <Typography variant="body2" color="primary" fontWeight="bold" component="span">
+                        {purchase.amount.toFixed(2)} {t('purchases.currency')}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" component="span">
+                        {purchase.quantity} {getUnitLabel(purchase.unit)}
+                        {purchase.coopId && (
+                          <>
+                            {' · '}
+                            {flockMap.get(purchase.coopId) || t('purchases.list.unknownFlock')}
+                          </>
+                        )}
+                      </Typography>
+                    </Stack>
+                  }
+                />
+              </ListItem>
+            </Box>
+          ))}
+        </List>
+      </Card>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog

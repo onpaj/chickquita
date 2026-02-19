@@ -54,7 +54,7 @@ vi.mock('../../features/coops/components/CreateCoopModal', () => ({
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, params?: { date?: string }) => {
+    t: (key: string, _params?: { date?: string }) => {
       const translations: Record<string, string> = {
         'coops.title': 'Coops',
         'coops.addCoop': 'Add Coop',

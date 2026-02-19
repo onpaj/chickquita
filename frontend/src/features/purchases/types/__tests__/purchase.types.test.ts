@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { isPurchaseDto, PurchaseDto, PurchaseType, QuantityUnit } from '../purchase.types';
+import { isPurchaseDto, PurchaseType, QuantityUnit } from '../purchase.types';
+import type { PurchaseDto } from '../purchase.types';
 
 describe('isPurchaseDto', () => {
   const validPurchaseDto: PurchaseDto = {

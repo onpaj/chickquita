@@ -9,7 +9,7 @@ import {
   Stack,
   Button,
   Chip,
-  Skeleton,
+  Grid,
   IconButton,
   Divider,
 } from '@mui/material';
@@ -19,6 +19,10 @@ import {
   Archive as ArchiveIcon,
   History as HistoryIcon,
   Pets as PetsIcon,
+  Female as FemaleIcon,
+  Male as MaleIcon,
+  EggAlt as EggAltIcon,
+  Diversity3 as Diversity3Icon,
 } from '@mui/icons-material';
 import { useFlockDetail } from '../features/flocks/hooks/useFlocks';
 import { useArchiveFlock } from '../features/flocks/hooks/useFlocks';
@@ -29,6 +33,8 @@ import { ResourceNotFound } from '../components/ResourceNotFound';
 import { processApiError, ErrorType } from '../lib/errors';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useToast } from '../hooks/useToast';
+import { CoopDetailSkeleton } from '../shared/components';
+import { StatCard } from '../shared/components';
 import { format } from 'date-fns';
 import { cs, enUS } from 'date-fns/locale';
 
@@ -90,23 +96,7 @@ export function FlockDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <Container maxWidth="sm" sx={{ py: 3 }}>
-        <Box sx={{ mb: 3 }}>
-          <Skeleton variant="rectangular" height={40} width={100} />
-        </Box>
-        <Paper sx={{ p: 3 }}>
-          <Skeleton variant="text" height={40} width="60%" />
-          <Skeleton variant="text" height={24} width="80%" sx={{ mt: 2 }} />
-          <Skeleton variant="text" height={24} width="70%" sx={{ mt: 1 }} />
-          <Skeleton variant="text" height={24} width="70%" sx={{ mt: 1 }} />
-          <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-            <Skeleton variant="rectangular" height={36} width={100} />
-            <Skeleton variant="rectangular" height={36} width={120} />
-          </Box>
-        </Paper>
-      </Container>
-    );
+    return <CoopDetailSkeleton />;
   }
 
   if (error) {
@@ -212,49 +202,40 @@ export function FlockDetailPage() {
             <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
               {t('flocks.currentComposition')}
             </Typography>
-            <Stack spacing={1.5}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body1" color="text.secondary">
-                  {t('flocks.hens')}:
-                </Typography>
-                <Typography variant="body1" fontWeight="medium">
-                  {flock.currentHens}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body1" color="text.secondary">
-                  {t('flocks.roosters')}:
-                </Typography>
-                <Typography variant="body1" fontWeight="medium">
-                  {flock.currentRoosters}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body1" color="text.secondary">
-                  {t('flocks.chicks')}:
-                </Typography>
-                <Typography variant="body1" fontWeight="medium">
-                  {flock.currentChicks}
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  pt: 1,
-                  borderTop: 1,
-                  borderColor: 'divider',
-                }}
-              >
-                <Typography variant="body1" fontWeight="medium">
-                  {t('flocks.total')}:
-                </Typography>
-                <Typography variant="body1" fontWeight="bold">
-                  {totalAnimals}
-                </Typography>
-              </Box>
-            </Stack>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <StatCard
+                  icon={<FemaleIcon />}
+                  label={t('flocks.hens')}
+                  value={flock.currentHens}
+                  color="error"
+                />
+              </Grid>
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <StatCard
+                  icon={<MaleIcon />}
+                  label={t('flocks.roosters')}
+                  value={flock.currentRoosters}
+                  color="info"
+                />
+              </Grid>
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <StatCard
+                  icon={<EggAltIcon />}
+                  label={t('flocks.chicks')}
+                  value={flock.currentChicks}
+                  color="warning"
+                />
+              </Grid>
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <StatCard
+                  icon={<Diversity3Icon />}
+                  label={t('flocks.total')}
+                  value={totalAnimals}
+                  color="primary"
+                />
+              </Grid>
+            </Grid>
           </Box>
 
           <Divider />
@@ -290,7 +271,7 @@ export function FlockDetailPage() {
             sx={{ pt: 2 }}
           >
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<EditIcon />}
               onClick={handleEdit}
               disabled={!flock.isActive}

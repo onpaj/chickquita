@@ -166,7 +166,8 @@ export default function FlocksPage() {
 
   return (
     <Container
-      sx={{ pb: 10 }}
+      maxWidth="lg"
+      sx={{ py: 3 }}
       onTouchStart={(e) => {
         const touch = e.touches[0];
         const startY = touch.clientY;
@@ -184,7 +185,7 @@ export default function FlocksPage() {
         }, { once: true });
       }}
     >
-      <Box sx={{ py: 3 }}>
+      <Box>
         <Typography variant="h4" component="h1" gutterBottom>
           {t('flocks.title')}
         </Typography>
@@ -200,6 +201,7 @@ export default function FlocksPage() {
               }
             }}
             size="small"
+            color="primary"
             aria-label={t('flocks.filterStatus')}
             sx={{
               '& .MuiToggleButton-root': {
@@ -271,9 +273,10 @@ export default function FlocksPage() {
       <Fab
         color="primary"
         aria-label={t('flocks.addFlock')}
+        data-testid="add-flock-fab"
         sx={{
           position: 'fixed',
-          bottom: 80,
+          bottom: { xs: 80, sm: 16 },
           right: 16,
         }}
         onClick={() => setIsCreateModalOpen(true)}

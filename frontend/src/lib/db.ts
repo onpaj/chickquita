@@ -8,7 +8,7 @@ export interface PendingRequest {
   id?: number;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   url: string;
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
   timestamp: string;
   retryCount: number;

@@ -2,6 +2,12 @@ import axios from 'axios';
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
 import { processApiError } from './errors';
 import { db } from './db';
+import type { PendingRequest } from './db';
+
+interface OfflineQueuedError extends Error {
+  isOfflineQueued: boolean;
+  requestId: number | undefined;
+}
 
 /**
  * API Client Configuration
@@ -10,12 +16,10 @@ import { db } from './db';
  * The Clerk JWT token is automatically attached to all requests and refreshed when needed.
  */
 
-// Get API base URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-if (!API_BASE_URL) {
-  throw new Error('Missing VITE_API_BASE_URL environment variable');
-}
+// Get API base URL from environment variables.
+// In development, VITE_API_BASE_URL points to the local backend (e.g. http://localhost:5100/api).
+// In production, FE and BE are served from the same container/origin, so we use a relative path.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
  * Axios instance with base configuration
@@ -109,7 +113,7 @@ apiClient.interceptors.response.use(
 
         // Queue the request for later sync
         const requestId = await db.queueRequest({
-          method: config.method?.toUpperCase() as any,
+          method: config.method?.toUpperCase() as PendingRequest['method'],
           url,
           body: config.data,
           headers: config.headers as Record<string, string>,
@@ -126,9 +130,9 @@ apiClient.interceptors.response.use(
         });
 
         // Return a special offline error that components can detect
-        const offlineError = new Error('Request queued for offline sync');
-        (offlineError as any).isOfflineQueued = true;
-        (offlineError as any).requestId = requestId;
+        const offlineError = new Error('Request queued for offline sync') as OfflineQueuedError;
+        offlineError.isOfflineQueued = true;
+        offlineError.requestId = requestId;
         return Promise.reject(offlineError);
       } catch (queueError) {
         console.error('Failed to queue offline request:', queueError);

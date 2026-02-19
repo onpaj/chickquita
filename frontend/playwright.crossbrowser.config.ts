@@ -125,7 +125,7 @@ export default defineConfig({
     video: 'retain-on-failure',
 
     // Authentication state
-    storageState: '.auth/user.json',
+    storageState: '.clerk/user.json',
 
     // Viewport settings (overridden per project)
     viewport: BREAKPOINTS.desktop_md,
@@ -144,7 +144,7 @@ export default defineConfig({
     // ============================================
     {
       name: 'setup',
-      testMatch: /.*\.setup\.ts/,
+      testMatch: /clerk\.setup\.ts/,
       use: {
         ...devices['Desktop Chrome'],
       },

@@ -2,7 +2,10 @@ using Chickquita.Api.Endpoints;
 using Chickquita.Api.Middleware;
 using Chickquita.Application;
 using MediatR;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
+using System.Text.Json;
 using Chickquita.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,6 +66,12 @@ builder.Services.AddApplicationServices();
 
 // Register Infrastructure layer services (DbContext, Repositories, Services)
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
+// Health checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<Chickquita.Infrastructure.Data.ApplicationDbContext>(
+        name: "database",
+        tags: ["ready"]);
 
 // Configure CORS for development only
 if (builder.Environment.IsDevelopment())
@@ -141,11 +150,58 @@ app.UseMiddleware<TenantResolutionMiddleware>();
 
 app.UseAuthorization();
 
-// Health check endpoint
-app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
-    .WithName("HealthCheck")
-    .WithOpenApi()
-    .Produces<object>(200);
+static async Task WriteHealthCheckResponse(HttpContext context, HealthReport report)
+{
+    context.Response.ContentType = "application/json; charset=utf-8";
+
+    var entries = report.Entries.Select(e => new
+    {
+        key = e.Key,
+        value = new
+        {
+            status = e.Value.Status.ToString(),
+            duration = e.Value.Duration.ToString(),
+            description = e.Value.Description,
+            exception = e.Value.Exception?.Message
+        }
+    }).ToDictionary(e => e.key, e => e.value);
+
+    var result = new
+    {
+        status = report.Status.ToString(),
+        totalDuration = report.TotalDuration.ToString(),
+        entries
+    };
+
+    await context.Response.WriteAsync(
+        JsonSerializer.Serialize(result, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }));
+}
+
+// Health check endpoints — unauthenticated, publicly accessible
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = WriteHealthCheckResponse,
+    AllowCachingResponses = false
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    // Liveness: no dependency checks — just proves the app is running
+    Predicate = _ => false,
+    ResponseWriter = WriteHealthCheckResponse,
+    AllowCachingResponses = false
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    // Readiness: only checks tagged "ready" (database)
+    Predicate = check => check.Tags.Contains("ready"),
+    ResponseWriter = WriteHealthCheckResponse,
+    AllowCachingResponses = false
+}).AllowAnonymous();
 
 // MediatR test endpoint (can be removed after verification)
 app.MapGet("/ping", async (IMediator mediator) =>

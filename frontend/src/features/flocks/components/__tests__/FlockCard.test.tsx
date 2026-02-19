@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { FlockCard } from '../FlockCard';
@@ -18,7 +18,7 @@ vi.mock('react-router-dom', async () => {
 // Mock i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, params?: any) => {
+    t: (key: string, params?: Record<string, unknown>) => {
       const translations: Record<string, string> = {
         'flocks.active': 'Active',
         'flocks.archived': 'Archived',
@@ -41,6 +41,7 @@ vi.mock('react-i18next', () => ({
 
 const mockFlock: Flock = {
   id: 'flock-1',
+  tenantId: 'tenant-1',
   coopId: 'coop-1',
   identifier: 'Test Flock',
   hatchDate: '2024-01-01',
@@ -50,6 +51,7 @@ const mockFlock: Flock = {
   isActive: true,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
+  history: [],
 };
 
 const renderFlockCard = (

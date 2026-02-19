@@ -20,7 +20,7 @@ e2e/
 │   └── CoopDetailPage.ts
 ├── fixtures/           # Test data fixtures
 │   └── coop.fixture.ts
-├── auth.setup.ts       # Authentication setup (runs before all tests)
+├── clerk.setup.ts      # Authentication setup via @clerk/testing (runs before all tests)
 ├── coops.spec.ts       # M2: Coop Management tests
 └── README.md           # This file
 ```
@@ -48,39 +48,31 @@ npx playwright install-deps
 
 ### Authentication Setup
 
-E2E tests require an authenticated session. Since we skip automated login, you need to save your authentication state manually once:
+E2E tests use **`@clerk/testing`** for automated authentication — no manual browser login required.
 
-**Option 1: Using the helper script (Recommended)**
-```bash
-# Make sure dev server is running
-npm run dev
+**Setup (one-time):**
 
-# In another terminal, run the helper script
-node e2e/save-auth.js
+1. Create `frontend/.env.test.local` (gitignored):
+   ```env
+   CLERK_SECRET_KEY=sk_test_your_key_here
+   ```
 
-# A browser will open - log in to the app
-# After login, close the browser
-# Auth state will be saved to .auth/user.json
-```
+2. Verify `frontend/.env.test` has test user credentials:
+   ```env
+   CLERK_PUBLISHABLE_KEY=pk_test_...
+   E2E_CLERK_USER_USERNAME=your-test-user@example.com
+   E2E_CLERK_USER_PASSWORD=your-test-password
+   ```
 
-**Option 2: Using Playwright codegen**
-```bash
-# Start dev server
-npm run dev
+3. Run tests — authentication happens automatically:
+   ```bash
+   npm run test:e2e
+   ```
 
-# Save auth state while interacting with the app
-npx playwright codegen --save-storage=.auth/user.json http://localhost:3100
+The `clerk.setup.ts` project signs in programmatically and saves state to `.clerk/user.json`.
+All test projects reuse this state via `storageState: '.clerk/user.json'`.
 
-# Log in through the opened browser
-# Close the browser when done
-```
-
-**Option 3: Manual storage state**
-```bash
-# Log in manually via browser
-# Then save the storage state using browser DevTools
-# Copy cookies and localStorage to .auth/user.json
-```
+For full details, see [docs/architecture/E2E_AUTH_SETUP.md](../../docs/architecture/E2E_AUTH_SETUP.md).
 
 ### Database Configuration
 
@@ -212,14 +204,14 @@ npx playwright test --ui
 
 ## Authentication Setup
 
-Tests use a shared authentication state to avoid logging in for each test:
+Tests use a shared authentication state via `@clerk/testing`:
 
-1. `auth.setup.ts` runs once before all tests
-2. Creates authenticated session
-3. Saves session to `.auth/user.json`
+1. `clerk.setup.ts` runs once before all tests
+2. Signs in programmatically using Clerk Testing Token
+3. Saves session to `.clerk/user.json`
 4. All tests reuse this session
 
-To re-authenticate, delete `.auth/user.json` and run tests again.
+To re-authenticate, delete `.clerk/user.json` and run tests again.
 
 ## Page Object Model (POM)
 

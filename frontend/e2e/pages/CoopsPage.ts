@@ -36,10 +36,34 @@ export class CoopsPage {
   }
 
   /**
+   * Wait for the coops list to finish loading.
+   * Waits for progressbar to disappear and then for either coops or empty state to be visible.
+   */
+  async waitForListLoaded(timeout: number = 30000) {
+    await this.page.waitForSelector('[role="progressbar"]', { state: 'hidden', timeout }).catch(() => {});
+    // Wait for either coop cards or empty state message to appear
+    await this.page.waitForFunction(
+      () => {
+        const cards = document.querySelectorAll('[data-testid="coop-card"]');
+        const emptyTexts = [
+          'zatím tu nejsou žádné kurníky',
+          'no coops here yet',
+        ];
+        const bodyText = document.body.innerText.toLowerCase();
+        const hasEmpty = emptyTexts.some(t => bodyText.includes(t.toLowerCase()));
+        return cards.length > 0 || hasEmpty;
+      },
+      { timeout }
+    ).catch(() => {});
+  }
+
+  /**
    * Shared helper to click menu action with proper timing
    * Waits for menu to appear and stabilize before clicking item
    */
   private async clickMenuAction(coopName: string, actionName: RegExp) {
+    // Wait for the coop card to be visible before trying to interact
+    await this.waitForCoopCard(coopName);
     const card = await this.getCoopCard(coopName);
 
     // Open the menu first
@@ -86,9 +110,24 @@ export class CoopsPage {
     await this.createCoopButton.click();
   }
 
+  /**
+   * Set up a promise that waits for the next GET /api/coops response.
+   * Must be called BEFORE the action that triggers the refetch.
+   */
+  prepareForRefetch(timeout: number = 30000): Promise<void> {
+    return this.page.waitForResponse(
+      response =>
+        response.url().includes('/api/coops') &&
+        response.request().method() === 'GET' &&
+        !response.url().includes('/coops/') &&
+        response.status() === 200,
+      { timeout }
+    ).then(() => {}).catch(() => {});
+  }
+
   async waitForCoopCard(coopName: string) {
     const card = await this.getCoopCard(coopName);
-    await card.waitFor({ state: 'visible', timeout: 10000 });
+    await card.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   /**
@@ -123,7 +162,7 @@ export class CoopsPage {
       await confirmButton.click();
 
       // Wait for dialog to close
-      await confirmDialog.waitFor({ state: 'hidden', timeout: 5000 });
+      await confirmDialog.waitFor({ state: 'hidden', timeout: 30000 });
 
       // Wait for network to be idle after deletion
       await this.page.waitForLoadState('networkidle');

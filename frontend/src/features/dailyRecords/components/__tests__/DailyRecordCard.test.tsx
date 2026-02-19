@@ -1,10 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nextProvider } from 'react-i18next';
 import { DailyRecordCard } from '../DailyRecordCard';
 import i18n from '../../../../lib/i18n';
 import type { DailyRecordDto } from '../../api/dailyRecordsApi';
+
+beforeAll(async () => {
+  await i18n.changeLanguage('cs');
+});
 
 const createWrapper = () => {
   return ({ children }: { children: React.ReactNode }) => (
@@ -16,6 +20,8 @@ const mockRecord: DailyRecordDto = {
   id: 'record-1',
   tenantId: 'tenant-1',
   flockId: 'flock-1',
+  flockName: 'Hejno A',
+  flockCoopName: 'Test Coop',
   recordDate: '2024-02-15',
   eggCount: 12,
   notes: 'Good production today',
@@ -208,7 +214,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      const editButton = screen.getByLabelText('edit record');
+      const editButton = screen.getByLabelText('Upravit záznam');
       expect(editButton).toBeInTheDocument();
     });
 
@@ -227,7 +233,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      const editButton = screen.queryByLabelText('edit record');
+      const editButton = screen.queryByLabelText('Upravit záznam');
       expect(editButton).not.toBeInTheDocument();
     });
 
@@ -241,7 +247,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      const editButton = screen.queryByLabelText('edit record');
+      const editButton = screen.queryByLabelText('Upravit záznam');
       expect(editButton).not.toBeInTheDocument();
     });
 
@@ -260,7 +266,7 @@ describe('DailyRecordCard', () => {
         }
       );
 
-      const editButton = screen.getByLabelText('edit record');
+      const editButton = screen.getByLabelText('Upravit záznam');
       await user.click(editButton);
 
       expect(mockOnEdit).toHaveBeenCalledWith(todayRecord);
@@ -286,12 +292,15 @@ describe('DailyRecordCard', () => {
   describe('Empty notes edge case', () => {
     it('should not render notes section when notes is empty string', () => {
       const recordWithEmptyNotes = { ...mockRecord, notes: '' };
-      render(<DailyRecordCard record={recordWithEmptyNotes} />, {
+      const { container } = render(<DailyRecordCard record={recordWithEmptyNotes} />, {
         wrapper: createWrapper(),
       });
 
-      const notesText = screen.queryByText('');
-      expect(notesText).not.toBeInTheDocument();
+      // When notes is empty, the notes Typography should not be rendered.
+      // The only p.MuiTypography-body2 element should be the "vajec" (eggs) label.
+      const body2Elements = container.querySelectorAll('p.MuiTypography-body2');
+      expect(body2Elements).toHaveLength(1);
+      expect(body2Elements[0].textContent).toBe('vajec');
     });
 
     it('should not render notes section when notes is whitespace', () => {

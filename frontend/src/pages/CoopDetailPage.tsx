@@ -9,7 +9,6 @@ import {
   Stack,
   Button,
   Chip,
-  Skeleton,
   IconButton,
   Tooltip,
 } from '@mui/material';
@@ -25,6 +24,7 @@ import { EditCoopModal } from '../features/coops/components/EditCoopModal';
 import { ArchiveCoopDialog } from '../features/coops/components/ArchiveCoopDialog';
 import { DeleteCoopDialog } from '../features/coops/components/DeleteCoopDialog';
 import { ResourceNotFound } from '../components/ResourceNotFound';
+import { CoopDetailSkeleton } from '../shared/components';
 import { processApiError, ErrorType } from '../lib/errors';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useToast } from '../hooks/useToast';
@@ -114,23 +114,7 @@ export function CoopDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <Container maxWidth="sm" sx={{ py: 3 }}>
-        <Box sx={{ mb: 3 }}>
-          <Skeleton variant="rectangular" height={40} width={100} />
-        </Box>
-        <Paper sx={{ p: 3 }}>
-          <Skeleton variant="text" height={40} width="60%" />
-          <Skeleton variant="text" height={24} width="80%" sx={{ mt: 2 }} />
-          <Skeleton variant="text" height={24} width="70%" sx={{ mt: 1 }} />
-          <Skeleton variant="text" height={24} width="70%" sx={{ mt: 1 }} />
-          <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-            <Skeleton variant="rectangular" height={36} width={100} />
-            <Skeleton variant="rectangular" height={36} width={120} />
-          </Box>
-        </Paper>
-      </Container>
-    );
+    return <CoopDetailSkeleton />;
   }
 
   if (error) {
@@ -281,7 +265,7 @@ export function CoopDetailPage() {
               {t('coops.archiveCoop')}
             </Button>
             <Tooltip
-              title={coop.flocksCount > 0 ? t('coops.deleteDisabledHasFlocks', 'Nejprve odstraňte všechna hejna') : !coop.isActive ? t('coops.deleteDisabledArchived', 'Kurník je archivován') : ''}
+              title={coop.flocksCount > 0 ? t('coops.deleteDisabledHasFlocks', 'Remove all flocks first') : !coop.isActive ? t('coops.deleteDisabledArchived', 'Coop is archived') : ''}
               disableHoverListener={coop.isActive && !isDeleting && coop.flocksCount === 0}
             >
               <span>

@@ -20,9 +20,9 @@ export class PurchasesPage {
     this.addPurchaseButton = page.getByLabel(/přidat nákup|add purchase/i).first();
     this.emptyStateMessage = page.getByText(/zatím žádné nákupy|no purchases yet/i);
     this.purchaseCardsList = page.locator('[role="article"]');
-    this.fromDateFilter = page.getByLabel(/od data|from date/i);
-    this.toDateFilter = page.getByLabel(/do data|to date/i);
-    this.typeFilter = page.getByLabel(/typ(?! nákupu)|type(?! of)/i);
+    this.fromDateFilter = page.getByLabel(/od data|from date/i).last();
+    this.toDateFilter = page.getByLabel(/do data|to date/i).last();
+    this.typeFilter = page.getByLabel(/typ(?! nákupu)|type(?! of)/i).first();
     this.flockFilter = page.getByLabel(/hejno|flock/i);
   }
 
@@ -46,7 +46,7 @@ export class PurchasesPage {
    * Get a purchase card by its name
    */
   getPurchaseCard(purchaseName: string): Locator {
-    return this.purchaseCardsList.filter({ hasText: purchaseName });
+    return this.purchaseCardsList.filter({ hasText: purchaseName }).first();
   }
 
   /**

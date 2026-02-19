@@ -31,7 +31,7 @@ export const MOBILE_BREAKPOINT = 480;
  * Check if current viewport is mobile
  */
 export const isMobileViewport = (): boolean => {
-  return typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT;
+  return typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT;
 };
 
 /**

@@ -49,22 +49,25 @@ export default defineConfig({
 
     // Video on failure
     video: 'retain-on-failure',
+
+    // Block service workers to prevent cached API responses from interfering with tests
+    // The service worker caches GET /api/* responses for 5 min which causes stale data in tests
+    serviceWorkers: 'block',
   },
 
   // Configure projects for major browsers
   projects: [
-    // Setup project - runs first to authenticate
+    // Setup project - runs first to authenticate via @clerk/testing
     {
       name: 'setup',
-      testMatch: /.*\.setup\.ts/,
+      testMatch: /clerk\.setup\.ts/,
     },
 
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Use prepared auth state if it exists (manual login required first)
-        storageState: '.auth/user.json',
+        storageState: '.clerk/user.json',
       },
       dependencies: ['setup'],
     },
@@ -73,7 +76,7 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
-        storageState: '.auth/user.json',
+        storageState: '.clerk/user.json',
       },
       dependencies: ['setup'],
     },
@@ -82,7 +85,7 @@ export default defineConfig({
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
-        storageState: '.auth/user.json',
+        storageState: '.clerk/user.json',
       },
       dependencies: ['setup'],
     },
@@ -92,7 +95,7 @@ export default defineConfig({
       name: 'Mobile Chrome',
       use: {
         ...devices['Pixel 5'],
-        storageState: '.auth/user.json',
+        storageState: '.clerk/user.json',
       },
       dependencies: ['setup'],
     },
@@ -100,7 +103,7 @@ export default defineConfig({
       name: 'Mobile Safari',
       use: {
         ...devices['iPhone 12'],
-        storageState: '.auth/user.json',
+        storageState: '.clerk/user.json',
       },
       dependencies: ['setup'],
     },

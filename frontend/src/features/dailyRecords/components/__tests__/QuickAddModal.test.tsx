@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
@@ -63,6 +63,13 @@ describe('QuickAddModal', () => {
   const mockOnClose = vi.fn();
   const mockMutate = vi.fn();
   const mockHandleError = vi.fn();
+
+  beforeAll(async () => {
+    // Ensure i18n uses Czech (cs) language for all tests in this file.
+    // The LanguageDetector may pick up 'en' from navigator in jsdom,
+    // but the tests expect Czech translations.
+    await i18n.changeLanguage('cs');
+  });
 
   beforeEach(() => {
     // Reset mocks
@@ -265,8 +272,6 @@ describe('QuickAddModal', () => {
     });
 
     it('should validate date is not in the future', async () => {
-      const user = userEvent.setup();
-
       render(
         <QuickAddModal
           open={true}
@@ -278,14 +283,19 @@ describe('QuickAddModal', () => {
 
       const dateInput = screen.getByLabelText(/datum/i);
 
-      // Try to set future date
+      // Build tomorrow's date using local time to avoid UTC timezone mismatch
+      // (toISOString() returns UTC which can differ from local date in UTC+ zones)
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 1);
-      const futureDateStr = futureDate.toISOString().split('T')[0];
+      const year = futureDate.getFullYear();
+      const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+      const day = String(futureDate.getDate()).padStart(2, '0');
+      const futureDateStr = `${year}-${month}-${day}`;
 
-      await user.clear(dateInput);
-      await user.type(dateInput, futureDateStr);
-      await user.tab(); // Trigger blur event
+      // Use fireEvent instead of userEvent.type - date inputs in jsdom don't support
+      // character-by-character typing (same pattern as notes validation test above)
+      fireEvent.change(dateInput, { target: { value: futureDateStr } });
+      fireEvent.blur(dateInput);
 
       await waitFor(() => {
         expect(screen.getByText(/nemůže být v budoucnosti/i)).toBeInTheDocument();
@@ -293,8 +303,6 @@ describe('QuickAddModal', () => {
     });
 
     it('should validate notes max length (500 characters)', async () => {
-      const user = userEvent.setup();
-
       render(
         <QuickAddModal
           open={true}
@@ -307,8 +315,9 @@ describe('QuickAddModal', () => {
       const notesInput = screen.getByLabelText(/poznámky/i);
       const longText = 'a'.repeat(501);
 
-      await user.type(notesInput, longText);
-      await user.tab(); // Trigger blur event
+      // Use fireEvent.change instead of userEvent.type to avoid timeout with 501 characters
+      fireEvent.change(notesInput, { target: { value: longText } });
+      fireEvent.blur(notesInput);
 
       await waitFor(() => {
         expect(screen.getByText(/maximální délka/i)).toBeInTheDocument();
@@ -345,13 +354,22 @@ describe('QuickAddModal', () => {
         { wrapper: createWrapper() }
       );
 
+      // Wait for auto-focus to complete (100ms timer moves focus to egg count input)
+      await waitFor(() => {
+        const eggCountInput = screen.getByLabelText('egg count increase')
+          .parentElement?.parentElement?.querySelector('input[type="number"]');
+        expect(document.activeElement).toBe(eggCountInput);
+      }, { timeout: 200 });
+
       // Fill in the form
       const incrementButton = screen.getByLabelText('egg count increase');
       await user.click(incrementButton);
       await user.click(incrementButton);
       await user.click(incrementButton); // Set egg count to 3
 
+      // Click the notes input to ensure focus before typing (avoid auto-focus race condition)
       const notesInput = screen.getByLabelText(/poznámky/i);
+      await user.click(notesInput);
       await user.type(notesInput, 'Test notes');
 
       // Submit
@@ -491,10 +509,10 @@ describe('QuickAddModal', () => {
   describe('Mobile responsive', () => {
     it('should render in fullScreen mode on mobile viewport', () => {
       // Mock mobile viewport
-      global.innerWidth = 400;
-      global.dispatchEvent(new Event('resize'));
+      window.innerWidth = 400;
+      window.dispatchEvent(new Event('resize'));
 
-      const { container } = render(
+      render(
         <QuickAddModal
           open={true}
           onClose={mockOnClose}
@@ -503,8 +521,8 @@ describe('QuickAddModal', () => {
         { wrapper: createWrapper() }
       );
 
-      // Check for fullScreen prop (MUI applies specific classes)
-      const dialog = container.querySelector('.MuiDialog-root');
+      // MUI Dialog renders via a portal into document.body, not into container
+      const dialog = document.querySelector('.MuiDialog-root');
       expect(dialog).toBeInTheDocument();
     });
   });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -11,7 +11,11 @@ import {
   Typography,
   Box,
   Divider,
+  IconButton,
+  Slide,
 } from '@mui/material';
+import type { TransitionProps } from '@mui/material/transitions';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { useUpdateFlock } from '../hooks/useFlocks';
 import { useErrorHandler } from '../../../hooks/useErrorHandler';
@@ -28,6 +32,13 @@ import {
   touchInputProps,
   FORM_FIELD_SPACING,
 } from '@/shared/constants/modalConfig';
+
+const SlideUp = React.forwardRef(function SlideUp(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 interface EditFlockModalProps {
   open: boolean;
@@ -117,7 +128,7 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
     }
 
     const request: UpdateFlockRequest = {
-      id: flock.id,
+      flockId: flock.id,
       identifier: identifier.trim(),
       hatchDate,
       currentHens: hens,
@@ -170,6 +181,7 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
       maxWidth={DIALOG_CONFIG.maxWidth}
       fullWidth={DIALOG_CONFIG.fullWidth}
       fullScreen={isMobileViewport()}
+      TransitionComponent={SlideUp}
       sx={{
         '& .MuiDialog-paper': {
           display: 'flex',
@@ -179,8 +191,19 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
       }}
     >
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <DialogTitle sx={dialogTitleSx}>{t('flocks.editFlock')}</DialogTitle>
+        <DialogTitle sx={{ ...dialogTitleSx, pr: 6 }}>
+          {t('flocks.editFlock')}
+          <IconButton
+            aria-label={t('common.close')}
+            onClick={handleClose}
+            disabled={isPending}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent
+          dividers
           sx={{
             ...dialogContentSx,
             overflowY: 'auto',
@@ -279,7 +302,7 @@ export function EditFlockModal({ open, onClose, flock }: EditFlockModalProps) {
           </Stack>
         </DialogContent>
         <DialogActions sx={dialogActionsSx}>
-          <Button onClick={handleClose} disabled={isPending} sx={touchButtonSx}>
+          <Button variant="text" onClick={handleClose} disabled={isPending} sx={touchButtonSx}>
             {t('common.cancel')}
           </Button>
           <Button

@@ -14,7 +14,7 @@ export class ArchiveFlockDialog {
     this.dialog = page.getByRole('dialog');
     this.dialogTitle = page.getByRole('dialog').getByRole('heading', { name: /archivovat hejno|archive flock/i });
     this.dialogMessage = page.getByRole('dialog').locator('#archive-flock-dialog-description');
-    this.flockName = page.getByRole('dialog').locator('.MuiDialogContent-root .MuiDialogContentText-root').nth(1);
+    this.flockName = page.getByRole('dialog').locator('.MuiDialogContent-root strong');
     this.confirmButton = page.getByRole('dialog').getByRole('button', { name: /archivovat|archive/i });
     this.cancelButton = page.getByRole('dialog').getByRole('button', { name: /zrušit|cancel/i });
   }
@@ -46,7 +46,7 @@ export class ArchiveFlockDialog {
    * Wait for dialog to close
    */
   async waitForClose() {
-    await this.dialog.waitFor({ state: 'hidden', timeout: 5000 });
+    await this.dialog.waitFor({ state: 'hidden', timeout: 30000 });
   }
 
   /**

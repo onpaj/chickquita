@@ -65,8 +65,6 @@ function setDismissed(): void {
 export function IosInstallPrompt() {
   const { t } = useTranslation();
   const [showPrompt, setShowPrompt] = useState(false);
-  const [isIos, setIsIos] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
@@ -75,9 +73,6 @@ export function IosInstallPrompt() {
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     const isSafari = /safari/.test(userAgent) && !/crios|fxios|edgios/.test(userAgent);
     const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
-
-    setIsIos(isIosDevice && isSafari);
-    setIsStandalone(isInStandaloneMode);
 
     // Don't show if not iOS Safari or already in standalone mode
     if (!isIosDevice || !isSafari || isInStandaloneMode) {
@@ -130,8 +125,8 @@ export function IosInstallPrompt() {
 
   const isLastStep = activeStep === 2;
 
-  // Don't render if not iOS Safari or already standalone
-  if (!isIos || isStandalone || !showPrompt) {
+  // Don't render if prompt is not showing
+  if (!showPrompt) {
     return null;
   }
 

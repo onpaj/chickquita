@@ -316,7 +316,7 @@ export const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 16,
           boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
           transition: 'box-shadow 0.3s ease, transform 0.3s ease',
           '&:hover': {
@@ -392,6 +392,7 @@ export const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
+          borderRadius: 0,
           boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.12)',
         },
       },
@@ -420,6 +421,7 @@ export const theme = createTheme({
     MuiBottomNavigation: {
       styleOverrides: {
         root: {
+          borderRadius: 0,
           height: 64,
           boxShadow: '0px -2px 4px rgba(0, 0, 0, 0.1)',
         },

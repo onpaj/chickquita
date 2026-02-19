@@ -22,6 +22,8 @@ describe('dailyRecordsApi', () => {
     id: '123e4567-e89b-12d3-a456-426614174000',
     tenantId: '123e4567-e89b-12d3-a456-426614174001',
     flockId: '123e4567-e89b-12d3-a456-426614174002',
+    flockName: 'Test Flock',
+    flockCoopName: 'Test Coop',
     recordDate: '2024-01-15',
     eggCount: 25,
     notes: 'Good weather, productive day',

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -9,16 +9,19 @@ import {
   Stack,
   CircularProgress,
   IconButton,
-  InputAdornment,
   Typography,
+  Slide,
+  Box,
+  Divider,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import type { TransitionProps } from '@mui/material/transitions';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { useCreateFlock } from '../hooks/useFlocks';
 import { useErrorHandler } from '../../../hooks/useErrorHandler';
 import { processApiError, ErrorType } from '../../../lib/errors';
 import type { CreateFlockRequest } from '../api/flocksApi';
+import { NumericStepper } from '@/shared/components';
 import {
   DIALOG_CONFIG,
   isMobileViewport,
@@ -27,9 +30,15 @@ import {
   dialogActionsSx,
   touchButtonSx,
   touchInputProps,
-  numberStepperButtonSx,
   FORM_FIELD_SPACING,
 } from '@/shared/constants/modalConfig';
+
+const SlideUp = React.forwardRef(function SlideUp(
+  props: TransitionProps & { children: React.ReactElement },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 interface CreateFlockModalProps {
   open: boolean;
@@ -78,7 +87,9 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
     if (!value) {
       return t('validation.required');
     }
-    const selectedDate = new Date(value);
+    // Parse as local date to avoid UTC timezone offset causing false "future date" errors
+    const [year, month, day] = value.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (selectedDate > today) {
@@ -121,29 +132,25 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
     );
   };
 
-  const handleNumberChange = (
-    setter: (value: number) => void,
-    value: number
-  ) => {
-    const newValue = Math.max(0, value);
-    setter(newValue);
-    // Clear counts error when user changes values
+  const handleHensChange = (value: number) => {
+    setHens(value);
     if (countsError) {
-      const err = validateCounts(
-        setter === setHens ? newValue : hens,
-        setter === setRoosters ? newValue : roosters,
-        setter === setChicks ? newValue : chicks
-      );
-      setCountsError(err);
+      setCountsError(validateCounts(value, roosters, chicks));
     }
   };
 
-  const incrementValue = (setter: (value: number) => void, currentValue: number) => {
-    handleNumberChange(setter, currentValue + 1);
+  const handleRoostersChange = (value: number) => {
+    setRoosters(value);
+    if (countsError) {
+      setCountsError(validateCounts(hens, value, chicks));
+    }
   };
 
-  const decrementValue = (setter: (value: number) => void, currentValue: number) => {
-    handleNumberChange(setter, currentValue - 1);
+  const handleChicksChange = (value: number) => {
+    setChicks(value);
+    if (countsError) {
+      setCountsError(validateCounts(hens, roosters, value));
+    }
   };
 
   const submitFlock = () => {
@@ -190,6 +197,13 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
     submitFlock();
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !(e.target as HTMLElement).closest('button')) {
+      e.preventDefault();
+      submitFlock();
+    }
+  };
+
   const getTodayDate = (): string => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -202,6 +216,7 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
       maxWidth={DIALOG_CONFIG.maxWidth}
       fullWidth={DIALOG_CONFIG.fullWidth}
       fullScreen={isMobileViewport()}
+      TransitionComponent={SlideUp}
       sx={{
         '& .MuiDialog-paper': {
           display: 'flex',
@@ -210,9 +225,20 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
         },
       }}
     >
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <DialogTitle sx={dialogTitleSx}>{t('flocks.addFlock')}</DialogTitle>
+      <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <DialogTitle sx={{ ...dialogTitleSx, pr: 6 }}>
+          {t('flocks.addFlock')}
+          <IconButton
+            aria-label={t('common.close')}
+            onClick={handleClose}
+            disabled={isPending}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent
+          dividers
           sx={{
             ...dialogContentSx,
             overflowY: 'auto',
@@ -271,143 +297,55 @@ export function CreateFlockModal({ open, onClose, coopId }: CreateFlockModalProp
               }}
             />
 
-            <Stack spacing={FORM_FIELD_SPACING}>
-              <Typography variant="subtitle2" color="text.secondary">
+            <Divider />
+
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
                 {t('flocks.form.composition')}
               </Typography>
 
-              <TextField
-                label={t('flocks.hens')}
-                value={hens}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  handleNumberChange(setHens, value);
-                }}
-                fullWidth
-                disabled={isPending}
-                type="number"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => decrementValue(setHens, hens)}
-                        disabled={isPending || hens <= 0}
-                        size="small"
-                        aria-label={t('flocks.form.decrease')}
-                        sx={numberStepperButtonSx}
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => incrementValue(setHens, hens)}
-                        disabled={isPending}
-                        size="small"
-                        aria-label={t('flocks.form.increase')}
-                        sx={numberStepperButtonSx}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                inputProps={{
-                  min: 0,
-                  ...touchInputProps,
-                }}
-              />
+              <Stack spacing={2}>
+                <NumericStepper
+                  label={t('flocks.hens')}
+                  value={hens}
+                  onChange={handleHensChange}
+                  min={0}
+                  disabled={isPending}
+                  aria-label={t('flocks.hens')}
+                />
 
-              <TextField
-                label={t('flocks.roosters')}
-                value={roosters}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  handleNumberChange(setRoosters, value);
-                }}
-                fullWidth
-                disabled={isPending}
-                type="number"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => decrementValue(setRoosters, roosters)}
-                        disabled={isPending || roosters <= 0}
-                        size="small"
-                        aria-label={t('flocks.form.decrease')}
-                        sx={numberStepperButtonSx}
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => incrementValue(setRoosters, roosters)}
-                        disabled={isPending}
-                        size="small"
-                        aria-label={t('flocks.form.increase')}
-                        sx={numberStepperButtonSx}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                inputProps={{
-                  min: 0,
-                  ...touchInputProps,
-                }}
-              />
+                <NumericStepper
+                  label={t('flocks.roosters')}
+                  value={roosters}
+                  onChange={handleRoostersChange}
+                  min={0}
+                  disabled={isPending}
+                  aria-label={t('flocks.roosters')}
+                />
 
-              <TextField
-                label={t('flocks.chicks')}
-                value={chicks}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0;
-                  handleNumberChange(setChicks, value);
-                }}
-                fullWidth
-                disabled={isPending}
-                type="number"
-                error={!!countsError}
-                helperText={countsError}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => decrementValue(setChicks, chicks)}
-                        disabled={isPending || chicks <= 0}
-                        size="small"
-                        aria-label={t('flocks.form.decrease')}
-                        sx={numberStepperButtonSx}
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => incrementValue(setChicks, chicks)}
-                        disabled={isPending}
-                        size="small"
-                        aria-label={t('flocks.form.increase')}
-                        sx={numberStepperButtonSx}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                inputProps={{
-                  min: 0,
-                  ...touchInputProps,
-                }}
-              />
-            </Stack>
+                <NumericStepper
+                  label={t('flocks.chicks')}
+                  value={chicks}
+                  onChange={handleChicksChange}
+                  min={0}
+                  disabled={isPending}
+                  error={!!countsError}
+                  helperText={countsError}
+                  aria-label={t('flocks.chicks')}
+                />
+              </Stack>
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions sx={dialogActionsSx}>
-          <Button onClick={handleClose} disabled={isPending} sx={touchButtonSx}>
+          <Button variant="text" onClick={handleClose} disabled={isPending} sx={touchButtonSx}>
             {t('common.cancel')}
           </Button>
           <Button
-            type="submit"
+            type="button"
             variant="contained"
             disabled={isPending || !isFormValid()}
+            onClick={submitFlock}
             startIcon={isPending ? <CircularProgress size={20} color="inherit" /> : undefined}
             sx={touchButtonSx}
           >
