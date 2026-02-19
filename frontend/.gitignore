@@ -32,4 +32,7 @@ dist-ssr
 # E2E test artifacts
 /.auth/
 /.clerk/
-.env.test
+# Environment files (keep .env.example as template only)
+.env
+.env.*
+!.env.example
