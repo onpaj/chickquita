@@ -61,8 +61,12 @@ builder.Services.AddSwaggerGen(options =>
     }
 });
 
-// Application Insights telemetry
-builder.Services.AddApplicationInsightsTelemetry();
+// Application Insights telemetry (only when connection string is configured)
+var aiConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
+if (!string.IsNullOrWhiteSpace(aiConnectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
 
 // Register Application layer services (MediatR, AutoMapper, FluentValidation)
 builder.Services.AddApplicationServices();
