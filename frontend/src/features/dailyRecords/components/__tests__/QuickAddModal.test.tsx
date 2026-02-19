@@ -272,8 +272,6 @@ describe('QuickAddModal', () => {
     });
 
     it('should validate date is not in the future', async () => {
-      const user = userEvent.setup();
-
       render(
         <QuickAddModal
           open={true}
@@ -285,14 +283,19 @@ describe('QuickAddModal', () => {
 
       const dateInput = screen.getByLabelText(/datum/i);
 
-      // Try to set future date
+      // Build tomorrow's date using local time to avoid UTC timezone mismatch
+      // (toISOString() returns UTC which can differ from local date in UTC+ zones)
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 1);
-      const futureDateStr = futureDate.toISOString().split('T')[0];
+      const year = futureDate.getFullYear();
+      const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+      const day = String(futureDate.getDate()).padStart(2, '0');
+      const futureDateStr = `${year}-${month}-${day}`;
 
-      await user.clear(dateInput);
-      await user.type(dateInput, futureDateStr);
-      await user.tab(); // Trigger blur event
+      // Use fireEvent instead of userEvent.type - date inputs in jsdom don't support
+      // character-by-character typing (same pattern as notes validation test above)
+      fireEvent.change(dateInput, { target: { value: futureDateStr } });
+      fireEvent.blur(dateInput);
 
       await waitFor(() => {
         expect(screen.getByText(/nemůže být v budoucnosti/i)).toBeInTheDocument();
