@@ -99,7 +99,7 @@ export default function CoopsPage() {
       }}
     >
       <Box sx={{ py: 3, pb: 10 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" sx={{ mb: 3 }}>
           {t('coops.title')}
         </Typography>
 
