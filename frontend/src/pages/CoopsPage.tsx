@@ -146,6 +146,7 @@ export default function CoopsPage() {
           position: 'fixed',
           bottom: { xs: 80, sm: 16 },
           right: 16,
+          zIndex: 1000,
         }}
         onClick={() => setIsModalOpen(true)}
       >
