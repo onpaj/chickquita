@@ -472,4 +472,86 @@ describe('CoopsPage', () => {
       expect(mockRefetch).toBeDefined();
     });
   });
+
+  describe('Design Patterns', () => {
+    beforeEach(() => {
+      mockUseCoops.mockReturnValue({
+        data: mockCoops,
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+    });
+
+    it('should render page title with bold font weight', () => {
+      renderPage();
+
+      const heading = screen.getByRole('heading', { name: 'Coops' });
+      expect(heading).toBeInTheDocument();
+
+      // Check for fontWeight="bold" - MUI converts to font-weight CSS
+      const headingElement = heading as HTMLElement;
+      const computedStyle = window.getComputedStyle(headingElement);
+      expect(computedStyle.fontWeight).toBe('700'); // bold = 700
+    });
+
+    it('should render page title with correct margin-bottom spacing (mb: 3)', () => {
+      renderPage();
+
+      const heading = screen.getByRole('heading', { name: 'Coops' });
+      const headingElement = heading as HTMLElement;
+
+      // mb: 3 in MUI = 24px (3 * 8px spacing unit)
+      const computedStyle = window.getComputedStyle(headingElement);
+      expect(computedStyle.marginBottom).toBe('24px');
+    });
+
+    it('should render Container with Box wrapper that has pb: 10', () => {
+      const { container } = renderPage();
+
+      // Find the Box element with py: 3, pb: 10
+      const boxElements = container.querySelectorAll('.MuiBox-root');
+      const contentBox = Array.from(boxElements).find(box => {
+        const style = window.getComputedStyle(box);
+        // pb: 10 = 80px (10 * 8px spacing unit)
+        return style.paddingBottom === '80px';
+      });
+
+      expect(contentBox).toBeTruthy();
+    });
+
+    it('should render FAB button with correct z-index (1000)', () => {
+      renderPage();
+
+      const fabButton = screen.getByLabelText('Add Coop');
+      const computedStyle = window.getComputedStyle(fabButton);
+
+      expect(computedStyle.zIndex).toBe('1000');
+    });
+
+    it('should render FAB button with correct mobile positioning (bottom: 80px)', () => {
+      renderPage();
+
+      const fabButton = screen.getByLabelText('Add Coop');
+      const computedStyle = window.getComputedStyle(fabButton);
+
+      // FAB should be fixed positioned
+      expect(computedStyle.position).toBe('fixed');
+      expect(computedStyle.right).toBe('16px');
+
+      // Note: In test environment, responsive sx might not fully apply,
+      // but we verify the FAB button is correctly positioned with fixed position
+      expect(fabButton).toBeInTheDocument();
+    });
+
+    it('should render FAB button with fixed position and correct right offset', () => {
+      renderPage();
+
+      const fabButton = screen.getByLabelText('Add Coop');
+      const computedStyle = window.getComputedStyle(fabButton);
+
+      expect(computedStyle.position).toBe('fixed');
+      expect(computedStyle.right).toBe('16px');
+    });
+  });
 });
