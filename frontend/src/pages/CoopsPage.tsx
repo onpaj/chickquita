@@ -81,7 +81,6 @@ export default function CoopsPage() {
   return (
     <Container
       maxWidth="lg"
-      sx={{ py: 3 }}
       onTouchStart={(e) => {
         const touch = e.touches[0];
         const startY = touch.clientY;
@@ -99,7 +98,7 @@ export default function CoopsPage() {
         }, { once: true });
       }}
     >
-      <Box>
+      <Box sx={{ py: 3, pb: 10 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           {t('coops.title')}
         </Typography>
