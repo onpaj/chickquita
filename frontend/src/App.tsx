@@ -42,9 +42,9 @@ function App() {
           position="sticky"
           color="default"
           elevation={1}
-          sx={{ top: 0, zIndex: 1100, height: 56 }}
+          sx={{ top: 0, zIndex: 1100, height: 64 }}
         >
-          <Toolbar sx={{ minHeight: '56px !important', px: 2 }}>
+          <Toolbar sx={{ minHeight: '64px !important', px: 2 }}>
             <Typography
               variant="h6"
               component="div"

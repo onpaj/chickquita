@@ -456,7 +456,7 @@ ENTRYPOINT ["dotnet", "Chickquita.Api.dll"]
 **No Docker Compose needed** - Just one container for production
 
 **Local Development:**
-- **Frontend:** `npm run dev` (port 5173, Vite HMR)
+- **Frontend:** `npm run dev` (port 3100, Vite HMR)
 - **Backend:** `dotnet run` (port 5000, hot reload)
 - Frontend proxies API calls to backend in dev mode
 
