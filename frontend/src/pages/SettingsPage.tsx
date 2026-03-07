@@ -16,9 +16,12 @@ import {
 import type { SelectChangeEvent } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import LogoutIcon from '@mui/icons-material/Logout';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from 'react-i18next';
 import { useClerk } from '@clerk/clerk-react';
 import { ConfirmationDialog } from '@/shared/components';
+
+const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation();
@@ -105,6 +108,21 @@ export function SettingsPage() {
               primaryTypographyProps={{ variant: 'body1', color: 'error' }}
             />
           </ListItem>
+        </CardContent>
+      </Card>
+
+      {/* About section */}
+      <Card elevation={1} sx={{ mt: 2 }}>
+        <CardContent>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+            {t('settings.about')}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <InfoOutlinedIcon color="action" />
+            <Typography variant="body2" color="text.secondary">
+              {t('settings.version')}: <strong>{appVersion}</strong>
+            </Typography>
+          </Box>
         </CardContent>
       </Card>
 

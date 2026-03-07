@@ -396,7 +396,9 @@
     "signOut": "Odhlásit se",
     "signOutConfirmTitle": "Odhlásit se?",
     "signOutConfirmMessage": "Opravdu se chcete odhlásit?",
-    "signOutConfirmButton": "Odhlásit se"
+    "signOutConfirmButton": "Odhlásit se",
+    "about": "O aplikaci",
+    "version": "Verze"
   },
   "validation": {
     "required": "Toto pole je povinné",

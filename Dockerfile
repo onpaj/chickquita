@@ -8,8 +8,10 @@ WORKDIR /app/frontend
 
 # Build args for Vite environment variables (injected at build time)
 ARG VITE_CLERK_PUBLISHABLE_KEY=
+ARG VITE_APP_VERSION=
 
 ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+ENV VITE_APP_VERSION=$VITE_APP_VERSION
 
 # Copy package files and install dependencies
 COPY frontend/package*.json ./
