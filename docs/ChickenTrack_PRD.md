@@ -1664,7 +1664,7 @@ Authorization: Bearer <clerk-jwt-token>
 ## 8. Development Milestones
 
 > **📊 IMPLEMENTATION STATUS TRACKER**
-> **Last Updated:** 2026-02-09
+> **Last Updated:** 2026-03-07
 >
 > | Milestone | Status | Implementation Notes |
 > |-----------|--------|----------------------|
@@ -1673,16 +1673,16 @@ Authorization: Bearer <clerk-jwt-token>
 > | M3: Basic Flock Creation | ✅ Complete | Flock CRUD, initial composition, history tracking |
 > | M4: Daily Egg Records | ✅ Complete | Quick-add flow, validation, same-day edit rule |
 > | M5: Purchase Tracking | ✅ Complete | Full CRUD, type filtering, autocomplete |
-> | M6: Egg Cost Calculation Dashboard | ✅ Complete | Dashboard widgets, statistics, trend indicators |
+> | M6: Egg Cost Calculation Dashboard | ✅ Complete | Dashboard widgets, real backend stats (today, weekly, cost/egg) |
 > | M7: Flock Composition Editing | ✅ Complete | Adjustment flow, delta display, confirmation dialog |
 > | M8: Chick Maturation | ✅ Complete | Maturation form, validation, history records |
-> | M9: Flock History View | ❌ Not Yet Implemented | FlockHistory table exists but no view UI |
-> | M10: Offline Mode | ❌ Not Yet Implemented | Requires service worker, IndexedDB, background sync |
-> | M11: Statistics Dashboard | ❌ Not Yet Implemented | Requires advanced charts and trend analysis |
-> | M12: PWA Installation | ❌ Not Yet Implemented | Requires manifest, service worker, install prompt |
+> | M9: Flock History View | ✅ Complete | FlockHistoryPage with timeline, delta display, editable notes |
+> | M10: Offline Mode | ✅ Complete | Workbox service worker, IndexedDB (Dexie), background sync, OfflineBanner |
+> | M11: Statistics Dashboard | ✅ Complete | 4 charts (pie, line×2, bar), date filters, flock productivity |
+> | M12: PWA Installation | ✅ Complete | vite-plugin-pwa manifest, install banner, iOS instructions, icons |
 >
-> **✅ Implemented:** M1-M8 (67% complete)
-> **❌ Pending:** M9-M12 (33% remaining)
+> **✅ Implemented:** M1-M12 (100% complete)
+> **❌ Pending:** None
 >
 > **Note:** This PRD is a living document. Milestone status reflects implementation as of the "Last Updated" date above.
 

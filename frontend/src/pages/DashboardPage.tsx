@@ -37,7 +37,7 @@ export default function DashboardPage() {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   // Check if user has any data
-  const hasData = stats && stats.flockStats.activeFlocks > 0;
+  const hasData = stats && stats.activeFlocks > 0;
 
   // Handler functions
   const handleAddDailyRecord = () => {
@@ -123,28 +123,28 @@ export default function DashboardPage() {
               >
                 {/* Today's Summary */}
                 <TodaySummaryWidget
-                  eggsToday={stats?.productionStats?.eggsToday}
+                  eggsToday={stats?.todayEggs}
                   loading={isLoading}
                 />
 
                 {/* Weekly Production */}
                 <WeeklyProductionWidget
-                  eggsThisWeek={stats?.productionStats?.eggsThisWeek}
+                  eggsThisWeek={stats?.thisWeekEggs}
                   loading={isLoading}
                 />
 
                 {/* Egg Cost Calculation */}
                 <EggCostWidget
-                  costPerEgg={stats?.costStats?.costPerEgg}
+                  costPerEgg={stats?.costPerEgg ?? undefined}
                   loading={isLoading}
                 />
 
                 {/* Flock Status */}
                 <FlockStatusWidget
-                  totalHens={stats?.flockStats.totalHens ?? 0}
-                  totalRoosters={stats?.flockStats.totalRoosters ?? 0}
-                  totalChicks={stats?.flockStats.totalChicks ?? 0}
-                  activeFlocks={stats?.flockStats.activeFlocks ?? 0}
+                  totalHens={stats?.totalHens ?? 0}
+                  totalRoosters={stats?.totalRoosters ?? 0}
+                  totalChicks={stats?.totalChicks ?? 0}
+                  activeFlocks={stats?.activeFlocks ?? 0}
                   loading={isLoading}
                 />
               </Box>
