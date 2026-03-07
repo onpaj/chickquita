@@ -21,7 +21,38 @@ public sealed class DashboardStatsDto
     public int TotalHens { get; set; }
 
     /// <summary>
+    /// Total number of roosters across all active flocks.
+    /// </summary>
+    public int TotalRoosters { get; set; }
+
+    /// <summary>
+    /// Total number of chicks across all active flocks.
+    /// </summary>
+    public int TotalChicks { get; set; }
+
+    /// <summary>
     /// Total number of animals (hens + roosters + chicks) across all active flocks.
     /// </summary>
     public int TotalAnimals { get; set; }
+
+    /// <summary>
+    /// Total eggs recorded today across all flocks.
+    /// </summary>
+    public int TodayEggs { get; set; }
+
+    /// <summary>
+    /// Total eggs recorded in the last 7 days across all flocks.
+    /// </summary>
+    public int ThisWeekEggs { get; set; }
+
+    /// <summary>
+    /// Average eggs per day in the last 7 days.
+    /// </summary>
+    public decimal AvgEggsPerDay { get; set; }
+
+    /// <summary>
+    /// Current cost per egg (all-time total costs divided by all-time total eggs).
+    /// Returns null when there is no production data.
+    /// </summary>
+    public decimal? CostPerEgg { get; set; }
 }

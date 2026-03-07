@@ -24,10 +24,10 @@ public class StatisticsRepository : IStatisticsRepository
 
     /// <summary>
     /// Gets aggregated dashboard statistics for the current tenant.
-    /// Uses two optimized queries: one for flock aggregation, one for coop count.
+    /// Includes flock counts, today's eggs, weekly eggs, and cost per egg.
     /// Tenant isolation is enforced by Row-Level Security (RLS) at the database level.
     /// </summary>
-    /// <returns>Dashboard statistics containing coops, flocks, and animal counts</returns>
+    /// <returns>Dashboard statistics containing coops, flocks, animal counts, production, and economics</returns>
     public async Task<DashboardStatsDto> GetDashboardStatsAsync()
     {
         // Optimized single-query aggregation for flocks
@@ -39,22 +39,52 @@ public class StatisticsRepository : IStatisticsRepository
             {
                 ActiveFlocks = g.Count(),
                 TotalHens = g.Sum(f => f.CurrentHens),
+                TotalRoosters = g.Sum(f => f.CurrentRoosters),
+                TotalChicks = g.Sum(f => f.CurrentChicks),
                 TotalAnimals = g.Sum(f => f.CurrentHens + f.CurrentRoosters + f.CurrentChicks)
             })
             .FirstOrDefaultAsync();
 
-        // Get count of active coops (separate query but optimized with counting)
+        // Get count of active coops
         var totalCoops = await _context.Coops
             .Where(c => c.IsActive)
             .CountAsync();
 
-        // If no flocks exist, return zero stats
+        // Today's egg production (UTC date)
+        var today = DateTime.UtcNow.Date;
+        var todayEggs = await _context.DailyRecords
+            .Where(dr => dr.RecordDate.Date == today)
+            .SumAsync(dr => (int?)dr.EggCount) ?? 0;
+
+        // This week's egg production (last 7 days including today)
+        var weekStart = today.AddDays(-6);
+        var thisWeekEggs = await _context.DailyRecords
+            .Where(dr => dr.RecordDate.Date >= weekStart && dr.RecordDate.Date <= today)
+            .SumAsync(dr => (int?)dr.EggCount) ?? 0;
+
+        var avgEggsPerDay = thisWeekEggs / 7m;
+
+        // All-time cost per egg
+        var totalCosts = await _context.Purchases
+            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
+        var totalEggs = await _context.DailyRecords
+            .SumAsync(dr => (int?)dr.EggCount) ?? 0;
+
+        decimal? costPerEgg = totalEggs > 0 ? totalCosts / totalEggs : null;
+
         return new DashboardStatsDto
         {
             TotalCoops = totalCoops,
             ActiveFlocks = flockStats?.ActiveFlocks ?? 0,
             TotalHens = flockStats?.TotalHens ?? 0,
-            TotalAnimals = flockStats?.TotalAnimals ?? 0
+            TotalRoosters = flockStats?.TotalRoosters ?? 0,
+            TotalChicks = flockStats?.TotalChicks ?? 0,
+            TotalAnimals = flockStats?.TotalAnimals ?? 0,
+            TodayEggs = todayEggs,
+            ThisWeekEggs = thisWeekEggs,
+            AvgEggsPerDay = avgEggsPerDay,
+            CostPerEgg = costPerEgg
         };
     }
 
