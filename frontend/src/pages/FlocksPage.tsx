@@ -115,7 +115,7 @@ export default function FlocksPage() {
           justifyContent: 'center',
           minHeight: '60vh',
           textAlign: 'center',
-          py: 4,
+          py: 3,
         }}
       >
         <Typography variant="h6" color="error">
@@ -140,7 +140,7 @@ export default function FlocksPage() {
           justifyContent: 'center',
           minHeight: '60vh',
           textAlign: 'center',
-          py: 4,
+          py: 3,
         }}
       >
         <Typography variant="h6" color="error" gutterBottom>
@@ -276,8 +276,8 @@ export default function FlocksPage() {
         data-testid="add-flock-fab"
         sx={{
           position: 'fixed',
-          bottom: { xs: 80, sm: 16 },
-          right: 16,
+          bottom: { xs: 10, sm: 2 },
+          right: 2,
         }}
         onClick={() => setIsCreateModalOpen(true)}
       >

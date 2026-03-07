@@ -506,15 +506,15 @@ describe('CoopsPage', () => {
       expect(computedStyle.marginBottom).toBe('24px');
     });
 
-    it('should render Container with Box wrapper that has pb: 10', () => {
+    it('should render Container with Box wrapper that has py: 3 (no double bottom padding)', () => {
       const { container } = renderPage();
 
-      // Find the Box element with py: 3, pb: 10
+      // Find the Box element with py: 3 — pb: 10 was removed to avoid double padding with App shell
       const boxElements = container.querySelectorAll('.MuiBox-root');
       const contentBox = Array.from(boxElements).find(box => {
         const style = window.getComputedStyle(box);
-        // pb: 10 = 80px (10 * 8px spacing unit)
-        return style.paddingBottom === '80px';
+        // py: 3 = 24px, and pb should NOT be 80px (old pb: 10 removed)
+        return style.paddingTop === '24px' && style.paddingBottom !== '80px';
       });
 
       expect(contentBox).toBeTruthy();
@@ -529,7 +529,7 @@ describe('CoopsPage', () => {
       expect(computedStyle.zIndex).toBe('1000');
     });
 
-    it('should render FAB button with correct mobile positioning (bottom: 80px)', () => {
+    it('should render FAB button with correct mobile positioning (bottom: xs:10, sm:2 tokens)', () => {
       renderPage();
 
       const fabButton = screen.getByLabelText('Add Coop');
@@ -537,10 +537,9 @@ describe('CoopsPage', () => {
 
       // FAB should be fixed positioned
       expect(computedStyle.position).toBe('fixed');
-      expect(computedStyle.right).toBe('16px');
+      // right: 2 MUI token (jsdom renders as 2px; in browser = 16px via theme.spacing)
+      expect(computedStyle.right).toBe('2px');
 
-      // Note: In test environment, responsive sx might not fully apply,
-      // but we verify the FAB button is correctly positioned with fixed position
       expect(fabButton).toBeInTheDocument();
     });
 
@@ -551,7 +550,8 @@ describe('CoopsPage', () => {
       const computedStyle = window.getComputedStyle(fabButton);
 
       expect(computedStyle.position).toBe('fixed');
-      expect(computedStyle.right).toBe('16px');
+      // right: 2 MUI token (jsdom renders as 2px; in browser = 16px via theme.spacing)
+      expect(computedStyle.right).toBe('2px');
     });
   });
 });

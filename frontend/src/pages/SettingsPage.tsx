@@ -36,7 +36,7 @@ export function SettingsPage() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
+    <Container maxWidth="md" sx={{ py: 3 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         {t('settings.title')}
       </Typography>

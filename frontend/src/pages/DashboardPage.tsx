@@ -89,7 +89,7 @@ export default function DashboardPage() {
 
   return (
     <Container maxWidth="lg">
-      <Box sx={{ py: 3, pb: 10 }}>
+      <Box sx={{ py: 3 }}>
         {/* Page Header */}
         <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" sx={{ mb: 3 }}>
           {t('dashboard.title')}
@@ -194,8 +194,8 @@ export default function DashboardPage() {
                 disabled={flocks.length === 0}
                 sx={{
                   position: 'fixed',
-                  bottom: 80, // Above bottom navigation (64px height + 16px spacing)
-                  right: 16,
+                  bottom: { xs: 10, sm: 2 },
+                  right: 2,
                 }}
               >
                 <AddIcon />

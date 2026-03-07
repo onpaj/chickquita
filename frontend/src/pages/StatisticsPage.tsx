@@ -4,6 +4,8 @@ import {
   Box,
   Typography,
   Paper,
+  Card,
+  CardContent,
   ToggleButtonGroup,
   ToggleButton,
   Alert,
@@ -75,14 +77,15 @@ export default function StatisticsPage() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={i18n.language}>
       <Container maxWidth="lg">
-        <Box sx={{ py: 3, pb: 10 }}>
+        <Box sx={{ py: 3 }}>
           {/* Page Header */}
           <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" sx={{ mb: 3 }}>
             {t('statistics.title')}
           </Typography>
 
           {/* Date Range Filters */}
-          <Paper sx={{ p: 2, mb: 3 }}>
+          <Card elevation={1} sx={{ mb: 3 }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CalendarTodayIcon color="action" />
@@ -152,7 +155,8 @@ export default function StatisticsPage() {
                 </Box>
               )}
             </Box>
-          </Paper>
+            </CardContent>
+          </Card>
 
           {/* Summary StatCards */}
           <Box

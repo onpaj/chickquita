@@ -155,7 +155,7 @@ export function CoopDetailPage() {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ py: 3, pb: 10 }}>
+    <Container maxWidth="sm" sx={{ py: 3 }}>
       {/* Header with Back Button */}
       <Box sx={{ mb: 3 }}>
         <IconButton

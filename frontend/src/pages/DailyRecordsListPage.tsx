@@ -121,7 +121,7 @@ export function DailyRecordsListPage() {
   const isLoading = isLoadingCoops || isLoadingRecords;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3, pb: 10 }}>
+    <Container maxWidth="lg" sx={{ py: 3 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         {t('dailyRecords.title')}
       </Typography>
