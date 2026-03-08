@@ -76,8 +76,8 @@ export default function StatisticsPage() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={i18n.language}>
-      <Container maxWidth="lg">
-        <Box sx={{ py: 3 }}>
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Box>
           {/* Page Header */}
           <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" sx={{ mb: 3 }}>
             {t('statistics.title')}

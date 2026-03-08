@@ -276,8 +276,8 @@ export default function FlocksPage() {
         data-testid="add-flock-fab"
         sx={{
           position: 'fixed',
-          bottom: { xs: 10, sm: 2 },
-          right: 2,
+          bottom: { xs: 'calc(env(safe-area-inset-bottom) + 80px)', sm: 24 },
+          right: 16,
         }}
         onClick={() => setIsCreateModalOpen(true)}
       >

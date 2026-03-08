@@ -75,7 +75,7 @@ function App() {
         </>
       )}
 
-      <Box sx={{ pb: isSignedIn ? 'calc(64px + env(safe-area-inset-bottom))' : 0, pt: bannerVisible ? '60px' : 0 }}>
+      <Box sx={{ pb: isSignedIn ? 'calc(64px + env(safe-area-inset-bottom) + 80px)' : 0, pt: bannerVisible ? '60px' : 0 }}>
         <Routes>
           <Route path="/" element={<Navigate to="/sign-up" replace />} />
           <Route path="/sign-up/*" element={<SignUpPage />} />
