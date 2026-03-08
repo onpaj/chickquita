@@ -506,18 +506,17 @@ describe('CoopsPage', () => {
       expect(computedStyle.marginBottom).toBe('24px');
     });
 
-    it('should render Container with Box wrapper that has py: 3 (no double bottom padding)', () => {
+    it('should render Container with py: 3 padding (no double bottom padding)', () => {
       const { container } = renderPage();
 
-      // Find the Box element with py: 3 — pb: 10 was removed to avoid double padding with App shell
-      const boxElements = container.querySelectorAll('.MuiBox-root');
-      const contentBox = Array.from(boxElements).find(box => {
-        const style = window.getComputedStyle(box);
-        // py: 3 = 24px, and pb should NOT be 80px (old pb: 10 removed)
+      // py: 3 is now on Container, not inner Box
+      const containerElements = container.querySelectorAll('.MuiContainer-root');
+      const contentContainer = Array.from(containerElements).find(el => {
+        const style = window.getComputedStyle(el);
         return style.paddingTop === '24px' && style.paddingBottom !== '80px';
       });
 
-      expect(contentBox).toBeTruthy();
+      expect(contentContainer).toBeTruthy();
     });
 
     it('should render FAB button with correct z-index (1000)', () => {
@@ -529,7 +528,7 @@ describe('CoopsPage', () => {
       expect(computedStyle.zIndex).toBe('1000');
     });
 
-    it('should render FAB button with correct mobile positioning (bottom: xs:10, sm:2 tokens)', () => {
+    it('should render FAB button with correct mobile positioning (right: 16px, above BottomNavigation)', () => {
       renderPage();
 
       const fabButton = screen.getByLabelText('Add Coop');
@@ -537,8 +536,8 @@ describe('CoopsPage', () => {
 
       // FAB should be fixed positioned
       expect(computedStyle.position).toBe('fixed');
-      // right: 2 MUI token (jsdom renders as 2px; in browser = 16px via theme.spacing)
-      expect(computedStyle.right).toBe('2px');
+      // right: 16px (explicit pixel value)
+      expect(computedStyle.right).toBe('16px');
 
       expect(fabButton).toBeInTheDocument();
     });
@@ -550,8 +549,8 @@ describe('CoopsPage', () => {
       const computedStyle = window.getComputedStyle(fabButton);
 
       expect(computedStyle.position).toBe('fixed');
-      // right: 2 MUI token (jsdom renders as 2px; in browser = 16px via theme.spacing)
-      expect(computedStyle.right).toBe('2px');
+      // right: 16px (explicit pixel value, visible above BottomNavigation)
+      expect(computedStyle.right).toBe('16px');
     });
   });
 });
