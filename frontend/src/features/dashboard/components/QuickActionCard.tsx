@@ -57,8 +57,8 @@ export function QuickActionCard({
             {/* Icon */}
             <Box
               sx={{
-                width: 48,
-                height: 48,
+                width: 6,
+                height: 6,
                 borderRadius: 2,
                 backgroundColor: 'primary.light',
                 display: 'flex',

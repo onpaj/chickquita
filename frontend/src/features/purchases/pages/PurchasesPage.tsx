@@ -122,7 +122,7 @@ export function PurchasesPage() {
   }));
 
   return (
-    <Container maxWidth="lg" sx={{ pb: 10, pt: 3 }}>
+    <Container maxWidth="lg" sx={{ pt: 3 }}>
       {/* Page Header */}
       <Box
         sx={{
@@ -163,8 +163,8 @@ export function PurchasesPage() {
           aria-label={t('purchases.addPurchase')}
           sx={{
             position: 'fixed',
-            bottom: { xs: 80, sm: 16 },
-            right: 16,
+            bottom: { xs: 10, sm: 2 },
+            right: 2,
             minWidth: 56,
             minHeight: 56,
           }}

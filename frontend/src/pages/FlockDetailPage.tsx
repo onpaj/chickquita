@@ -137,7 +137,7 @@ export function FlockDetailPage() {
   const totalAnimals = flock.currentHens + flock.currentRoosters + flock.currentChicks;
 
   return (
-    <Container maxWidth="sm" sx={{ py: 3, pb: 10 }}>
+    <Container maxWidth="sm" sx={{ py: 3 }}>
       {/* Header with Back Button */}
       <Box sx={{ mb: 3 }}>
         <IconButton

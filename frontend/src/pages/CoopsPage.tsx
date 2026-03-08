@@ -54,7 +54,7 @@ export default function CoopsPage() {
           justifyContent: 'center',
           minHeight: '60vh',
           textAlign: 'center',
-          py: 4,
+          py: 3,
         }}
       >
         <Typography variant="h6" color="error" gutterBottom>
@@ -81,6 +81,7 @@ export default function CoopsPage() {
   return (
     <Container
       maxWidth="lg"
+      sx={{ py: 3 }}
       onTouchStart={(e) => {
         const touch = e.touches[0];
         const startY = touch.clientY;
@@ -98,7 +99,7 @@ export default function CoopsPage() {
         }, { once: true });
       }}
     >
-      <Box sx={{ py: 3, pb: 10 }}>
+      <Box>
         <Typography variant="h4" component="h1" gutterBottom fontWeight="bold" sx={{ mb: 3 }}>
           {t('coops.title')}
         </Typography>
@@ -144,7 +145,7 @@ export default function CoopsPage() {
         aria-label={t('coops.addCoop')}
         sx={{
           position: 'fixed',
-          bottom: { xs: 80, sm: 16 },
+          bottom: { xs: 'calc(env(safe-area-inset-bottom) + 80px)', sm: 24 },
           right: 16,
           zIndex: 1000,
         }}
