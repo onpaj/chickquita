@@ -64,11 +64,14 @@ function CostPerEggTrendTooltip({ active, payload }: CostPerEggTrendTooltipProps
 }
 
 export function CostPerEggTrendChart({ data }: CostPerEggTrendChartProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
-  // Format date for display
+  // Format date for display — unambiguous, locale-aware
   const formatDate = (dateString: string) => {
-    return dayjs(dateString).format('DD/MM');
+    const d = dayjs(dateString);
+    return i18n.language === 'cs'
+      ? d.format('D. M. YYYY')
+      : d.format('D MMM YYYY');
   };
 
   // Calculate trend (compare first and last values)
