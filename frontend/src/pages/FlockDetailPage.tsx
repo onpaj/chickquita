@@ -12,11 +12,12 @@ import {
   Grid,
   Divider,
   Tooltip,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Archive as ArchiveIcon,
-  History as HistoryIcon,
   Pets as PetsIcon,
   Female as FemaleIcon,
   Male as MaleIcon,
@@ -29,6 +30,8 @@ import { useArchiveFlock } from '../features/flocks/hooks/useFlocks';
 import { EditFlockModal } from '../features/flocks/components/EditFlockModal';
 import { ArchiveFlockDialog } from '../features/flocks/components/ArchiveFlockDialog';
 import { MatureChicksModal } from '../features/flocks/components/MatureChicksModal';
+import { FlockHistoryTimeline } from '../features/flocks/components/FlockHistoryTimeline';
+import { useFlockHistory } from '../features/flocks/hooks/useFlockHistory';
 import { ResourceNotFound } from '../components/ResourceNotFound';
 import { processApiError, ErrorType } from '../lib/errors';
 import { useErrorHandler } from '../hooks/useErrorHandler';
@@ -48,10 +51,13 @@ export function FlockDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isMatureChicksModalOpen, setIsMatureChicksModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   const { setAppBar, resetAppBar } = useAppBar();
 
+  const { data: history, isLoading: isHistoryLoading, error: historyError } = useFlockHistory(flockId || '');
+
   const handleBack = useCallback(() => {
-    navigate(`/coops/${coopId}/flocks`);
+    navigate(`/coops/${coopId}`);
   }, [navigate, coopId]);
 
   useEffect(() => {
@@ -84,7 +90,7 @@ export function FlockDetailPage() {
         onSuccess: () => {
           showSuccess(t('flocks.archiveSuccess'));
           setIsArchiveDialogOpen(false);
-          navigate(`/coops/${coopId}/flocks`);
+          navigate(`/coops/${coopId}`);
         },
         onError: (error: Error) => {
           setIsArchiveDialogOpen(false);
@@ -92,10 +98,6 @@ export function FlockDetailPage() {
         },
       }
     );
-  };
-
-  const handleViewHistory = () => {
-    navigate(`/coops/${coopId}/flocks/${flockId}/history`);
   };
 
   if (isLoading) {
@@ -110,7 +112,7 @@ export function FlockDetailPage() {
         <ResourceNotFound
           resourceType={t('flocks.title')}
           translationKey="flocks.flockNotFound"
-          backPath={`/coops/${coopId}/flocks`}
+          backPath={`/coops/${coopId}`}
           backButtonTranslationKey="errors.backToList"
         />
       );
@@ -136,170 +138,179 @@ export function FlockDetailPage() {
 
   return (
     <Container maxWidth="sm" sx={{ py: 3 }}>
-      {/* Flock Details Card */}
       <Paper elevation={2} sx={{ p: 3 }}>
         <Stack spacing={3}>
-          {/* Flock Identifier */}
-          <Box>
-            <Typography variant="overline" color="text.secondary">
-              {t('flocks.identifier')}
-            </Typography>
-            <Typography variant="h5" component="h2">
-              {flock.identifier}
-            </Typography>
-          </Box>
+          {/* Tabs */}
+          <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} sx={{ mb: -1 }}>
+            <Tab label={t('flocks.tabs.info')} />
+            <Tab label={t('flocks.tabs.history')} />
+          </Tabs>
 
-          {/* Status */}
-          <Box>
-            <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              {t('flocks.status')}
-            </Typography>
-            <Chip
-              label={flock.isActive ? t('flocks.active') : t('flocks.archived')}
-              color={flock.isActive ? 'success' : 'default'}
-              size="medium"
-              sx={{ fontWeight: 600, px: 1 }}
-            />
-          </Box>
+          {activeTab === 0 && (
+            <>
+              {/* Flock Identifier */}
+              <Box>
+                <Typography variant="overline" color="text.secondary">
+                  {t('flocks.identifier')}
+                </Typography>
+                <Typography variant="h5" component="h2">
+                  {flock.identifier}
+                </Typography>
+              </Box>
 
-          {/* Hatch Date */}
-          {flock.hatchDate && (
-            <Box>
-              <Typography variant="overline" color="text.secondary">
-                {t('flocks.hatchDate')}
-              </Typography>
-              <Typography variant="body1">
-                {formatDate(flock.hatchDate)}
-              </Typography>
-            </Box>
-          )}
-
-          <Divider />
-
-          {/* Current Composition */}
-          <Box>
-            <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-              {t('flocks.currentComposition')}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 6, sm: 3 }}>
-                <StatCard
-                  icon={<FemaleIcon />}
-                  label={t('flocks.hens')}
-                  value={flock.currentHens}
-                  color="error"
+              {/* Status */}
+              <Box>
+                <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                  {t('flocks.status')}
+                </Typography>
+                <Chip
+                  label={flock.isActive ? t('flocks.active') : t('flocks.archived')}
+                  color={flock.isActive ? 'success' : 'default'}
+                  size="medium"
+                  sx={{ fontWeight: 600, px: 1 }}
                 />
-              </Grid>
-              <Grid size={{ xs: 6, sm: 3 }}>
-                <StatCard
-                  icon={<MaleIcon />}
-                  label={t('flocks.roosters')}
-                  value={flock.currentRoosters}
-                  color="info"
-                />
-              </Grid>
-              <Grid size={{ xs: 6, sm: 3 }}>
-                <StatCard
-                  icon={<EggAltIcon />}
-                  label={t('flocks.chicks')}
-                  value={flock.currentChicks}
-                  color="warning"
-                />
-              </Grid>
-              <Grid size={{ xs: 6, sm: 3 }}>
-                <StatCard
-                  icon={<Diversity3Icon />}
-                  label={t('flocks.total')}
-                  value={totalAnimals}
-                  color="primary"
-                />
-              </Grid>
-            </Grid>
-          </Box>
+              </Box>
 
-          <Divider />
+              {/* Hatch Date */}
+              {flock.hatchDate && (
+                <Box>
+                  <Typography variant="overline" color="text.secondary">
+                    {t('flocks.hatchDate')}
+                  </Typography>
+                  <Typography variant="body1">
+                    {formatDate(flock.hatchDate)}
+                  </Typography>
+                </Box>
+              )}
 
-          {/* Created Date */}
-          {flock.createdAt && (
-            <Box>
-              <Typography variant="overline" color="text.secondary">
-                {t('flocks.createdAt', { date: '' }).replace(/\s*$/, '')}
-              </Typography>
-              <Typography variant="body2">
-                {formatDateTime(flock.createdAt)}
-              </Typography>
-            </Box>
-          )}
+              <Divider />
 
-          {/* Updated Date */}
-          {flock.updatedAt && (
-            <Box>
-              <Typography variant="overline" color="text.secondary">
-                {t('flocks.updatedAt', { date: '' }).replace(/\s*$/, '')}
-              </Typography>
-              <Typography variant="body2">
-                {formatDateTime(flock.updatedAt)}
-              </Typography>
-            </Box>
-          )}
+              {/* Current Composition */}
+              <Box>
+                <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                  {t('flocks.currentComposition')}
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 6, sm: 3 }}>
+                    <StatCard
+                      icon={<FemaleIcon />}
+                      label={t('flocks.hens')}
+                      value={flock.currentHens}
+                      color="error"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 3 }}>
+                    <StatCard
+                      icon={<MaleIcon />}
+                      label={t('flocks.roosters')}
+                      value={flock.currentRoosters}
+                      color="info"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 3 }}>
+                    <StatCard
+                      icon={<EggAltIcon />}
+                      label={t('flocks.chicks')}
+                      value={flock.currentChicks}
+                      color="warning"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 3 }}>
+                    <StatCard
+                      icon={<Diversity3Icon />}
+                      label={t('flocks.total')}
+                      value={totalAnimals}
+                      color="primary"
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
 
-          {/* Action Buttons */}
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={2}
-            sx={{ pt: 2 }}
-          >
-            <Button
-              variant="contained"
-              startIcon={<EditIcon />}
-              onClick={handleEdit}
-              disabled={!flock.isActive}
-              sx={{ width: { xs: '100%', md: 'auto' } }}
-            >
-              {t('common.edit')}
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<ArchiveIcon />}
-              onClick={handleArchive}
-              disabled={!flock.isActive || isArchiving}
-              sx={{ width: { xs: '100%', md: 'auto' } }}
-            >
-              {t('flocks.archiveFlock')}
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<HistoryIcon />}
-              onClick={handleViewHistory}
-              sx={{ width: { xs: '100%', md: 'auto' } }}
-            >
-              {t('flocks.viewHistory')}
-            </Button>
-            <Tooltip
-              title={
-                !flock.isActive
-                  ? t('flocks.matureChicks.disabledInactive')
-                  : flock.currentChicks === 0
-                    ? t('flocks.matureChicks.disabledNoChicks')
-                    : ''
-              }
-              disableHoverListener={flock.isActive && flock.currentChicks > 0}
-              disableFocusListener={flock.isActive && flock.currentChicks > 0}
-              disableTouchListener={flock.isActive && flock.currentChicks > 0}
-            >
-              <span>
+              <Divider />
+
+              {/* Created Date */}
+              {flock.createdAt && (
+                <Box>
+                  <Typography variant="overline" color="text.secondary">
+                    {t('flocks.createdAt', { date: '' }).replace(/\s*$/, '')}
+                  </Typography>
+                  <Typography variant="body2">
+                    {formatDateTime(flock.createdAt)}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Updated Date */}
+              {flock.updatedAt && (
+                <Box>
+                  <Typography variant="overline" color="text.secondary">
+                    {t('flocks.updatedAt', { date: '' }).replace(/\s*$/, '')}
+                  </Typography>
+                  <Typography variant="body2">
+                    {formatDateTime(flock.updatedAt)}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Action Buttons */}
+              <Stack
+                direction={{ xs: 'column', md: 'row' }}
+                spacing={2}
+                sx={{ pt: 2 }}
+              >
                 <Button
-                  variant="outlined"
-                  startIcon={<PetsIcon />}
-                  onClick={() => setIsMatureChicksModalOpen(true)}
-                  disabled={!flock.isActive || flock.currentChicks === 0}
+                  variant="contained"
+                  startIcon={<EditIcon />}
+                  onClick={handleEdit}
+                  disabled={!flock.isActive}
                   sx={{ width: { xs: '100%', md: 'auto' } }}
                 >
-                  {t('flocks.matureChicks.action')}
+                  {t('common.edit')}
                 </Button>
-              </span>
-            </Tooltip>
-          </Stack>
+                <Button
+                  variant="outlined"
+                  startIcon={<ArchiveIcon />}
+                  onClick={handleArchive}
+                  disabled={!flock.isActive || isArchiving}
+                  sx={{ width: { xs: '100%', md: 'auto' } }}
+                >
+                  {t('flocks.archiveFlock')}
+                </Button>
+                <Tooltip
+                  title={
+                    !flock.isActive
+                      ? t('flocks.matureChicks.disabledInactive')
+                      : flock.currentChicks === 0
+                        ? t('flocks.matureChicks.disabledNoChicks')
+                        : ''
+                  }
+                  disableHoverListener={flock.isActive && flock.currentChicks > 0}
+                  disableFocusListener={flock.isActive && flock.currentChicks > 0}
+                  disableTouchListener={flock.isActive && flock.currentChicks > 0}
+                >
+                  <span>
+                    <Button
+                      variant="outlined"
+                      startIcon={<PetsIcon />}
+                      onClick={() => setIsMatureChicksModalOpen(true)}
+                      disabled={!flock.isActive || flock.currentChicks === 0}
+                      sx={{ width: { xs: '100%', md: 'auto' } }}
+                    >
+                      {t('flocks.matureChicks.action')}
+                    </Button>
+                  </span>
+                </Tooltip>
+              </Stack>
+            </>
+          )}
+
+          {activeTab === 1 && (
+            <FlockHistoryTimeline
+              history={history || []}
+              loading={isHistoryLoading}
+              error={historyError}
+            />
+          )}
         </Stack>
       </Paper>
 

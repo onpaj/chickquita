@@ -153,6 +153,10 @@
     "updatedAt": "Updated {{date}}",
     "flockNotFound": "Flock not found",
     "viewHistory": "View History",
+    "tabs": {
+      "info": "Info",
+      "history": "History"
+    },
     "flockCardAriaLabel": "Flock {{identifier}} in coop {{coopName}}",
     "belongsToCoopAriaLabel": "Belongs to coop {{coopName}}",
     "form": {

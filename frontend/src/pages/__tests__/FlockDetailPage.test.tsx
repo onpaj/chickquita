@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContext, type ToastContextType } from '../../contexts/ToastContext';
@@ -50,6 +51,8 @@ vi.mock('react-i18next', () => ({
         'flocks.archiveFlock': 'Archive',
         'flocks.archiveSuccess': 'Archived!',
         'flocks.viewHistory': 'History',
+        'flocks.tabs.info': 'Info',
+        'flocks.tabs.history': 'History',
         'flocks.flockNotFound': 'Not found',
         'flocks.matureChicks.action': 'Mature Chicks',
         'flocks.matureChicks.disabledInactive': 'Inactive',
@@ -82,6 +85,10 @@ vi.mock('../../features/flocks/hooks/useFlocks', () => ({
   useArchiveFlock: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
 }));
 
+vi.mock('../../features/flocks/hooks/useFlockHistory', () => ({
+  useFlockHistory: vi.fn(() => ({ data: [], isLoading: false, error: null })),
+}));
+
 vi.mock('../../hooks/useErrorHandler', () => ({
   useErrorHandler: () => ({ handleError: vi.fn() }),
 }));
@@ -94,6 +101,9 @@ vi.mock('../../features/flocks/components/ArchiveFlockDialog', () => ({
 }));
 vi.mock('../../features/flocks/components/MatureChicksModal', () => ({
   MatureChicksModal: () => null,
+}));
+vi.mock('../../features/flocks/components/FlockHistoryTimeline', () => ({
+  FlockHistoryTimeline: () => <div data-testid="flock-history-timeline" />,
 }));
 vi.mock('../../components/ResourceNotFound', () => ({
   ResourceNotFound: ({ translationKey }: { translationKey: string }) => (
@@ -160,10 +170,29 @@ describe('FlockDetailPage', () => {
     expect(backButtons).toHaveLength(0);
   });
 
-  it('renders action buttons', () => {
+  it('renders Info and History tabs', () => {
+    renderPage();
+    expect(screen.getByRole('tab', { name: 'Info' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'History' })).toBeInTheDocument();
+  });
+
+  it('renders action buttons on Info tab', () => {
     renderPage();
     expect(screen.getByText('Edit')).toBeInTheDocument();
     expect(screen.getByText('Archive')).toBeInTheDocument();
-    expect(screen.getByText('History')).toBeInTheDocument();
+  });
+
+  it('shows history timeline when History tab is clicked', async () => {
+    renderPage();
+    const historyTab = screen.getByRole('tab', { name: 'History' });
+    await userEvent.click(historyTab);
+    expect(screen.getByTestId('flock-history-timeline')).toBeInTheDocument();
+  });
+
+  it('onBack navigates to /coops/:coopId', () => {
+    renderPage();
+    const callArgs = mockSetAppBar.mock.calls[0][0];
+    callArgs.onBack();
+    expect(mockNavigate).toHaveBeenCalledWith('/coops/coop-1');
   });
 });

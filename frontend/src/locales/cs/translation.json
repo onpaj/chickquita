@@ -153,6 +153,10 @@
     "updatedAt": "Aktualizováno {{date}}",
     "flockNotFound": "Hejno nenalezeno",
     "viewHistory": "Zobrazit historii",
+    "tabs": {
+      "info": "Informace",
+      "history": "Historie"
+    },
     "flockCardAriaLabel": "Hejno {{identifier}} v kurníku {{coopName}}",
     "belongsToCoopAriaLabel": "Patří do kurníku {{coopName}}",
     "form": {
