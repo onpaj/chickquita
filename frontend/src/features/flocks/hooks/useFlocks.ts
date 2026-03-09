@@ -104,6 +104,7 @@ export function useCreateFlock() {
       queryClient.invalidateQueries({
         queryKey: ['flocks', variables.coopId]
       });
+      queryClient.invalidateQueries({ queryKey: ['flocks', 'all'] });
     },
   });
 }
@@ -132,6 +133,7 @@ export function useUpdateFlock() {
       queryClient.invalidateQueries({
         queryKey: ['flocks', variables.coopId, variables.data.flockId]
       });
+      queryClient.invalidateQueries({ queryKey: ['flocks', 'all'] });
       showSuccess(
         t('flocks.update.success'),
         'flocks.update.success'
@@ -194,6 +196,7 @@ export function useArchiveFlock() {
       queryClient.invalidateQueries({
         queryKey: ['flocks', variables.coopId, variables.flockId]
       });
+      queryClient.invalidateQueries({ queryKey: ['flocks', 'all'] });
       showSuccess(
         t('flocks.archive.success'),
         'flocks.archive.success'
