@@ -11,16 +11,23 @@ namespace Chickquita.Infrastructure.Repositories;
 public class PurchaseRepository : IPurchaseRepository
 {
     private readonly ApplicationDbContext _context;
+    private readonly ICurrentUserService _currentUserService;
 
-    public PurchaseRepository(ApplicationDbContext context)
+    public PurchaseRepository(ApplicationDbContext context, ICurrentUserService currentUserService)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
     }
+
+    private Guid GetTenantId() =>
+        _currentUserService.TenantId ?? throw new InvalidOperationException("No tenant context");
 
     /// <inheritdoc />
     public async Task<List<Purchase>> GetAllAsync()
     {
+        var tenantId = GetTenantId();
         return await _context.Purchases
+            .Where(p => p.TenantId == tenantId)
             .Include(p => p.Coop)
             .OrderByDescending(p => p.PurchaseDate)
             .ToListAsync();
@@ -33,7 +40,9 @@ public class PurchaseRepository : IPurchaseRepository
         PurchaseType? type = null,
         Guid? coopId = null)
     {
+        var tenantId = GetTenantId();
         var query = _context.Purchases
+            .Where(p => p.TenantId == tenantId)
             .Include(p => p.Coop)
             .AsQueryable();
 
@@ -70,7 +79,9 @@ public class PurchaseRepository : IPurchaseRepository
     /// <inheritdoc />
     public async Task<Purchase?> GetByIdAsync(Guid id)
     {
+        var tenantId = GetTenantId();
         return await _context.Purchases
+            .Where(p => p.TenantId == tenantId)
             .Include(p => p.Coop)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
@@ -82,7 +93,9 @@ public class PurchaseRepository : IPurchaseRepository
         var startDateUtc = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
         var endDateUtc = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
 
+        var tenantId = GetTenantId();
         return await _context.Purchases
+            .Where(p => p.TenantId == tenantId)
             .Include(p => p.Coop)
             .Where(p => p.PurchaseDate >= startDateUtc && p.PurchaseDate <= endDateUtc)
             .OrderByDescending(p => p.PurchaseDate)
@@ -92,7 +105,9 @@ public class PurchaseRepository : IPurchaseRepository
     /// <inheritdoc />
     public async Task<List<Purchase>> GetByTypeAsync(PurchaseType type)
     {
+        var tenantId = GetTenantId();
         return await _context.Purchases
+            .Where(p => p.TenantId == tenantId)
             .Include(p => p.Coop)
             .Where(p => p.Type == type)
             .OrderByDescending(p => p.PurchaseDate)
@@ -102,7 +117,9 @@ public class PurchaseRepository : IPurchaseRepository
     /// <inheritdoc />
     public async Task<List<string>> GetDistinctNamesAsync()
     {
+        var tenantId = GetTenantId();
         return await _context.Purchases
+            .Where(p => p.TenantId == tenantId)
             .Select(p => p.Name)
             .Distinct()
             .OrderBy(n => n)
@@ -118,9 +135,10 @@ public class PurchaseRepository : IPurchaseRepository
         }
 
         var lowerQuery = query.ToLower();
+        var tenantId = GetTenantId();
 
         return await _context.Purchases
-            .Where(p => p.Name.ToLower().Contains(lowerQuery))
+            .Where(p => p.TenantId == tenantId && p.Name.ToLower().Contains(lowerQuery))
             .Select(p => p.Name)
             .Distinct()
             .OrderBy(n => n)

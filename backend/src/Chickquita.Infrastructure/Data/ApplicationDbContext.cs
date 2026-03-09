@@ -1,3 +1,4 @@
+using Chickquita.Application.Interfaces;
 using Chickquita.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,13 +6,18 @@ namespace Chickquita.Infrastructure.Data;
 
 /// <summary>
 /// Application database context for Chickquita.
-/// Implements multi-tenancy with Row-Level Security (RLS) support.
+/// Implements multi-tenancy with Row-Level Security (RLS) support and EF Core global query filters.
 /// </summary>
 public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    private readonly ICurrentUserService _currentUserService;
+
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options,
+        ICurrentUserService currentUserService)
         : base(options)
     {
+        _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
     }
 
     /// <summary>
@@ -50,6 +56,15 @@ public class ApplicationDbContext : DbContext
 
         // Apply all entity configurations from the current assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+        // Global query filters for tenant isolation — evaluated at query time via _currentUserService.
+        // These act as a defense-in-depth layer complementing PostgreSQL RLS.
+        // When TenantId is null (no active request context), queries return no rows — this is intentional.
+        modelBuilder.Entity<Coop>().HasQueryFilter(c => c.TenantId == _currentUserService.TenantId);
+        modelBuilder.Entity<Flock>().HasQueryFilter(f => f.TenantId == _currentUserService.TenantId);
+        modelBuilder.Entity<FlockHistory>().HasQueryFilter(h => h.TenantId == _currentUserService.TenantId);
+        modelBuilder.Entity<DailyRecord>().HasQueryFilter(d => d.TenantId == _currentUserService.TenantId);
+        modelBuilder.Entity<Purchase>().HasQueryFilter(p => p.TenantId == _currentUserService.TenantId);
     }
 
     /// <summary>

@@ -1,14 +1,18 @@
+using System.Data.Common;
 using Chickquita.Application.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace Chickquita.Infrastructure.Data.Interceptors;
 
 /// <summary>
-/// EF Core interceptor that sets the PostgreSQL RLS context before SaveChanges operations
+/// EF Core interceptor that sets the PostgreSQL RLS tenant context on every
+/// database connection before any command (SELECT or write) is executed on it.
+///
+/// Extends DbConnectionInterceptor instead of SaveChangesInterceptor so that
+/// set_tenant_context() is called before reads, not only before writes.
 /// </summary>
-public class TenantInterceptor : SaveChangesInterceptor
+public class TenantInterceptor : DbConnectionInterceptor
 {
     private readonly ITenantService _tenantService;
     private readonly ILogger<TenantInterceptor> _logger;
@@ -19,34 +23,26 @@ public class TenantInterceptor : SaveChangesInterceptor
         _logger = logger;
     }
 
-    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
-        DbContextEventData eventData,
-        InterceptionResult<int> result,
+    public override async Task ConnectionOpenedAsync(
+        DbConnection connection,
+        ConnectionEndEventData eventData,
         CancellationToken cancellationToken = default)
     {
-        if (eventData.Context is not null)
-        {
-            await SetTenantContextAsync(eventData.Context, cancellationToken);
-        }
-
-        return await base.SavingChangesAsync(eventData, result, cancellationToken);
+        await SetTenantContextAsync(connection, cancellationToken);
+        await base.ConnectionOpenedAsync(connection, eventData, cancellationToken);
     }
 
-    public override InterceptionResult<int> SavingChanges(
-        DbContextEventData eventData,
-        InterceptionResult<int> result)
+    public override void ConnectionOpened(
+        DbConnection connection,
+        ConnectionEndEventData eventData)
     {
-        if (eventData.Context is not null)
-        {
-            SetTenantContextAsync(eventData.Context, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult();
-        }
-
-        return base.SavingChanges(eventData, result);
+        SetTenantContextAsync(connection, CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+        base.ConnectionOpened(connection, eventData);
     }
 
-    private async Task SetTenantContextAsync(DbContext context, CancellationToken cancellationToken)
+    private async Task SetTenantContextAsync(DbConnection connection, CancellationToken cancellationToken)
     {
         var tenantId = _tenantService.GetCurrentTenantId();
 
@@ -54,10 +50,13 @@ public class TenantInterceptor : SaveChangesInterceptor
         {
             _logger.LogDebug("Setting RLS context for tenant: {TenantId}", tenantId.Value);
 
-            await context.Database.ExecuteSqlRawAsync(
-                "SELECT set_tenant_context({0})",
-                new object[] { tenantId.Value },
-                cancellationToken);
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT set_tenant_context(@tenantId)";
+            var param = cmd.CreateParameter();
+            param.ParameterName = "tenantId";
+            param.Value = tenantId.Value;
+            cmd.Parameters.Add(param);
+            await cmd.ExecuteNonQueryAsync(cancellationToken);
         }
         else
         {

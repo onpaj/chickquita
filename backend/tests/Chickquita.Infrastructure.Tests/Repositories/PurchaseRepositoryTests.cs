@@ -1,9 +1,11 @@
+using Chickquita.Application.Interfaces;
 using Chickquita.Domain.Entities;
 using Chickquita.Infrastructure.Data;
 using Chickquita.Infrastructure.Repositories;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace Chickquita.Infrastructure.Tests.Repositories;
@@ -31,13 +33,16 @@ public class PurchaseRepositoryTests : IDisposable
             .UseSqlite(_connection)
             .Options;
 
-        _dbContext = new ApplicationDbContext(options);
-        _dbContext.Database.EnsureCreated();
-
-        _repository = new PurchaseRepository(_dbContext);
-
         // Seed test data
         _tenantId = Guid.NewGuid();
+
+        var mockCurrentUserService = new Mock<ICurrentUserService>();
+        mockCurrentUserService.Setup(x => x.TenantId).Returns(_tenantId);
+
+        _dbContext = new ApplicationDbContext(options, mockCurrentUserService.Object);
+        _dbContext.Database.EnsureCreated();
+
+        _repository = new PurchaseRepository(_dbContext, mockCurrentUserService.Object);
         var tenant = Tenant.Create("clerk_user_test", "test@example.com");
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         _dbContext.Tenants.Add(tenant);
@@ -499,10 +504,10 @@ public class PurchaseRepositoryTests : IDisposable
         _dbContext.Purchases.AddRange(purchase1, purchase2);
         await _dbContext.SaveChangesAsync();
 
-        // Act - This would normally be filtered by RLS, but in tests we see all data
-        var allPurchases = await _dbContext.Purchases.ToListAsync();
+        // Act - Use IgnoreQueryFilters to bypass global tenant filter and verify raw DB state
+        var allPurchases = await _dbContext.Purchases.IgnoreQueryFilters().ToListAsync();
 
-        // Assert - Verify both purchases exist in the database (RLS would filter in production)
+        // Assert - Both purchases exist in the database; global query filter (not tested here) handles isolation
         allPurchases.Should().HaveCount(2);
         allPurchases.Should().Contain(p => p.TenantId == _tenantId);
         allPurchases.Should().Contain(p => p.TenantId == tenant2Id);

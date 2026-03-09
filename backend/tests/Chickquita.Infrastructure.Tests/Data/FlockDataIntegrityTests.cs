@@ -1,8 +1,10 @@
+using Chickquita.Application.Interfaces;
 using Chickquita.Domain.Entities;
 using Chickquita.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace Chickquita.Infrastructure.Tests.Data;
@@ -29,11 +31,14 @@ public class FlockDataIntegrityTests : IDisposable
             .UseSqlite(_connection)
             .Options;
 
-        _dbContext = new ApplicationDbContext(options);
-        _dbContext.Database.EnsureCreated();
-
         // Seed test data
         _tenantId = Guid.NewGuid();
+
+        var mockCurrentUserService = new Mock<ICurrentUserService>();
+        mockCurrentUserService.Setup(x => x.TenantId).Returns(_tenantId);
+
+        _dbContext = new ApplicationDbContext(options, mockCurrentUserService.Object);
+        _dbContext.Database.EnsureCreated();
         var tenant = Tenant.Create("clerk_user_test", "test@example.com");
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         _dbContext.Tenants.Add(tenant);
