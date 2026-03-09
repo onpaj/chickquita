@@ -175,6 +175,8 @@
       "sumError": "Součet slepic a kohoutů musí být {{count}}",
       "confirm": "Potvrdit dospění",
       "action": "Dospět kuřata",
+      "disabledNoChicks": "Přidejte kuřata do hejna, abyste mohli použít tuto funkci",
+      "disabledInactive": "Nelze provést u archivovaného hejna",
       "success": "Kuřata úspěšně dospěla",
       "error": "Nepodařilo se provést dospění kuřat"
     },

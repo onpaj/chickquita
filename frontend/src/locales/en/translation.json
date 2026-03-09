@@ -175,6 +175,8 @@
       "sumError": "Sum of hens and roosters must equal {{count}}",
       "confirm": "Confirm Maturation",
       "action": "Mature Chicks",
+      "disabledNoChicks": "Add chicks to your flock to use this feature",
+      "disabledInactive": "Cannot perform this action on an archived flock",
       "success": "Chicks matured successfully",
       "error": "Failed to mature chicks"
     },

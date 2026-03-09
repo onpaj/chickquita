@@ -12,6 +12,7 @@ import {
   Grid,
   IconButton,
   Divider,
+  Tooltip,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -296,15 +297,30 @@ export function FlockDetailPage() {
             >
               {t('flocks.viewHistory')}
             </Button>
-            <Button
-              variant="outlined"
-              startIcon={<PetsIcon />}
-              onClick={() => setIsMatureChicksModalOpen(true)}
-              disabled={!flock.isActive || flock.currentChicks === 0}
-              sx={{ width: { xs: '100%', md: 'auto' } }}
+            <Tooltip
+              title={
+                !flock.isActive
+                  ? t('flocks.matureChicks.disabledInactive')
+                  : flock.currentChicks === 0
+                    ? t('flocks.matureChicks.disabledNoChicks')
+                    : ''
+              }
+              disableHoverListener={flock.isActive && flock.currentChicks > 0}
+              disableFocusListener={flock.isActive && flock.currentChicks > 0}
+              disableTouchListener={flock.isActive && flock.currentChicks > 0}
             >
-              {t('flocks.matureChicks.action')}
-            </Button>
+              <span>
+                <Button
+                  variant="outlined"
+                  startIcon={<PetsIcon />}
+                  onClick={() => setIsMatureChicksModalOpen(true)}
+                  disabled={!flock.isActive || flock.currentChicks === 0}
+                  sx={{ width: { xs: '100%', md: 'auto' } }}
+                >
+                  {t('flocks.matureChicks.action')}
+                </Button>
+              </span>
+            </Tooltip>
           </Stack>
         </Stack>
       </Paper>
