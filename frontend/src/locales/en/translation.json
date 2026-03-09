@@ -39,7 +39,8 @@
     "purchases": "Purchases",
     "dailyRecords": "Daily Records",
     "statistics": "Statistics",
-    "settings": "Settings"
+    "settings": "Settings",
+    "records": "Records"
   },
   "dashboard": {
     "title": "Dashboard",

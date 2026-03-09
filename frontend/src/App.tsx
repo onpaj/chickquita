@@ -3,13 +3,12 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import SignUpPage from './pages/SignUpPage'
 import SignInPage from './pages/SignInPage'
 import DashboardPage from './pages/DashboardPage'
-import StatisticsPage from './pages/StatisticsPage'
 import CoopsPage from './pages/CoopsPage'
 import { CoopDetailPage } from './pages/CoopDetailPage'
 import FlocksPage from './pages/FlocksPage'
 import { FlockDetailPage } from './pages/FlockDetailPage'
 import { FlockHistoryPage } from './features/flocks/components/FlockHistoryPage'
-import { DailyRecordsListPage } from './pages/DailyRecordsListPage'
+import { RecordsPage } from './pages/RecordsPage'
 import { PurchasesPage } from './features/purchases/pages/PurchasesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -90,9 +89,13 @@ function App() {
           />
           <Route
             path="/statistics"
+            element={<Navigate to="/records/stats" replace />}
+          />
+          <Route
+            path="/records/*"
             element={
               <ProtectedRoute>
-                <StatisticsPage />
+                <RecordsPage />
               </ProtectedRoute>
             }
           />
@@ -138,11 +141,7 @@ function App() {
           />
           <Route
             path="/daily-records"
-            element={
-              <ProtectedRoute>
-                <DailyRecordsListPage />
-              </ProtectedRoute>
-            }
+            element={<Navigate to="/records/list" replace />}
           />
           <Route
             path="/purchases"
