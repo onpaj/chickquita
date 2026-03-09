@@ -70,6 +70,8 @@ vi.mock('react-i18next', () => ({
     t: (key: string, params?: Record<string, unknown>) => {
       const translations: Record<string, string> = {
         'dailyRecords.title': 'Daily Records',
+        'fab.addRecord': 'Add Record',
+        'fab.disabledTooltip': 'Add a flock first',
         'dailyRecords.addRecord': 'Add Record',
         'dailyRecords.flock': 'Flock',
         'dailyRecords.clearFilters': 'Clear filters',
