@@ -219,7 +219,7 @@ describe('CoopDetailPage', () => {
         },
       ],
       isLoading: false,
-    } as ReturnType<typeof useFlocks>);
+    } as unknown as ReturnType<typeof useFlocks>);
 
     renderPage();
     expect(screen.getByTestId('flock-card')).toBeInTheDocument();
