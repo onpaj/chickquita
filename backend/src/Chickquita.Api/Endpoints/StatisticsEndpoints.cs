@@ -66,11 +66,15 @@ public static class StatisticsEndpoints
     /// <param name="mediator">The mediator instance for dispatching the query.</param>
     /// <param name="startDate">Start date (YYYY-MM-DD format).</param>
     /// <param name="endDate">End date (YYYY-MM-DD format).</param>
+    /// <param name="coopId">Optional coop ID (GUID) to filter statistics to a specific coop.</param>
+    /// <param name="flockId">Optional flock ID (GUID) to filter statistics to a specific flock.</param>
     /// <returns>Detailed statistics DTO.</returns>
     private static async Task<IResult> GetStatistics(
         [FromServices] IMediator mediator,
         [FromQuery] string startDate,
-        [FromQuery] string endDate)
+        [FromQuery] string endDate,
+        [FromQuery] string? coopId = null,
+        [FromQuery] string? flockId = null)
     {
         // Parse date strings to DateOnly
         if (!DateOnly.TryParse(startDate, out var parsedStartDate))
@@ -83,10 +87,32 @@ public static class StatisticsEndpoints
             return Results.BadRequest(new { error = "Invalid endDate format. Use YYYY-MM-DD." });
         }
 
+        Guid? parsedCoopId = null;
+        if (coopId != null && !Guid.TryParse(coopId, out var tempCoopId))
+        {
+            return Results.BadRequest(new { error = "Invalid coopId format. Use a valid GUID." });
+        }
+        else if (coopId != null)
+        {
+            parsedCoopId = Guid.Parse(coopId);
+        }
+
+        Guid? parsedFlockId = null;
+        if (flockId != null && !Guid.TryParse(flockId, out var tempFlockId))
+        {
+            return Results.BadRequest(new { error = "Invalid flockId format. Use a valid GUID." });
+        }
+        else if (flockId != null)
+        {
+            parsedFlockId = Guid.Parse(flockId);
+        }
+
         var query = new GetStatisticsQuery
         {
             StartDate = parsedStartDate,
-            EndDate = parsedEndDate
+            EndDate = parsedEndDate,
+            CoopId = parsedCoopId,
+            FlockId = parsedFlockId
         };
 
         var result = await mediator.Send(query);

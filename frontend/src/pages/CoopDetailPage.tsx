@@ -28,13 +28,12 @@ import { CoopDetailSkeleton } from '../shared/components';
 import { processApiError, ErrorType } from '../lib/errors';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useToast } from '../hooks/useToast';
-import { format } from 'date-fns';
-import { cs, enUS } from 'date-fns/locale';
+import { formatDateTime } from '../lib/dateFormat';
 
 export function CoopDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { data: coop, isLoading, error } = useCoopDetail(id!);
   const { mutate: archiveCoop, isPending: isArchiving } = useArchiveCoop();
   const { mutate: deleteCoop, isPending: isDeleting } = useDeleteCoop();
@@ -43,8 +42,6 @@ export function CoopDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const dateLocale = i18n.language === 'cs' ? cs : enUS;
 
   const handleBack = () => {
     navigate('/coops');
@@ -219,7 +216,7 @@ export function CoopDetailPage() {
               {t('coops.createdAt', { date: '' }).replace(/\s*$/, '')}
             </Typography>
             <Typography variant="body2">
-              {format(new Date(coop.createdAt), 'PPP p', { locale: dateLocale })}
+              {formatDateTime(coop.createdAt)}
             </Typography>
           </Box>
 
@@ -229,7 +226,7 @@ export function CoopDetailPage() {
               {t('coops.updatedAt', { date: '' }).replace(/\s*$/, '')}
             </Typography>
             <Typography variant="body2">
-              {format(new Date(coop.updatedAt), 'PPP p', { locale: dateLocale })}
+              {formatDateTime(coop.updatedAt)}
             </Typography>
           </Box>
 

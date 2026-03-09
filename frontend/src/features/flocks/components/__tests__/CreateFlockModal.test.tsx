@@ -27,7 +27,7 @@ vi.mock('react-i18next', () => ({
     t: (key: string, params?: { count?: number }) => {
       const translations: Record<string, string> = {
         'flocks.addFlock': 'Add Flock',
-        'flocks.form.identifier': 'Name',
+        'flocks.form.identifier': 'Flock Name',
         'flocks.form.hatchDate': 'Hatch Date',
         'flocks.form.composition': 'Composition',
         'flocks.hens': 'Hens',
@@ -96,7 +96,7 @@ describe('CreateFlockModal', () => {
 
     it('should render identifier input field', () => {
       renderModal();
-      expect(screen.getByLabelText(/Name/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Flock Name/)).toBeInTheDocument();
     });
 
     it('should render hatch date input field', () => {
@@ -153,7 +153,7 @@ describe('CreateFlockModal', () => {
 
     it('should auto-focus on identifier field when modal opens', () => {
       renderModal();
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       expect(identifierInput).toHaveFocus();
     });
   });
@@ -163,7 +163,7 @@ describe('CreateFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.click(identifierInput);
       await user.tab(); // Blur the field
 
@@ -176,7 +176,7 @@ describe('CreateFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       const longIdentifier = 'a'.repeat(51);
 
       await user.click(identifierInput);
@@ -192,7 +192,7 @@ describe('CreateFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
 
       // Trigger required error by focusing on identifier then tabbing away
       await user.click(identifierInput);
@@ -208,7 +208,7 @@ describe('CreateFlockModal', () => {
 
       // The identifier error should be cleared; hatch date may still show its own error
       await waitFor(() => {
-        const identifierField = screen.getByLabelText(/Name/);
+        const identifierField = screen.getByLabelText(/Flock Name/);
         expect(identifierField.getAttribute('aria-invalid')).toBe('false');
       });
     });
@@ -260,7 +260,7 @@ describe('CreateFlockModal', () => {
       expect(screen.queryByText('Hatch date cannot be in the future')).not.toBeInTheDocument();
 
       // Verify form can be submitted with valid identifier and at least one animal
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test Flock');
 
       const hensInput = screen.getByLabelText('Hens', { exact: true });
@@ -285,7 +285,7 @@ describe('CreateFlockModal', () => {
       renderModal();
 
       // Fill required fields
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test Flock');
 
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
@@ -316,7 +316,7 @@ describe('CreateFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test Flock');
 
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
@@ -433,7 +433,7 @@ describe('CreateFlockModal', () => {
         fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
       });
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test Flock');
 
       // Set hens count to 1
@@ -473,7 +473,7 @@ describe('CreateFlockModal', () => {
         fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
       });
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, '  Test Flock  ');
 
       const hensInput = screen.getByLabelText('Hens', { exact: true });
@@ -501,7 +501,7 @@ describe('CreateFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       const longIdentifier = 'a'.repeat(51);
       await user.click(identifierInput);
       await user.paste(longIdentifier);
@@ -529,7 +529,7 @@ describe('CreateFlockModal', () => {
         fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
       });
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test Flock');
 
       const hensInput = screen.getByLabelText('Hens', { exact: true });
@@ -550,7 +550,7 @@ describe('CreateFlockModal', () => {
       const user = userEvent.setup();
       const { unmount } = renderModal();
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test Flock');
 
       const cancelButton = screen.getByRole('button', { name: 'Cancel' });
@@ -564,7 +564,7 @@ describe('CreateFlockModal', () => {
       renderModal();
 
       await waitFor(() => {
-        const newIdentifierInput = screen.getByLabelText(/Name/) as HTMLInputElement;
+        const newIdentifierInput = screen.getByLabelText(/Flock Name/) as HTMLInputElement;
         expect(newIdentifierInput.value).toBe('');
       });
     });
@@ -588,7 +588,7 @@ describe('CreateFlockModal', () => {
         fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
       });
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test');
 
       const hensInput = screen.getByLabelText('Hens', { exact: true });
@@ -622,7 +622,7 @@ describe('CreateFlockModal', () => {
         fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
       });
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test');
 
       const hensInput = screen.getByLabelText('Hens', { exact: true });
@@ -652,7 +652,7 @@ describe('CreateFlockModal', () => {
 
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test Flock');
 
       // Check that save button shows loading text
@@ -703,7 +703,7 @@ describe('CreateFlockModal', () => {
         fireEvent.change(hatchDateInput, { target: { value: getTodayDate() } });
       });
 
-      const identifierInput = screen.getByLabelText(/Name/);
+      const identifierInput = screen.getByLabelText(/Flock Name/);
       await user.type(identifierInput, 'Test Flock');
 
       const hensInput = screen.getByLabelText('Hens', { exact: true });
@@ -742,7 +742,7 @@ describe('CreateFlockModal', () => {
       renderModal();
 
       const inputs = [
-        screen.getByLabelText(/Name/),
+        screen.getByLabelText(/Flock Name/),
         screen.getByLabelText(/Hatch Date/),
         screen.getByLabelText('Hens', { exact: true }),
         screen.getByLabelText('Roosters', { exact: true }),
