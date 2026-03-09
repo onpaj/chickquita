@@ -13,7 +13,7 @@ namespace Chickquita.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260309120000_ForceRowLevelSecurity")]
-    partial class AddPurchaseEntity
+    partial class ForceRowLevelSecurity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
