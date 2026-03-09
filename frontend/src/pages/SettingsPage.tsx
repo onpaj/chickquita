@@ -12,13 +12,15 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Avatar,
+  Divider,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import LogoutIcon from '@mui/icons-material/Logout';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from 'react-i18next';
-import { useClerk } from '@clerk/clerk-react';
+import { useClerk, useUser } from '@clerk/clerk-react';
 import { ConfirmationDialog } from '@/shared/components';
 
 const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
@@ -26,6 +28,7 @@ const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
 export function SettingsPage() {
   const { t, i18n } = useTranslation();
   const { signOut } = useClerk();
+  const { user } = useUser();
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -81,6 +84,35 @@ export function SettingsPage() {
           >
             {t('settings.profile')}
           </Typography>
+
+          {/* User info row */}
+          {user && (
+            <>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 2, pb: 2 }}>
+                <Avatar
+                  src={user.imageUrl}
+                  alt={user.fullName ?? user.primaryEmailAddress?.emailAddress}
+                  sx={{ width: 48, height: 48 }}
+                >
+                  {(user.fullName ?? user.primaryEmailAddress?.emailAddress ?? '?')[0].toUpperCase()}
+                </Avatar>
+                <Box>
+                  {user.fullName && (
+                    <Typography variant="body1" fontWeight={600}>
+                      {user.fullName}
+                    </Typography>
+                  )}
+                  {user.primaryEmailAddress && (
+                    <Typography variant="body2" color="text.secondary">
+                      {user.primaryEmailAddress.emailAddress}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+              <Divider />
+            </>
+          )}
+
           <ListItem
             component="button"
             aria-label={t('settings.signOut')}

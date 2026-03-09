@@ -10,9 +10,14 @@ import {
   ToggleButton,
   Alert,
   Skeleton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -28,6 +33,8 @@ import { ProductionTrendChart } from '@/features/statistics/components/Productio
 import { CostPerEggTrendChart } from '@/features/statistics/components/CostPerEggTrendChart';
 import { FlockProductivityChart } from '@/features/statistics/components/FlockProductivityChart';
 import { useStatistics } from '@/features/statistics/hooks/useStatistics';
+import { useCoops } from '@/features/coops/hooks/useCoops';
+import { useFlocks } from '@/features/flocks/hooks/useFlocks';
 
 /**
  * Statistics Page Component
@@ -46,6 +53,8 @@ export default function StatisticsPage() {
   const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'custom'>('30');
   const [customStartDate, setCustomStartDate] = useState<Dayjs | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Dayjs | null>(null);
+  const [selectedCoopId, setSelectedCoopId] = useState<string>('');
+  const [selectedFlockId, setSelectedFlockId] = useState<string>('');
 
   // Calculate date range based on selection
   const getDateRange = () => {
@@ -66,12 +75,24 @@ export default function StatisticsPage() {
   };
 
   const { startDate, endDate } = getDateRange();
-  const { data: stats, isLoading, error } = useStatistics(startDate, endDate);
+  const { data: coops } = useCoops();
+  const { data: flocks } = useFlocks(selectedCoopId, true);
+  const { data: stats, isLoading, error } = useStatistics(
+    startDate,
+    endDate,
+    selectedCoopId || undefined,
+    selectedFlockId || undefined,
+  );
 
   const handleDateRangeChange = (_event: React.MouseEvent<HTMLElement>, newRange: string | null) => {
     if (newRange !== null) {
       setDateRange(newRange as '7' | '30' | '90' | 'custom');
     }
+  };
+
+  const handleCoopChange = (coopId: string) => {
+    setSelectedCoopId(coopId);
+    setSelectedFlockId('');
   };
 
   return (
@@ -155,6 +176,59 @@ export default function StatisticsPage() {
                 </Box>
               )}
             </Box>
+            </CardContent>
+          </Card>
+
+          {/* Coop / Flock Filters */}
+          <Card elevation={1} sx={{ mb: 3 }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <FilterListIcon color="action" />
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {t('statistics.filters.title')}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: 2,
+                  }}
+                >
+                  <FormControl fullWidth>
+                    <InputLabel>{t('statistics.filters.coop')}</InputLabel>
+                    <Select
+                      value={selectedCoopId}
+                      label={t('statistics.filters.coop')}
+                      onChange={(e) => handleCoopChange(e.target.value)}
+                    >
+                      <MenuItem value="">{t('statistics.filters.allCoops')}</MenuItem>
+                      {coops?.filter((c) => c.isActive).map((coop) => (
+                        <MenuItem key={coop.id} value={coop.id}>
+                          {coop.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl fullWidth disabled={!selectedCoopId}>
+                    <InputLabel>{t('statistics.filters.flock')}</InputLabel>
+                    <Select
+                      value={selectedFlockId}
+                      label={t('statistics.filters.flock')}
+                      onChange={(e) => setSelectedFlockId(e.target.value)}
+                    >
+                      <MenuItem value="">{t('statistics.filters.allFlocks')}</MenuItem>
+                      {flocks?.map((flock) => (
+                        <MenuItem key={flock.id} value={flock.id}>
+                          {flock.identifier}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+              </Box>
             </CardContent>
           </Card>
 

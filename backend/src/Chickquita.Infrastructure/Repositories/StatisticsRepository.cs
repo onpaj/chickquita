@@ -93,19 +93,19 @@ public class StatisticsRepository : IStatisticsRepository
     /// Includes cost breakdown, production trends, cost per egg trends, and flock productivity.
     /// Tenant isolation is enforced by Row-Level Security (RLS) at the database level.
     /// </summary>
-    public async Task<StatisticsDto> GetStatisticsAsync(DateOnly startDate, DateOnly endDate)
+    public async Task<StatisticsDto> GetStatisticsAsync(DateOnly startDate, DateOnly endDate, Guid? coopId = null, Guid? flockId = null)
     {
         // 1. Cost Breakdown by Purchase Type
-        var costBreakdown = await GetCostBreakdownAsync(startDate, endDate);
+        var costBreakdown = await GetCostBreakdownAsync(startDate, endDate, coopId);
 
         // 2. Production Trend (daily eggs)
-        var productionTrend = await GetProductionTrendAsync(startDate, endDate);
+        var productionTrend = await GetProductionTrendAsync(startDate, endDate, coopId, flockId);
 
         // 3. Cost Per Egg Trend (cumulative)
-        var costPerEggTrend = await GetCostPerEggTrendAsync(startDate, endDate);
+        var costPerEggTrend = await GetCostPerEggTrendAsync(startDate, endDate, coopId, flockId);
 
         // 4. Flock Productivity Comparison
-        var flockProductivity = await GetFlockProductivityAsync(startDate, endDate);
+        var flockProductivity = await GetFlockProductivityAsync(startDate, endDate, coopId, flockId);
 
         // 5. Summary Statistics
         var totalEggs = productionTrend.Sum(p => p.Eggs);
@@ -130,13 +130,14 @@ public class StatisticsRepository : IStatisticsRepository
         };
     }
 
-    private async Task<List<CostBreakdownItemDto>> GetCostBreakdownAsync(DateOnly startDate, DateOnly endDate)
+    private async Task<List<CostBreakdownItemDto>> GetCostBreakdownAsync(DateOnly startDate, DateOnly endDate, Guid? coopId = null)
     {
         var startDateTime = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
         var endDateTime = DateTime.SpecifyKind(endDate.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
         var purchases = await _context.Purchases
             .Where(p => p.PurchaseDate >= startDateTime && p.PurchaseDate <= endDateTime)
+            .Where(p => coopId == null || p.CoopId == coopId)
             .GroupBy(p => p.Type)
             .Select(g => new
             {
@@ -155,13 +156,15 @@ public class StatisticsRepository : IStatisticsRepository
         }).ToList();
     }
 
-    private async Task<List<ProductionTrendItemDto>> GetProductionTrendAsync(DateOnly startDate, DateOnly endDate)
+    private async Task<List<ProductionTrendItemDto>> GetProductionTrendAsync(DateOnly startDate, DateOnly endDate, Guid? coopId = null, Guid? flockId = null)
     {
         var startDateTime = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
         var endDateTime = DateTime.SpecifyKind(endDate.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
         var groups = await _context.DailyRecords
             .Where(dr => dr.RecordDate >= startDateTime && dr.RecordDate <= endDateTime)
+            .Where(dr => flockId == null || dr.FlockId == flockId)
+            .Where(dr => coopId == null || dr.Flock!.CoopId == coopId)
             .GroupBy(dr => dr.RecordDate)
             .Select(g => new { Date = g.Key, Eggs = g.Sum(dr => dr.EggCount) })
             .OrderBy(g => g.Date)
@@ -174,7 +177,7 @@ public class StatisticsRepository : IStatisticsRepository
         }).ToList();
     }
 
-    private async Task<List<CostPerEggTrendItemDto>> GetCostPerEggTrendAsync(DateOnly startDate, DateOnly endDate)
+    private async Task<List<CostPerEggTrendItemDto>> GetCostPerEggTrendAsync(DateOnly startDate, DateOnly endDate, Guid? coopId = null, Guid? flockId = null)
     {
         var startDateTime = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
         var endDateTime = DateTime.SpecifyKind(endDate.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
@@ -182,6 +185,8 @@ public class StatisticsRepository : IStatisticsRepository
         // Get cumulative costs and eggs by date
         var dailyRecords = await _context.DailyRecords
             .Where(dr => dr.RecordDate >= startDateTime && dr.RecordDate <= endDateTime)
+            .Where(dr => flockId == null || dr.FlockId == flockId)
+            .Where(dr => coopId == null || dr.Flock!.CoopId == coopId)
             .GroupBy(dr => dr.RecordDate)
             .Select(g => new
             {
@@ -193,6 +198,7 @@ public class StatisticsRepository : IStatisticsRepository
 
         var purchases = await _context.Purchases
             .Where(p => p.PurchaseDate >= startDateTime && p.PurchaseDate <= endDateTime)
+            .Where(p => coopId == null || p.CoopId == coopId)
             .GroupBy(p => p.PurchaseDate)
             .Select(g => new
             {
@@ -230,13 +236,15 @@ public class StatisticsRepository : IStatisticsRepository
         return result;
     }
 
-    private async Task<List<FlockProductivityItemDto>> GetFlockProductivityAsync(DateOnly startDate, DateOnly endDate)
+    private async Task<List<FlockProductivityItemDto>> GetFlockProductivityAsync(DateOnly startDate, DateOnly endDate, Guid? coopId = null, Guid? flockId = null)
     {
         var startDateTime = DateTime.SpecifyKind(startDate.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
         var endDateTime = DateTime.SpecifyKind(endDate.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc);
 
         var flockStats = await _context.DailyRecords
             .Where(dr => dr.RecordDate >= startDateTime && dr.RecordDate <= endDateTime)
+            .Where(dr => flockId == null || dr.FlockId == flockId)
+            .Where(dr => coopId == null || dr.Flock!.CoopId == coopId)
             .Include(dr => dr.Flock)
             .GroupBy(dr => new { dr.FlockId, dr.Flock!.Identifier })
             .Select(g => new

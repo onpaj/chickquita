@@ -67,7 +67,7 @@ public sealed class GetStatisticsQueryHandler : IRequestHandler<GetStatisticsQue
             }
 
             // Retrieve statistics (tenant isolation is handled by RLS and repository)
-            var stats = await _statisticsRepository.GetStatisticsAsync(request.StartDate, request.EndDate);
+            var stats = await _statisticsRepository.GetStatisticsAsync(request.StartDate, request.EndDate, request.CoopId, request.FlockId);
 
             _logger.LogInformation(
                 "Retrieved statistics for tenant: {TenantId}, Period: {StartDate} to {EndDate}, Total Eggs: {TotalEggs}, Total Cost: {TotalCost}",

@@ -93,8 +93,8 @@ describe('DeleteDailyRecordDialog', () => {
   it('displays formatted date in dialog message', () => {
     renderDialog();
 
-    // Date should be formatted as "07. 02. 2026" (Czech format)
-    expect(screen.getByText('07. 02. 2026')).toBeInTheDocument();
+    // Date should be formatted as "7. 2. 2026"
+    expect(screen.getByText('7. 2. 2026')).toBeInTheDocument();
   });
 
   it('displays flock identifier when provided', () => {

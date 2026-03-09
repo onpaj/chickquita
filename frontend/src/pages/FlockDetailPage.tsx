@@ -12,6 +12,7 @@ import {
   Grid,
   IconButton,
   Divider,
+  Tooltip,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
@@ -35,13 +36,12 @@ import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useToast } from '../hooks/useToast';
 import { CoopDetailSkeleton } from '../shared/components';
 import { StatCard } from '../shared/components';
-import { format } from 'date-fns';
-import { cs, enUS } from 'date-fns/locale';
+import { formatDate, formatDateTime } from '../lib/dateFormat';
 
 export function FlockDetailPage() {
   const { coopId, flockId } = useParams<{ coopId: string; flockId: string }>();
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { data: flock, isLoading, error } = useFlockDetail(coopId!, flockId!);
   const { mutate: archiveFlock, isPending: isArchiving } = useArchiveFlock();
   const { handleError } = useErrorHandler();
@@ -49,8 +49,6 @@ export function FlockDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isMatureChicksModalOpen, setIsMatureChicksModalOpen] = useState(false);
-
-  const dateLocale = i18n.language === 'cs' ? cs : enUS;
 
   const handleBack = () => {
     navigate(`/coops/${coopId}/flocks`);
@@ -190,7 +188,7 @@ export function FlockDetailPage() {
                 {t('flocks.hatchDate')}
               </Typography>
               <Typography variant="body1">
-                {format(new Date(flock.hatchDate), 'PPP', { locale: dateLocale })}
+                {formatDate(flock.hatchDate)}
               </Typography>
             </Box>
           )}
@@ -247,7 +245,7 @@ export function FlockDetailPage() {
                 {t('flocks.createdAt', { date: '' }).replace(/\s*$/, '')}
               </Typography>
               <Typography variant="body2">
-                {format(new Date(flock.createdAt), 'PPP p', { locale: dateLocale })}
+                {formatDateTime(flock.createdAt)}
               </Typography>
             </Box>
           )}
@@ -259,7 +257,7 @@ export function FlockDetailPage() {
                 {t('flocks.updatedAt', { date: '' }).replace(/\s*$/, '')}
               </Typography>
               <Typography variant="body2">
-                {format(new Date(flock.updatedAt), 'PPP p', { locale: dateLocale })}
+                {formatDateTime(flock.updatedAt)}
               </Typography>
             </Box>
           )}
@@ -296,15 +294,30 @@ export function FlockDetailPage() {
             >
               {t('flocks.viewHistory')}
             </Button>
-            <Button
-              variant="outlined"
-              startIcon={<PetsIcon />}
-              onClick={() => setIsMatureChicksModalOpen(true)}
-              disabled={!flock.isActive || flock.currentChicks === 0}
-              sx={{ width: { xs: '100%', md: 'auto' } }}
+            <Tooltip
+              title={
+                !flock.isActive
+                  ? t('flocks.matureChicks.disabledInactive')
+                  : flock.currentChicks === 0
+                    ? t('flocks.matureChicks.disabledNoChicks')
+                    : ''
+              }
+              disableHoverListener={flock.isActive && flock.currentChicks > 0}
+              disableFocusListener={flock.isActive && flock.currentChicks > 0}
+              disableTouchListener={flock.isActive && flock.currentChicks > 0}
             >
-              {t('flocks.matureChicks.action')}
-            </Button>
+              <span>
+                <Button
+                  variant="outlined"
+                  startIcon={<PetsIcon />}
+                  onClick={() => setIsMatureChicksModalOpen(true)}
+                  disabled={!flock.isActive || flock.currentChicks === 0}
+                  sx={{ width: { xs: '100%', md: 'auto' } }}
+                >
+                  {t('flocks.matureChicks.action')}
+                </Button>
+              </span>
+            </Tooltip>
           </Stack>
         </Stack>
       </Paper>

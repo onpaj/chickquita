@@ -1,10 +1,9 @@
 import { Card, CardContent, Typography, Box, Chip, IconButton } from '@mui/material';
 import { Egg as EggIcon, Edit as EditIcon } from '@mui/icons-material';
-import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { DailyRecordDto } from '../api/dailyRecordsApi';
 import { useIsRecordPendingSync } from '../../../lib/useIsRecordPendingSync';
-import { useDateLocale } from '../../../hooks/useDateLocale';
+import { formatDate } from '@/lib/dateFormat';
 
 interface DailyRecordCardProps {
   record: DailyRecordDto;
@@ -26,11 +25,8 @@ interface DailyRecordCardProps {
  */
 export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecordCardProps) {
   const { t } = useTranslation();
-  const dateLocale = useDateLocale();
   const isPendingSync = useIsRecordPendingSync(record.id);
-  const formattedDate = format(new Date(record.recordDate), 'dd. MM. yyyy', {
-    locale: dateLocale,
-  });
+  const formattedDate = formatDate(record.recordDate);
 
   // Check if record can be edited (same-day restriction)
   const canEdit = (() => {

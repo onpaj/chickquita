@@ -36,7 +36,7 @@ import type { FlockHistory } from '../api/flocksApi';
 import { useUpdateFlockHistoryNotes } from '../hooks/useFlockHistory';
 import { IllustratedEmptyState } from '@/shared/components';
 import { formatCzechCount } from '@/lib/czechPlurals';
-import { useDateLocale } from '@/hooks/useDateLocale';
+import { formatDate } from '@/lib/dateFormat';
 import { useToast } from '@/hooks/useToast';
 
 interface FlockHistoryTimelineProps {
@@ -55,7 +55,6 @@ interface FlockHistoryTimelineProps {
  */
 export function FlockHistoryTimeline({ history, loading, error }: FlockHistoryTimelineProps) {
   const { t, i18n } = useTranslation();
-  const dateLocale = useDateLocale();
   const { showError } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editNotes, setEditNotes] = useState('');
@@ -168,10 +167,10 @@ export function FlockHistoryTimeline({ history, loading, error }: FlockHistoryTi
           <TimelineItem key={entry.id}>
             <TimelineOppositeContent color="text.secondary" sx={{ flex: 0.3 }}>
               <Typography variant="body2" fontWeight="medium">
-                {format(new Date(entry.changeDate), 'dd. MMM yyyy', { locale: dateLocale })}
+                {formatDate(entry.changeDate)}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {format(new Date(entry.createdAt), 'HH:mm', { locale: dateLocale })}
+                {format(new Date(entry.createdAt), 'HH:mm')}
               </Typography>
             </TimelineOppositeContent>
 
