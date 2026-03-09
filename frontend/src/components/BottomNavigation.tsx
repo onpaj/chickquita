@@ -4,7 +4,8 @@ import {
   HomeWork as CoopsIcon,
   Assignment as DailyRecordsIcon,
   BarChart as StatisticsIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  ShoppingCart as PurchasesIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +19,7 @@ export function BottomNavigation() {
     if (location.pathname.startsWith('/coops')) return 'coops';
     if (location.pathname.startsWith('/daily-records')) return 'daily-records';
     if (location.pathname.startsWith('/statistics')) return 'statistics';
+    if (location.pathname.startsWith('/purchases')) return 'purchases';
     if (location.pathname.startsWith('/settings')) return 'settings';
     return 'dashboard';
   };
@@ -35,6 +37,9 @@ export function BottomNavigation() {
         break;
       case 'statistics':
         navigate('/statistics');
+        break;
+      case 'purchases':
+        navigate('/purchases');
         break;
       case 'settings':
         navigate('/settings');
@@ -93,6 +98,11 @@ export function BottomNavigation() {
           label={t('navigation.statistics')}
           value="statistics"
           icon={<StatisticsIcon />}
+        />
+        <BottomNavigationAction
+          label={t('navigation.purchases')}
+          value="purchases"
+          icon={<PurchasesIcon />}
         />
         <BottomNavigationAction
           label={t('navigation.settings')}
