@@ -12,18 +12,23 @@ import {
   Chip,
   Card,
   CardContent,
+  Fab,
+  Tooltip,
 } from '@mui/material';
 import {
   Egg as EggIcon,
   FilterList as FilterIcon,
   Clear as ClearIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { format, subDays } from 'date-fns';
 import { useDailyRecords } from '../features/dailyRecords/hooks/useDailyRecords';
 import { useCoops } from '../features/coops/hooks/useCoops';
+import { useAllFlocks } from '../features/flocks/hooks/useAllFlocks';
 import { DailyRecordCard } from '../features/dailyRecords/components/DailyRecordCard';
 import { EditDailyRecordModal } from '../features/dailyRecords/components/EditDailyRecordModal';
+import { QuickAddModal } from '../features/dailyRecords/components/QuickAddModal';
 import { IllustratedEmptyState, DailyRecordCardSkeleton } from '../shared/components';
 import type { GetDailyRecordsParams, DailyRecordDto } from '../features/dailyRecords/api/dailyRecordsApi';
 
@@ -33,8 +38,11 @@ export function DailyRecordsListPage() {
   const [editingRecord, setEditingRecord] = useState<DailyRecordDto | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+
   const { isLoading: isLoadingCoops } = useCoops();
   const { data: dailyRecords, isLoading: isLoadingRecords } = useDailyRecords(filters);
+  const { data: flocks = [] } = useAllFlocks();
 
   // Create a map of flock IDs to display labels (flockName + coopName) for filter dropdown
   const flockMap = useMemo(() => {
@@ -294,6 +302,32 @@ export function DailyRecordsListPage() {
           </Box>
         </>
       )}
+
+      {/* Floating Action Button - Add Daily Record */}
+      <Tooltip title={t('dailyRecords.addRecord')} placement="left">
+        <span>
+          <Fab
+            color="primary"
+            aria-label={t('dailyRecords.addRecord')}
+            onClick={() => setIsQuickAddOpen(true)}
+            disabled={flocks.length === 0}
+            sx={{
+              position: 'fixed',
+              bottom: { xs: 'calc(env(safe-area-inset-bottom) + 80px)', sm: 24 },
+              right: 16,
+            }}
+          >
+            <AddIcon />
+          </Fab>
+        </span>
+      </Tooltip>
+
+      {/* Quick Add Modal */}
+      <QuickAddModal
+        open={isQuickAddOpen}
+        onClose={() => setIsQuickAddOpen(false)}
+        flocks={flocks}
+      />
 
       {/* Edit Modal */}
       <EditDailyRecordModal
