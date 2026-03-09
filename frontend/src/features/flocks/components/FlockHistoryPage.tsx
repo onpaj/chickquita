@@ -1,9 +1,10 @@
+import { useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Container, IconButton, Typography } from '@mui/material';
-import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { Container } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useFlockHistory } from '../hooks/useFlockHistory';
 import { FlockHistoryTimeline } from './FlockHistoryTimeline';
+import { useAppBar } from '../../../context/AppBarContext';
 
 /**
  * Full page view for flock history timeline.
@@ -13,31 +14,21 @@ export function FlockHistoryPage() {
   const { t } = useTranslation();
   const { coopId, flockId } = useParams<{ coopId: string; flockId: string }>();
   const navigate = useNavigate();
+  const { setAppBar, resetAppBar } = useAppBar();
 
   const { data: history, isLoading, error } = useFlockHistory(flockId || '');
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     navigate(`/coops/${coopId}/flocks/${flockId}`);
-  };
+  }, [navigate, coopId, flockId]);
+
+  useEffect(() => {
+    setAppBar({ title: t('flockHistory.title'), onBack: handleBack });
+    return () => resetAppBar();
+  }, [handleBack, t, setAppBar, resetAppBar]);
 
   return (
     <Container maxWidth="md" sx={{ py: 3 }}>
-      {/* Header */}
-      <Box display="flex" alignItems="center" mb={3}>
-        <IconButton
-          edge="start"
-          onClick={handleBack}
-          aria-label={t('common.back', 'Back')}
-          sx={{ mr: 2, minWidth: 48, minHeight: 48 }}
-        >
-          <ArrowBackIcon fontSize="large" />
-        </IconButton>
-        <Typography variant="h4" component="h1" fontWeight="bold">
-          {t('flockHistory.title', 'Flock History')}
-        </Typography>
-      </Box>
-
-      {/* Timeline */}
       <FlockHistoryTimeline history={history || []} loading={isLoading} error={error} />
     </Container>
   );

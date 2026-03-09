@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -9,15 +9,14 @@ import {
   Stack,
   Button,
   Chip,
-  IconButton,
   Tooltip,
 } from '@mui/material';
 import {
-  ArrowBack as ArrowBackIcon,
   Edit as EditIcon,
   Archive as ArchiveIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
+import { useAppBar } from '../context/AppBarContext';
 import { useCoopDetail } from '../features/coops/hooks/useCoopDetail';
 import { useArchiveCoop, useDeleteCoop } from '../features/coops/hooks/useCoops';
 import { EditCoopModal } from '../features/coops/components/EditCoopModal';
@@ -42,10 +41,16 @@ export function CoopDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { setAppBar, resetAppBar } = useAppBar();
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     navigate('/coops');
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    setAppBar({ title: coop?.name ?? t('coops.details'), onBack: handleBack });
+    return () => resetAppBar();
+  }, [coop?.name, handleBack, t, setAppBar, resetAppBar]);
 
   const handleEdit = () => {
     setIsEditModalOpen(true);
@@ -132,11 +137,6 @@ export function CoopDetailPage() {
     // For other errors, show a generic error with back button
     return (
       <Container maxWidth="sm" sx={{ py: 3 }}>
-        <Box sx={{ mb: 3 }}>
-          <IconButton onClick={handleBack} edge="start">
-            <ArrowBackIcon />
-          </IconButton>
-        </Box>
         <Typography variant="h6" color="error" gutterBottom>
           {t(processedError.translationKey)}
         </Typography>
@@ -153,25 +153,6 @@ export function CoopDetailPage() {
 
   return (
     <Container maxWidth="sm" sx={{ py: 3 }}>
-      {/* Header with Back Button */}
-      <Box sx={{ mb: 3 }}>
-        <IconButton
-          onClick={handleBack}
-          edge="start"
-          aria-label={t('common.back')}
-          sx={{
-            mb: 2,
-            minWidth: 48,
-            minHeight: 48,
-          }}
-        >
-          <ArrowBackIcon fontSize="large" />
-        </IconButton>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {t('coops.details')}
-        </Typography>
-      </Box>
-
       {/* Coop Details Card */}
       <Paper elevation={2} sx={{ p: 3 }}>
         <Stack spacing={3}>
