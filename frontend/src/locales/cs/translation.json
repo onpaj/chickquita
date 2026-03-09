@@ -475,7 +475,8 @@
       "coop": "Kurník",
       "flock": "Hejno",
       "allCoops": "Všechny kurníky",
-      "allFlocks": "Všechna hejna"
+      "allFlocks": "Všechna hejna",
+      "summary": "{{range}} · {{flock}}"
     }
   },
   "errors": {

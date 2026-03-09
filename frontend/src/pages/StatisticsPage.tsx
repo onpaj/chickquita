@@ -4,8 +4,9 @@ import {
   Box,
   Typography,
   Paper,
-  Card,
-  CardContent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   ToggleButtonGroup,
   ToggleButton,
   Alert,
@@ -16,6 +17,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -95,6 +97,25 @@ export default function StatisticsPage() {
     setSelectedFlockId('');
   };
 
+  const activeDateLabel = (() => {
+    if (dateRange === '7') return t('statistics.dateRange.last7Days');
+    if (dateRange === '30') return t('statistics.dateRange.last30Days');
+    if (dateRange === '90') return t('statistics.dateRange.last90Days');
+    return t('statistics.dateRange.custom');
+  })();
+
+  const activeFlockLabel = (() => {
+    if (selectedFlockId) {
+      const flock = flocks?.find((f) => f.id === selectedFlockId);
+      return flock?.identifier ?? t('statistics.filters.allFlocks');
+    }
+    if (selectedCoopId) {
+      const coop = coops?.find((c) => c.id === selectedCoopId);
+      return coop?.name ?? t('statistics.filters.allCoops');
+    }
+    return t('statistics.filters.allFlocks');
+  })();
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={i18n.language}>
       <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -104,133 +125,140 @@ export default function StatisticsPage() {
             {t('statistics.title')}
           </Typography>
 
-          {/* Date Range Filters */}
-          <Card elevation={1} sx={{ mb: 3 }}>
-            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {/* Collapsible Filters */}
+          <Accordion
+            defaultExpanded={false}
+            disableGutters
+            elevation={1}
+            sx={{ mb: 3, '&:before': { display: 'none' }, borderRadius: 1 }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="statistics-filters-content"
+              id="statistics-filters-header"
+            >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CalendarTodayIcon color="action" />
-                <Typography variant="subtitle1" fontWeight={600}>
-                  {t('statistics.dateRange.title')}
+                <FilterListIcon fontSize="small" color="action" />
+                <Typography variant="body2">
+                  {t('statistics.filters.summary', {
+                    range: activeDateLabel,
+                    flock: activeFlockLabel,
+                  })}
                 </Typography>
               </Box>
-
-              <ToggleButtonGroup
-                value={dateRange}
-                exclusive
-                onChange={handleDateRangeChange}
-                aria-label={t('statistics.dateRange.ariaLabel')}
-                fullWidth
-                sx={{
-                  '& .MuiToggleButton-root': {
-                    py: 1,
-                  },
-                }}
-              >
-                <ToggleButton value="7" aria-label={t('statistics.dateRange.last7Days')}>
-                  {t('statistics.dateRange.last7Days')}
-                </ToggleButton>
-                <ToggleButton value="30" aria-label={t('statistics.dateRange.last30Days')}>
-                  {t('statistics.dateRange.last30Days')}
-                </ToggleButton>
-                <ToggleButton value="90" aria-label={t('statistics.dateRange.last90Days')}>
-                  {t('statistics.dateRange.last90Days')}
-                </ToggleButton>
-                <ToggleButton value="custom" aria-label={t('statistics.dateRange.custom')}>
-                  {t('statistics.dateRange.custom')}
-                </ToggleButton>
-              </ToggleButtonGroup>
-
-              {/* Custom Date Range Pickers */}
-              {dateRange === 'custom' && (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    gap: 2,
-                  }}
-                >
-                  <DatePicker
-                    label={t('statistics.dateRange.startDate')}
-                    value={customStartDate}
-                    onChange={(newValue) => setCustomStartDate(newValue)}
-                    maxDate={customEndDate || dayjs()}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                      },
-                    }}
-                  />
-                  <DatePicker
-                    label={t('statistics.dateRange.endDate')}
-                    value={customEndDate}
-                    onChange={(newValue) => setCustomEndDate(newValue)}
-                    minDate={customStartDate || undefined}
-                    maxDate={dayjs()}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                      },
-                    }}
-                  />
-                </Box>
-              )}
-            </Box>
-            </CardContent>
-          </Card>
-
-          {/* Coop / Flock Filters */}
-          <Card elevation={1} sx={{ mb: 3 }}>
-            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+            </AccordionSummary>
+            <AccordionDetails sx={{ pt: 0 }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FilterListIcon color="action" />
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    {t('statistics.filters.title')}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    gap: 2,
-                  }}
-                >
-                  <FormControl fullWidth>
-                    <InputLabel>{t('statistics.filters.coop')}</InputLabel>
-                    <Select
-                      value={selectedCoopId}
-                      label={t('statistics.filters.coop')}
-                      onChange={(e) => handleCoopChange(e.target.value)}
-                    >
-                      <MenuItem value="">{t('statistics.filters.allCoops')}</MenuItem>
-                      {coops?.filter((c) => c.isActive).map((coop) => (
-                        <MenuItem key={coop.id} value={coop.id}>
-                          {coop.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                {/* Date Range */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CalendarTodayIcon color="action" fontSize="small" />
+                    <Typography variant="subtitle2" fontWeight={600}>
+                      {t('statistics.dateRange.title')}
+                    </Typography>
+                  </Box>
 
-                  <FormControl fullWidth disabled={!selectedCoopId}>
-                    <InputLabel>{t('statistics.filters.flock')}</InputLabel>
-                    <Select
-                      value={selectedFlockId}
-                      label={t('statistics.filters.flock')}
-                      onChange={(e) => setSelectedFlockId(e.target.value)}
+                  <ToggleButtonGroup
+                    value={dateRange}
+                    exclusive
+                    onChange={handleDateRangeChange}
+                    aria-label={t('statistics.dateRange.ariaLabel')}
+                    fullWidth
+                    sx={{ '& .MuiToggleButton-root': { py: 1 } }}
+                  >
+                    <ToggleButton value="7" aria-label={t('statistics.dateRange.last7Days')}>
+                      {t('statistics.dateRange.last7Days')}
+                    </ToggleButton>
+                    <ToggleButton value="30" aria-label={t('statistics.dateRange.last30Days')}>
+                      {t('statistics.dateRange.last30Days')}
+                    </ToggleButton>
+                    <ToggleButton value="90" aria-label={t('statistics.dateRange.last90Days')}>
+                      {t('statistics.dateRange.last90Days')}
+                    </ToggleButton>
+                    <ToggleButton value="custom" aria-label={t('statistics.dateRange.custom')}>
+                      {t('statistics.dateRange.custom')}
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+
+                  {/* Custom Date Range Pickers */}
+                  {dateRange === 'custom' && (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        gap: 2,
+                      }}
                     >
-                      <MenuItem value="">{t('statistics.filters.allFlocks')}</MenuItem>
-                      {flocks?.map((flock) => (
-                        <MenuItem key={flock.id} value={flock.id}>
-                          {flock.identifier}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                      <DatePicker
+                        label={t('statistics.dateRange.startDate')}
+                        value={customStartDate}
+                        onChange={(newValue) => setCustomStartDate(newValue)}
+                        maxDate={customEndDate || dayjs()}
+                        slotProps={{ textField: { fullWidth: true } }}
+                      />
+                      <DatePicker
+                        label={t('statistics.dateRange.endDate')}
+                        value={customEndDate}
+                        onChange={(newValue) => setCustomEndDate(newValue)}
+                        minDate={customStartDate || undefined}
+                        maxDate={dayjs()}
+                        slotProps={{ textField: { fullWidth: true } }}
+                      />
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Coop / Flock Filters */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FilterListIcon color="action" fontSize="small" />
+                    <Typography variant="subtitle2" fontWeight={600}>
+                      {t('statistics.filters.title')}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      gap: 2,
+                    }}
+                  >
+                    <FormControl fullWidth>
+                      <InputLabel>{t('statistics.filters.coop')}</InputLabel>
+                      <Select
+                        value={selectedCoopId}
+                        label={t('statistics.filters.coop')}
+                        onChange={(e) => handleCoopChange(e.target.value)}
+                      >
+                        <MenuItem value="">{t('statistics.filters.allCoops')}</MenuItem>
+                        {coops?.filter((c) => c.isActive).map((coop) => (
+                          <MenuItem key={coop.id} value={coop.id}>
+                            {coop.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl fullWidth disabled={!selectedCoopId}>
+                      <InputLabel>{t('statistics.filters.flock')}</InputLabel>
+                      <Select
+                        value={selectedFlockId}
+                        label={t('statistics.filters.flock')}
+                        onChange={(e) => setSelectedFlockId(e.target.value)}
+                      >
+                        <MenuItem value="">{t('statistics.filters.allFlocks')}</MenuItem>
+                        {flocks?.map((flock) => (
+                          <MenuItem key={flock.id} value={flock.id}>
+                            {flock.identifier}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
                 </Box>
               </Box>
-            </CardContent>
-          </Card>
+            </AccordionDetails>
+          </Accordion>
 
           {/* Summary StatCards */}
           <Box

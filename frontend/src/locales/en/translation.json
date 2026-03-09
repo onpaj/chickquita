@@ -473,7 +473,8 @@
       "coop": "Coop",
       "flock": "Flock",
       "allCoops": "All Coops",
-      "allFlocks": "All Flocks"
+      "allFlocks": "All Flocks",
+      "summary": "{{range}} · {{flock}}"
     }
   },
   "errors": {
