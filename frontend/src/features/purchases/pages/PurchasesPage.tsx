@@ -163,8 +163,8 @@ export function PurchasesPage() {
           aria-label={t('purchases.addPurchase')}
           sx={{
             position: 'fixed',
-            bottom: { xs: 10, sm: 2 },
-            right: 2,
+            bottom: { xs: 'calc(env(safe-area-inset-bottom) + 80px)', sm: 24 },
+            right: 16,
             minWidth: 56,
             minHeight: 56,
           }}
