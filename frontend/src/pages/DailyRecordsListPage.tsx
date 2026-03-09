@@ -32,9 +32,15 @@ import { QuickAddModal } from '../features/dailyRecords/components/QuickAddModal
 import { IllustratedEmptyState, DailyRecordCardSkeleton } from '../shared/components';
 import type { GetDailyRecordsParams, DailyRecordDto } from '../features/dailyRecords/api/dailyRecordsApi';
 
+const getDefaultFilters = (): GetDailyRecordsParams => ({
+  startDate: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
+  endDate: format(new Date(), 'yyyy-MM-dd'),
+});
+
 export function DailyRecordsListPage() {
   const { t } = useTranslation();
-  const [filters, setFilters] = useState<GetDailyRecordsParams>({});
+  const initialFilters = useMemo(() => getDefaultFilters(), []);
+  const [filters, setFilters] = useState<GetDailyRecordsParams>(getDefaultFilters);
   const [editingRecord, setEditingRecord] = useState<DailyRecordDto | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -89,7 +95,7 @@ export function DailyRecordsListPage() {
   };
 
   const handleClearFilters = () => {
-    setFilters({});
+    setFilters(initialFilters);
   };
 
   const handleEditRecord = (record: DailyRecordDto) => {
@@ -102,7 +108,10 @@ export function DailyRecordsListPage() {
     setEditingRecord(null);
   };
 
-  const hasActiveFilters = filters.flockId || filters.startDate || filters.endDate;
+  const hasActiveFilters =
+    filters.flockId ||
+    filters.startDate !== initialFilters.startDate ||
+    filters.endDate !== initialFilters.endDate;
 
   // Quick filter presets
   const handleQuickFilter = (preset: 'today' | 'week' | 'month') => {
