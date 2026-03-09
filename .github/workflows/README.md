@@ -101,3 +101,4 @@ Potential improvements for the pipeline:
 - [ ] Add deployment to Azure Container Apps
 - [ ] Add staging environment deployment
 - [ ] Add performance testing
+
