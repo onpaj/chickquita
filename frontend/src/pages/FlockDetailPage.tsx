@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -10,12 +10,10 @@ import {
   Button,
   Chip,
   Grid,
-  IconButton,
   Divider,
   Tooltip,
 } from '@mui/material';
 import {
-  ArrowBack as ArrowBackIcon,
   Edit as EditIcon,
   Archive as ArchiveIcon,
   History as HistoryIcon,
@@ -25,6 +23,7 @@ import {
   EggAlt as EggAltIcon,
   Diversity3 as Diversity3Icon,
 } from '@mui/icons-material';
+import { useAppBar } from '../context/AppBarContext';
 import { useFlockDetail } from '../features/flocks/hooks/useFlocks';
 import { useArchiveFlock } from '../features/flocks/hooks/useFlocks';
 import { EditFlockModal } from '../features/flocks/components/EditFlockModal';
@@ -49,10 +48,16 @@ export function FlockDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isMatureChicksModalOpen, setIsMatureChicksModalOpen] = useState(false);
+  const { setAppBar, resetAppBar } = useAppBar();
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     navigate(`/coops/${coopId}/flocks`);
-  };
+  }, [navigate, coopId]);
+
+  useEffect(() => {
+    setAppBar({ title: flock?.identifier ?? t('flocks.details'), onBack: handleBack });
+    return () => resetAppBar();
+  }, [flock?.identifier, handleBack, t, setAppBar, resetAppBar]);
 
   const handleEdit = () => {
     setIsEditModalOpen(true);
@@ -113,11 +118,6 @@ export function FlockDetailPage() {
 
     return (
       <Container maxWidth="sm" sx={{ py: 3 }}>
-        <Box sx={{ mb: 3 }}>
-          <IconButton onClick={handleBack} edge="start">
-            <ArrowBackIcon />
-          </IconButton>
-        </Box>
         <Typography variant="h6" color="error" gutterBottom>
           {t(processedError.translationKey)}
         </Typography>
@@ -136,25 +136,6 @@ export function FlockDetailPage() {
 
   return (
     <Container maxWidth="sm" sx={{ py: 3 }}>
-      {/* Header with Back Button */}
-      <Box sx={{ mb: 3 }}>
-        <IconButton
-          onClick={handleBack}
-          edge="start"
-          aria-label={t('common.back')}
-          sx={{
-            mb: 2,
-            minWidth: 48,
-            minHeight: 48,
-          }}
-        >
-          <ArrowBackIcon fontSize="large" />
-        </IconButton>
-        <Typography variant="h4" component="h1" gutterBottom>
-          {t('flocks.details')}
-        </Typography>
-      </Box>
-
       {/* Flock Details Card */}
       <Paper elevation={2} sx={{ p: 3 }}>
         <Stack spacing={3}>

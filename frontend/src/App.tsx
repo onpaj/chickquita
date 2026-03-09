@@ -20,15 +20,16 @@ import { useAuth } from '@clerk/clerk-react'
 import { startAutoSync } from './lib/syncManager'
 import { Box, AppBar, Toolbar, Typography, IconButton } from '@mui/material'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { AppBarProvider, useAppBar } from './context/AppBarContext'
 
-function App() {
-  // Initialize API client with Clerk authentication
+function AppInner() {
   useApiClient()
   const { isSignedIn } = useAuth()
   const navigate = useNavigate()
   const [bannerVisible, setBannerVisible] = useState(false)
+  const { title, onBack } = useAppBar()
 
-  // Start offline sync manager
   useEffect(() => {
     startAutoSync()
   }, [])
@@ -44,21 +45,34 @@ function App() {
           sx={{ top: 0, zIndex: 1100, height: 64 }}
         >
           <Toolbar sx={{ minHeight: '64px !important', px: 2 }}>
+            {onBack ? (
+              <IconButton
+                edge="start"
+                onClick={onBack}
+                aria-label="back"
+                size="medium"
+                sx={{ mr: 1, p: 1 }}
+              >
+                <ArrowBackIcon />
+              </IconButton>
+            ) : null}
             <Typography
               variant="h6"
               component="div"
               sx={{ flexGrow: 1, fontWeight: 700, color: 'primary.main', letterSpacing: 0.5 }}
             >
-              Chickquita
+              {title ?? 'Chickquita'}
             </Typography>
-            <IconButton
-              onClick={() => navigate('/settings')}
-              aria-label="settings"
-              size="medium"
-              sx={{ p: 1 }}
-            >
-              <AccountCircleIcon />
-            </IconButton>
+            {!onBack && (
+              <IconButton
+                onClick={() => navigate('/settings')}
+                aria-label="settings"
+                size="medium"
+                sx={{ p: 1 }}
+              >
+                <AccountCircleIcon />
+              </IconButton>
+            )}
           </Toolbar>
         </AppBar>
       )}
@@ -164,6 +178,14 @@ function App() {
       </Box>
       {isSignedIn && <BottomNavigation />}
     </>
+  )
+}
+
+function App() {
+  return (
+    <AppBarProvider>
+      <AppInner />
+    </AppBarProvider>
   )
 }
 
