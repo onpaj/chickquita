@@ -27,7 +27,7 @@ vi.mock('react-i18next', () => ({
     t: (key: string, params?: { count?: number }) => {
       const translations: Record<string, string> = {
         'flocks.editFlock': 'Edit Flock',
-        'flocks.form.identifier': 'Flock Identifier',
+        'flocks.form.identifier': 'Name',
         'flocks.form.hatchDate': 'Hatch Date',
         'flocks.form.hatchDateFuture': 'Hatch date cannot be in the future',
         'common.cancel': 'Cancel',
@@ -99,7 +99,7 @@ describe('EditFlockModal', () => {
     it('should render modal when open prop is true', () => {
       renderModal(true);
       expect(screen.getByText('Edit Flock')).toBeInTheDocument();
-      expect(screen.getByLabelText(/Flock Identifier/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Name/)).toBeInTheDocument();
     });
 
     it('should not render when open is false', () => {
@@ -109,7 +109,7 @@ describe('EditFlockModal', () => {
 
     it('should render identifier input field', () => {
       renderModal();
-      expect(screen.getByLabelText(/Flock Identifier/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Name/)).toBeInTheDocument();
     });
 
     it('should render hatch date input field', () => {
@@ -140,7 +140,7 @@ describe('EditFlockModal', () => {
     it('should pre-fill form with existing flock data', () => {
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/) as HTMLInputElement;
+      const identifierInput = screen.getByLabelText(/Name/) as HTMLInputElement;
       const hatchDateInput = screen.getByLabelText(/Hatch Date/) as HTMLInputElement;
 
       expect(identifierInput.value).toBe('Existing Flock');
@@ -175,7 +175,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
       await user.tab(); // Blur the field
 
@@ -188,7 +188,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       const longIdentifier = 'a'.repeat(51);
 
       await user.clear(identifierInput);
@@ -205,7 +205,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       const validIdentifier = 'a'.repeat(50);
 
       await user.clear(identifierInput);
@@ -267,7 +267,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
 
       // Clear the field to trigger required error
       await user.clear(identifierInput);
@@ -289,7 +289,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
 
       const saveButton = screen.getByRole('button', { name: 'Save' });
@@ -309,7 +309,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       const hatchDateInput = screen.getByLabelText(/Hatch Date/);
 
       await user.clear(identifierInput);
@@ -343,7 +343,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
       await user.type(identifierInput, 'Updated Flock');
 
@@ -362,7 +362,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
       await user.type(identifierInput, '  Updated Flock  ');
 
@@ -379,7 +379,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       const longIdentifier = 'a'.repeat(51);
       await user.clear(identifierInput);
       await user.click(identifierInput);
@@ -402,7 +402,7 @@ describe('EditFlockModal', () => {
 
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
       await user.type(identifierInput, 'Updated Flock');
 
@@ -418,7 +418,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
       await user.type(identifierInput, 'Updated Flock{Enter}');
 
@@ -433,7 +433,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
       await user.type(identifierInput, 'Modified Name');
 
@@ -448,7 +448,7 @@ describe('EditFlockModal', () => {
       const user = userEvent.setup();
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
       await user.tab(); // Trigger error
 
@@ -475,7 +475,7 @@ describe('EditFlockModal', () => {
 
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.type(identifierInput, 'Test');
 
       // Check that save button shows loading text
@@ -536,7 +536,7 @@ describe('EditFlockModal', () => {
 
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
       await user.type(identifierInput, 'Duplicate Identifier');
 
@@ -571,7 +571,7 @@ describe('EditFlockModal', () => {
 
       renderModal();
 
-      const identifierInput = screen.getByLabelText(/Flock Identifier/);
+      const identifierInput = screen.getByLabelText(/Name/);
       await user.clear(identifierInput);
       await user.type(identifierInput, 'Test Flock');
 
