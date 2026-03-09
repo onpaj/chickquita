@@ -2,8 +2,7 @@ import { BottomNavigation as MuiBottomNavigation, BottomNavigationAction, Paper 
 import {
   Dashboard as DashboardIcon,
   HomeWork as CoopsIcon,
-  Assignment as DailyRecordsIcon,
-  BarChart as StatisticsIcon,
+  Assignment as RecordsIcon,
   Settings as SettingsIcon,
   ShoppingCart as PurchasesIcon,
 } from '@mui/icons-material';
@@ -17,8 +16,9 @@ export function BottomNavigation() {
 
   const getCurrentTab = () => {
     if (location.pathname.startsWith('/coops')) return 'coops';
-    if (location.pathname.startsWith('/daily-records')) return 'daily-records';
-    if (location.pathname.startsWith('/statistics')) return 'statistics';
+    if (location.pathname.startsWith('/records')) return 'records';
+    if (location.pathname.startsWith('/daily-records')) return 'records';
+    if (location.pathname.startsWith('/statistics')) return 'records';
     if (location.pathname.startsWith('/purchases')) return 'purchases';
     if (location.pathname.startsWith('/settings')) return 'settings';
     return 'dashboard';
@@ -32,11 +32,8 @@ export function BottomNavigation() {
       case 'coops':
         navigate('/coops');
         break;
-      case 'daily-records':
-        navigate('/daily-records');
-        break;
-      case 'statistics':
-        navigate('/statistics');
+      case 'records':
+        navigate('/records/list');
         break;
       case 'purchases':
         navigate('/purchases');
@@ -90,14 +87,9 @@ export function BottomNavigation() {
           icon={<CoopsIcon />}
         />
         <BottomNavigationAction
-          label={t('navigation.dailyRecords')}
-          value="daily-records"
-          icon={<DailyRecordsIcon />}
-        />
-        <BottomNavigationAction
-          label={t('navigation.statistics')}
-          value="statistics"
-          icon={<StatisticsIcon />}
+          label={t('navigation.records')}
+          value="records"
+          icon={<RecordsIcon />}
         />
         <BottomNavigationAction
           label={t('navigation.purchases')}

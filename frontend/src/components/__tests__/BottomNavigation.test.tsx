@@ -20,8 +20,7 @@ vi.mock('react-i18next', () => ({
       const translations: Record<string, string> = {
         'navigation.dashboard': 'Dashboard',
         'navigation.coops': 'Coops',
-        'navigation.dailyRecords': 'Daily Records',
-        'navigation.statistics': 'Statistics',
+        'navigation.records': 'Records',
         'navigation.purchases': 'Purchases',
         'navigation.settings': 'Settings',
       };
@@ -43,57 +42,83 @@ describe('BottomNavigation', () => {
     vi.clearAllMocks();
   });
 
-  describe('renders all navigation items', () => {
-    it('shows all six navigation items', () => {
+  describe('renders navigation items', () => {
+    it('shows five navigation items', () => {
       renderWithRouter('/dashboard');
       expect(screen.getByText('Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Coops')).toBeInTheDocument();
-      expect(screen.getByText('Daily Records')).toBeInTheDocument();
-      expect(screen.getByText('Statistics')).toBeInTheDocument();
+      expect(screen.getByText('Records')).toBeInTheDocument();
       expect(screen.getByText('Purchases')).toBeInTheDocument();
       expect(screen.getByText('Settings')).toBeInTheDocument();
+    });
+
+    it('does not show separate Daily Records and Statistics items', () => {
+      renderWithRouter('/dashboard');
+      expect(screen.queryByText('Daily Records')).not.toBeInTheDocument();
+      expect(screen.queryByText('Statistics')).not.toBeInTheDocument();
     });
   });
 
   describe('active tab detection', () => {
     it('activates dashboard tab on /dashboard', () => {
       renderWithRouter('/dashboard');
-      const dashboardButton = screen.getByRole('button', { name: /dashboard/i });
-      expect(dashboardButton).toHaveClass('Mui-selected');
+      expect(screen.getByRole('button', { name: /dashboard/i })).toHaveClass('Mui-selected');
+    });
+
+    it('activates records tab on /records/list', () => {
+      renderWithRouter('/records/list');
+      expect(screen.getByRole('button', { name: /records/i })).toHaveClass('Mui-selected');
+    });
+
+    it('activates records tab on /records/stats', () => {
+      renderWithRouter('/records/stats');
+      expect(screen.getByRole('button', { name: /records/i })).toHaveClass('Mui-selected');
+    });
+
+    it('activates records tab on legacy /daily-records path', () => {
+      renderWithRouter('/daily-records');
+      expect(screen.getByRole('button', { name: /records/i })).toHaveClass('Mui-selected');
+    });
+
+    it('activates records tab on legacy /statistics path', () => {
+      renderWithRouter('/statistics');
+      expect(screen.getByRole('button', { name: /records/i })).toHaveClass('Mui-selected');
     });
 
     it('activates purchases tab on /purchases', () => {
       renderWithRouter('/purchases');
-      const purchasesButton = screen.getByRole('button', { name: /purchases/i });
-      expect(purchasesButton).toHaveClass('Mui-selected');
+      expect(screen.getByRole('button', { name: /purchases/i })).toHaveClass('Mui-selected');
     });
 
     it('activates purchases tab on /purchases/new', () => {
       renderWithRouter('/purchases/new');
-      const purchasesButton = screen.getByRole('button', { name: /purchases/i });
-      expect(purchasesButton).toHaveClass('Mui-selected');
-    });
-
-    it('does not activate purchases tab on /dashboard', () => {
-      renderWithRouter('/dashboard');
-      const purchasesButton = screen.getByRole('button', { name: /purchases/i });
-      expect(purchasesButton).not.toHaveClass('Mui-selected');
+      expect(screen.getByRole('button', { name: /purchases/i })).toHaveClass('Mui-selected');
     });
 
     it('activates coops tab on /coops', () => {
       renderWithRouter('/coops');
-      const coopsButton = screen.getByRole('button', { name: /coops/i });
-      expect(coopsButton).toHaveClass('Mui-selected');
+      expect(screen.getByRole('button', { name: /coops/i })).toHaveClass('Mui-selected');
     });
 
     it('activates settings tab on /settings', () => {
       renderWithRouter('/settings');
-      const settingsButton = screen.getByRole('button', { name: /settings/i });
-      expect(settingsButton).toHaveClass('Mui-selected');
+      expect(screen.getByRole('button', { name: /settings/i })).toHaveClass('Mui-selected');
+    });
+
+    it('does not activate purchases tab on /dashboard', () => {
+      renderWithRouter('/dashboard');
+      expect(screen.getByRole('button', { name: /purchases/i })).not.toHaveClass('Mui-selected');
     });
   });
 
   describe('navigation on click', () => {
+    it('navigates to /records/list when clicking Records', async () => {
+      const user = userEvent.setup();
+      renderWithRouter('/dashboard');
+      await user.click(screen.getByRole('button', { name: /records/i }));
+      expect(mockNavigate).toHaveBeenCalledWith('/records/list');
+    });
+
     it('navigates to /purchases when clicking Purchases', async () => {
       const user = userEvent.setup();
       renderWithRouter('/dashboard');
