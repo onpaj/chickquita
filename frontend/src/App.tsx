@@ -18,14 +18,16 @@ import { OfflineBanner, PwaInstallPrompt, IosInstallPrompt } from './shared/comp
 import { useApiClient } from './lib/useApiClient'
 import { useAuth } from '@clerk/clerk-react'
 import { startAutoSync } from './lib/syncManager'
-import { Box, AppBar, Toolbar, Typography, IconButton } from '@mui/material'
+import { Box, AppBar, Toolbar, Typography, IconButton, Avatar } from '@mui/material'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { AppBarProvider, useAppBar } from './context/AppBarContext'
+import { useUser } from '@clerk/clerk-react'
 
 function AppInner() {
   useApiClient()
   const { isSignedIn } = useAuth()
+  const { user } = useUser()
   const navigate = useNavigate()
   const [bannerVisible, setBannerVisible] = useState(false)
   const { title, onBack } = useAppBar()
@@ -63,16 +65,16 @@ function AppInner() {
             >
               {title ?? 'Chickquita'}
             </Typography>
-            {!onBack && (
-              <IconButton
-                onClick={() => navigate('/settings')}
-                aria-label="settings"
-                size="medium"
-                sx={{ p: 1 }}
-              >
-                <AccountCircleIcon />
-              </IconButton>
-            )}
+            <IconButton
+              onClick={() => navigate('/settings')}
+              aria-label="settings"
+              size="medium"
+              sx={{ p: 1 }}
+            >
+              {user?.imageUrl
+                ? <Avatar src={user.imageUrl} sx={{ width: 32, height: 32 }} />
+                : <AccountCircleIcon />}
+            </IconButton>
           </Toolbar>
         </AppBar>
       )}
