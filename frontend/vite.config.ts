@@ -14,7 +14,7 @@ export default defineConfig({
       },
     }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['vite.svg'],
       manifest: {
         name: 'Chickquita - Evidence chovu slepic',

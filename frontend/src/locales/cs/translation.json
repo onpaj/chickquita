@@ -533,5 +533,11 @@
   "fab": {
     "addRecord": "Přidat denní záznam",
     "disabledTooltip": "Nejprve přidejte hejno"
+  },
+  "pwa": {
+    "update": {
+      "message": "Je dostupná nová verze aplikace.",
+      "action": "Aktualizovat"
+    }
   }
 }

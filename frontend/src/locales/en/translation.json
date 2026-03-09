@@ -531,5 +531,11 @@
   "fab": {
     "addRecord": "Add daily record",
     "disabledTooltip": "Add a flock first"
+  },
+  "pwa": {
+    "update": {
+      "message": "A new version of the app is available.",
+      "action": "Update"
+    }
   }
 }

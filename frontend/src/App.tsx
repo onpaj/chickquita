@@ -14,7 +14,7 @@ import { SettingsPage } from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import { BottomNavigation } from './components/BottomNavigation'
-import { OfflineBanner, PwaInstallPrompt, IosInstallPrompt } from './shared/components'
+import { OfflineBanner, PwaInstallPrompt, IosInstallPrompt, PwaUpdatePrompt } from './shared/components'
 import { useApiClient } from './lib/useApiClient'
 import { useAuth } from '@clerk/clerk-react'
 import { startAutoSync } from './lib/syncManager'
@@ -89,6 +89,9 @@ function AppInner() {
           <IosInstallPrompt />
         </>
       )}
+
+      {/* PWA update prompt — shown whenever a new version is available */}
+      <PwaUpdatePrompt />
 
       <Box sx={{ pb: isSignedIn ? 'calc(64px + env(safe-area-inset-bottom) + 80px)' : 0, pt: bannerVisible ? '60px' : 0 }}>
         <Routes>
