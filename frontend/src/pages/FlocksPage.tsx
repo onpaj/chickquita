@@ -189,6 +189,11 @@ export default function FlocksPage() {
         <Typography variant="h4" component="h1" gutterBottom>
           {t('flocks.title')}
         </Typography>
+        {coop?.name && (
+          <Typography variant="subtitle1" color="text.secondary" sx={{ mt: -1, mb: 1 }}>
+            {coop.name}
+          </Typography>
+        )}
 
         {/* Filter toggle */}
         <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
