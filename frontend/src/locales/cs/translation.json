@@ -40,7 +40,8 @@
     "dailyRecords": "Denní záznamy",
     "statistics": "Statistiky",
     "settings": "Nastavení",
-    "records": "Záznamy"
+    "records": "Záznamy",
+    "profile": "Profil"
   },
   "dashboard": {
     "title": "Přehled",
@@ -532,5 +533,9 @@
       "dismiss": "Už nezobrazovat",
       "gotIt": "Rozumím"
     }
+  },
+  "fab": {
+    "addRecord": "Přidat denní záznam",
+    "disabledTooltip": "Nejprve přidejte hejno"
   }
 }

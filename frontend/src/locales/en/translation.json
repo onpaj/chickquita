@@ -40,7 +40,8 @@
     "dailyRecords": "Daily Records",
     "statistics": "Statistics",
     "settings": "Settings",
-    "records": "Records"
+    "records": "Records",
+    "profile": "Profile"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -530,5 +531,9 @@
       "dismiss": "Don't show again",
       "gotIt": "Got it"
     }
+  },
+  "fab": {
+    "addRecord": "Add daily record",
+    "disabledTooltip": "Add a flock first"
   }
 }

@@ -22,7 +22,6 @@ vi.mock('react-i18next', () => ({
         'navigation.coops': 'Coops',
         'navigation.records': 'Records',
         'navigation.purchases': 'Purchases',
-        'navigation.settings': 'Settings',
       };
       return translations[key] ?? key;
     },
@@ -49,7 +48,12 @@ describe('BottomNavigation', () => {
       expect(screen.getByText('Coops')).toBeInTheDocument();
       expect(screen.getByText('Records')).toBeInTheDocument();
       expect(screen.getByText('Purchases')).toBeInTheDocument();
-      expect(screen.getByText('Settings')).toBeInTheDocument();
+    });
+
+    it('does not show Settings in bottom navigation', () => {
+      renderWithRouter('/dashboard');
+      expect(screen.queryByText('Settings')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /settings/i })).not.toBeInTheDocument();
     });
 
     it('does not show separate Daily Records and Statistics items', () => {
@@ -100,9 +104,10 @@ describe('BottomNavigation', () => {
       expect(screen.getByRole('button', { name: /coops/i })).toHaveClass('Mui-selected');
     });
 
-    it('activates settings tab on /settings', () => {
+    it('falls back to dashboard tab on /settings (settings removed from nav)', () => {
       renderWithRouter('/settings');
-      expect(screen.getByRole('button', { name: /settings/i })).toHaveClass('Mui-selected');
+      const dashboardButton = screen.getByRole('button', { name: /dashboard/i });
+      expect(dashboardButton).toHaveClass('Mui-selected');
     });
 
     it('does not activate purchases tab on /dashboard', () => {
@@ -131,13 +136,6 @@ describe('BottomNavigation', () => {
       renderWithRouter('/purchases');
       await user.click(screen.getByRole('button', { name: /dashboard/i }));
       expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
-    });
-
-    it('navigates to /settings when clicking Settings', async () => {
-      const user = userEvent.setup();
-      renderWithRouter('/dashboard');
-      await user.click(screen.getByRole('button', { name: /settings/i }));
-      expect(mockNavigate).toHaveBeenCalledWith('/settings');
     });
   });
 });
