@@ -504,10 +504,10 @@ public class PurchaseRepositoryTests : IDisposable
         _dbContext.Purchases.AddRange(purchase1, purchase2);
         await _dbContext.SaveChangesAsync();
 
-        // Act - This would normally be filtered by RLS, but in tests we see all data
-        var allPurchases = await _dbContext.Purchases.ToListAsync();
+        // Act - Use IgnoreQueryFilters to bypass global tenant filter and verify raw DB state
+        var allPurchases = await _dbContext.Purchases.IgnoreQueryFilters().ToListAsync();
 
-        // Assert - Verify both purchases exist in the database (RLS would filter in production)
+        // Assert - Both purchases exist in the database; global query filter (not tested here) handles isolation
         allPurchases.Should().HaveCount(2);
         allPurchases.Should().Contain(p => p.TenantId == _tenantId);
         allPurchases.Should().Contain(p => p.TenantId == tenant2Id);
