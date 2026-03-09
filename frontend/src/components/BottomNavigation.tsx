@@ -3,7 +3,6 @@ import {
   Dashboard as DashboardIcon,
   HomeWork as CoopsIcon,
   Assignment as RecordsIcon,
-  Settings as SettingsIcon,
   ShoppingCart as PurchasesIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -20,7 +19,6 @@ export function BottomNavigation() {
     if (location.pathname.startsWith('/daily-records')) return 'records';
     if (location.pathname.startsWith('/statistics')) return 'records';
     if (location.pathname.startsWith('/purchases')) return 'purchases';
-    if (location.pathname.startsWith('/settings')) return 'settings';
     return 'dashboard';
   };
 
@@ -37,9 +35,6 @@ export function BottomNavigation() {
         break;
       case 'purchases':
         navigate('/purchases');
-        break;
-      case 'settings':
-        navigate('/settings');
         break;
     }
   };
@@ -95,11 +90,6 @@ export function BottomNavigation() {
           label={t('navigation.purchases')}
           value="purchases"
           icon={<PurchasesIcon />}
-        />
-        <BottomNavigationAction
-          label={t('navigation.settings')}
-          value="settings"
-          icon={<SettingsIcon />}
         />
       </MuiBottomNavigation>
     </Paper>

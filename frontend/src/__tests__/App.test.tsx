@@ -5,11 +5,13 @@ import App from '../App';
 
 // Mock Clerk
 const mockUseAuth = vi.fn();
+const mockUseUser = vi.fn(() => ({ user: null }));
 vi.mock('@clerk/clerk-react', async () => {
   const actual = await vi.importActual('@clerk/clerk-react');
   return {
     ...actual,
     useAuth: () => mockUseAuth(),
+    useUser: () => mockUseUser(),
     ClerkProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   };
 });
