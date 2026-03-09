@@ -525,5 +525,9 @@
       "dismiss": "Don't show again",
       "gotIt": "Got it"
     }
+  },
+  "fab": {
+    "addRecord": "Add daily record",
+    "disabledTooltip": "Add a flock first"
   }
 }

@@ -527,5 +527,9 @@
       "dismiss": "Už nezobrazovat",
       "gotIt": "Rozumím"
     }
+  },
+  "fab": {
+    "addRecord": "Přidat denní záznam",
+    "disabledTooltip": "Nejprve přidejte hejno"
   }
 }

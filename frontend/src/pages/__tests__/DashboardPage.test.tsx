@@ -83,9 +83,11 @@ describe('DashboardPage', () => {
       expect(screen.queryByText('dashboard.quickActions.viewStatistics')).not.toBeInTheDocument();
     });
 
-    it('renders the FAB', () => {
+    it('renders the FAB enabled', () => {
       renderPage();
-      expect(screen.getByRole('button', { name: 'dashboard.quickActions.addDailyRecordAriaLabel' })).toBeInTheDocument();
+      const fab = screen.getByRole('button', { name: 'fab.addRecord' });
+      expect(fab).toBeInTheDocument();
+      expect(fab).not.toBeDisabled();
     });
 
     it('does not render empty state', () => {
@@ -114,9 +116,11 @@ describe('DashboardPage', () => {
       expect(screen.queryByTestId('today-summary-widget')).not.toBeInTheDocument();
     });
 
-    it('does not render FAB', () => {
+    it('renders the FAB disabled', () => {
       renderPage();
-      expect(screen.queryByRole('button', { name: 'dashboard.quickActions.addDailyRecordAriaLabel' })).not.toBeInTheDocument();
+      const fab = screen.getByRole('button', { name: 'fab.addRecord' });
+      expect(fab).toBeInTheDocument();
+      expect(fab).toBeDisabled();
     });
   });
 

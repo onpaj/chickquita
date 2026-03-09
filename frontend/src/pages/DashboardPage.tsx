@@ -96,25 +96,23 @@ export default function DashboardPage() {
         )}
 
         {/* Floating Action Button - Add Daily Record */}
-        {hasData && (
-          <Tooltip title={t('dashboard.quickActions.addDailyRecord')} placement="left">
-            <span>
-              <Fab
-                color="primary"
-                aria-label={t('dashboard.quickActions.addDailyRecordAriaLabel')}
-                onClick={handleAddDailyRecord}
-                disabled={flocks.length === 0}
-                sx={{
-                  position: 'fixed',
-                  bottom: { xs: 'calc(env(safe-area-inset-bottom) + 80px)', sm: 24 },
-                  right: 16,
-                }}
-              >
-                <AddIcon />
-              </Fab>
-            </span>
-          </Tooltip>
-        )}
+        <Tooltip title={!hasData ? t('fab.disabledTooltip') : t('fab.addRecord')} placement="left">
+          <span>
+            <Fab
+              color="primary"
+              aria-label={t('fab.addRecord')}
+              onClick={hasData ? handleAddDailyRecord : undefined}
+              disabled={!hasData}
+              sx={{
+                position: 'fixed',
+                bottom: { xs: 'calc(env(safe-area-inset-bottom) + 80px)', sm: 24 },
+                right: 16,
+              }}
+            >
+              <AddIcon />
+            </Fab>
+          </span>
+        </Tooltip>
 
         {/* Quick Add Modal */}
         <QuickAddModal

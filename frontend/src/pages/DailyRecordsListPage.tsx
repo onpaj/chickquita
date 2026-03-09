@@ -313,12 +313,12 @@ export function DailyRecordsListPage() {
       )}
 
       {/* Floating Action Button - Add Daily Record */}
-      <Tooltip title={t('dailyRecords.addRecord')} placement="left">
+      <Tooltip title={flocks.length === 0 ? t('fab.disabledTooltip') : t('fab.addRecord')} placement="left">
         <span>
           <Fab
             color="primary"
-            aria-label={t('dailyRecords.addRecord')}
-            onClick={() => setIsQuickAddOpen(true)}
+            aria-label={t('fab.addRecord')}
+            onClick={flocks.length > 0 ? () => setIsQuickAddOpen(true) : undefined}
             disabled={flocks.length === 0}
             sx={{
               position: 'fixed',
