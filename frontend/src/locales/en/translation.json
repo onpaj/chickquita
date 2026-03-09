@@ -465,6 +465,13 @@
     },
     "error": {
       "loadFailed": "Failed to load statistics"
+    },
+    "filters": {
+      "title": "Filters",
+      "coop": "Coop",
+      "flock": "Flock",
+      "allCoops": "All Coops",
+      "allFlocks": "All Flocks"
     }
   },
   "errors": {

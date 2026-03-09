@@ -467,6 +467,13 @@
     },
     "error": {
       "loadFailed": "Nepodařilo se načíst statistiky"
+    },
+    "filters": {
+      "title": "Filtry",
+      "coop": "Kurník",
+      "flock": "Hejno",
+      "allCoops": "Všechny kurníky",
+      "allFlocks": "Všechna hejna"
     }
   },
   "errors": {

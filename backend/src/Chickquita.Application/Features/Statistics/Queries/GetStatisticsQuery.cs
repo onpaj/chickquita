@@ -19,4 +19,14 @@ public sealed record GetStatisticsQuery : IRequest<Result<StatisticsDto>>
     /// End date for the statistics period (inclusive).
     /// </summary>
     public required DateOnly EndDate { get; init; }
+
+    /// <summary>
+    /// Optional coop ID to filter statistics to a specific coop.
+    /// </summary>
+    public Guid? CoopId { get; init; }
+
+    /// <summary>
+    /// Optional flock ID to filter statistics to a specific flock.
+    /// </summary>
+    public Guid? FlockId { get; init; }
 }
