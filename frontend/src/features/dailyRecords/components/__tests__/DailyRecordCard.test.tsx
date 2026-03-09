@@ -36,7 +36,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      expect(screen.getByText('15. 02. 2024')).toBeInTheDocument();
+      expect(screen.getByText('15. 2. 2024')).toBeInTheDocument();
       expect(screen.getByText('12')).toBeInTheDocument();
       expect(screen.getByText('vajec')).toBeInTheDocument();
       expect(screen.getByText('Hejno A')).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      expect(screen.getByText('15. 02. 2024')).toBeInTheDocument();
+      expect(screen.getByText('15. 2. 2024')).toBeInTheDocument();
       expect(screen.getByText('12')).toBeInTheDocument();
       expect(screen.queryByText('Hejno A')).not.toBeInTheDocument();
     });
@@ -59,7 +59,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      expect(screen.getByText('15. 02. 2024')).toBeInTheDocument();
+      expect(screen.getByText('15. 2. 2024')).toBeInTheDocument();
       expect(screen.getByText('12')).toBeInTheDocument();
       expect(screen.queryByText('Good production today')).not.toBeInTheDocument();
     });
@@ -99,7 +99,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      expect(screen.getByText('01. 01. 2024')).toBeInTheDocument();
+      expect(screen.getByText('1. 1. 2024')).toBeInTheDocument();
     });
   });
 
@@ -169,7 +169,7 @@ describe('DailyRecordCard', () => {
 
       const heading = container.querySelector('h3');
       expect(heading).toBeInTheDocument();
-      expect(heading?.textContent).toBe('15. 02. 2024');
+      expect(heading?.textContent).toBe('15. 2. 2024');
     });
 
     it('should render within a card container', () => {
@@ -325,7 +325,7 @@ describe('DailyRecordCard', () => {
         wrapper: createWrapper(),
       });
 
-      expect(screen.getByText('29. 02. 2024')).toBeInTheDocument();
+      expect(screen.getByText('29. 2. 2024')).toBeInTheDocument();
     });
 
     it('should format year boundary date correctly', () => {

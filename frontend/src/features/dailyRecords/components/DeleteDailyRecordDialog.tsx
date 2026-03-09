@@ -1,6 +1,5 @@
-import { format } from 'date-fns';
-import { cs } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '@/lib/dateFormat';
 import { ConfirmationDialog } from '@/shared/components/ConfirmationDialog';
 import { useDeleteDailyRecord } from '../hooks/useDailyRecords';
 import type { DailyRecordDto } from '../api/dailyRecordsApi';
@@ -67,9 +66,7 @@ export function DeleteDailyRecordDialog({
     return null;
   }
 
-  const formattedDate = format(new Date(record.recordDate), 'dd. MM. yyyy', {
-    locale: cs,
-  });
+  const formattedDate = formatDate(record.recordDate);
 
   const handleConfirm = () => {
     if (!record) return;

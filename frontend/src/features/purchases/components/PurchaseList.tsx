@@ -29,6 +29,7 @@ import BedIcon from '@mui/icons-material/Bed';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useTranslation } from 'react-i18next';
 import { IllustratedEmptyState, ConfirmationDialog } from '../../../shared/components';
+import { formatDate } from '@/lib/dateFormat';
 import { PurchaseListSkeleton } from './PurchaseListSkeleton';
 import { usePurchases, useDeletePurchase } from '../hooks/usePurchases';
 import { useCoops } from '../../coops/hooks/useCoops';
@@ -273,16 +274,6 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
     setPurchaseToDelete(null);
-  };
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat(t('common.locale'), {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    }).format(date);
   };
 
   // Loading state
