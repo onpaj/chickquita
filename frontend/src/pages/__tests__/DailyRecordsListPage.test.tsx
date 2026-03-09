@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
+import { format, subDays } from 'date-fns';
 import { DailyRecordsListPage } from '../DailyRecordsListPage';
 import type { DailyRecordDto } from '../../features/dailyRecords/api/dailyRecordsApi';
 import type { FlockForQuickAdd } from '../../features/flocks/hooks/useAllFlocks';
@@ -13,7 +14,7 @@ const mockUseCoops = vi.fn();
 const mockUseAllFlocks = vi.fn();
 
 vi.mock('../../features/dailyRecords/hooks/useDailyRecords', () => ({
-  useDailyRecords: () => mockUseDailyRecords(),
+  useDailyRecords: (params: unknown) => mockUseDailyRecords(params),
 }));
 
 vi.mock('../../features/coops/hooks/useCoops', () => ({
@@ -239,6 +240,73 @@ describe('DailyRecordsListPage', () => {
       renderPage();
 
       expect(screen.getByRole('heading', { name: 'Daily Records' })).toBeInTheDocument();
+    });
+  });
+
+  describe('Default filters', () => {
+    it('calls useDailyRecords with last 30 days by default', () => {
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
+
+      renderPage();
+
+      expect(mockUseDailyRecords).toHaveBeenCalledWith(
+        expect.objectContaining({ startDate: thirtyDaysAgo, endDate: today })
+      );
+    });
+
+    it('does not show "Clear filters" button when using default filters', () => {
+      renderPage();
+
+      expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument();
+    });
+
+    it('shows start date field pre-filled with 30 days ago', () => {
+      const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
+
+      renderPage();
+
+      const startDateInput = screen.getByLabelText('Start date') as HTMLInputElement;
+      expect(startDateInput.value).toBe(thirtyDaysAgo);
+    });
+
+    it('shows end date field pre-filled with today', () => {
+      const today = format(new Date(), 'yyyy-MM-dd');
+
+      renderPage();
+
+      const endDateInput = screen.getByLabelText('End date') as HTMLInputElement;
+      expect(endDateInput.value).toBe(today);
+    });
+
+    it('shows "Clear filters" button after applying a quick filter', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      // "Last week" sets startDate to 7 days ago — different from default 30 days ago
+      await user.click(screen.getByRole('button', { name: 'Last week' }));
+
+      expect(screen.getByRole('button', { name: 'Clear filters' })).toBeInTheDocument();
+    });
+
+    it('"Clear filters" resets to default 30-day range, not empty', async () => {
+      const user = userEvent.setup();
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
+
+      renderPage();
+
+      // Apply "Last week" filter (changes startDate to 7 days ago)
+      await user.click(screen.getByRole('button', { name: 'Last week' }));
+
+      const clearButton = screen.getByRole('button', { name: 'Clear filters' });
+      await user.click(clearButton);
+
+      // Dates should be back to 30-day default
+      const startDateInput = screen.getByLabelText('Start date') as HTMLInputElement;
+      const endDateInput = screen.getByLabelText('End date') as HTMLInputElement;
+      expect(startDateInput.value).toBe(thirtyDaysAgo);
+      expect(endDateInput.value).toBe(today);
     });
   });
 });
