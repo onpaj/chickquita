@@ -136,7 +136,7 @@
     "deleteFlock": "Delete Flock",
     "archiveFlock": "Archive Flock",
     "flockName": "Flock Name",
-    "identifier": "Identifier",
+    "identifier": "Name",
     "hens": "Hens",
     "roosters": "Roosters",
     "chicks": "Chicks",
@@ -155,7 +155,7 @@
     "flockCardAriaLabel": "Flock {{identifier}} in coop {{coopName}}",
     "belongsToCoopAriaLabel": "Belongs to coop {{coopName}}",
     "form": {
-      "identifier": "Flock Identifier",
+      "identifier": "Flock Name",
       "hatchDate": "Hatch Date",
       "hatchDateFuture": "Date cannot be in the future",
       "composition": "Flock Composition",
