@@ -10,24 +10,37 @@ import {
   Button,
   Chip,
   Tooltip,
+  Fab,
+  Divider,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Archive as ArchiveIcon,
   Delete as DeleteIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 import { useAppBar } from '../context/AppBarContext';
 import { useCoopDetail } from '../features/coops/hooks/useCoopDetail';
 import { useArchiveCoop, useDeleteCoop } from '../features/coops/hooks/useCoops';
+import { useFlocks, useArchiveFlock } from '../features/flocks/hooks/useFlocks';
 import { EditCoopModal } from '../features/coops/components/EditCoopModal';
 import { ArchiveCoopDialog } from '../features/coops/components/ArchiveCoopDialog';
 import { DeleteCoopDialog } from '../features/coops/components/DeleteCoopDialog';
+import { CreateFlockModal } from '../features/flocks/components/CreateFlockModal';
+import { EditFlockModal } from '../features/flocks/components/EditFlockModal';
+import { ArchiveFlockDialog } from '../features/flocks/components/ArchiveFlockDialog';
+import { FlockCard } from '../features/flocks/components/FlockCard';
+import { FlocksEmptyState } from '../features/flocks/components/FlocksEmptyState';
+import { FlockCardSkeleton } from '../shared/components/FlockCardSkeleton';
 import { ResourceNotFound } from '../components/ResourceNotFound';
 import { CoopDetailSkeleton } from '../shared/components';
 import { processApiError, ErrorType } from '../lib/errors';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useToast } from '../hooks/useToast';
 import { formatDateTime } from '../lib/dateFormat';
+import type { Flock } from '../features/flocks/api/flocksApi';
 
 export function CoopDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -38,9 +51,21 @@ export function CoopDetailPage() {
   const { mutate: deleteCoop, isPending: isDeleting } = useDeleteCoop();
   const { handleError } = useErrorHandler();
   const { showSuccess, showError } = useToast();
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  // Flocks state
+  const [includeInactive, setIncludeInactive] = useState(false);
+  const [isCreateFlockModalOpen, setIsCreateFlockModalOpen] = useState(false);
+  const [isEditFlockModalOpen, setIsEditFlockModalOpen] = useState(false);
+  const [isArchiveFlockDialogOpen, setIsArchiveFlockDialogOpen] = useState(false);
+  const [selectedFlock, setSelectedFlock] = useState<Flock | null>(null);
+
+  const { data: flocks, isLoading: isFlocksLoading } = useFlocks(id!, includeInactive);
+  const { mutate: archiveFlock, isPending: isArchivingFlock } = useArchiveFlock();
+
   const { setAppBar, resetAppBar } = useAppBar();
 
   const handleBack = useCallback(() => {
@@ -114,6 +139,55 @@ export function CoopDetailPage() {
       },
     });
   };
+
+  // Flock handlers
+  const handleFlockEdit = (flock: Flock) => {
+    setSelectedFlock(flock);
+    setIsEditFlockModalOpen(true);
+  };
+
+  const handleCloseEditFlockModal = () => {
+    setIsEditFlockModalOpen(false);
+    setSelectedFlock(null);
+  };
+
+  const handleFlockArchive = (flock: Flock) => {
+    setSelectedFlock(flock);
+    setIsArchiveFlockDialogOpen(true);
+  };
+
+  const handleCloseArchiveFlockDialog = () => {
+    setIsArchiveFlockDialogOpen(false);
+    setSelectedFlock(null);
+  };
+
+  const handleConfirmArchiveFlock = () => {
+    if (!selectedFlock) return;
+
+    archiveFlock(
+      { coopId: selectedFlock.coopId, flockId: selectedFlock.id },
+      {
+        onSuccess: () => {
+          showSuccess(t('flocks.archiveSuccess'));
+          setIsArchiveFlockDialogOpen(false);
+          setSelectedFlock(null);
+        },
+        onError: (error: Error) => {
+          setIsArchiveFlockDialogOpen(false);
+          setSelectedFlock(null);
+          handleError(error, handleConfirmArchiveFlock);
+        },
+      }
+    );
+  };
+
+  const sortedFlocks = flocks
+    ? [...flocks].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    : [];
+
+  const filteredFlocks = sortedFlocks.filter(flock =>
+    includeInactive ? true : flock.isActive
+  );
 
   if (isLoading) {
     return <CoopDetailSkeleton />;
@@ -218,13 +292,6 @@ export function CoopDetailPage() {
             sx={{ pt: 2 }}
           >
             <Button
-              variant="contained"
-              onClick={() => navigate(`/coops/${coop.id}/flocks`)}
-              sx={{ width: { xs: '100%', md: 'auto' }, minWidth: { md: 120 } }}
-            >
-              {t('flocks.title')}
-            </Button>
-            <Button
               variant="outlined"
               startIcon={<EditIcon />}
               onClick={handleEdit}
@@ -263,7 +330,74 @@ export function CoopDetailPage() {
         </Stack>
       </Paper>
 
-      {/* Edit Modal */}
+      {/* Flocks Section */}
+      <Box sx={{ mt: 4 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Typography variant="h6" component="h2">
+            {t('flocks.title')}
+          </Typography>
+          <ToggleButtonGroup
+            value={includeInactive ? 'all' : 'active'}
+            exclusive
+            onChange={(_, newValue) => {
+              if (newValue !== null) {
+                setIncludeInactive(newValue === 'all');
+              }
+            }}
+            size="small"
+            color="primary"
+            aria-label={t('flocks.filterStatus')}
+          >
+            <ToggleButton value="active" aria-label={t('flocks.active')}>
+              {t('flocks.active')}
+            </ToggleButton>
+            <ToggleButton value="all" aria-label={t('common.all')}>
+              {t('common.all')}
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Stack>
+
+        <Divider sx={{ mb: 2 }} />
+
+        {isFlocksLoading ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {[1, 2].map((index) => (
+              <FlockCardSkeleton key={index} />
+            ))}
+          </Box>
+        ) : filteredFlocks.length === 0 ? (
+          <FlocksEmptyState onAddClick={() => setIsCreateFlockModalOpen(true)} />
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {filteredFlocks.map((flock) => (
+              <FlockCard
+                key={flock.id}
+                flock={flock}
+                coopName={coop.name}
+                onEdit={handleFlockEdit}
+                onArchive={handleFlockArchive}
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
+
+      {/* FAB for adding flock */}
+      <Fab
+        color="primary"
+        aria-label={t('flocks.addFlock')}
+        data-testid="add-flock-fab"
+        sx={{
+          position: 'fixed',
+          bottom: { xs: 'calc(env(safe-area-inset-bottom) + 80px)', sm: 24 },
+          right: 16,
+        }}
+        onClick={() => setIsCreateFlockModalOpen(true)}
+      >
+        <AddIcon />
+      </Fab>
+
+      {/* Coop Edit Modal */}
       {coop && (
         <EditCoopModal
           open={isEditModalOpen}
@@ -272,7 +406,7 @@ export function CoopDetailPage() {
         />
       )}
 
-      {/* Archive Confirmation Dialog */}
+      {/* Archive Coop Confirmation Dialog */}
       {coop && (
         <ArchiveCoopDialog
           open={isArchiveDialogOpen}
@@ -283,7 +417,7 @@ export function CoopDetailPage() {
         />
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Coop Confirmation Dialog */}
       {coop && (
         <DeleteCoopDialog
           open={isDeleteDialogOpen}
@@ -291,6 +425,33 @@ export function CoopDetailPage() {
           onConfirm={handleConfirmDelete}
           coopName={coop.name}
           isPending={isDeleting}
+        />
+      )}
+
+      {/* Create Flock Modal */}
+      <CreateFlockModal
+        open={isCreateFlockModalOpen}
+        onClose={() => setIsCreateFlockModalOpen(false)}
+        coopId={id!}
+      />
+
+      {/* Edit Flock Modal */}
+      {selectedFlock && (
+        <EditFlockModal
+          open={isEditFlockModalOpen}
+          onClose={handleCloseEditFlockModal}
+          flock={selectedFlock}
+        />
+      )}
+
+      {/* Archive Flock Dialog */}
+      {selectedFlock && (
+        <ArchiveFlockDialog
+          open={isArchiveFlockDialogOpen}
+          onClose={handleCloseArchiveFlockDialog}
+          onConfirm={handleConfirmArchiveFlock}
+          flockIdentifier={selectedFlock.identifier}
+          isPending={isArchivingFlock}
         />
       )}
     </Container>

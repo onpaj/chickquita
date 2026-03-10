@@ -51,8 +51,12 @@ vi.mock('react-i18next', () => ({
         'coops.coopNotFound': 'Not found',
         'common.edit': 'Edit',
         'common.delete': 'Delete',
+        'common.all': 'All',
         'errors.backToList': 'Back to list',
         'flocks.title': 'Flocks',
+        'flocks.active': 'Active',
+        'flocks.filterStatus': 'Filter Status',
+        'flocks.addFlock': 'Add Flock',
       };
       return map[key] ?? key;
     },
@@ -80,6 +84,11 @@ vi.mock('../../features/coops/hooks/useCoops', () => ({
   useDeleteCoop: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
 }));
 
+vi.mock('../../features/flocks/hooks/useFlocks', () => ({
+  useFlocks: vi.fn(() => ({ data: [], isLoading: false })),
+  useArchiveFlock: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+}));
+
 vi.mock('../../hooks/useErrorHandler', () => ({
   useErrorHandler: () => ({ handleError: vi.fn() }),
 }));
@@ -92,6 +101,26 @@ vi.mock('../../features/coops/components/ArchiveCoopDialog', () => ({
 }));
 vi.mock('../../features/coops/components/DeleteCoopDialog', () => ({
   DeleteCoopDialog: () => null,
+}));
+vi.mock('../../features/flocks/components/CreateFlockModal', () => ({
+  CreateFlockModal: () => null,
+}));
+vi.mock('../../features/flocks/components/EditFlockModal', () => ({
+  EditFlockModal: () => null,
+}));
+vi.mock('../../features/flocks/components/ArchiveFlockDialog', () => ({
+  ArchiveFlockDialog: () => null,
+}));
+vi.mock('../../features/flocks/components/FlockCard', () => ({
+  FlockCard: ({ flock }: { flock: { identifier: string } }) => (
+    <div data-testid="flock-card">{flock.identifier}</div>
+  ),
+}));
+vi.mock('../../features/flocks/components/FlocksEmptyState', () => ({
+  FlocksEmptyState: () => <div data-testid="flocks-empty-state" />,
+}));
+vi.mock('../../features/flocks/components/FlockCardSkeleton', () => ({
+  FlockCardSkeleton: () => <div data-testid="flock-card-skeleton" />,
 }));
 vi.mock('../../components/ResourceNotFound', () => ({
   ResourceNotFound: ({ translationKey }: { translationKey: string }) => (
@@ -151,7 +180,6 @@ describe('CoopDetailPage', () => {
 
   it('does not render an inline back button inside the page', () => {
     renderPage();
-    // No ArrowBack IconButton should be in the page content
     const backButtons = screen.queryAllByRole('button', { name: /back/i });
     expect(backButtons).toHaveLength(0);
   });
@@ -161,5 +189,52 @@ describe('CoopDetailPage', () => {
     expect(screen.getByText('Edit')).toBeInTheDocument();
     expect(screen.getByText('Archive')).toBeInTheDocument();
     expect(screen.getByText('Delete')).toBeInTheDocument();
+  });
+
+  it('renders Flocks section heading', () => {
+    renderPage();
+    expect(screen.getByText('Flocks')).toBeInTheDocument();
+  });
+
+  it('renders empty state when no flocks', () => {
+    renderPage();
+    expect(screen.getByTestId('flocks-empty-state')).toBeInTheDocument();
+  });
+
+  it('renders flock cards when flocks are present', async () => {
+    const { useFlocks } = await import('../../features/flocks/hooks/useFlocks');
+    vi.mocked(useFlocks).mockReturnValue({
+      data: [
+        {
+          id: 'flock-1',
+          coopId: 'coop-1',
+          identifier: 'Flock Alpha',
+          isActive: true,
+          hatchDate: null,
+          currentHens: 5,
+          currentRoosters: 1,
+          currentChicks: 0,
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-01T00:00:00Z',
+        },
+      ],
+      isLoading: false,
+    } as unknown as ReturnType<typeof useFlocks>);
+
+    renderPage();
+    expect(screen.getByTestId('flock-card')).toBeInTheDocument();
+    expect(screen.getByText('Flock Alpha')).toBeInTheDocument();
+  });
+
+  it('renders Add Flock FAB', () => {
+    renderPage();
+    expect(screen.getByRole('button', { name: 'Add Flock' })).toBeInTheDocument();
+  });
+
+  it('onBack navigates to /coops', () => {
+    renderPage();
+    const callArgs = mockSetAppBar.mock.calls[0][0];
+    callArgs.onBack();
+    expect(mockNavigate).toHaveBeenCalledWith('/coops');
   });
 });
