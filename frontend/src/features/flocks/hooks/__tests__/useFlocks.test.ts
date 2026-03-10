@@ -98,6 +98,25 @@ describe('useCreateFlock', () => {
     expect(invalidatedFlat).toContain(JSON.stringify({ queryKey: ['flocks', 'all'] }));
   });
 
+  it('invalidates ["dashboard", "stats"] after successful creation', async () => {
+    mockCreate.mockResolvedValue({ id: 'flock-1', coopId: 'coop-1', identifier: 'F1', hatchDate: '2024-01-01', currentHens: 10, currentRoosters: 1, currentChicks: 0, isActive: true, createdAt: '', updatedAt: '', history: [], tenantId: 't1' });
+
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+    const { result } = renderHook(() => useCreateFlock(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ coopId: 'coop-1', identifier: 'F1', hatchDate: '2024-01-01', initialHens: 10, initialRoosters: 1, initialChicks: 0 });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const invalidatedKeys = invalidateSpy.mock.calls.map((call) => JSON.stringify(call[0]));
+    expect(invalidatedKeys).toContain(JSON.stringify({ queryKey: ['dashboard', 'stats'] }));
+  });
+
   it('invalidates scoped coop key after successful creation', async () => {
     mockCreate.mockResolvedValue({ id: 'flock-1', coopId: 'coop-1', identifier: 'F1', hatchDate: '2024-01-01', currentHens: 10, currentRoosters: 1, currentChicks: 0, isActive: true, createdAt: '', updatedAt: '', history: [], tenantId: 't1' });
 
@@ -221,6 +240,25 @@ describe('useArchiveFlock', () => {
 
     const invalidatedKeys = invalidateSpy.mock.calls.map((call) => JSON.stringify(call[0]));
     expect(invalidatedKeys).toContain(JSON.stringify({ queryKey: ['flocks', 'all'] }));
+  });
+
+  it('invalidates ["dashboard", "stats"] after successful archive', async () => {
+    mockArchive.mockResolvedValue(undefined);
+
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+    const { result } = renderHook(() => useArchiveFlock(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ coopId: 'coop-1', flockId: 'flock-1' });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const invalidatedKeys = invalidateSpy.mock.calls.map((call) => JSON.stringify(call[0]));
+    expect(invalidatedKeys).toContain(JSON.stringify({ queryKey: ['dashboard', 'stats'] }));
   });
 
   it('invalidates coop-scoped and flock-specific keys after successful archive', async () => {
