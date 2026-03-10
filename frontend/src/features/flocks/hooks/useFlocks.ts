@@ -107,6 +107,10 @@ export function useCreateFlock() {
       queryClient.invalidateQueries({
         queryKey: ['flocks', 'all']
       });
+      // Dashboard stats depend on flock counts — invalidate so the summary page refreshes
+      queryClient.invalidateQueries({
+        queryKey: ['dashboard', 'stats']
+      });
     },
   });
 }
@@ -167,6 +171,7 @@ export function useMatureChicks() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['flocks'] });
       queryClient.invalidateQueries({ queryKey: ['flockHistory', variables.flockId] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] });
       showSuccess(
         t('flocks.matureChicks.success'),
         'flocks.matureChicks.success'
@@ -202,6 +207,9 @@ export function useArchiveFlock() {
       });
       queryClient.invalidateQueries({
         queryKey: ['flocks', 'all']
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['dashboard', 'stats']
       });
       showSuccess(
         t('flocks.archive.success'),
