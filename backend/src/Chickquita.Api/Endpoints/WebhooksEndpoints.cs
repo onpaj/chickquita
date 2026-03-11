@@ -1,4 +1,3 @@
-using Chickquita.Application.Features.Users.Commands;
 using Chickquita.Application.Interfaces;
 using MediatR;
 
@@ -20,6 +19,7 @@ public static class WebhooksEndpoints
             .WithTags("Webhooks");
 
         // Clerk webhook endpoint
+        // TODO: Task 4 - Update to handle organization.created event using SyncOrgCommand
         group.MapPost("/clerk", async (HttpRequest request, IClerkWebhookValidator validator, IMediator mediator) =>
             {
                 // Read request body
@@ -37,26 +37,7 @@ public static class WebhooksEndpoints
                     return Results.Unauthorized();
                 }
 
-                var webhookDto = validationResult.Value;
-
-                // Handle user.created event
-                if (webhookDto.Type == "user.created")
-                {
-                    // Extract primary email
-                    var primaryEmail = webhookDto.Data.EmailAddresses
-                        .FirstOrDefault(e => e.Id == webhookDto.Data.PrimaryEmailAddressId)
-                        ?.EmailAddress ?? string.Empty;
-
-                    // Dispatch SyncUserCommand
-                    var syncCommand = new SyncUserCommand
-                    {
-                        ClerkUserId = webhookDto.Data.Id,
-                        Email = primaryEmail
-                    };
-
-                    await mediator.Send(syncCommand);
-                }
-
+                // TODO: Task 4 - Handle organization.created event with SyncOrgCommand
                 return Results.Ok();
             })
             .WithName("ClerkWebhook")

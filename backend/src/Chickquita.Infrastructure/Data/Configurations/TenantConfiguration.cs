@@ -4,31 +4,24 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Chickquita.Infrastructure.Data.Configurations;
 
-/// <summary>
-/// Entity Framework Core configuration for the Tenant entity.
-/// </summary>
 public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 {
     public void Configure(EntityTypeBuilder<Tenant> builder)
     {
-        // Table name
         builder.ToTable("tenants");
-
-        // Primary key
         builder.HasKey(t => t.Id);
 
-        // Properties
         builder.Property(t => t.Id)
             .HasColumnName("id")
             .IsRequired();
 
-        builder.Property(t => t.ClerkUserId)
-            .HasColumnName("clerk_user_id")
+        builder.Property(t => t.ClerkOrgId)
+            .HasColumnName("clerk_org_id")
             .HasMaxLength(255)
             .IsRequired();
 
-        builder.Property(t => t.Email)
-            .HasColumnName("email")
+        builder.Property(t => t.Name)
+            .HasColumnName("name")
             .HasMaxLength(255)
             .IsRequired();
 
@@ -42,12 +35,8 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasColumnType("timestamp with time zone")
             .IsRequired();
 
-        // Indexes
-        builder.HasIndex(t => t.ClerkUserId)
-            .HasDatabaseName("ix_tenants_clerk_user_id")
+        builder.HasIndex(t => t.ClerkOrgId)
+            .HasDatabaseName("ix_tenants_clerk_org_id")
             .IsUnique();
-
-        builder.HasIndex(t => t.Email)
-            .HasDatabaseName("ix_tenants_email");
     }
 }
