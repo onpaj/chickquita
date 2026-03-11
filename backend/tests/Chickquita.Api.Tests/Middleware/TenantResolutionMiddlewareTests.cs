@@ -212,6 +212,40 @@ public class TenantResolutionMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_WithNoOrgIdClaim_DoesNotSetTenantId()
+    {
+        // Arrange
+        var mockTenantRepository = new Mock<ITenantRepository>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim("sub", "user_xyz")  // authenticated but no org active
+        }, "TestAuth"));
+
+        var requestDelegate = new Mock<RequestDelegate>();
+        requestDelegate
+            .Setup(rd => rd(It.IsAny<HttpContext>()))
+            .Returns(Task.CompletedTask);
+
+        var mockLogger = new Mock<ILogger<Chickquita.Api.Middleware.TenantResolutionMiddleware>>();
+
+        var middleware = new Chickquita.Api.Middleware.TenantResolutionMiddleware(
+            requestDelegate.Object);
+
+        // Act
+        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object, mockLogger.Object);
+
+        // Assert
+        httpContext.Items.Should().NotContainKey("TenantId",
+            "TenantId should not be set when no org_id claim is present");
+        mockTenantRepository.Verify(
+            r => r.GetByClerkOrgIdAsync(It.IsAny<string>()),
+            Times.Never,
+            "Should not query tenant repository when org_id claim is missing");
+    }
+
+    [Fact]
     public async Task InvokeAsync_WhenTenantNotFound_AndNoOrgNameInClaims_UsesFallbackName()
     {
         // Arrange
