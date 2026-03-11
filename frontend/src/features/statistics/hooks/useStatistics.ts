@@ -11,7 +11,7 @@ import type { StatisticsDto } from '../types';
 /**
  * Fetch statistics for a given date range
  */
-export function useStatistics(startDate: string, endDate: string, coopId?: string, flockId?: string) {
+export function useStatistics(startDate?: string, endDate?: string, coopId?: string, flockId?: string) {
   return useQuery<StatisticsDto>({
     queryKey: ['statistics', startDate, endDate, coopId, flockId],
     queryFn: () => statisticsApi.getStatistics(startDate, endDate, coopId, flockId),

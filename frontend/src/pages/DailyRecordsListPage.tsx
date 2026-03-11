@@ -32,10 +32,7 @@ import { QuickAddModal } from '../features/dailyRecords/components/QuickAddModal
 import { IllustratedEmptyState, DailyRecordCardSkeleton } from '../shared/components';
 import type { GetDailyRecordsParams, DailyRecordDto } from '../features/dailyRecords/api/dailyRecordsApi';
 
-const getDefaultFilters = (): GetDailyRecordsParams => ({
-  startDate: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
-  endDate: format(new Date(), 'yyyy-MM-dd'),
-});
+const getDefaultFilters = (): GetDailyRecordsParams => ({});
 
 export function DailyRecordsListPage() {
   const { t } = useTranslation();

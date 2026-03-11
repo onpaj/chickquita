@@ -52,7 +52,7 @@ import { useFlocks } from '@/features/flocks/hooks/useFlocks';
  */
 export default function StatisticsPage() {
   const { t, i18n } = useTranslation();
-  const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'custom'>('30');
+  const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Dayjs | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Dayjs | null>(null);
   const [selectedCoopId, setSelectedCoopId] = useState<string>('');
@@ -65,6 +65,10 @@ export default function StatisticsPage() {
         startDate: customStartDate.format('YYYY-MM-DD'),
         endDate: customEndDate.format('YYYY-MM-DD'),
       };
+    }
+
+    if (dateRange === 'all') {
+      return { startDate: undefined, endDate: undefined };
     }
 
     const endDate = dayjs();
@@ -88,7 +92,7 @@ export default function StatisticsPage() {
 
   const handleDateRangeChange = (_event: React.MouseEvent<HTMLElement>, newRange: string | null) => {
     if (newRange !== null) {
-      setDateRange(newRange as '7' | '30' | '90' | 'custom');
+      setDateRange(newRange as '7' | '30' | '90' | 'all' | 'custom');
     }
   };
 
@@ -101,6 +105,7 @@ export default function StatisticsPage() {
     if (dateRange === '7') return t('statistics.dateRange.last7Days');
     if (dateRange === '30') return t('statistics.dateRange.last30Days');
     if (dateRange === '90') return t('statistics.dateRange.last90Days');
+    if (dateRange === 'all') return t('statistics.dateRange.allTime');
     return t('statistics.dateRange.custom');
   })();
 
@@ -166,6 +171,9 @@ export default function StatisticsPage() {
                     fullWidth
                     sx={{ '& .MuiToggleButton-root': { py: 1 } }}
                   >
+                    <ToggleButton value="all" aria-label={t('statistics.dateRange.allTime')}>
+                      {t('statistics.dateRange.allTime')}
+                    </ToggleButton>
                     <ToggleButton value="7" aria-label={t('statistics.dateRange.last7Days')}>
                       {t('statistics.dateRange.last7Days')}
                     </ToggleButton>

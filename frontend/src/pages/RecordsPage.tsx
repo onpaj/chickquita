@@ -10,12 +10,12 @@ export function RecordsPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
-  const currentTab = location.pathname.endsWith('/stats') ? 'stats' : 'list'
+  const currentTab = location.pathname.endsWith('/list') ? 'list' : 'stats'
 
   useEffect(() => {
-    // Redirect bare /records to /records/list
+    // Redirect bare /records to /records/stats
     if (location.pathname === '/records' || location.pathname === '/records/') {
-      navigate('/records/list', { replace: true })
+      navigate('/records/stats', { replace: true })
     }
   }, [location.pathname, navigate])
 
@@ -27,14 +27,14 @@ export function RecordsPage() {
           onChange={(_, v: string) => navigate(`/records/${v}`)}
           variant="fullWidth"
         >
-          <Tab label={t('navigation.dailyRecords')} value="list" />
           <Tab label={t('navigation.statistics')} value="stats" />
+          <Tab label={t('navigation.dailyRecords')} value="list" />
         </Tabs>
       </Box>
       <Routes>
         <Route path="list" element={<DailyRecordsListPage />} />
         <Route path="stats" element={<StatisticsPage />} />
-        <Route index element={<Navigate to="list" replace />} />
+        <Route index element={<Navigate to="stats" replace />} />
       </Routes>
     </Box>
   )

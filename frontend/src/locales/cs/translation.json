@@ -431,6 +431,7 @@
     "dateRange": {
       "title": "Časové období",
       "ariaLabel": "Vyberte časové období",
+      "allTime": "Vše",
       "last7Days": "7 dní",
       "last30Days": "30 dní",
       "last90Days": "90 dní",
