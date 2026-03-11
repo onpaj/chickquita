@@ -102,11 +102,11 @@ describe('RecordsPage', () => {
   });
 
   describe('Default redirect', () => {
-    it('redirects /records/index to list tab', () => {
+    it('redirects /records to stats tab', () => {
       renderAt('/records');
 
-      // After redirect, daily records content should be visible
-      expect(screen.getByTestId('daily-records-page')).toBeInTheDocument();
+      // After redirect, statistics content should be visible
+      expect(screen.getByTestId('statistics-page')).toBeInTheDocument();
     });
   });
 });

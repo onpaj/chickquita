@@ -61,6 +61,7 @@ vi.mock('react-i18next', () => ({
         'statistics.title': 'Statistics',
         'statistics.dateRange.title': 'Time Period',
         'statistics.dateRange.ariaLabel': 'Select time period',
+        'statistics.dateRange.allTime': 'All time',
         'statistics.dateRange.last7Days': '7 days',
         'statistics.dateRange.last30Days': '30 days',
         'statistics.dateRange.last90Days': '90 days',
@@ -139,7 +140,7 @@ describe('StatisticsPage', () => {
 
     it('shows filter summary with default date range and flock label', () => {
       renderPage();
-      expect(screen.getByText('30 days · All Flocks')).toBeInTheDocument();
+      expect(screen.getByText('All time · All Flocks')).toBeInTheDocument();
     });
 
     it('expands accordion when clicking the summary', async () => {

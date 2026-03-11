@@ -3,7 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
-import { format, subDays } from 'date-fns';
 import { DailyRecordsListPage } from '../DailyRecordsListPage';
 import type { DailyRecordDto } from '../../features/dailyRecords/api/dailyRecordsApi';
 import type { FlockForQuickAdd } from '../../features/flocks/hooks/useAllFlocks';
@@ -246,15 +245,10 @@ describe('DailyRecordsListPage', () => {
   });
 
   describe('Default filters', () => {
-    it('calls useDailyRecords with last 30 days by default', () => {
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
-
+    it('calls useDailyRecords with no date filter by default (all-time)', () => {
       renderPage();
 
-      expect(mockUseDailyRecords).toHaveBeenCalledWith(
-        expect.objectContaining({ startDate: thirtyDaysAgo, endDate: today })
-      );
+      expect(mockUseDailyRecords).toHaveBeenCalledWith({});
     });
 
     it('does not show "Clear filters" button when using default filters', () => {
@@ -263,22 +257,18 @@ describe('DailyRecordsListPage', () => {
       expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument();
     });
 
-    it('shows start date field pre-filled with 30 days ago', () => {
-      const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
-
+    it('shows start date field empty by default (all-time)', () => {
       renderPage();
 
       const startDateInput = screen.getByLabelText('Start date') as HTMLInputElement;
-      expect(startDateInput.value).toBe(thirtyDaysAgo);
+      expect(startDateInput.value).toBe('');
     });
 
-    it('shows end date field pre-filled with today', () => {
-      const today = format(new Date(), 'yyyy-MM-dd');
-
+    it('shows end date field empty by default (all-time)', () => {
       renderPage();
 
       const endDateInput = screen.getByLabelText('End date') as HTMLInputElement;
-      expect(endDateInput.value).toBe(today);
+      expect(endDateInput.value).toBe('');
     });
 
     it('shows "Clear filters" button after applying a quick filter', async () => {
@@ -291,10 +281,8 @@ describe('DailyRecordsListPage', () => {
       expect(screen.getByRole('button', { name: 'Clear filters' })).toBeInTheDocument();
     });
 
-    it('"Clear filters" resets to default 30-day range, not empty', async () => {
+    it('"Clear filters" resets to empty (all-time)', async () => {
       const user = userEvent.setup();
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
 
       renderPage();
 
@@ -304,11 +292,11 @@ describe('DailyRecordsListPage', () => {
       const clearButton = screen.getByRole('button', { name: 'Clear filters' });
       await user.click(clearButton);
 
-      // Dates should be back to 30-day default
+      // Dates should be cleared back to empty (all-time default)
       const startDateInput = screen.getByLabelText('Start date') as HTMLInputElement;
       const endDateInput = screen.getByLabelText('End date') as HTMLInputElement;
-      expect(startDateInput.value).toBe(thirtyDaysAgo);
-      expect(endDateInput.value).toBe(today);
+      expect(startDateInput.value).toBe('');
+      expect(endDateInput.value).toBe('');
     });
   });
 });
