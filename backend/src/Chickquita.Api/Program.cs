@@ -1,6 +1,7 @@
 using Chickquita.Api.Endpoints;
 using Chickquita.Api.Middleware;
 using Chickquita.Application;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -106,6 +107,30 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
+
+// Intercept FluentValidation.ValidationException from the MediatR pipeline behavior
+// and return 400 Bad Request instead of 500. This applies to all endpoints globally.
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next(context);
+    }
+    catch (ValidationException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        context.Response.ContentType = "application/json";
+        var error = new
+        {
+            error = new
+            {
+                code = "Error.Validation",
+                message = string.Join("; ", ex.Errors.Select(e => e.ErrorMessage))
+            }
+        };
+        await context.Response.WriteAsJsonAsync(error);
+    }
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
