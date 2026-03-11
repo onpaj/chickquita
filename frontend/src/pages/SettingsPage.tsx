@@ -20,7 +20,7 @@ import LanguageIcon from '@mui/icons-material/Language';
 import LogoutIcon from '@mui/icons-material/Logout';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from 'react-i18next';
-import { useClerk, useUser } from '@clerk/clerk-react';
+import { OrganizationProfile, useClerk, useOrganization, useUser } from '@clerk/clerk-react';
 import { ConfirmationDialog } from '@/shared/components';
 
 const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
@@ -29,6 +29,7 @@ export function SettingsPage() {
   const { t, i18n } = useTranslation();
   const { signOut } = useClerk();
   const { user } = useUser();
+  const { organization } = useOrganization();
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -73,6 +74,18 @@ export function SettingsPage() {
           </Box>
         </CardContent>
       </Card>
+
+      {/* Members section - only show if user has an active organization */}
+      {organization && (
+        <Card elevation={1} sx={{ mt: 2 }}>
+          <CardContent>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+              {t('settings.members')}
+            </Typography>
+            <OrganizationProfile />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Profile / sign-out section */}
       <Card elevation={1} sx={{ mt: 2 }}>

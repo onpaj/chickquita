@@ -406,7 +406,9 @@
     "signOutConfirmMessage": "Opravdu se chcete odhlásit?",
     "signOutConfirmButton": "Odhlásit se",
     "about": "O aplikaci",
-    "version": "Verze"
+    "version": "Verze",
+    "members": "Členové farmy",
+    "inviteMember": "Pozvat člena"
   },
   "validation": {
     "required": "Toto pole je povinné",

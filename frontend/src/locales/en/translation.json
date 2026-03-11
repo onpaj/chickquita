@@ -404,7 +404,9 @@
     "signOutConfirmMessage": "Are you sure you want to sign out?",
     "signOutConfirmButton": "Sign Out",
     "about": "About",
-    "version": "Version"
+    "version": "Version",
+    "members": "Farm Members",
+    "inviteMember": "Invite Member"
   },
   "validation": {
     "required": "This field is required",

@@ -26,8 +26,8 @@ export function useApiClient() {
   const { getToken } = useAuth();
 
   useEffect(() => {
-    // Set up the token getter for the API client
-    // Clerk's getToken automatically handles token refresh
-    setTokenGetter(() => getToken());
+    // Set up the token getter for the API client using the 'chickquita' JWT template
+    // This template includes the org_id claim for organization-scoped requests
+    setTokenGetter(() => getToken({ template: 'chickquita' }));
   }, [getToken]);
 }
