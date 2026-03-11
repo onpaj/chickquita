@@ -35,8 +35,8 @@ public sealed class GetStatisticsQueryHandler : IRequestHandler<GetStatisticsQue
     {
         _logger.LogInformation(
             "Processing GetStatisticsQuery for period: {StartDate} to {EndDate}",
-            request.StartDate,
-            request.EndDate);
+            request.StartDate?.ToString() ?? "all",
+            request.EndDate?.ToString() ?? "all");
 
         try
         {
@@ -55,8 +55,8 @@ public sealed class GetStatisticsQueryHandler : IRequestHandler<GetStatisticsQue
                 return Result<StatisticsDto>.Failure(Error.Unauthorized("Tenant not found"));
             }
 
-            // Validate date range
-            if (request.StartDate > request.EndDate)
+            // Validate date range only when both dates are provided
+            if (request.StartDate.HasValue && request.EndDate.HasValue && request.StartDate > request.EndDate)
             {
                 _logger.LogWarning(
                     "GetStatisticsQuery: Invalid date range - StartDate ({StartDate}) > EndDate ({EndDate})",
@@ -72,8 +72,8 @@ public sealed class GetStatisticsQueryHandler : IRequestHandler<GetStatisticsQue
             _logger.LogInformation(
                 "Retrieved statistics for tenant: {TenantId}, Period: {StartDate} to {EndDate}, Total Eggs: {TotalEggs}, Total Cost: {TotalCost}",
                 tenantId.Value,
-                request.StartDate,
-                request.EndDate,
+                request.StartDate?.ToString() ?? "all",
+                request.EndDate?.ToString() ?? "all",
                 stats.Summary.TotalEggs,
                 stats.Summary.TotalCost);
 
@@ -84,8 +84,8 @@ public sealed class GetStatisticsQueryHandler : IRequestHandler<GetStatisticsQue
             _logger.LogError(
                 ex,
                 "Error occurred while retrieving statistics for period: {StartDate} to {EndDate}",
-                request.StartDate,
-                request.EndDate);
+                request.StartDate?.ToString() ?? "all",
+                request.EndDate?.ToString() ?? "all");
 
             return Result<StatisticsDto>.Failure(
                 Error.Failure($"Failed to retrieve statistics: {ex.Message}"));
