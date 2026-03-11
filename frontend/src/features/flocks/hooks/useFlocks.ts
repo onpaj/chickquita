@@ -122,7 +122,7 @@ export function useCreateFlock() {
 export function useUpdateFlock() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const { showSuccess, showError } = useToast();
+  const { showSuccess } = useToast();
 
   return useMutation({
     mutationFn: ({
@@ -145,12 +145,6 @@ export function useUpdateFlock() {
       showSuccess(
         t('flocks.update.success'),
         'flocks.update.success'
-      );
-    },
-    onError: () => {
-      showError(
-        t('flocks.update.error'),
-        'flocks.update.error'
       );
     },
   });

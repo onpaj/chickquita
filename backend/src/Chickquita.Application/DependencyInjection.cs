@@ -1,4 +1,5 @@
 using System.Reflection;
+using Chickquita.Application.Behaviors;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,10 +18,11 @@ public static class DependencyInjection
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // Register MediatR with all handlers from this assembly
+        // Register MediatR with all handlers and the validation pipeline behavior
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         });
 
         // Register AutoMapper with profiles from this assembly
