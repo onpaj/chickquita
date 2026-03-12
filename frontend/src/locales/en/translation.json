@@ -450,7 +450,8 @@
       "description": "Egg production over time",
       "eggs": "Eggs",
       "yAxisLabel": "Number of Eggs",
-      "noData": "No data for selected period"
+      "noData": "No data for selected period",
+      "weekOf": "Week of {{date}}"
     },
     "costPerEggTrend": {
       "title": "Cost Per Egg Trend",

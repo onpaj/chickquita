@@ -452,7 +452,8 @@
       "description": "Produkce vajec v čase",
       "eggs": "Vajec",
       "yAxisLabel": "Počet vajec",
-      "noData": "Žádná data za vybrané období"
+      "noData": "Žádná data za vybrané období",
+      "weekOf": "Týden od {{date}}"
     },
     "costPerEggTrend": {
       "title": "Vývoj ceny za vejce",
