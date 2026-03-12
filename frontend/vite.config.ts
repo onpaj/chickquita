@@ -14,7 +14,7 @@ export default defineConfig({
       },
     }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['vite.svg'],
       manifest: {
         name: 'Chickquita - Evidence chovu slepic',
@@ -102,8 +102,6 @@ export default defineConfig({
         ],
         // Clean up old caches
         cleanupOutdatedCaches: true,
-        // Skip waiting and activate new service worker immediately
-        skipWaiting: true,
         clientsClaim: true
       },
       devOptions: {
