@@ -31,7 +31,7 @@ export function BottomNavigation() {
         navigate('/coops');
         break;
       case 'records':
-        navigate('/records/list');
+        navigate('/records/stats');
         break;
       case 'purchases':
         navigate('/purchases');
