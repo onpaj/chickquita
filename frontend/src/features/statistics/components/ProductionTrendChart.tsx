@@ -11,18 +11,18 @@ import {
   Legend,
 } from 'recharts';
 import type { ProductionTrendItem } from '../types';
+import { aggregateProductionData } from '../utils/aggregateProductionData';
+import type { AggregatedProductionItem } from '../utils/aggregateProductionData';
 import dayjs from 'dayjs';
 
 /**
  * Production Trend Chart Component
  *
  * Displays a line chart showing egg production trend over time.
- *
- * Features:
- * - Responsive line chart with Recharts
- * - Date formatting on X-axis
- * - Interactive tooltip with daily totals
- * - Smooth curve animation
+ * Automatically adjusts x-axis granularity based on the date range:
+ *   - <= 30 days  → daily
+ *   - <= 112 days → weekly
+ *   - >  112 days → monthly
  */
 
 interface ProductionTrendChartProps {
@@ -31,13 +31,29 @@ interface ProductionTrendChartProps {
 
 interface ProductionTrendTooltipProps {
   active?: boolean;
-  payload?: readonly { payload: ProductionTrendItem }[];
+  payload?: readonly { payload: AggregatedProductionItem }[];
 }
 
 function ProductionTrendTooltip({ active, payload }: ProductionTrendTooltipProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
+    const item = payload[0].payload;
+    const d = dayjs(item.date);
+
+    let label: string;
+    if (item.granularity === 'monthly') {
+      label =
+        i18n.language === 'cs' ? d.format('MMMM YYYY') : d.format('MMMM YYYY');
+    } else if (item.granularity === 'weekly') {
+      label =
+        i18n.language === 'cs'
+          ? t('statistics.productionTrend.weekOf', { date: d.format('D. M. YYYY') })
+          : t('statistics.productionTrend.weekOf', { date: d.format('D MMM YYYY') });
+    } else {
+      label =
+        i18n.language === 'cs' ? d.format('D. M. YYYY') : d.format('D MMM YYYY');
+    }
+
     return (
       <Box
         sx={{
@@ -49,10 +65,10 @@ function ProductionTrendTooltip({ active, payload }: ProductionTrendTooltipProps
         }}
       >
         <Typography variant="body2" fontWeight={600}>
-          {dayjs(data.date).format('DD MMMM YYYY')}
+          {label}
         </Typography>
         <Typography variant="body2" color="primary">
-          {t('statistics.productionTrend.eggs')}: {data.eggs}
+          {t('statistics.productionTrend.eggs')}: {item.eggs}
         </Typography>
       </Box>
     );
@@ -63,12 +79,18 @@ function ProductionTrendTooltip({ active, payload }: ProductionTrendTooltipProps
 export function ProductionTrendChart({ data }: ProductionTrendChartProps) {
   const { t, i18n } = useTranslation();
 
-  // Format date for display — unambiguous, locale-aware
-  const formatDate = (dateString: string) => {
+  const aggregated = aggregateProductionData(data ?? []);
+  const granularity = aggregated[0]?.granularity ?? 'daily';
+
+  const formatXAxis = (dateString: string) => {
     const d = dayjs(dateString);
-    return i18n.language === 'cs'
-      ? d.format('D. M. YYYY')
-      : d.format('D MMM YYYY');
+    if (granularity === 'monthly') {
+      return i18n.language === 'cs' ? d.format('MMM YYYY') : d.format('MMM YYYY');
+    }
+    if (granularity === 'weekly') {
+      return i18n.language === 'cs' ? d.format('D. M.') : d.format('D MMM');
+    }
+    return i18n.language === 'cs' ? d.format('D. M.') : d.format('D MMM');
   };
 
   // Empty state
@@ -95,11 +117,11 @@ export function ProductionTrendChart({ data }: ProductionTrendChartProps) {
       </Typography>
 
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+        <LineChart data={aggregated} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="date"
-            tickFormatter={formatDate}
+            tickFormatter={formatXAxis}
             style={{ fontSize: '12px' }}
           />
           <YAxis
