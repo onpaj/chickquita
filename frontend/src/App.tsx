@@ -14,7 +14,7 @@ import { SettingsPage } from './pages/SettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import { BottomNavigation } from './components/BottomNavigation'
-import { OfflineBanner, PwaInstallPrompt, IosInstallPrompt } from './shared/components'
+import { OfflineBanner, PwaInstallPrompt, IosInstallPrompt, UpdateNotification } from './shared/components'
 import { useApiClient } from './lib/useApiClient'
 import { useAuth } from '@clerk/clerk-react'
 import { startAutoSync } from './lib/syncManager'
@@ -78,6 +78,9 @@ function AppInner() {
           </Toolbar>
         </AppBar>
       )}
+
+      {/* PWA update notification */}
+      <UpdateNotification />
 
       {/* Offline detection banner */}
       {isSignedIn && <OfflineBanner onVisibilityChange={setBannerVisible} />}

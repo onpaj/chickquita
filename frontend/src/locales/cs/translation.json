@@ -517,6 +517,10 @@
       "install": "Instalovat",
       "dismiss": "Už nezobrazovat"
     },
+    "update": {
+      "message": "Je dostupná nová verze aplikace.",
+      "reload": "Aktualizovat"
+    },
     "ios": {
       "title": "Přidat na plochu",
       "description": "Pro instalaci aplikace Chickquita na iPhone nebo iPad postupujte podle následujících kroků:",
