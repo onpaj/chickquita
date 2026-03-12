@@ -11,14 +11,14 @@ namespace Chickquita.Application.Features.Statistics.Queries;
 public sealed record GetStatisticsQuery : IRequest<Result<StatisticsDto>>
 {
     /// <summary>
-    /// Start date for the statistics period (inclusive).
+    /// Start date for the statistics period (inclusive). Null means no lower bound (all time).
     /// </summary>
-    public required DateOnly StartDate { get; init; }
+    public DateOnly? StartDate { get; init; }
 
     /// <summary>
-    /// End date for the statistics period (inclusive).
+    /// End date for the statistics period (inclusive). Null means no upper bound (all time).
     /// </summary>
-    public required DateOnly EndDate { get; init; }
+    public DateOnly? EndDate { get; init; }
 
     /// <summary>
     /// Optional coop ID to filter statistics to a specific coop.

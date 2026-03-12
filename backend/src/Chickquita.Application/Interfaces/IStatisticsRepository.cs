@@ -21,5 +21,5 @@ public interface IStatisticsRepository
     /// <param name="startDate">Start date (inclusive)</param>
     /// <param name="endDate">End date (inclusive)</param>
     /// <returns>Detailed statistics DTO</returns>
-    Task<StatisticsDto> GetStatisticsAsync(DateOnly startDate, DateOnly endDate, Guid? coopId = null, Guid? flockId = null);
+    Task<StatisticsDto> GetStatisticsAsync(DateOnly? startDate = null, DateOnly? endDate = null, Guid? coopId = null, Guid? flockId = null);
 }

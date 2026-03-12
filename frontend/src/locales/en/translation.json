@@ -516,6 +516,10 @@
       "install": "Install",
       "dismiss": "Don't show again"
     },
+    "update": {
+      "message": "A new version of the app is available.",
+      "reload": "Update"
+    },
     "ios": {
       "title": "Add to Home Screen",
       "description": "To install Chickquita app on iPhone or iPad, follow these steps:",
