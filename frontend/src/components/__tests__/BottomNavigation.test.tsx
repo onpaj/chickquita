@@ -117,11 +117,11 @@ describe('BottomNavigation', () => {
   });
 
   describe('navigation on click', () => {
-    it('navigates to /records/list when clicking Records', async () => {
+    it('navigates to /records/stats when clicking Records', async () => {
       const user = userEvent.setup();
       renderWithRouter('/dashboard');
       await user.click(screen.getByRole('button', { name: /records/i }));
-      expect(mockNavigate).toHaveBeenCalledWith('/records/list');
+      expect(mockNavigate).toHaveBeenCalledWith('/records/stats');
     });
 
     it('navigates to /purchases when clicking Purchases', async () => {

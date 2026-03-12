@@ -71,20 +71,30 @@ public static class StatisticsEndpoints
     /// <returns>Detailed statistics DTO.</returns>
     private static async Task<IResult> GetStatistics(
         [FromServices] IMediator mediator,
-        [FromQuery] string startDate,
-        [FromQuery] string endDate,
+        [FromQuery] string? startDate = null,
+        [FromQuery] string? endDate = null,
         [FromQuery] string? coopId = null,
         [FromQuery] string? flockId = null)
     {
-        // Parse date strings to DateOnly
-        if (!DateOnly.TryParse(startDate, out var parsedStartDate))
+        // Parse optional date strings to DateOnly
+        DateOnly? parsedStartDate = null;
+        if (startDate != null && !DateOnly.TryParse(startDate, out var tempStart))
         {
             return Results.BadRequest(new { error = "Invalid startDate format. Use YYYY-MM-DD." });
         }
+        else if (startDate != null)
+        {
+            parsedStartDate = DateOnly.Parse(startDate);
+        }
 
-        if (!DateOnly.TryParse(endDate, out var parsedEndDate))
+        DateOnly? parsedEndDate = null;
+        if (endDate != null && !DateOnly.TryParse(endDate, out var tempEnd))
         {
             return Results.BadRequest(new { error = "Invalid endDate format. Use YYYY-MM-DD." });
+        }
+        else if (endDate != null)
+        {
+            parsedEndDate = DateOnly.Parse(endDate);
         }
 
         Guid? parsedCoopId = null;
