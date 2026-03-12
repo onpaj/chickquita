@@ -116,3 +116,7 @@ tasks/
 BRIEF.md
 WORKLOG.md
 .ralph/
+.claude/worktrees/
+.claire/
+.playwright-mcp/
+import/

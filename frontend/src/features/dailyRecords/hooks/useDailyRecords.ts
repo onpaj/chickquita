@@ -120,6 +120,8 @@ export function useCreateDailyRecord() {
       queryClient.invalidateQueries({
         queryKey: ['dailyRecords', 'flock', variables.flockId],
       });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['statistics'] });
     },
   });
 }
@@ -143,6 +145,8 @@ export function useUpdateDailyRecord() {
       queryClient.invalidateQueries({
         queryKey: ['dailyRecords', 'flock', updatedRecord.flockId],
       });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['statistics'] });
       showSuccess(
         t('dailyRecords.update.success'),
         'dailyRecords.update.success'
@@ -176,6 +180,8 @@ export function useDeleteDailyRecord() {
       queryClient.invalidateQueries({
         queryKey: ['dailyRecords', 'flock', variables.flockId],
       });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['statistics'] });
       showSuccess(
         t('dailyRecords.delete.success'),
         'dailyRecords.delete.success'
