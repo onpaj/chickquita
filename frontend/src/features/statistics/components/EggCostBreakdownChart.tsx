@@ -50,7 +50,7 @@ function EggCostBreakdownTooltip({ active, payload }: EggCostBreakdownTooltipPro
         }}
       >
         <Typography variant="body2" fontWeight={600}>
-          {t(`purchases.types.${data.type}`)}
+          {t(`purchases.types.${data.type.toLowerCase()}`)}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {t('statistics.costBreakdown.amount')}: {data.amount.toFixed(2)} Kč
@@ -110,7 +110,7 @@ export function EggCostBreakdownChart({ data }: EggCostBreakdownChartProps) {
           <Legend
             formatter={(_value: string, entry: { payload?: unknown }) => {
               const item = entry.payload as CostBreakdownItem;
-              return `${t(`purchases.types.${item.type}`)} (${item.percentage.toFixed(1)}%)`;
+              return `${t(`purchases.types.${item.type.toLowerCase()}`)} (${item.percentage.toFixed(1)}%)`;
             }}
           />
         </PieChart>
