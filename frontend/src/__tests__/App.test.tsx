@@ -94,6 +94,7 @@ vi.mock('../shared/components', () => ({
   OfflineBanner: () => <div>Offline Banner</div>,
   PwaInstallPrompt: () => <div>PWA Install Prompt</div>,
   IosInstallPrompt: () => <div>iOS Install Prompt</div>,
+  UpdateNotification: () => <div>Update Notification</div>,
 }));
 
 describe('App - AppBar Design Patterns', () => {
