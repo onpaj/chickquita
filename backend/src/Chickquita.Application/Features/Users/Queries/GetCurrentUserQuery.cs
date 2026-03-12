@@ -30,32 +30,28 @@ public class GetCurrentUserQueryHandler : IRequestHandler<GetCurrentUserQuery, R
 
     public async Task<Result<UserDto>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        // Check if user is authenticated
         if (!_currentUserService.IsAuthenticated)
         {
             _logger.LogWarning("Attempted to get current user for unauthenticated request");
             return Result<UserDto>.Failure(Error.Unauthorized("User is not authenticated"));
         }
 
-        var clerkUserId = _currentUserService.ClerkUserId;
-        if (string.IsNullOrEmpty(clerkUserId))
+        var tenantId = _currentUserService.TenantId;
+        if (tenantId == null)
         {
-            _logger.LogWarning("Authenticated user has no Clerk user ID");
-            return Result<UserDto>.Failure(Error.Unauthorized("User identity could not be determined"));
+            _logger.LogWarning("Authenticated user has no resolved tenant (missing org_id claim?)");
+            return Result<UserDto>.Failure(Error.Unauthorized("Tenant could not be determined"));
         }
 
-        // Fetch tenant from database using Clerk user ID
-        var tenant = await _tenantRepository.GetByClerkUserIdAsync(clerkUserId);
+        var tenant = await _tenantRepository.GetByIdAsync(tenantId.Value);
 
         if (tenant == null)
         {
-            _logger.LogWarning("No tenant found for Clerk user ID: {ClerkUserId}", clerkUserId);
+            _logger.LogWarning("No tenant found for tenant ID: {TenantId}", tenantId);
             return Result<UserDto>.Failure(Error.NotFound("User not found"));
         }
 
-        // Map tenant to UserDto
         var userDto = _mapper.Map<UserDto>(tenant);
-
         _logger.LogInformation("Successfully retrieved current user: {UserId}", userDto.Id);
         return Result<UserDto>.Success(userDto);
     }

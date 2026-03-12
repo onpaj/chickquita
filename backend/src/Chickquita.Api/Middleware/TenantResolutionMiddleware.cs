@@ -25,36 +25,35 @@ public class TenantResolutionMiddleware
         // Skip tenant resolution if user is not authenticated
         if (context.User?.Identity?.IsAuthenticated == true)
         {
-            // Extract Clerk user ID from JWT token
-            var clerkUserId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                              ?? context.User.FindFirst("sub")?.Value;
+            // TODO: Task 5 - Read org_id claim from JWT instead of sub claim.
+            // For now, use the org_id claim directly to look up the tenant.
+            var clerkOrgId = context.User.FindFirst("org_id")?.Value;
 
-            if (!string.IsNullOrEmpty(clerkUserId))
+            if (!string.IsNullOrEmpty(clerkOrgId))
             {
-                // Fetch tenant from database
-                var tenant = await tenantRepository.GetByClerkUserIdAsync(clerkUserId);
+                // Fetch tenant from database using Clerk org ID
+                var tenant = await tenantRepository.GetByClerkOrgIdAsync(clerkOrgId);
 
                 if (tenant == null)
                 {
                     // Fallback behavior: Create tenant automatically if it doesn't exist
                     // This handles cases where the Clerk webhook didn't fire or failed
                     logger.LogWarning(
-                        "Tenant not found for Clerk user ID: {ClerkUserId}. Creating tenant automatically (fallback).",
-                        clerkUserId);
+                        "Tenant not found for Clerk org ID: {ClerkOrgId}. Creating tenant automatically (fallback).",
+                        clerkOrgId);
 
-                    // Extract email from claims (Clerk includes this in the JWT)
-                    var email = context.User.FindFirst(ClaimTypes.Email)?.Value
-                                ?? context.User.FindFirst("email")?.Value
-                                ?? $"{clerkUserId}@clerk.temp"; // Fallback email if not in claims
+                    // Extract org name from claims
+                    var orgName = context.User.FindFirst("org_name")?.Value
+                                  ?? clerkOrgId; // Fallback to org ID if name not in claims
 
                     // Create new tenant
-                    tenant = Tenant.Create(clerkUserId, email);
+                    tenant = Tenant.Create(clerkOrgId, orgName);
                     tenant = await tenantRepository.AddAsync(tenant);
 
                     logger.LogInformation(
-                        "Auto-created tenant with ID: {TenantId} for Clerk user ID: {ClerkUserId}",
+                        "Auto-created tenant with ID: {TenantId} for Clerk org ID: {ClerkOrgId}",
                         tenant.Id,
-                        clerkUserId);
+                        clerkOrgId);
                 }
 
                 // Store tenant ID in HttpContext.Items for downstream use

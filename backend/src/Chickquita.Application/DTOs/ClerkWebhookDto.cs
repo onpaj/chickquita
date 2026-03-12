@@ -40,6 +40,11 @@ public sealed class ClerkWebhookDataDto
     public string? PrimaryEmailAddressId { get; set; }
 
     /// <summary>
+    /// Gets or sets the organization name (for organization.created and organization.updated events).
+    /// </summary>
+    public string? Name { get; set; }
+
+    /// <summary>
     /// Gets or sets the timestamp when the user was created in Clerk (Unix milliseconds).
     /// </summary>
     public long CreatedAt { get; set; }

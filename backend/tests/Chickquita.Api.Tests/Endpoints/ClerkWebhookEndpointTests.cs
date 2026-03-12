@@ -50,7 +50,7 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
             });
         }).CreateClient();
 
-        var requestBody = "{\"type\":\"user.created\",\"data\":{\"id\":\"user_123\"}}";
+        var requestBody = "{\"type\":\"organization.created\",\"data\":{\"id\":\"org_abc123\",\"name\":\"Smith Farm\"}}";
         var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
         // Act
@@ -61,7 +61,7 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
     }
 
     [Fact]
-    public async Task ClerkWebhook_WithValidSignatureAndUserCreatedEvent_DispatchesSyncUserCommand()
+    public async Task ClerkWebhook_WithValidSignatureAndOrgCreatedEvent_DispatchesSyncOrgCommand()
     {
         // Arrange
         var mockValidator = new Mock<IClerkWebhookValidator>();
@@ -69,20 +69,11 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
 
         var webhookDto = new ClerkWebhookDto
         {
-            Type = "user.created",
+            Type = "organization.created",
             Data = new ClerkWebhookDataDto
             {
-                Id = "user_123",
-                EmailAddresses = new List<ClerkEmailDto>
-                {
-                    new ClerkEmailDto
-                    {
-                        Id = "email_1",
-                        EmailAddress = "test@example.com",
-                        Verified = true
-                    }
-                },
-                PrimaryEmailAddressId = "email_1"
+                Id = "org_abc123",
+                Name = "Smith Farm"
             }
         };
 
@@ -91,7 +82,7 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
             .Returns(Result<ClerkWebhookDto>.Success(webhookDto));
 
         mockMediator
-            .Setup(m => m.Send(It.IsAny<SyncUserCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.IsAny<SyncOrgCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<TenantDto>.Success(new TenantDto()));
 
         var client = _factory.WithWebHostBuilder(builder =>
@@ -117,18 +108,20 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
             });
         }).CreateClient();
 
-        var requestBody = "{\"type\":\"user.created\",\"data\":{\"id\":\"user_123\"}}";
+        var requestBody = "{\"type\":\"organization.created\",\"data\":{\"id\":\"org_abc123\",\"name\":\"Smith Farm\"}}";
         var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
         // Act
-        var response = await client.PostAsync("/api/webhooks/clerk", content);
+        await client.PostAsync("/api/webhooks/clerk", content);
 
-        // Assert
+        // Assert: SyncOrgCommand dispatched with correct data
+        // NOTE: This verification will pass once Task 4 wires up the organization.created handler.
+        // Currently the endpoint stub does not yet dispatch SyncOrgCommand.
         mockMediator.Verify(
             m => m.Send(
-                It.Is<SyncUserCommand>(cmd =>
-                    cmd.ClerkUserId == "user_123" &&
-                    cmd.Email == "test@example.com"),
+                It.Is<SyncOrgCommand>(cmd =>
+                    cmd.ClerkOrgId == "org_abc123" &&
+                    cmd.Name == "Smith Farm"),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -142,20 +135,11 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
 
         var webhookDto = new ClerkWebhookDto
         {
-            Type = "user.created",
+            Type = "organization.created",
             Data = new ClerkWebhookDataDto
             {
-                Id = "user_123",
-                EmailAddresses = new List<ClerkEmailDto>
-                {
-                    new ClerkEmailDto
-                    {
-                        Id = "email_1",
-                        EmailAddress = "test@example.com",
-                        Verified = true
-                    }
-                },
-                PrimaryEmailAddressId = "email_1"
+                Id = "org_abc123",
+                Name = "Smith Farm"
             }
         };
 
@@ -164,7 +148,7 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
             .Returns(Result<ClerkWebhookDto>.Success(webhookDto));
 
         mockMediator
-            .Setup(m => m.Send(It.IsAny<SyncUserCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.IsAny<SyncOrgCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<TenantDto>.Success(new TenantDto()));
 
         var client = _factory.WithWebHostBuilder(builder =>
@@ -190,7 +174,7 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
             });
         }).CreateClient();
 
-        var requestBody = "{\"type\":\"user.created\",\"data\":{\"id\":\"user_123\"}}";
+        var requestBody = "{\"type\":\"organization.created\",\"data\":{\"id\":\"org_abc123\",\"name\":\"Smith Farm\"}}";
         var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
         // Act

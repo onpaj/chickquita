@@ -12,27 +12,26 @@ namespace Chickquita.Api.Tests.Middleware;
 
 /// <summary>
 /// Tests for TenantResolutionMiddleware.
-/// Following TDD principles: Write tests first, watch them fail, then implement.
+/// Validates tenant resolution using Clerk org_id JWT claim.
 /// </summary>
 public class TenantResolutionMiddlewareTests
 {
     [Fact]
-    public async Task InvokeAsync_WithValidClerkUserId_ExtractsClerkUserIdFromJWT()
+    public async Task InvokeAsync_WithValidClerkOrgId_ExtractsClerkOrgIdFromJWT()
     {
         // Arrange
-        var clerkUserId = "user_123";
-        var tenantId = Guid.NewGuid();
-        var tenant = Tenant.Create(clerkUserId, "test@example.com");
+        var clerkOrgId = "org_abc123";
+        var tenant = Tenant.Create(clerkOrgId, "Smith Farm");
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
-            .Setup(r => r.GetByClerkUserIdAsync(clerkUserId))
+            .Setup(r => r.GetByClerkOrgIdAsync(clerkOrgId))
             .ReturnsAsync(tenant);
 
         var httpContext = new DefaultHttpContext();
         httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim("sub", clerkUserId)
+            new Claim("org_id", clerkOrgId)
         }, "TestAuth"));
 
         var requestDelegate = new Mock<RequestDelegate>();
@@ -50,27 +49,27 @@ public class TenantResolutionMiddlewareTests
 
         // Assert
         mockTenantRepository.Verify(
-            r => r.GetByClerkUserIdAsync(clerkUserId),
+            r => r.GetByClerkOrgIdAsync(clerkOrgId),
             Times.Once,
-            "Middleware should extract Clerk user ID from JWT and use it to fetch tenant");
+            "Middleware should extract Clerk org ID from JWT and use it to fetch tenant");
     }
 
     [Fact]
     public async Task InvokeAsync_WithValidTenant_StoresTenantIdInHttpContextItems()
     {
         // Arrange
-        var clerkUserId = "user_123";
-        var tenant = Tenant.Create(clerkUserId, "test@example.com");
+        var clerkOrgId = "org_abc123";
+        var tenant = Tenant.Create(clerkOrgId, "Smith Farm");
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
-            .Setup(r => r.GetByClerkUserIdAsync(clerkUserId))
+            .Setup(r => r.GetByClerkOrgIdAsync(clerkOrgId))
             .ReturnsAsync(tenant);
 
         var httpContext = new DefaultHttpContext();
         httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim("sub", clerkUserId)
+            new Claim("org_id", clerkOrgId)
         }, "TestAuth"));
 
         var requestDelegate = new Mock<RequestDelegate>();
@@ -95,13 +94,13 @@ public class TenantResolutionMiddlewareTests
     public async Task InvokeAsync_WhenTenantNotFound_AutoCreatesNewTenant()
     {
         // Arrange
-        var clerkUserId = "user_123";
-        var email = "test@example.com";
-        var createdTenant = Tenant.Create(clerkUserId, email);
+        var clerkOrgId = "org_abc123";
+        var orgName = "Smith Farm";
+        var createdTenant = Tenant.Create(clerkOrgId, orgName);
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
-            .Setup(r => r.GetByClerkUserIdAsync(clerkUserId))
+            .Setup(r => r.GetByClerkOrgIdAsync(clerkOrgId))
             .ReturnsAsync((Tenant?)null);
         mockTenantRepository
             .Setup(r => r.AddAsync(It.IsAny<Tenant>()))
@@ -110,8 +109,8 @@ public class TenantResolutionMiddlewareTests
         var httpContext = new DefaultHttpContext();
         httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim("sub", clerkUserId),
-            new Claim("email", email)
+            new Claim("org_id", clerkOrgId),
+            new Claim("org_name", orgName)
         }, "TestAuth"));
 
         var requestDelegate = new Mock<RequestDelegate>();
@@ -129,7 +128,7 @@ public class TenantResolutionMiddlewareTests
 
         // Assert
         mockTenantRepository.Verify(
-            r => r.AddAsync(It.Is<Tenant>(t => t.ClerkUserId == clerkUserId && t.Email == email)),
+            r => r.AddAsync(It.Is<Tenant>(t => t.ClerkOrgId == clerkOrgId && t.Name == orgName)),
             Times.Once,
             "Should auto-create tenant when not found");
 
@@ -146,18 +145,18 @@ public class TenantResolutionMiddlewareTests
     public async Task InvokeAsync_WithValidTenant_CallsNextMiddleware()
     {
         // Arrange
-        var clerkUserId = "user_123";
-        var tenant = Tenant.Create(clerkUserId, "test@example.com");
+        var clerkOrgId = "org_abc123";
+        var tenant = Tenant.Create(clerkOrgId, "Smith Farm");
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
-            .Setup(r => r.GetByClerkUserIdAsync(clerkUserId))
+            .Setup(r => r.GetByClerkOrgIdAsync(clerkOrgId))
             .ReturnsAsync(tenant);
 
         var httpContext = new DefaultHttpContext();
         httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim("sub", clerkUserId)
+            new Claim("org_id", clerkOrgId)
         }, "TestAuth"));
 
         var nextCalled = false;
@@ -207,22 +206,56 @@ public class TenantResolutionMiddlewareTests
         nextCalled.Should().BeTrue("Middleware should call next delegate for unauthenticated requests");
         httpContext.Items.Should().NotContainKey("TenantId");
         mockTenantRepository.Verify(
-            r => r.GetByClerkUserIdAsync(It.IsAny<string>()),
+            r => r.GetByClerkOrgIdAsync(It.IsAny<string>()),
             Times.Never,
             "Should not query tenant repository when user is not authenticated");
     }
 
     [Fact]
-    public async Task InvokeAsync_WhenTenantNotFound_AndNoEmailInClaims_UsesFallbackEmail()
+    public async Task InvokeAsync_WithNoOrgIdClaim_DoesNotSetTenantId()
     {
         // Arrange
-        var clerkUserId = "user_123";
-        var expectedFallbackEmail = $"{clerkUserId}@clerk.temp";
-        var createdTenant = Tenant.Create(clerkUserId, expectedFallbackEmail);
+        var mockTenantRepository = new Mock<ITenantRepository>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+            new Claim("sub", "user_xyz")  // authenticated but no org active
+        }, "TestAuth"));
+
+        var requestDelegate = new Mock<RequestDelegate>();
+        requestDelegate
+            .Setup(rd => rd(It.IsAny<HttpContext>()))
+            .Returns(Task.CompletedTask);
+
+        var mockLogger = new Mock<ILogger<Chickquita.Api.Middleware.TenantResolutionMiddleware>>();
+
+        var middleware = new Chickquita.Api.Middleware.TenantResolutionMiddleware(
+            requestDelegate.Object);
+
+        // Act
+        await middleware.InvokeAsync(httpContext, mockTenantRepository.Object, mockLogger.Object);
+
+        // Assert
+        httpContext.Items.Should().NotContainKey("TenantId",
+            "TenantId should not be set when no org_id claim is present");
+        mockTenantRepository.Verify(
+            r => r.GetByClerkOrgIdAsync(It.IsAny<string>()),
+            Times.Never,
+            "Should not query tenant repository when org_id claim is missing");
+    }
+
+    [Fact]
+    public async Task InvokeAsync_WhenTenantNotFound_AndNoOrgNameInClaims_UsesFallbackName()
+    {
+        // Arrange
+        var clerkOrgId = "org_abc123";
+        var expectedFallbackName = clerkOrgId; // Middleware falls back to org ID as name
+        var createdTenant = Tenant.Create(clerkOrgId, expectedFallbackName);
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
-            .Setup(r => r.GetByClerkUserIdAsync(clerkUserId))
+            .Setup(r => r.GetByClerkOrgIdAsync(clerkOrgId))
             .ReturnsAsync((Tenant?)null);
         mockTenantRepository
             .Setup(r => r.AddAsync(It.IsAny<Tenant>()))
@@ -231,8 +264,8 @@ public class TenantResolutionMiddlewareTests
         var httpContext = new DefaultHttpContext();
         httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
-            new Claim("sub", clerkUserId)
-            // No email claim
+            new Claim("org_id", clerkOrgId)
+            // No org_name claim
         }, "TestAuth"));
 
         var requestDelegate = new Mock<RequestDelegate>();
@@ -251,9 +284,9 @@ public class TenantResolutionMiddlewareTests
         // Assert
         mockTenantRepository.Verify(
             r => r.AddAsync(It.Is<Tenant>(t =>
-                t.ClerkUserId == clerkUserId &&
-                t.Email == expectedFallbackEmail)),
+                t.ClerkOrgId == clerkOrgId &&
+                t.Name == expectedFallbackName)),
             Times.Once,
-            "Should use fallback email when email claim is not present");
+            "Should use fallback name (org ID) when org_name claim is not present");
     }
 }

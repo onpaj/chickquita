@@ -19,7 +19,6 @@ public static class WebhooksEndpoints
         var group = app.MapGroup("/api/webhooks")
             .WithTags("Webhooks");
 
-        // Clerk webhook endpoint
         group.MapPost("/clerk", async (HttpRequest request, IClerkWebhookValidator validator, IMediator mediator) =>
             {
                 // Read request body
@@ -39,19 +38,13 @@ public static class WebhooksEndpoints
 
                 var webhookDto = validationResult.Value;
 
-                // Handle user.created event
-                if (webhookDto.Type == "user.created")
+                // Handle organization.created and organization.updated events
+                if (webhookDto.Type == "organization.created" || webhookDto.Type == "organization.updated")
                 {
-                    // Extract primary email
-                    var primaryEmail = webhookDto.Data.EmailAddresses
-                        .FirstOrDefault(e => e.Id == webhookDto.Data.PrimaryEmailAddressId)
-                        ?.EmailAddress ?? string.Empty;
-
-                    // Dispatch SyncUserCommand
-                    var syncCommand = new SyncUserCommand
+                    var syncCommand = new SyncOrgCommand
                     {
-                        ClerkUserId = webhookDto.Data.Id,
-                        Email = primaryEmail
+                        ClerkOrgId = webhookDto.Data.Id,
+                        Name = webhookDto.Data.Name ?? webhookDto.Data.Id
                     };
 
                     await mediator.Send(syncCommand);

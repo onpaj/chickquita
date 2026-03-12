@@ -1,9 +1,9 @@
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
-/// Represents a tenant (user account) in the system.
+/// Represents a tenant (organization / farm) in the system.
 /// Each tenant has isolated data enforced by Row-Level Security (RLS).
-/// Linked to Clerk user for authentication.
+/// Linked to a Clerk Organization for authentication.
 /// </summary>
 public class Tenant
 {
@@ -13,16 +13,16 @@ public class Tenant
     public Guid Id { get; private set; }
 
     /// <summary>
-    /// Clerk user ID for authentication integration.
-    /// This links the tenant to their Clerk account.
+    /// Clerk Organization ID for authentication integration.
+    /// This links the tenant to their Clerk organization.
     /// </summary>
-    public string ClerkUserId { get; private set; } = string.Empty;
+    public string ClerkOrgId { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Email address of the tenant.
-    /// Synchronized from Clerk on user creation.
+    /// Display name of the organization / farm.
+    /// Synchronized from Clerk on organization creation.
     /// </summary>
-    public string Email { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
 
     /// <summary>
     /// Timestamp when the tenant was created.
@@ -37,52 +37,43 @@ public class Tenant
     /// <summary>
     /// Private constructor for EF Core.
     /// </summary>
-    private Tenant()
-    {
-    }
+    private Tenant() { }
 
     /// <summary>
     /// Factory method to create a new Tenant.
     /// </summary>
-    /// <param name="clerkUserId">The Clerk user ID</param>
-    /// <param name="email">The tenant's email address</param>
+    /// <param name="clerkOrgId">The Clerk Organization ID</param>
+    /// <param name="name">The display name of the organization / farm</param>
     /// <returns>A new Tenant instance</returns>
-    public static Tenant Create(string clerkUserId, string email)
+    public static Tenant Create(string clerkOrgId, string name)
     {
-        if (string.IsNullOrWhiteSpace(clerkUserId))
-        {
-            throw new ArgumentException("Clerk user ID cannot be empty.", nameof(clerkUserId));
-        }
+        if (string.IsNullOrWhiteSpace(clerkOrgId))
+            throw new ArgumentException("Clerk org ID cannot be empty.", nameof(clerkOrgId));
 
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new ArgumentException("Email cannot be empty.", nameof(email));
-        }
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
 
         var now = DateTime.UtcNow;
-
         return new Tenant
         {
             Id = Guid.NewGuid(),
-            ClerkUserId = clerkUserId,
-            Email = email,
+            ClerkOrgId = clerkOrgId,
+            Name = name,
             CreatedAt = now,
             UpdatedAt = now
         };
     }
 
     /// <summary>
-    /// Updates the tenant's email address.
+    /// Updates the tenant's display name.
     /// </summary>
-    /// <param name="email">The new email address</param>
-    public void UpdateEmail(string email)
+    /// <param name="name">The new display name</param>
+    public void UpdateName(string name)
     {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new ArgumentException("Email cannot be empty.", nameof(email));
-        }
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
 
-        Email = email;
+        Name = name;
         UpdatedAt = DateTime.UtcNow;
     }
 }
