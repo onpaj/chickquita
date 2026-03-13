@@ -113,7 +113,7 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
                 request.Name);
 
             return Result<CoopDto>.Failure(
-                Error.Failure($"Failed to create coop: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

@@ -152,7 +152,7 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
                 request.FlockId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to update flock: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

@@ -276,8 +276,7 @@ public class GetDashboardStatsQueryHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to retrieve dashboard statistics");
-        result.Error.Message.Should().Contain("Database connection failed");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     #endregion

@@ -125,7 +125,7 @@ public sealed class UpdateDailyRecordCommandHandler : IRequestHandler<UpdateDail
                 request.Id);
 
             return Result<DailyRecordDto>.Failure(
-                Error.Failure($"Failed to update daily record: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

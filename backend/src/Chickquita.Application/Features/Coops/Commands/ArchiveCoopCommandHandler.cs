@@ -97,7 +97,7 @@ public sealed class ArchiveCoopCommandHandler : IRequestHandler<ArchiveCoopComma
                 request.Id);
 
             return Result<bool>.Failure(
-                Error.Failure($"Failed to archive coop: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

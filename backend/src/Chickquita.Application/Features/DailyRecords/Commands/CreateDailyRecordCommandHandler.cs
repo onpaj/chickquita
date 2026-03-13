@@ -137,7 +137,7 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
                 request.RecordDate);
 
             return Result<DailyRecordDto>.Failure(
-                Error.Failure($"Failed to create daily record: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

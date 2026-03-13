@@ -113,7 +113,7 @@ public sealed class MatureChicksCommandHandler : IRequestHandler<MatureChicksCom
                 request.FlockId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to mature chicks: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

@@ -118,7 +118,7 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
                 request.CoopId?.ToString() ?? "All");
 
             return Result<List<FlockDto>>.Failure(
-                Error.Failure($"Failed to retrieve flocks: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

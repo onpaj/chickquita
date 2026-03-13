@@ -239,7 +239,7 @@ public class DeleteCoopCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to delete coop");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     [Fact]
@@ -266,7 +266,7 @@ public class DeleteCoopCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to delete coop");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
 
         _mockCoopRepository.Verify(x => x.DeleteAsync(It.IsAny<Guid>()), Times.Never);
     }

@@ -79,7 +79,7 @@ public sealed class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboard
                 "Error occurred while retrieving dashboard statistics");
 
             return Result<DashboardStatsDto>.Failure(
-                Error.Failure($"Failed to retrieve dashboard statistics: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

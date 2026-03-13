@@ -147,7 +147,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
                 request.Id);
 
             return Result<PurchaseDto>.Failure(
-                Error.Failure($"Failed to update purchase: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

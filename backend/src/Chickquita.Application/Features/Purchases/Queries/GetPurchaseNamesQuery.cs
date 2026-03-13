@@ -102,7 +102,7 @@ public sealed class GetPurchaseNamesQueryHandler : IRequestHandler<GetPurchaseNa
                 "Error occurred while retrieving purchase names");
 
             return Result<List<string>>.Failure(
-                Error.Failure($"Failed to retrieve purchase names: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

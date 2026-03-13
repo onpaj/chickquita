@@ -127,7 +127,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
                 request.Name);
 
             return Result<PurchaseDto>.Failure(
-                Error.Failure($"Failed to create purchase: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }
