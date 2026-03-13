@@ -74,8 +74,6 @@ public class CreateDailyRecordCommandHandlerTests
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
             .ReturnsAsync(flock);
-        _mockDailyRecordRepository.Setup(x => x.ExistsForFlockAndDateAsync(flockId, recordDate))
-            .ReturnsAsync(false);
 
         var createdDailyRecord = DailyRecord.Create(
             tenantId,
@@ -113,7 +111,6 @@ public class CreateDailyRecordCommandHandlerTests
         result.Value.TenantId.Should().Be(tenantId);
 
         _mockFlockRepository.Verify(x => x.GetByIdWithoutHistoryAsync(flockId), Times.Once);
-        _mockDailyRecordRepository.Verify(x => x.ExistsForFlockAndDateAsync(flockId, recordDate), Times.Once);
         _mockDailyRecordRepository.Verify(x => x.AddAsync(It.IsAny<DailyRecord>()), Times.Once);
         _mockMapper.Verify(x => x.Map<DailyRecordDto>(It.IsAny<DailyRecord>()), Times.Once);
     }
@@ -146,8 +143,6 @@ public class CreateDailyRecordCommandHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
-        _mockDailyRecordRepository.Setup(x => x.ExistsForFlockAndDateAsync(flockId, recordDate))
-            .ReturnsAsync(false);
 
         var createdDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, 0, command.Notes);
         _mockDailyRecordRepository.Setup(x => x.AddAsync(It.IsAny<DailyRecord>()))
@@ -198,8 +193,6 @@ public class CreateDailyRecordCommandHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
-        _mockDailyRecordRepository.Setup(x => x.ExistsForFlockAndDateAsync(flockId, recordDate))
-            .ReturnsAsync(false);
 
         var createdDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, command.EggCount);
         _mockDailyRecordRepository.Setup(x => x.AddAsync(It.IsAny<DailyRecord>()))
@@ -251,99 +244,6 @@ public class CreateDailyRecordCommandHandlerTests
 
         _mockFlockRepository.Verify(x => x.GetByIdWithoutHistoryAsync(flockId), Times.Once);
         _mockDailyRecordRepository.Verify(x => x.AddAsync(It.IsAny<DailyRecord>()), Times.Never);
-    }
-
-    #endregion
-
-    #region Duplicate Detection Tests
-
-    [Fact]
-    public async Task Handle_WithDuplicateRecordForSameFlockAndDate_ShouldReturnConflictError()
-    {
-        // Arrange
-        var tenantId = Guid.NewGuid();
-        var flockId = Guid.NewGuid();
-        var recordDate = DateTime.UtcNow.Date.AddDays(-1);
-
-        var command = new CreateDailyRecordCommand
-        {
-            FlockId = flockId,
-            RecordDate = recordDate,
-            EggCount = 10
-        };
-
-        var flock = Flock.Create(
-            tenantId,
-            Guid.NewGuid(),
-            "Spring 2024",
-            DateTime.UtcNow.AddDays(-60),
-            10,
-            2,
-            0);
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
-        _mockDailyRecordRepository.Setup(x => x.ExistsForFlockAndDateAsync(flockId, recordDate))
-            .ReturnsAsync(true); // Duplicate exists
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Conflict");
-        result.Error.Message.Should().Be("A daily record already exists for this flock on the specified date");
-
-        _mockDailyRecordRepository.Verify(x => x.ExistsForFlockAndDateAsync(flockId, recordDate), Times.Once);
-        _mockDailyRecordRepository.Verify(x => x.AddAsync(It.IsAny<DailyRecord>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WithSameFlockDifferentDate_ShouldCreateSuccessfully()
-    {
-        // Arrange
-        var tenantId = Guid.NewGuid();
-        var flockId = Guid.NewGuid();
-        var recordDate1 = DateTime.UtcNow.Date.AddDays(-1);
-        var recordDate2 = DateTime.UtcNow.Date.AddDays(-2);
-
-        var command = new CreateDailyRecordCommand
-        {
-            FlockId = flockId,
-            RecordDate = recordDate2, // Different date
-            EggCount = 10
-        };
-
-        var flock = Flock.Create(
-            tenantId,
-            Guid.NewGuid(),
-            "Spring 2024",
-            DateTime.UtcNow.AddDays(-60),
-            10,
-            2,
-            0);
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
-        _mockDailyRecordRepository.Setup(x => x.ExistsForFlockAndDateAsync(flockId, recordDate2))
-            .ReturnsAsync(false); // No duplicate
-
-        var createdDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate2, command.EggCount);
-        _mockDailyRecordRepository.Setup(x => x.AddAsync(It.IsAny<DailyRecord>()))
-            .ReturnsAsync(createdDailyRecord);
-
-        var expectedDto = new DailyRecordDto { Id = createdDailyRecord.Id };
-        _mockMapper.Setup(x => x.Map<DailyRecordDto>(It.IsAny<DailyRecord>()))
-            .Returns(expectedDto);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
     }
 
     #endregion
@@ -434,8 +334,6 @@ public class CreateDailyRecordCommandHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
-        _mockDailyRecordRepository.Setup(x => x.ExistsForFlockAndDateAsync(flockId, futureDate))
-            .ReturnsAsync(false);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -476,8 +374,6 @@ public class CreateDailyRecordCommandHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
-        _mockDailyRecordRepository.Setup(x => x.ExistsForFlockAndDateAsync(flockId, recordDate))
-            .ReturnsAsync(false);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -520,8 +416,6 @@ public class CreateDailyRecordCommandHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
-        _mockDailyRecordRepository.Setup(x => x.ExistsForFlockAndDateAsync(flockId, recordDate))
-            .ReturnsAsync(false);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -566,8 +460,6 @@ public class CreateDailyRecordCommandHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
-        _mockDailyRecordRepository.Setup(x => x.ExistsForFlockAndDateAsync(flockId, recordDate))
-            .ReturnsAsync(false);
         _mockDailyRecordRepository.Setup(x => x.AddAsync(It.IsAny<DailyRecord>()))
             .ThrowsAsync(new Exception("Database connection failed"));
 
