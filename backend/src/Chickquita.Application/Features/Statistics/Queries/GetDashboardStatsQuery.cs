@@ -9,6 +9,6 @@ namespace Chickquita.Application.Features.Statistics.Queries;
 /// Query to get dashboard statistics for the current tenant.
 /// Aggregates key metrics including coops, flocks, and animal counts.
 /// </summary>
-public sealed record GetDashboardStatsQuery : IRequest<Result<DashboardStatsDto>, IAuthorizedRequest>
+public sealed record GetDashboardStatsQuery : IRequest<Result<DashboardStatsDto>>, IAuthorizedRequest
 {
 }

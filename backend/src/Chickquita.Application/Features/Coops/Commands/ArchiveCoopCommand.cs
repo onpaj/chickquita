@@ -7,7 +7,7 @@ namespace Chickquita.Application.Features.Coops.Commands;
 /// <summary>
 /// Command to archive a coop (soft delete).
 /// </summary>
-public sealed record ArchiveCoopCommand : IRequest<Result<bool>, IAuthorizedRequest>
+public sealed record ArchiveCoopCommand : IRequest<Result<bool>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the ID of the coop to archive.

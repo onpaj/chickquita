@@ -10,7 +10,7 @@ namespace Chickquita.Application.Features.Flocks.Commands;
 /// Converts the specified number of chicks into hens and roosters,
 /// creating an immutable FlockHistory entry with reason "Maturation".
 /// </summary>
-public sealed record MatureChicksCommand : IRequest<Result<FlockDto>, IAuthorizedRequest>
+public sealed record MatureChicksCommand : IRequest<Result<FlockDto>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the ID of the flock whose chicks are maturing.

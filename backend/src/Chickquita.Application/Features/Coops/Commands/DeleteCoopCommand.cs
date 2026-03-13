@@ -7,7 +7,7 @@ namespace Chickquita.Application.Features.Coops.Commands;
 /// <summary>
 /// Command to delete a coop.
 /// </summary>
-public sealed record DeleteCoopCommand : IRequest<Result<bool>, IAuthorizedRequest>
+public sealed record DeleteCoopCommand : IRequest<Result<bool>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the ID of the coop to delete.

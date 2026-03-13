@@ -9,7 +9,7 @@ namespace Chickquita.Application.Features.Purchases.Commands.Create;
 /// <summary>
 /// Command to create a new purchase.
 /// </summary>
-public sealed record CreatePurchaseCommand : IRequest<Result<PurchaseDto>, IAuthorizedRequest>
+public sealed record CreatePurchaseCommand : IRequest<Result<PurchaseDto>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the coop this purchase is associated with (optional).

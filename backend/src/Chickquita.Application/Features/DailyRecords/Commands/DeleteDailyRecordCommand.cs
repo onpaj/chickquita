@@ -7,7 +7,7 @@ namespace Chickquita.Application.Features.DailyRecords.Commands;
 /// <summary>
 /// Command to delete a daily record.
 /// </summary>
-public sealed record DeleteDailyRecordCommand : IRequest<Result<bool>, IAuthorizedRequest>
+public sealed record DeleteDailyRecordCommand : IRequest<Result<bool>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the ID of the daily record to delete.

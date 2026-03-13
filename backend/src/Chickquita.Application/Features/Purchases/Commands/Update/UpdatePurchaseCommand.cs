@@ -9,7 +9,7 @@ namespace Chickquita.Application.Features.Purchases.Commands.Update;
 /// <summary>
 /// Command to update an existing purchase.
 /// </summary>
-public sealed record UpdatePurchaseCommand : IRequest<Result<PurchaseDto>, IAuthorizedRequest>
+public sealed record UpdatePurchaseCommand : IRequest<Result<PurchaseDto>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the ID of the purchase to update.

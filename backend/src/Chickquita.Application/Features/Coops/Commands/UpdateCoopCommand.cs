@@ -8,7 +8,7 @@ namespace Chickquita.Application.Features.Coops.Commands;
 /// <summary>
 /// Command to update an existing coop.
 /// </summary>
-public sealed record UpdateCoopCommand : IRequest<Result<CoopDto>, IAuthorizedRequest>
+public sealed record UpdateCoopCommand : IRequest<Result<CoopDto>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the ID of the coop to update.

@@ -8,7 +8,7 @@ namespace Chickquita.Application.Features.DailyRecords.Commands;
 /// <summary>
 /// Command to create a new daily record for egg production.
 /// </summary>
-public sealed record CreateDailyRecordCommand : IRequest<Result<DailyRecordDto>, IAuthorizedRequest>
+public sealed record CreateDailyRecordCommand : IRequest<Result<DailyRecordDto>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the ID of the flock this daily record belongs to.
