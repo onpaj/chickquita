@@ -1,3 +1,4 @@
+using Chickquita.Api.Extensions;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Features.DailyRecords.Commands;
 using Chickquita.Application.Features.DailyRecords.Queries;
@@ -76,17 +77,7 @@ public static class DailyRecordsEndpoints
         };
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetDailyRecordsByFlock(
@@ -103,17 +94,7 @@ public static class DailyRecordsEndpoints
         };
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> CreateDailyRecord(
@@ -126,18 +107,7 @@ public static class DailyRecordsEndpoints
 
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Created($"/api/daily-records/{result.Value.Id}", result.Value);
+        return result.ToHttpResult(value => Results.Created($"/api/daily-records/{value.Id}", value));
     }
 
     private static async Task<IResult> UpdateDailyRecord(
@@ -153,18 +123,7 @@ public static class DailyRecordsEndpoints
 
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> DeleteDailyRecord(
@@ -174,16 +133,6 @@ public static class DailyRecordsEndpoints
         var command = new DeleteDailyRecordCommand { Id = id };
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.NoContent();
+        return result.ToHttpResult(_ => Results.NoContent());
     }
 }

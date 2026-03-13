@@ -1,3 +1,4 @@
+using Chickquita.Api.Extensions;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Features.Coops.Commands;
 using Chickquita.Application.Features.Coops.Queries;
@@ -68,16 +69,7 @@ public static class CoopsEndpoints
         var query = new GetCoopsQuery { IncludeArchived = includeArchived };
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetCoopById(
@@ -87,17 +79,7 @@ public static class CoopsEndpoints
         var query = new GetCoopByIdQuery { Id = id };
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> CreateCoop(
@@ -106,18 +88,7 @@ public static class CoopsEndpoints
     {
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.Conflict" => Results.Conflict(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Created($"/api/coops/{result.Value.Id}", result.Value);
+        return result.ToHttpResult(value => Results.Created($"/api/coops/{value.Id}", value));
     }
 
     private static async Task<IResult> UpdateCoop(
@@ -133,19 +104,7 @@ public static class CoopsEndpoints
 
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                "Error.Conflict" => Results.Conflict(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> DeleteCoop(
@@ -155,18 +114,7 @@ public static class CoopsEndpoints
         var command = new DeleteCoopCommand { Id = id };
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> ArchiveCoop(
@@ -176,17 +124,6 @@ public static class CoopsEndpoints
         var command = new ArchiveCoopCommand { Id = id };
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 }
