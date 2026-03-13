@@ -286,61 +286,6 @@ public class UpdateDailyRecordCommandHandlerTests
 
     #endregion
 
-    #region Authentication and Tenant Isolation Tests
-
-    [Fact]
-    public async Task Handle_WhenUserNotAuthenticated_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var command = new UpdateDailyRecordCommand
-        {
-            Id = Guid.NewGuid(),
-            EggCount = 20
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(false);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("User is not authenticated");
-
-        _mockDailyRecordRepository.Verify(x => x.GetByIdWithoutNavigationAsync(It.IsAny<Guid>()), Times.Never);
-        _mockDailyRecordRepository.Verify(x => x.UpdateAsync(It.IsAny<DailyRecord>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WhenTenantIdNotFound_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var command = new UpdateDailyRecordCommand
-        {
-            Id = Guid.NewGuid(),
-            EggCount = 20
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns((Guid?)null);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("Tenant not found");
-
-        _mockDailyRecordRepository.Verify(x => x.GetByIdWithoutNavigationAsync(It.IsAny<Guid>()), Times.Never);
-        _mockDailyRecordRepository.Verify(x => x.UpdateAsync(It.IsAny<DailyRecord>()), Times.Never);
-    }
-
-    #endregion
-
     #region Validation Error Tests
 
     [Fact]
@@ -449,7 +394,7 @@ public class UpdateDailyRecordCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to update daily record");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     #endregion

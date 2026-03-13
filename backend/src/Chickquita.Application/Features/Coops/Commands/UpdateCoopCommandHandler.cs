@@ -52,20 +52,7 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("UpdateCoopCommand: User is not authenticated");
-                return Result<CoopDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("UpdateCoopCommand: Tenant ID not found");
-                return Result<CoopDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Get the existing coop
             var coop = await _coopRepository.GetByIdAsync(request.Id);
@@ -126,7 +113,7 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
                 request.Id);
 
             return Result<CoopDto>.Failure(
-                Error.Failure($"Failed to update coop: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

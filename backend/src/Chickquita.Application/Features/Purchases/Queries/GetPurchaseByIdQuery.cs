@@ -59,20 +59,7 @@ public sealed class GetPurchaseByIdQueryHandler : IRequestHandler<GetPurchaseByI
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("GetPurchaseByIdQuery: User is not authenticated");
-                return Result<PurchaseDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("GetPurchaseByIdQuery: Tenant ID not found");
-                return Result<PurchaseDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Retrieve purchase by ID (tenant isolation is handled by RLS and global query filter)
             var purchase = await _purchaseRepository.GetByIdAsync(request.Id);
@@ -100,7 +87,7 @@ public sealed class GetPurchaseByIdQueryHandler : IRequestHandler<GetPurchaseByI
                 request.Id);
 
             return Result<PurchaseDto>.Failure(
-                Error.Failure($"Failed to retrieve purchase: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

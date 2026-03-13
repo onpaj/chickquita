@@ -470,7 +470,7 @@ public class CreateDailyRecordCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to create daily record");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     #endregion

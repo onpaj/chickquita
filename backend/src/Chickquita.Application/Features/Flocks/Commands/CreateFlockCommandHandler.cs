@@ -57,20 +57,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("CreateFlockCommand: User is not authenticated");
-                return Result<FlockDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("CreateFlockCommand: Tenant ID not found");
-                return Result<FlockDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Check if the coop exists and belongs to the current tenant
             var coop = await _coopRepository.GetByIdAsync(request.CoopId);
@@ -140,7 +127,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
                 request.CoopId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to create flock: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

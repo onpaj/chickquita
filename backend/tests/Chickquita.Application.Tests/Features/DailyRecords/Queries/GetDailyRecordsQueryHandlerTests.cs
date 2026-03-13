@@ -514,63 +514,6 @@ public class GetDailyRecordsQueryHandlerTests
 
     #endregion
 
-    #region Authentication and Authorization Tests
-
-    [Fact]
-    public async Task Handle_WhenUserNotAuthenticated_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var query = new GetDailyRecordsQuery
-        {
-            FlockId = null,
-            StartDate = null,
-            EndDate = null
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(false);
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("User is not authenticated");
-
-        _mockDailyRecordRepository.Verify(x => x.GetAllAsync(), Times.Never);
-        _mockDailyRecordRepository.Verify(x => x.GetByFlockIdAsync(It.IsAny<Guid>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WhenTenantIdNotFound_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var query = new GetDailyRecordsQuery
-        {
-            FlockId = null,
-            StartDate = null,
-            EndDate = null
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns((Guid?)null);
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("Tenant not found");
-
-        _mockDailyRecordRepository.Verify(x => x.GetAllAsync(), Times.Never);
-        _mockDailyRecordRepository.Verify(x => x.GetByFlockIdAsync(It.IsAny<Guid>()), Times.Never);
-    }
-
-    #endregion
-
     #region Error Handling Tests
 
     [Fact]
@@ -597,7 +540,7 @@ public class GetDailyRecordsQueryHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to retrieve daily records");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     #endregion

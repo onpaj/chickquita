@@ -39,18 +39,7 @@ public sealed class MatureChicksCommandHandler : IRequestHandler<MatureChicksCom
 
         try
         {
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("MatureChicksCommand: User is not authenticated");
-                return Result<FlockDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("MatureChicksCommand: Tenant ID not found");
-                return Result<FlockDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Load flock with history so UpdateComposition can add the new entry
             var flock = await _flockRepository.GetByIdAsync(request.FlockId);
@@ -113,7 +102,7 @@ public sealed class MatureChicksCommandHandler : IRequestHandler<MatureChicksCom
                 request.FlockId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to mature chicks: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

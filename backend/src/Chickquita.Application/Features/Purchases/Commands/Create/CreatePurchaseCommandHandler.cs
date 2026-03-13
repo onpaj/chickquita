@@ -57,20 +57,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("CreatePurchaseCommand: User is not authenticated");
-                return Result<PurchaseDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("CreatePurchaseCommand: Tenant ID not found");
-                return Result<PurchaseDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Validate coop reference if provided
             if (request.CoopId.HasValue)
@@ -127,7 +114,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
                 request.Name);
 
             return Result<PurchaseDto>.Failure(
-                Error.Failure($"Failed to create purchase: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

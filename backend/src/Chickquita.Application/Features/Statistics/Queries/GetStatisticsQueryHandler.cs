@@ -40,20 +40,7 @@ public sealed class GetStatisticsQueryHandler : IRequestHandler<GetStatisticsQue
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("GetStatisticsQuery: User is not authenticated");
-                return Result<StatisticsDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("GetStatisticsQuery: Tenant ID not found");
-                return Result<StatisticsDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Validate date range only when both dates are provided
             if (request.StartDate.HasValue && request.EndDate.HasValue && request.StartDate > request.EndDate)
@@ -88,7 +75,7 @@ public sealed class GetStatisticsQueryHandler : IRequestHandler<GetStatisticsQue
                 request.EndDate?.ToString() ?? "all");
 
             return Result<StatisticsDto>.Failure(
-                Error.Failure($"Failed to retrieve statistics: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

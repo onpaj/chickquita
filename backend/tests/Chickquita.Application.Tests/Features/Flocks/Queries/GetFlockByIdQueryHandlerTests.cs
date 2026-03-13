@@ -259,55 +259,6 @@ public class GetFlockByIdQueryHandlerTests
 
     #endregion
 
-    #region Authentication Tests
-
-    [Fact]
-    public async Task Handle_WhenUserNotAuthenticated_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var flockId = Guid.NewGuid();
-        var query = new GetFlockByIdQuery { FlockId = flockId };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(false);
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("User is not authenticated");
-
-        _mockFlockRepository.Verify(x => x.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
-        _mockMapper.Verify(x => x.Map<FlockDto>(It.IsAny<Flock>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WhenTenantIdNotFound_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var flockId = Guid.NewGuid();
-        var query = new GetFlockByIdQuery { FlockId = flockId };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns((Guid?)null);
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("Tenant not found");
-
-        _mockFlockRepository.Verify(x => x.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
-        _mockMapper.Verify(x => x.Map<FlockDto>(It.IsAny<Flock>()), Times.Never);
-    }
-
-    #endregion
-
     #region DTO Mapping Tests
 
     [Fact]
@@ -388,8 +339,7 @@ public class GetFlockByIdQueryHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to retrieve flock");
-        result.Error.Message.Should().Contain("Database connection failed");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
 
         _mockFlockRepository.Verify(x => x.GetByIdAsync(flockId), Times.Once);
         _mockMapper.Verify(x => x.Map<FlockDto>(It.IsAny<Flock>()), Times.Never);
@@ -419,8 +369,7 @@ public class GetFlockByIdQueryHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to retrieve flock");
-        result.Error.Message.Should().Contain("Mapping failed");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
 
         _mockFlockRepository.Verify(x => x.GetByIdAsync(flockId), Times.Once);
         _mockMapper.Verify(x => x.Map<FlockDto>(flock), Times.Once);

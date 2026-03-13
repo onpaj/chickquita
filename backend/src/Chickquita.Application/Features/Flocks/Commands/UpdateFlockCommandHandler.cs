@@ -53,20 +53,7 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("UpdateFlockCommand: User is not authenticated");
-                return Result<FlockDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("UpdateFlockCommand: Tenant ID not found");
-                return Result<FlockDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Get the flock (without history to improve performance)
             var flock = await _flockRepository.GetByIdWithoutHistoryAsync(request.FlockId);
@@ -152,7 +139,7 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
                 request.FlockId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to update flock: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

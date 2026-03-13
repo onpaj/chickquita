@@ -44,20 +44,7 @@ public sealed class DeletePurchaseCommandHandler : IRequestHandler<DeletePurchas
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("DeletePurchaseCommand: User is not authenticated");
-                return Result<bool>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("DeletePurchaseCommand: Tenant ID not found");
-                return Result<bool>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Fetch existing purchase to validate tenant ownership
             var purchase = await _purchaseRepository.GetByIdAsync(request.PurchaseId);
@@ -97,7 +84,7 @@ public sealed class DeletePurchaseCommandHandler : IRequestHandler<DeletePurchas
                 request.PurchaseId);
 
             return Result<bool>.Failure(
-                Error.Failure($"Failed to delete purchase: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

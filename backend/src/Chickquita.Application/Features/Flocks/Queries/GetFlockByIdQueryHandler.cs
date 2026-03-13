@@ -50,20 +50,7 @@ public sealed class GetFlockByIdQueryHandler : IRequestHandler<GetFlockByIdQuery
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("GetFlockByIdQuery: User is not authenticated");
-                return Result<FlockDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("GetFlockByIdQuery: Tenant ID not found");
-                return Result<FlockDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Retrieve flock by ID with history
             // Tenant isolation is handled by RLS and global query filter in the repository
@@ -97,7 +84,7 @@ public sealed class GetFlockByIdQueryHandler : IRequestHandler<GetFlockByIdQuery
                 request.FlockId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to retrieve flock: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

@@ -413,71 +413,6 @@ public class UpdatePurchaseCommandHandlerTests
 
     #endregion
 
-    #region Authentication Tests
-
-    [Fact]
-    public async Task Handle_WhenUserNotAuthenticated_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var purchaseId = Guid.NewGuid();
-        var command = new UpdatePurchaseCommand
-        {
-            Id = purchaseId,
-            Name = "Updated Feed",
-            Type = PurchaseType.Feed,
-            Amount = 300.00m,
-            Quantity = 30m,
-            Unit = QuantityUnit.Kg,
-            PurchaseDate = DateTime.UtcNow.Date
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(false);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("User is not authenticated");
-
-        _mockPurchaseRepository.Verify(x => x.UpdateAsync(It.IsAny<Purchase>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WhenTenantIdNotFound_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var purchaseId = Guid.NewGuid();
-        var command = new UpdatePurchaseCommand
-        {
-            Id = purchaseId,
-            Name = "Updated Feed",
-            Type = PurchaseType.Feed,
-            Amount = 300.00m,
-            Quantity = 30m,
-            Unit = QuantityUnit.Kg,
-            PurchaseDate = DateTime.UtcNow.Date
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns((Guid?)null);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("Tenant not found");
-
-        _mockPurchaseRepository.Verify(x => x.UpdateAsync(It.IsAny<Purchase>()), Times.Never);
-    }
-
-    #endregion
-
     #region Error Handling Tests
 
     [Fact]
@@ -521,7 +456,7 @@ public class UpdatePurchaseCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to update purchase");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     #endregion

@@ -52,20 +52,7 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("ArchiveFlockCommand: User is not authenticated");
-                return Result<FlockDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("ArchiveFlockCommand: Tenant ID not found");
-                return Result<FlockDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Get the flock (without history to improve performance)
             var flock = await _flockRepository.GetByIdWithoutHistoryAsync(request.FlockId);
@@ -110,7 +97,7 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
                 request.FlockId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to archive flock: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

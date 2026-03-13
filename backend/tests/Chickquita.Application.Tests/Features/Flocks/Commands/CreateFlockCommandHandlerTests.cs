@@ -645,69 +645,6 @@ public class CreateFlockCommandHandlerTests
 
     #endregion
 
-    #region Authentication and Tenant Isolation Tests
-
-    [Fact]
-    public async Task Handle_WhenUserNotAuthenticated_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var command = new CreateFlockCommand
-        {
-            CoopId = Guid.NewGuid(),
-            Identifier = "Test Flock",
-            HatchDate = DateTime.UtcNow.AddDays(-10),
-            InitialHens = 10,
-            InitialRoosters = 2,
-            InitialChicks = 0
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(false);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("User is not authenticated");
-
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
-        _mockFlockRepository.Verify(x => x.AddAsync(It.IsAny<Flock>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WhenTenantIdNotFound_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var command = new CreateFlockCommand
-        {
-            CoopId = Guid.NewGuid(),
-            Identifier = "Test Flock",
-            HatchDate = DateTime.UtcNow.AddDays(-10),
-            InitialHens = 10,
-            InitialRoosters = 2,
-            InitialChicks = 0
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns((Guid?)null);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("Tenant not found");
-
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
-        _mockFlockRepository.Verify(x => x.AddAsync(It.IsAny<Flock>()), Times.Never);
-    }
-
-    #endregion
-
     #region Validation Error Tests
 
     [Fact]
@@ -994,7 +931,7 @@ public class CreateFlockCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to create flock");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     #endregion
