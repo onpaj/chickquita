@@ -1,13 +1,14 @@
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.DailyRecords.Commands;
 
 /// <summary>
 /// Command to create a new daily record for egg production.
 /// </summary>
-public sealed record CreateDailyRecordCommand : IRequest<Result<DailyRecordDto>>
+public sealed record CreateDailyRecordCommand : IRequest<Result<DailyRecordDto>, IAuthorizedRequest>
 {
     /// <summary>
     /// Gets or sets the ID of the flock this daily record belongs to.

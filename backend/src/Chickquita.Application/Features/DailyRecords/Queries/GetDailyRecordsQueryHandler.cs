@@ -58,21 +58,7 @@ public sealed class GetDailyRecordsQueryHandler : IRequestHandler<GetDailyRecord
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("GetDailyRecordsQuery: User is not authenticated");
-                return Result<List<DailyRecordDto>>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("GetDailyRecordsQuery: Tenant ID not found");
-                return Result<List<DailyRecordDto>>.Failure(Error.Unauthorized("Tenant not found"));
-            }
-
             List<DailyRecord> dailyRecords;
 
             // Case 1: FlockId + Date Range

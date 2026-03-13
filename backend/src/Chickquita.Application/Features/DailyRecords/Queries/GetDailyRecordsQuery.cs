@@ -1,13 +1,14 @@
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.DailyRecords.Queries;
 
 /// <summary>
 /// Query to get daily records with optional filtering by flock and date range.
 /// </summary>
-public sealed record GetDailyRecordsQuery : IRequest<Result<List<DailyRecordDto>>>
+public sealed record GetDailyRecordsQuery : IRequest<Result<List<DailyRecordDto>>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the optional ID of the flock to filter daily records.

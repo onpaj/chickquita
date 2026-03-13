@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Chickquita.Application.Features.Users.Queries;
 
-public record GetCurrentUserQuery : IRequest<Result<UserDto>>;
+public record GetCurrentUserQuery : IRequest<Result<UserDto>>, IAuthorizedRequest;
 
 public class GetCurrentUserQueryHandler : IRequestHandler<GetCurrentUserQuery, Result<UserDto>>
 {
@@ -30,19 +30,7 @@ public class GetCurrentUserQueryHandler : IRequestHandler<GetCurrentUserQuery, R
 
     public async Task<Result<UserDto>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        if (!_currentUserService.IsAuthenticated)
-        {
-            _logger.LogWarning("Attempted to get current user for unauthenticated request");
-            return Result<UserDto>.Failure(Error.Unauthorized("User is not authenticated"));
-        }
-
         var tenantId = _currentUserService.TenantId;
-        if (tenantId == null)
-        {
-            _logger.LogWarning("Authenticated user has no resolved tenant (missing org_id claim?)");
-            return Result<UserDto>.Failure(Error.Unauthorized("Tenant could not be determined"));
-        }
-
         var tenant = await _tenantRepository.GetByIdAsync(tenantId.Value);
 
         if (tenant == null)

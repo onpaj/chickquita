@@ -1,13 +1,14 @@
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.Flocks.Queries;
 
 /// <summary>
 /// Query to get flocks. Can retrieve all flocks for the tenant or filter by coop.
 /// </summary>
-public sealed record GetFlocksQuery : IRequest<Result<List<FlockDto>>>
+public sealed record GetFlocksQuery : IRequest<Result<List<FlockDto>>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the optional ID of the coop to filter flocks.

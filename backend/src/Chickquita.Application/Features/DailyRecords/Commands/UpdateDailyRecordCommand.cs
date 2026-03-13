@@ -1,6 +1,7 @@
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.DailyRecords.Commands;
 
@@ -8,7 +9,7 @@ namespace Chickquita.Application.Features.DailyRecords.Commands;
 /// Command to update an existing daily record for egg production.
 /// Only allows updates on the same day the record was created (same-day edit restriction).
 /// </summary>
-public sealed record UpdateDailyRecordCommand : IRequest<Result<DailyRecordDto>>
+public sealed record UpdateDailyRecordCommand : IRequest<Result<DailyRecordDto>, IAuthorizedRequest>
 {
     /// <summary>
     /// Gets or sets the ID of the daily record to update.

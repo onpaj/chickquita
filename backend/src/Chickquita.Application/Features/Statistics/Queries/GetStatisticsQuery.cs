@@ -1,6 +1,7 @@
 using Chickquita.Application.DTOs;
 using Chickquita.Domain.Common;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.Statistics.Queries;
 
@@ -8,7 +9,7 @@ namespace Chickquita.Application.Features.Statistics.Queries;
 /// Query to get detailed statistics for a date range.
 /// Includes cost breakdown, production trends, and flock productivity.
 /// </summary>
-public sealed record GetStatisticsQuery : IRequest<Result<StatisticsDto>>
+public sealed record GetStatisticsQuery : IRequest<Result<StatisticsDto>, IAuthorizedRequest>
 {
     /// <summary>
     /// Start date for the statistics period (inclusive). Null means no lower bound (all time).

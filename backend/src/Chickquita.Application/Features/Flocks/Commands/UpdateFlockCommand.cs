@@ -1,6 +1,7 @@
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.Flocks.Commands;
 
@@ -8,7 +9,7 @@ namespace Chickquita.Application.Features.Flocks.Commands;
 /// Command to update flock information (identifier, hatch date, and optionally composition).
 /// When composition differs from current values, a history entry is created with reason "Manual update".
 /// </summary>
-public sealed record UpdateFlockCommand : IRequest<Result<FlockDto>>
+public sealed record UpdateFlockCommand : IRequest<Result<FlockDto>, IAuthorizedRequest>
 {
     /// <summary>
     /// Gets or sets the ID of the flock to update.

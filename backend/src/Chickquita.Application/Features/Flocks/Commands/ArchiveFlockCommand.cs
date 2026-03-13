@@ -1,6 +1,7 @@
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.Flocks.Commands;
 
@@ -8,7 +9,7 @@ namespace Chickquita.Application.Features.Flocks.Commands;
 /// Command to archive a flock (soft delete).
 /// Sets IsActive = false while preserving all data.
 /// </summary>
-public sealed record ArchiveFlockCommand : IRequest<Result<FlockDto>>
+public sealed record ArchiveFlockCommand : IRequest<Result<FlockDto>, IAuthorizedRequest>
 {
     /// <summary>
     /// Gets or sets the ID of the flock to archive.

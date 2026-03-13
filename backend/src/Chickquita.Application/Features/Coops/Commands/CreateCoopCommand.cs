@@ -1,13 +1,14 @@
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.Coops.Commands;
 
 /// <summary>
 /// Command to create a new coop.
 /// </summary>
-public sealed record CreateCoopCommand : IRequest<Result<CoopDto>>
+public sealed record CreateCoopCommand : IRequest<Result<CoopDto>, IAuthorizedRequest>
 {
     /// <summary>
     /// Gets or sets the name of the coop.

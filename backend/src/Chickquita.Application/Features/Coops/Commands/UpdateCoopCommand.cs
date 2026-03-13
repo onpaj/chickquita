@@ -1,13 +1,14 @@
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.Coops.Commands;
 
 /// <summary>
 /// Command to update an existing coop.
 /// </summary>
-public sealed record UpdateCoopCommand : IRequest<Result<CoopDto>>
+public sealed record UpdateCoopCommand : IRequest<Result<CoopDto>, IAuthorizedRequest>
 {
     /// <summary>
     /// Gets or sets the ID of the coop to update.

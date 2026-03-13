@@ -1,13 +1,14 @@
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.Flocks.Commands;
 
 /// <summary>
 /// Command to create a new flock within a coop.
 /// </summary>
-public sealed record CreateFlockCommand : IRequest<Result<FlockDto>>
+public sealed record CreateFlockCommand : IRequest<Result<FlockDto>, IAuthorizedRequest>
 {
     /// <summary>
     /// Gets or sets the ID of the coop this flock belongs to.

@@ -48,21 +48,7 @@ public sealed class GetCoopsQueryHandler : IRequestHandler<GetCoopsQuery, Result
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("GetCoopsQuery: User is not authenticated");
-                return Result<List<CoopDto>>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("GetCoopsQuery: Tenant ID not found");
-                return Result<List<CoopDto>>.Failure(Error.Unauthorized("Tenant not found"));
-            }
-
             // Retrieve all coops (tenant isolation is handled by RLS and global query filter)
             var coops = await _coopRepository.GetAllAsync(request.IncludeArchived);
 

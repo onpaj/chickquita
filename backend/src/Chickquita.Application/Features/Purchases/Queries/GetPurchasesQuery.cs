@@ -2,13 +2,14 @@ using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.Purchases.Queries;
 
 /// <summary>
 /// Query to get all purchases for the current tenant with optional filters.
 /// </summary>
-public sealed record GetPurchasesQuery : IRequest<Result<List<PurchaseDto>>>
+public sealed record GetPurchasesQuery : IRequest<Result<List<PurchaseDto>>>, IAuthorizedRequest
 {
     /// <summary>
     /// Gets or sets the start date for filtering purchases (inclusive).

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Chickquita.Application.Features.Coops.Queries;
 
-public record GetCoopByIdQuery : IRequest<Result<CoopDto>>
+public record GetCoopByIdQuery : IRequest<Result<CoopDto>>, IAuthorizedRequest
 {
     public Guid Id { get; init; }
 }
@@ -37,21 +37,7 @@ public class GetCoopByIdQueryHandler : IRequestHandler<GetCoopByIdQuery, Result<
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("GetCoopByIdQuery: User is not authenticated");
-                return Result<CoopDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("GetCoopByIdQuery: Tenant ID not found");
-                return Result<CoopDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
-
             // Retrieve coop by ID (tenant isolation is handled by RLS and global query filter)
             var coop = await _coopRepository.GetByIdAsync(request.Id);
 

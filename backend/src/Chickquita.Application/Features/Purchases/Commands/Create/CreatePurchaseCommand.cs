@@ -2,13 +2,14 @@ using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using Chickquita.Application.DTOs;
 using MediatR;
+using Chickquita.Application.Interfaces;
 
 namespace Chickquita.Application.Features.Purchases.Commands.Create;
 
 /// <summary>
 /// Command to create a new purchase.
 /// </summary>
-public sealed record CreatePurchaseCommand : IRequest<Result<PurchaseDto>>
+public sealed record CreatePurchaseCommand : IRequest<Result<PurchaseDto>, IAuthorizedRequest>
 {
     /// <summary>
     /// Gets or sets the coop this purchase is associated with (optional).
