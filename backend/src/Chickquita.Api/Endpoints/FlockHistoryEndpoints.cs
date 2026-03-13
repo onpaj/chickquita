@@ -1,3 +1,4 @@
+using Chickquita.Api.Extensions;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Features.FlockHistory.Commands;
 using Chickquita.Application.Features.Flocks.Queries;
@@ -43,17 +44,7 @@ public static class FlockHistoryEndpoints
         var query = new GetFlockHistoryQuery { FlockId = id };
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" or "Flock.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> UpdateFlockHistoryNotes(
@@ -69,18 +60,7 @@ public static class FlockHistoryEndpoints
 
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" or "FlockHistory.NotFound" => Results.NotFound(new { error = result.Error }),
-                "Error.Validation" or "FlockHistory.ValidationError" => Results.BadRequest(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 }
 

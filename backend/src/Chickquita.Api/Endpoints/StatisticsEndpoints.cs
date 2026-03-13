@@ -1,3 +1,4 @@
+using Chickquita.Api.Extensions;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Features.Statistics.Queries;
 using MediatR;
@@ -47,16 +48,7 @@ public static class StatisticsEndpoints
         var query = new GetDashboardStatsQuery();
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     /// <summary>
@@ -127,15 +119,6 @@ public static class StatisticsEndpoints
 
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 }
