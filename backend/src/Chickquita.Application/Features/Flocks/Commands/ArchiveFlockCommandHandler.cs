@@ -110,7 +110,7 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
                 request.FlockId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to archive flock: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

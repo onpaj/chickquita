@@ -150,7 +150,7 @@ public sealed class GetDailyRecordsQueryHandler : IRequestHandler<GetDailyRecord
                 request.EndDate?.ToString("yyyy-MM-dd") ?? "None");
 
             return Result<List<DailyRecordDto>>.Failure(
-                Error.Failure($"Failed to retrieve daily records: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 

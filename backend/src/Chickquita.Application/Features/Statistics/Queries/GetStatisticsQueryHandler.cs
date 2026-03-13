@@ -88,7 +88,7 @@ public sealed class GetStatisticsQueryHandler : IRequestHandler<GetStatisticsQue
                 request.EndDate?.ToString() ?? "all");
 
             return Result<StatisticsDto>.Failure(
-                Error.Failure($"Failed to retrieve statistics: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

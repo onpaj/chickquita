@@ -89,7 +89,7 @@ public sealed class GetCoopsQueryHandler : IRequestHandler<GetCoopsQuery, Result
                 "Error occurred while retrieving coops");
 
             return Result<List<CoopDto>>.Failure(
-                Error.Failure($"Failed to retrieve coops: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

@@ -140,7 +140,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
                 request.CoopId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to create flock: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

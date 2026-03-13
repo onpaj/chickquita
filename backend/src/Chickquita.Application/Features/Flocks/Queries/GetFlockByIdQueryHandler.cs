@@ -97,7 +97,7 @@ public sealed class GetFlockByIdQueryHandler : IRequestHandler<GetFlockByIdQuery
                 request.FlockId);
 
             return Result<FlockDto>.Failure(
-                Error.Failure($"Failed to retrieve flock: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

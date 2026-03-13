@@ -388,8 +388,7 @@ public class GetFlockByIdQueryHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to retrieve flock");
-        result.Error.Message.Should().Contain("Database connection failed");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
 
         _mockFlockRepository.Verify(x => x.GetByIdAsync(flockId), Times.Once);
         _mockMapper.Verify(x => x.Map<FlockDto>(It.IsAny<Flock>()), Times.Never);
@@ -419,8 +418,7 @@ public class GetFlockByIdQueryHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to retrieve flock");
-        result.Error.Message.Should().Contain("Mapping failed");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
 
         _mockFlockRepository.Verify(x => x.GetByIdAsync(flockId), Times.Once);
         _mockMapper.Verify(x => x.Map<FlockDto>(flock), Times.Once);

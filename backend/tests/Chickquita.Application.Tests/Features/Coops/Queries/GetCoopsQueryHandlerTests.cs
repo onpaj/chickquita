@@ -497,8 +497,7 @@ public class GetCoopsQueryHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to retrieve coops");
-        result.Error.Message.Should().Contain("Database connection failed");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     [Fact]
@@ -526,8 +525,7 @@ public class GetCoopsQueryHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to retrieve coops");
-        result.Error.Message.Should().Contain("Mapping failed");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     [Fact]
@@ -569,8 +567,7 @@ public class GetCoopsQueryHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Error.Failure");
-        result.Error.Message.Should().Contain("Failed to retrieve coops");
-        result.Error.Message.Should().Contain("Failed to get flocks count");
+        result.Error.Message.Should().Be("An unexpected error occurred. Please try again.");
     }
 
     #endregion

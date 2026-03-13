@@ -88,7 +88,7 @@ public sealed class DeleteDailyRecordCommandHandler : IRequestHandler<DeleteDail
                 request.Id);
 
             return Result<bool>.Failure(
-                Error.Failure($"Failed to delete daily record: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

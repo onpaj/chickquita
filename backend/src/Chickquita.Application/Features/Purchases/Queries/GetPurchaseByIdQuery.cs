@@ -100,7 +100,7 @@ public sealed class GetPurchaseByIdQueryHandler : IRequestHandler<GetPurchaseByI
                 request.Id);
 
             return Result<PurchaseDto>.Failure(
-                Error.Failure($"Failed to retrieve purchase: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

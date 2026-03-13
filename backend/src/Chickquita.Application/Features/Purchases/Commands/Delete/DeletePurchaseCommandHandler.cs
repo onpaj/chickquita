@@ -97,7 +97,7 @@ public sealed class DeletePurchaseCommandHandler : IRequestHandler<DeletePurchas
                 request.PurchaseId);
 
             return Result<bool>.Failure(
-                Error.Failure($"Failed to delete purchase: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

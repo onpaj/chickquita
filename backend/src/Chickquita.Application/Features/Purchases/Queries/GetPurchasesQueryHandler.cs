@@ -111,7 +111,7 @@ public sealed class GetPurchasesQueryHandler : IRequestHandler<GetPurchasesQuery
                 "Error occurred while retrieving purchases");
 
             return Result<List<PurchaseDto>>.Failure(
-                Error.Failure($"Failed to retrieve purchases: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

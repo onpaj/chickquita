@@ -98,7 +98,7 @@ public sealed class DeleteCoopCommandHandler : IRequestHandler<DeleteCoopCommand
                 request.Id);
 
             return Result<bool>.Failure(
-                Error.Failure($"Failed to delete coop: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

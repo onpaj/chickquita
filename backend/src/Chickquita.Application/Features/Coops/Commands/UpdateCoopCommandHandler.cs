@@ -126,7 +126,7 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
                 request.Id);
 
             return Result<CoopDto>.Failure(
-                Error.Failure($"Failed to update coop: {ex.Message}"));
+                Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }

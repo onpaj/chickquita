@@ -64,7 +64,7 @@ public sealed class SyncOrgCommandHandler : IRequestHandler<SyncOrgCommand, Resu
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error syncing org {ClerkOrgId}", request.ClerkOrgId);
-            return Result<TenantDto>.Failure(Error.Failure($"Failed to sync org: {ex.Message}"));
+            return Result<TenantDto>.Failure(Error.Failure("An unexpected error occurred. Please try again."));
         }
     }
 }
