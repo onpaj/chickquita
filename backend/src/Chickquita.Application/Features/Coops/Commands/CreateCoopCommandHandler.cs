@@ -52,20 +52,7 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("CreateCoopCommand: User is not authenticated");
-                return Result<CoopDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("CreateCoopCommand: Tenant ID not found");
-                return Result<CoopDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Check if a coop with this name already exists for the current tenant
             var nameExists = await _coopRepository.ExistsByNameAsync(request.Name);

@@ -44,20 +44,7 @@ public sealed class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboard
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("GetDashboardStatsQuery: User is not authenticated");
-                return Result<DashboardStatsDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("GetDashboardStatsQuery: Tenant ID not found");
-                return Result<DashboardStatsDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Retrieve dashboard statistics (tenant isolation is handled by RLS and repository)
             var stats = await _statisticsRepository.GetDashboardStatsAsync();

@@ -460,67 +460,6 @@ public class CreatePurchaseCommandHandlerTests
 
     #endregion
 
-    #region Authentication Tests
-
-    [Fact]
-    public async Task Handle_WhenUserNotAuthenticated_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var command = new CreatePurchaseCommand
-        {
-            Name = "Chicken Feed",
-            Type = PurchaseType.Feed,
-            Amount = 250.50m,
-            Quantity = 25m,
-            Unit = QuantityUnit.Kg,
-            PurchaseDate = DateTime.UtcNow.Date
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(false);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("User is not authenticated");
-
-        _mockPurchaseRepository.Verify(x => x.AddAsync(It.IsAny<Purchase>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WhenTenantIdNotFound_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var command = new CreatePurchaseCommand
-        {
-            Name = "Chicken Feed",
-            Type = PurchaseType.Feed,
-            Amount = 250.50m,
-            Quantity = 25m,
-            Unit = QuantityUnit.Kg,
-            PurchaseDate = DateTime.UtcNow.Date
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns((Guid?)null);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("Tenant not found");
-
-        _mockPurchaseRepository.Verify(x => x.AddAsync(It.IsAny<Purchase>()), Times.Never);
-    }
-
-    #endregion
-
     #region Error Handling Tests
 
     [Fact]

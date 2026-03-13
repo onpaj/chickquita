@@ -57,20 +57,7 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("CreateDailyRecordCommand: User is not authenticated");
-                return Result<DailyRecordDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("CreateDailyRecordCommand: Tenant ID not found");
-                return Result<DailyRecordDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Check if the flock exists and belongs to the current tenant
             var flock = await _flockRepository.GetByIdWithoutHistoryAsync(request.FlockId);

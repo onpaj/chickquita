@@ -18,10 +18,11 @@ public static class DependencyInjection
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // Register MediatR with all handlers and the validation pipeline behavior
+        // Register MediatR with all handlers and pipeline behaviors (order matters: auth runs before validation)
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         });
 

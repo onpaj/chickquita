@@ -44,20 +44,7 @@ public sealed class DeleteCoopCommandHandler : IRequestHandler<DeleteCoopCommand
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("DeleteCoopCommand: User is not authenticated");
-                return Result<bool>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("DeleteCoopCommand: Tenant ID not found");
-                return Result<bool>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Get the existing coop
             var coop = await _coopRepository.GetByIdAsync(request.Id);

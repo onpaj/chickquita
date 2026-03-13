@@ -54,20 +54,7 @@ public sealed class UpdateDailyRecordCommandHandler : IRequestHandler<UpdateDail
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("UpdateDailyRecordCommand: User is not authenticated");
-                return Result<DailyRecordDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("UpdateDailyRecordCommand: Tenant ID not found");
-                return Result<DailyRecordDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Get the existing daily record
             var dailyRecord = await _dailyRecordRepository.GetByIdWithoutNavigationAsync(request.Id);
