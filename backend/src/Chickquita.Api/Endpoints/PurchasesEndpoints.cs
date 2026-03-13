@@ -1,3 +1,4 @@
+using Chickquita.Api.Extensions;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Features.Purchases.Commands.Create;
 using Chickquita.Application.Features.Purchases.Commands.Update;
@@ -112,17 +113,7 @@ public static class PurchasesEndpoints
 
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetPurchaseById(
@@ -132,17 +123,7 @@ public static class PurchasesEndpoints
         var query = new GetPurchaseByIdQuery { Id = id };
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetPurchaseNames(
@@ -158,16 +139,7 @@ public static class PurchasesEndpoints
 
         var result = await mediator.Send(purchaseNamesQuery);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> CreatePurchase(
@@ -176,18 +148,7 @@ public static class PurchasesEndpoints
     {
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Created($"/api/purchases/{result.Value.Id}", result.Value);
+        return result.ToHttpResult(value => Results.Created($"/api/purchases/{value.Id}", value));
     }
 
     private static async Task<IResult> UpdatePurchase(
@@ -203,19 +164,7 @@ public static class PurchasesEndpoints
 
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                "Error.Forbidden" => Results.Forbid(),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> DeletePurchase(
@@ -225,18 +174,6 @@ public static class PurchasesEndpoints
         var command = new DeletePurchaseCommand { PurchaseId = id };
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                "Error.Forbidden" => Results.Forbid(),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.NoContent();
+        return result.ToHttpResult(_ => Results.NoContent());
     }
 }

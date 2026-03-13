@@ -1,3 +1,4 @@
+using Chickquita.Api.Extensions;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Features.Flocks.Commands;
 using Chickquita.Application.Features.Flocks.Queries;
@@ -92,17 +93,7 @@ public static class FlocksEndpoints
         };
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetFlocksByCoop(
@@ -140,17 +131,7 @@ public static class FlocksEndpoints
         };
         var result = await mediator.Send(query);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> CreateFlock(
@@ -163,18 +144,7 @@ public static class FlocksEndpoints
 
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Created($"/api/flocks/{result.Value.Id}", result.Value);
+        return result.ToHttpResult(value => Results.Created($"/api/flocks/{value.Id}", value));
     }
 
     private static async Task<IResult> UpdateFlock(
@@ -190,18 +160,7 @@ public static class FlocksEndpoints
 
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> ArchiveFlock(
@@ -211,18 +170,7 @@ public static class FlocksEndpoints
         var command = new ArchiveFlockCommand { FlockId = id };
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> MatureChicks(
@@ -233,17 +181,6 @@ public static class FlocksEndpoints
         command.FlockId = id;
         var result = await mediator.Send(command);
 
-        if (!result.IsSuccess)
-        {
-            return result.Error.Code switch
-            {
-                "Error.Unauthorized" => Results.Unauthorized(),
-                "Error.Validation" => Results.BadRequest(new { error = result.Error }),
-                "Error.NotFound" => Results.NotFound(new { error = result.Error }),
-                _ => Results.BadRequest(new { error = result.Error })
-            };
-        }
-
-        return Results.Ok(result.Value);
+        return result.ToHttpResult();
     }
 }
