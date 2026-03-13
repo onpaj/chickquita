@@ -93,8 +93,18 @@ public sealed class UpdateDailyRecordCommandHandler : IRequestHandler<UpdateDail
                     Error.Validation("Daily records can only be updated on the same day they were created (same-day edit restriction)"));
             }
 
+            // Parse optional collection time (null = preserve existing value)
+            TimeSpan? collectionTime = null;
+            if (!string.IsNullOrWhiteSpace(request.CollectionTime))
+            {
+                if (TimeSpan.TryParseExact(request.CollectionTime, @"hh\:mm", null, out var parsedTime))
+                {
+                    collectionTime = parsedTime;
+                }
+            }
+
             // Update the daily record
-            dailyRecord.Update(request.EggCount, request.Notes);
+            dailyRecord.Update(request.EggCount, request.Notes, collectionTime);
 
             // Save to database
             var updatedDailyRecord = await _dailyRecordRepository.UpdateAsync(dailyRecord);

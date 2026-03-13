@@ -183,6 +183,7 @@ public sealed class GetDailyRecordsQueryHandler : IRequestHandler<GetDailyRecord
 
         return query
             .OrderByDescending(d => d.RecordDate)
+            .ThenByDescending(d => d.CollectionTime)
             .ToList();
     }
 }

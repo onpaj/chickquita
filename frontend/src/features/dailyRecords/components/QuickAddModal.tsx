@@ -85,11 +85,19 @@ export function QuickAddModal({
     return flocks[0]?.id || '';
   };
 
+  const getCurrentUtcTime = (): string => {
+    const now = new Date();
+    const hh = String(now.getUTCHours()).padStart(2, '0');
+    const mm = String(now.getUTCMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  };
+
   const [flockId, setFlockId] = useState<string>(getInitialFlockId());
   const [eggCount, setEggCount] = useState<number>(0);
   const [recordDate, setRecordDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
+  const [collectionTime, setCollectionTime] = useState<string>(getCurrentUtcTime());
   const [notesLength, setNotesLength] = useState<number>(0);
   const [flockIdError, setFlockIdError] = useState('');
   const [eggCountError, setEggCountError] = useState('');
@@ -134,6 +142,7 @@ export function QuickAddModal({
     setFlockId(getInitialFlockId());
     setEggCount(0);
     setRecordDate(new Date().toISOString().split('T')[0]);
+    setCollectionTime(getCurrentUtcTime());
     if (notesRef.current) {
       notesRef.current.value = '';
     }
@@ -224,6 +233,7 @@ export function QuickAddModal({
           recordDate,
           eggCount,
           notes: notesValue.trim() || undefined,
+          collectionTime: collectionTime || undefined,
         },
       },
       {
@@ -366,6 +376,17 @@ export function QuickAddModal({
                 ...touchInputProps,
                 max: new Date().toISOString().split('T')[0],
               }}
+            />
+
+            <TextField
+              type="time"
+              label={t('dailyRecords.form.collectionTime')}
+              value={collectionTime}
+              onChange={(e) => setCollectionTime(e.target.value)}
+              fullWidth
+              disabled={isPending}
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ ...touchInputProps, step: 60 }}
             />
 
             <NumericStepper

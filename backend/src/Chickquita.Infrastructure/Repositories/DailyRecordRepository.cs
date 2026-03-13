@@ -24,6 +24,7 @@ public class DailyRecordRepository : IDailyRecordRepository
             .Include(d => d.Flock)
                 .ThenInclude(f => f.Coop)
             .OrderByDescending(d => d.RecordDate)
+            .ThenByDescending(d => d.CollectionTime)
             .ToListAsync();
     }
 
@@ -35,6 +36,7 @@ public class DailyRecordRepository : IDailyRecordRepository
                 .ThenInclude(f => f.Coop)
             .Where(d => d.FlockId == flockId)
             .OrderByDescending(d => d.RecordDate)
+            .ThenByDescending(d => d.CollectionTime)
             .ToListAsync();
     }
 
@@ -52,6 +54,7 @@ public class DailyRecordRepository : IDailyRecordRepository
                 && d.RecordDate >= startDateUtc
                 && d.RecordDate <= endDateUtc)
             .OrderByDescending(d => d.RecordDate)
+            .ThenByDescending(d => d.CollectionTime)
             .ToListAsync();
     }
 
@@ -69,17 +72,6 @@ public class DailyRecordRepository : IDailyRecordRepository
     {
         return await _context.DailyRecords
             .FirstOrDefaultAsync(d => d.Id == id);
-    }
-
-    /// <inheritdoc />
-    public async Task<DailyRecord?> GetByFlockIdAndDateAsync(Guid flockId, DateTime recordDate)
-    {
-        // Normalize date to UTC date only
-        var recordDateUtc = DateTime.SpecifyKind(recordDate.Date, DateTimeKind.Utc);
-
-        return await _context.DailyRecords
-            .Include(d => d.Flock)
-            .FirstOrDefaultAsync(d => d.FlockId == flockId && d.RecordDate == recordDateUtc);
     }
 
     /// <inheritdoc />
@@ -119,28 +111,6 @@ public class DailyRecordRepository : IDailyRecordRepository
             _context.DailyRecords.Remove(dailyRecord);
             await _context.SaveChangesAsync();
         }
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> ExistsForFlockAndDateAsync(Guid flockId, DateTime recordDate)
-    {
-        // Normalize date to UTC date only
-        var recordDateUtc = DateTime.SpecifyKind(recordDate.Date, DateTimeKind.Utc);
-
-        return await _context.DailyRecords
-            .AnyAsync(d => d.FlockId == flockId && d.RecordDate == recordDateUtc);
-    }
-
-    /// <inheritdoc />
-    public async Task<bool> ExistsForFlockAndDateAsync(Guid flockId, DateTime recordDate, Guid excludeRecordId)
-    {
-        // Normalize date to UTC date only
-        var recordDateUtc = DateTime.SpecifyKind(recordDate.Date, DateTimeKind.Utc);
-
-        return await _context.DailyRecords
-            .AnyAsync(d => d.FlockId == flockId
-                && d.RecordDate == recordDateUtc
-                && d.Id != excludeRecordId);
     }
 
     /// <inheritdoc />

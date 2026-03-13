@@ -45,14 +45,6 @@ public interface IDailyRecordRepository
     Task<DailyRecord?> GetByIdWithoutNavigationAsync(Guid id);
 
     /// <summary>
-    /// Gets a daily record for a specific flock and date.
-    /// </summary>
-    /// <param name="flockId">The flock ID</param>
-    /// <param name="recordDate">The record date</param>
-    /// <returns>The daily record if found, null otherwise</returns>
-    Task<DailyRecord?> GetByFlockIdAndDateAsync(Guid flockId, DateTime recordDate);
-
-    /// <summary>
     /// Adds a new daily record.
     /// </summary>
     /// <param name="dailyRecord">The daily record to add</param>
@@ -71,24 +63,6 @@ public interface IDailyRecordRepository
     /// </summary>
     /// <param name="id">The daily record ID</param>
     Task DeleteAsync(Guid id);
-
-    /// <summary>
-    /// Checks if a daily record exists for a specific flock and date.
-    /// </summary>
-    /// <param name="flockId">The flock ID</param>
-    /// <param name="recordDate">The record date</param>
-    /// <returns>True if a record exists for the flock and date, false otherwise</returns>
-    Task<bool> ExistsForFlockAndDateAsync(Guid flockId, DateTime recordDate);
-
-    /// <summary>
-    /// Checks if a daily record exists for a specific flock and date, excluding a specific record ID.
-    /// Useful for update operations where you want to check uniqueness but exclude the current record.
-    /// </summary>
-    /// <param name="flockId">The flock ID</param>
-    /// <param name="recordDate">The record date</param>
-    /// <param name="excludeRecordId">The record ID to exclude from the check</param>
-    /// <returns>True if a record exists for the flock and date (excluding the specified record), false otherwise</returns>
-    Task<bool> ExistsForFlockAndDateAsync(Guid flockId, DateTime recordDate, Guid excludeRecordId);
 
     /// <summary>
     /// Gets the count of daily records for a specific flock.

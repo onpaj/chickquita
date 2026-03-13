@@ -46,6 +46,11 @@ public sealed class DailyRecordDto
     public string? Notes { get; set; }
 
     /// <summary>
+    /// Optional time of egg collection in "HH:mm" format (UTC).
+    /// </summary>
+    public string? CollectionTime { get; set; }
+
+    /// <summary>
     /// Timestamp when the record was created.
     /// </summary>
     public DateTime CreatedAt { get; set; }

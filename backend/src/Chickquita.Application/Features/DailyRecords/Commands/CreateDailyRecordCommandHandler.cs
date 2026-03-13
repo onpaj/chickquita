@@ -83,19 +83,14 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
                 return Result<DailyRecordDto>.Failure(Error.NotFound("Flock not found"));
             }
 
-            // Check if a daily record already exists for this flock and date (duplicate detection)
-            var recordExists = await _dailyRecordRepository.ExistsForFlockAndDateAsync(
-                request.FlockId,
-                request.RecordDate);
-
-            if (recordExists)
+            // Parse optional collection time
+            TimeSpan? collectionTime = null;
+            if (!string.IsNullOrWhiteSpace(request.CollectionTime))
             {
-                _logger.LogWarning(
-                    "CreateDailyRecordCommand: Daily record already exists for flock {FlockId} on date {RecordDate}",
-                    request.FlockId,
-                    request.RecordDate);
-                return Result<DailyRecordDto>.Failure(
-                    Error.Conflict("A daily record already exists for this flock on the specified date"));
+                if (TimeSpan.TryParseExact(request.CollectionTime, @"hh\:mm", null, out var parsedTime))
+                {
+                    collectionTime = parsedTime;
+                }
             }
 
             // Create the daily record entity
@@ -104,7 +99,8 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
                 flockId: request.FlockId,
                 recordDate: request.RecordDate,
                 eggCount: request.EggCount,
-                notes: request.Notes);
+                notes: request.Notes,
+                collectionTime: collectionTime);
 
             // Save to database
             var addedDailyRecord = await _dailyRecordRepository.AddAsync(dailyRecord);

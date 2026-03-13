@@ -44,6 +44,11 @@ public class DailyRecordConfiguration : IEntityTypeConfiguration<DailyRecord>
             .HasMaxLength(500)
             .IsRequired(false);
 
+        builder.Property(d => d.CollectionTime)
+            .HasColumnName("collection_time")
+            .HasColumnType("time")
+            .IsRequired(false);
+
         builder.Property(d => d.CreatedAt)
             .HasColumnName("created_at")
             .HasColumnType("timestamp with time zone")
@@ -70,10 +75,9 @@ public class DailyRecordConfiguration : IEntityTypeConfiguration<DailyRecord>
         builder.HasIndex(d => d.RecordDate)
             .HasDatabaseName("ix_daily_records_record_date");
 
-        // Unique constraint: one record per flock per date
+        // Index on (FlockId, RecordDate) — no longer unique; multiple records per flock per day are allowed
         builder.HasIndex(d => new { d.FlockId, d.RecordDate })
-            .HasDatabaseName("ix_daily_records_flock_id_record_date")
-            .IsUnique();
+            .HasDatabaseName("ix_daily_records_flock_id_record_date");
 
         // Global query filter for tenant isolation
         // Note: The actual tenant isolation is enforced at the database level via RLS in PostgreSQL.

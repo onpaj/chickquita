@@ -13,6 +13,7 @@ export interface DailyRecordDto {
   recordDate: string; // ISO 8601 date string (YYYY-MM-DD)
   eggCount: number;
   notes?: string;
+  collectionTime?: string; // "HH:mm" format (UTC), optional
   createdAt: string; // ISO 8601 datetime string
   updatedAt: string; // ISO 8601 datetime string
 }
@@ -26,6 +27,7 @@ export interface CreateDailyRecordRequest {
   recordDate: string; // ISO 8601 date string (YYYY-MM-DD)
   eggCount: number;
   notes?: string;
+  collectionTime?: string; // "HH:mm" format (UTC), optional
 }
 
 /**
@@ -37,6 +39,7 @@ export interface UpdateDailyRecordRequest {
   id: string;
   eggCount: number;
   notes?: string;
+  collectionTime?: string; // "HH:mm" format (UTC), optional; omit to preserve existing value
 }
 
 /**
