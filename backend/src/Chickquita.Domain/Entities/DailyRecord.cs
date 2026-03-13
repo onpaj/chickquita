@@ -41,6 +41,11 @@ public class DailyRecord
     public string? Notes { get; private set; }
 
     /// <summary>
+    /// Optional time of egg collection (UTC). Allows multiple records per day.
+    /// </summary>
+    public TimeSpan? CollectionTime { get; private set; }
+
+    /// <summary>
     /// Timestamp when the record was created.
     /// </summary>
     public DateTime CreatedAt { get; private set; }
@@ -76,7 +81,8 @@ public class DailyRecord
         Guid flockId,
         DateTime recordDate,
         int eggCount,
-        string? notes = null)
+        string? notes = null,
+        TimeSpan? collectionTime = null)
     {
         // Validate tenant ID
         if (tenantId == Guid.Empty)
@@ -127,6 +133,7 @@ public class DailyRecord
             RecordDate = recordDateUtc,
             EggCount = eggCount,
             Notes = notes,
+            CollectionTime = collectionTime,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -135,11 +142,12 @@ public class DailyRecord
     }
 
     /// <summary>
-    /// Updates the egg count and notes for this record.
+    /// Updates the egg count, notes, and collection time for this record.
     /// </summary>
     /// <param name="eggCount">New egg count</param>
     /// <param name="notes">Optional notes</param>
-    public void Update(int eggCount, string? notes = null)
+    /// <param name="collectionTime">Optional collection time; null preserves the existing value</param>
+    public void Update(int eggCount, string? notes = null, TimeSpan? collectionTime = null)
     {
         // Validate egg count is non-negative
         if (eggCount < 0)
@@ -155,6 +163,10 @@ public class DailyRecord
 
         EggCount = eggCount;
         Notes = notes;
+        if (collectionTime.HasValue)
+        {
+            CollectionTime = collectionTime;
+        }
         UpdatedAt = DateTime.UtcNow;
     }
 }

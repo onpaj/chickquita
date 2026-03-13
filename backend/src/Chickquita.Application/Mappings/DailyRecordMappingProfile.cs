@@ -19,6 +19,8 @@ public sealed class DailyRecordMappingProfile : Profile
             .ForMember(dest => dest.FlockName,
                 opt => opt.MapFrom(src => src.Flock != null ? src.Flock.Identifier : string.Empty))
             .ForMember(dest => dest.FlockCoopName,
-                opt => opt.MapFrom(src => src.Flock != null && src.Flock.Coop != null ? src.Flock.Coop.Name : string.Empty));
+                opt => opt.MapFrom(src => src.Flock != null && src.Flock.Coop != null ? src.Flock.Coop.Name : string.Empty))
+            .ForMember(dest => dest.CollectionTime,
+                opt => opt.MapFrom(src => src.CollectionTime.HasValue ? src.CollectionTime.Value.ToString(@"hh\:mm") : null));
     }
 }

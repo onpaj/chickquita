@@ -24,4 +24,10 @@ public sealed record UpdateDailyRecordCommand : IRequest<Result<DailyRecordDto>>
     /// Gets or sets optional notes about the daily collection.
     /// </summary>
     public string? Notes { get; init; }
+
+    /// <summary>
+    /// Gets or sets the optional time of egg collection in "HH:mm" format (UTC).
+    /// Null means preserve the existing value.
+    /// </summary>
+    public string? CollectionTime { get; init; }
 }

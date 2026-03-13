@@ -315,6 +315,9 @@
       "startDate": "Od data",
       "endDate": "Do data"
     },
+    "form": {
+      "collectionTime": "Čas sběru (UTC)"
+    },
     "quickAdd": {
       "title": "Rychlý záznam vajec"
     },

@@ -51,13 +51,15 @@ describe('EditDailyRecordModal', () => {
     },
   });
 
+  const todayDateStr = new Date().toISOString().split('T')[0]; // e.g. '2026-03-13'
+
   const todayRecord: DailyRecordDto = {
     id: 'record-1',
     tenantId: 'tenant-1',
     flockId: 'flock-1',
     flockName: 'Test Flock',
     flockCoopName: 'Test Coop',
-    recordDate: '2026-02-07',
+    recordDate: todayDateStr,
     eggCount: 10,
     notes: 'Test notes',
     createdAt: new Date().toISOString(), // Created today
@@ -119,7 +121,8 @@ describe('EditDailyRecordModal', () => {
 
     const dateField = screen.getByLabelText('Datum');
     expect(dateField).toBeDisabled();
-    expect(dateField).toHaveValue('7. 2. 2026');
+    const expectedFormattedDate = new Date(todayDateStr).toLocaleDateString('cs-CZ');
+    expect(dateField).toHaveValue(expectedFormattedDate);
   });
 
   it('displays flock identifier as read-only field', () => {

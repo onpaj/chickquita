@@ -313,6 +313,9 @@
       "startDate": "Start Date",
       "endDate": "End Date"
     },
+    "form": {
+      "collectionTime": "Collection time (UTC)"
+    },
     "quickAdd": {
       "title": "Quick Add Eggs"
     },

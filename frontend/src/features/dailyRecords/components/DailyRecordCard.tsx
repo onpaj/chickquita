@@ -28,15 +28,15 @@ export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecord
   const isPendingSync = useIsRecordPendingSync(record.id);
   const formattedDate = formatDate(record.recordDate);
 
-  // Check if record can be edited (same-day restriction)
+  // Check if record can be edited (same-day restriction based on recordDate)
   const canEdit = (() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const createdDate = new Date(record.createdAt);
-    createdDate.setHours(0, 0, 0, 0);
+    const recordDateObj = new Date(record.recordDate);
+    recordDateObj.setHours(0, 0, 0, 0);
 
-    return createdDate.getTime() === today.getTime();
+    return recordDateObj.getTime() === today.getTime();
   })();
 
   return (
@@ -105,6 +105,13 @@ export function DailyRecordCard({ record, flockIdentifier, onEdit }: DailyRecord
             </Typography>
           </Box>
         </Box>
+
+        {/* Collection time */}
+        {record.collectionTime && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            {t('dailyRecords.form.collectionTime')}: {record.collectionTime}
+          </Typography>
+        )}
 
         {/* Flock identifier */}
         {flockIdentifier && (

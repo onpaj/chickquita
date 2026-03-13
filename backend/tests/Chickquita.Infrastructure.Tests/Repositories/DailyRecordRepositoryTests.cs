@@ -24,6 +24,36 @@ public class DailyRecordRepositoryTests : IDisposable
     private readonly Guid _coopId;
     private readonly Guid _flockId;
 
+    /// <summary>
+    /// SQLite-compatible subclass of ApplicationDbContext.
+    /// Converts CollectionTime (TimeSpan?) to ticks (long?) so that SQLite can handle
+    /// ORDER BY on the column. The EF Core SQLite provider does not support TimeSpan
+    /// in ORDER BY clauses natively.
+    /// </summary>
+    private class SqliteApplicationDbContext : ApplicationDbContext
+    {
+        public SqliteApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            ICurrentUserService currentUserService)
+            : base(options, currentUserService)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Convert TimeSpan? to long? (ticks) for SQLite compatibility.
+            // PostgreSQL handles "time" type natively, but SQLite cannot ORDER BY TimeSpan.
+            modelBuilder.Entity<DailyRecord>()
+                .Property(d => d.CollectionTime)
+                .HasColumnType("INTEGER")
+                .HasConversion(
+                    v => v.HasValue ? v.Value.Ticks : (long?)null,
+                    v => v.HasValue ? TimeSpan.FromTicks(v.Value) : (TimeSpan?)null);
+        }
+    }
+
     public DailyRecordRepositoryTests()
     {
         // Use SQLite in-memory database for testing
@@ -40,7 +70,7 @@ public class DailyRecordRepositoryTests : IDisposable
         var mockCurrentUserService = new Mock<ICurrentUserService>();
         mockCurrentUserService.Setup(x => x.TenantId).Returns(_tenantId);
 
-        _dbContext = new ApplicationDbContext(options, mockCurrentUserService.Object);
+        _dbContext = new SqliteApplicationDbContext(options, mockCurrentUserService.Object);
         _dbContext.Database.EnsureCreated();
 
         _repository = new DailyRecordRepository(_dbContext);
@@ -262,38 +292,6 @@ public class DailyRecordRepositoryTests : IDisposable
 
     #endregion
 
-    #region GetByFlockIdAndDateAsync Tests
-
-    [Fact]
-    public async Task GetByFlockIdAndDateAsync_ReturnsRecord_WhenRecordExists()
-    {
-        // Arrange
-        var recordDate = DateTime.UtcNow.Date;
-        var record = DailyRecord.Create(_tenantId, _flockId, recordDate, 10, null);
-        _dbContext.DailyRecords.Add(record);
-        await _dbContext.SaveChangesAsync();
-
-        // Act
-        var result = await _repository.GetByFlockIdAndDateAsync(_flockId, recordDate);
-
-        // Assert
-        result.Should().NotBeNull();
-        result!.FlockId.Should().Be(_flockId);
-        result.RecordDate.Should().Be(recordDate);
-    }
-
-    [Fact]
-    public async Task GetByFlockIdAndDateAsync_ReturnsNull_WhenRecordDoesNotExist()
-    {
-        // Act
-        var result = await _repository.GetByFlockIdAndDateAsync(_flockId, DateTime.UtcNow);
-
-        // Assert
-        result.Should().BeNull();
-    }
-
-    #endregion
-
     #region AddAsync Tests
 
     [Fact]
@@ -399,70 +397,6 @@ public class DailyRecordRepositoryTests : IDisposable
 
     #endregion
 
-    #region ExistsForFlockAndDateAsync Tests
-
-    [Fact]
-    public async Task ExistsForFlockAndDateAsync_ReturnsTrue_WhenRecordExists()
-    {
-        // Arrange
-        var recordDate = DateTime.UtcNow.Date;
-        var record = DailyRecord.Create(_tenantId, _flockId, recordDate, 10, null);
-        _dbContext.DailyRecords.Add(record);
-        await _dbContext.SaveChangesAsync();
-
-        // Act
-        var result = await _repository.ExistsForFlockAndDateAsync(_flockId, recordDate);
-
-        // Assert
-        result.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task ExistsForFlockAndDateAsync_ReturnsFalse_WhenRecordDoesNotExist()
-    {
-        // Act
-        var result = await _repository.ExistsForFlockAndDateAsync(_flockId, DateTime.UtcNow);
-
-        // Assert
-        result.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task ExistsForFlockAndDateAsync_WithExcludeRecordId_ExcludesSpecifiedRecord()
-    {
-        // Arrange
-        var recordDate = DateTime.UtcNow.Date;
-        var record = DailyRecord.Create(_tenantId, _flockId, recordDate, 10, null);
-        _dbContext.DailyRecords.Add(record);
-        await _dbContext.SaveChangesAsync();
-
-        // Act - Exclude the existing record
-        var result = await _repository.ExistsForFlockAndDateAsync(_flockId, recordDate, record.Id);
-
-        // Assert
-        result.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task ExistsForFlockAndDateAsync_WithExcludeRecordId_ReturnsTrue_WhenOtherRecordExists()
-    {
-        // Arrange - This scenario shouldn't happen due to unique constraint, but test the logic
-        var recordDate = DateTime.UtcNow.Date;
-        var record = DailyRecord.Create(_tenantId, _flockId, recordDate, 10, null);
-        _dbContext.DailyRecords.Add(record);
-        await _dbContext.SaveChangesAsync();
-
-        var otherRecordId = Guid.NewGuid();
-
-        // Act - Exclude a different record
-        var result = await _repository.ExistsForFlockAndDateAsync(_flockId, recordDate, otherRecordId);
-
-        // Assert
-        result.Should().BeTrue();
-    }
-
-    #endregion
-
     #region GetCountByFlockIdAsync Tests
 
     [Fact]
@@ -530,9 +464,9 @@ public class DailyRecordRepositoryTests : IDisposable
     #region Database Constraint Tests
 
     [Fact]
-    public async Task DailyRecord_UniqueConstraint_OneRecordPerFlockPerDate()
+    public async Task DailyRecord_AllowsMultipleRecordsPerFlockPerDate()
     {
-        // Arrange
+        // Arrange - Multiple records on the same date should be allowed (issue #107)
         var recordDate = DateTime.UtcNow.Date;
         var record1 = DailyRecord.Create(_tenantId, _flockId, recordDate, 10, null);
         _dbContext.DailyRecords.Add(record1);
@@ -541,9 +475,14 @@ public class DailyRecordRepositoryTests : IDisposable
         var record2 = DailyRecord.Create(_tenantId, _flockId, recordDate, 15, null);
         _dbContext.DailyRecords.Add(record2);
 
-        // Act & Assert
+        // Act & Assert - Should succeed without throwing
         var act = async () => await _dbContext.SaveChangesAsync();
-        await act.Should().ThrowAsync<DbUpdateException>();
+        await act.Should().NotThrowAsync();
+
+        var records = await _dbContext.DailyRecords
+            .Where(r => r.FlockId == _flockId && r.RecordDate == recordDate)
+            .ToListAsync();
+        records.Should().HaveCount(2);
     }
 
     [Fact]

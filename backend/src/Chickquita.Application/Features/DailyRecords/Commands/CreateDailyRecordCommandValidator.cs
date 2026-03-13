@@ -30,5 +30,10 @@ public sealed class CreateDailyRecordCommandValidator : AbstractValidator<Create
             .MaximumLength(500)
             .WithMessage("Notes must not exceed 500 characters.")
             .When(x => !string.IsNullOrWhiteSpace(x.Notes));
+
+        RuleFor(x => x.CollectionTime)
+            .Must(value => TimeSpan.TryParseExact(value, @"hh\:mm", null, out var t) && t >= TimeSpan.Zero && t < TimeSpan.FromHours(24))
+            .WithMessage("Collection time must be a valid time in HH:mm format (00:00–23:59).")
+            .When(x => !string.IsNullOrWhiteSpace(x.CollectionTime));
     }
 }

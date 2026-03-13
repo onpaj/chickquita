@@ -51,17 +51,17 @@ interface EditDailyRecordModalProps {
 const MAX_NOTES_LENGTH = 500;
 
 /**
- * Checks if a record can be edited (same-day restriction).
- * Only records created today can be edited.
+ * Checks if a record can be edited (same-day restriction based on recordDate).
+ * Only records with today's recordDate can be edited.
  */
 function canEditRecord(record: DailyRecordDto): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const createdDate = new Date(record.createdAt);
-  createdDate.setHours(0, 0, 0, 0);
+  const recordDateObj = new Date(record.recordDate);
+  recordDateObj.setHours(0, 0, 0, 0);
 
-  return createdDate.getTime() === today.getTime();
+  return recordDateObj.getTime() === today.getTime();
 }
 
 /**
@@ -95,6 +95,7 @@ export function EditDailyRecordModal({
 
   const [eggCount, setEggCount] = useState<number>(0);
   const [notes, setNotes] = useState<string>('');
+  const [collectionTime, setCollectionTime] = useState<string>('');
   const [eggCountError, setEggCountError] = useState('');
   const [notesError, setNotesError] = useState('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -107,6 +108,7 @@ export function EditDailyRecordModal({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setEggCount(record.eggCount);
       setNotes(record.notes || '');
+      setCollectionTime(record.collectionTime || '');
       setEggCountError('');
       setNotesError('');
     }
@@ -126,6 +128,7 @@ export function EditDailyRecordModal({
   const handleClose = () => {
     setEggCount(0);
     setNotes('');
+    setCollectionTime('');
     setEggCountError('');
     setNotesError('');
     setIsDeleteDialogOpen(false);
@@ -178,6 +181,7 @@ export function EditDailyRecordModal({
         id: record.id,
         eggCount,
         notes: notes.trim() || undefined,
+        collectionTime: collectionTime || undefined,
       },
       {
         onSuccess: () => {
@@ -328,6 +332,18 @@ export function EditDailyRecordModal({
               multiline
               rows={2}
               inputProps={touchInputProps}
+            />
+
+            {/* Collection time (optional) */}
+            <TextField
+              type="time"
+              label={t('dailyRecords.form.collectionTime')}
+              value={collectionTime}
+              onChange={(e) => setCollectionTime(e.target.value)}
+              fullWidth
+              disabled={isPending || !canEdit}
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ ...touchInputProps, step: 60 }}
             />
           </Stack>
         </DialogContent>

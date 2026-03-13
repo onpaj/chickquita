@@ -202,9 +202,10 @@ describe('DailyRecordCard', () => {
 
   describe('Edit button functionality', () => {
     it('should show edit button for same-day records when onEdit is provided', () => {
-      // Create a record from today
+      // Create a record from today (canEdit checks recordDate, not createdAt)
       const todayRecord = {
         ...mockRecord,
+        recordDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
       };
 
@@ -240,6 +241,7 @@ describe('DailyRecordCard', () => {
     it('should not show edit button when onEdit is not provided', () => {
       const todayRecord = {
         ...mockRecord,
+        recordDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
       };
 
@@ -256,6 +258,7 @@ describe('DailyRecordCard', () => {
       const mockOnEdit = vi.fn();
       const todayRecord = {
         ...mockRecord,
+        recordDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
       };
 

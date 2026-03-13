@@ -56,7 +56,7 @@ export function useCreateDailyRecord() {
       data,
     }: {
       flockId: string;
-      data: { recordDate: string; eggCount: number; notes?: string };
+      data: { recordDate: string; eggCount: number; notes?: string; collectionTime?: string };
     }) => dailyRecordsApi.create(flockId, data),
     onMutate: async ({ flockId, data }) => {
       // Cancel any outgoing refetches
