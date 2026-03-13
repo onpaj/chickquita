@@ -57,20 +57,7 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("GetFlocksQuery: User is not authenticated");
-                return Result<List<FlockDto>>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("GetFlocksQuery: Tenant ID not found");
-                return Result<List<FlockDto>>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             List<Flock> flocks;
 

@@ -44,20 +44,7 @@ public sealed class DeleteDailyRecordCommandHandler : IRequestHandler<DeleteDail
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("DeleteDailyRecordCommand: User is not authenticated");
-                return Result<bool>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("DeleteDailyRecordCommand: Tenant ID not found");
-                return Result<bool>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Get the existing daily record to verify it exists and belongs to this tenant
             var dailyRecord = await _dailyRecordRepository.GetByIdWithoutNavigationAsync(request.Id);

@@ -63,20 +63,7 @@ public sealed class GetPurchaseNamesQueryHandler : IRequestHandler<GetPurchaseNa
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("GetPurchaseNamesQuery: User is not authenticated");
-                return Result<List<string>>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("GetPurchaseNamesQuery: Tenant ID not found");
-                return Result<List<string>>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Return empty list if query is null or empty
             if (string.IsNullOrWhiteSpace(request.Query))

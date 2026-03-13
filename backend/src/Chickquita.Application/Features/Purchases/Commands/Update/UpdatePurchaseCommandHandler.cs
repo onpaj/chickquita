@@ -58,20 +58,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("UpdatePurchaseCommand: User is not authenticated");
-                return Result<PurchaseDto>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("UpdatePurchaseCommand: Tenant ID not found");
-                return Result<PurchaseDto>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Fetch existing purchase
             var purchase = await _purchaseRepository.GetByIdAsync(request.Id);

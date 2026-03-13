@@ -206,61 +206,6 @@ public class CreateCoopCommandHandlerTests
 
     #endregion
 
-    #region Authentication Tests
-
-    [Fact]
-    public async Task Handle_WhenUserNotAuthenticated_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var command = new CreateCoopCommand
-        {
-            Name = "Main Coop",
-            Location = "North Field"
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(false);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("User is not authenticated");
-
-        _mockCoopRepository.Verify(x => x.ExistsByNameAsync(It.IsAny<string>()), Times.Never);
-        _mockCoopRepository.Verify(x => x.AddAsync(It.IsAny<Coop>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WhenTenantIdNotFound_ShouldReturnUnauthorizedError()
-    {
-        // Arrange
-        var command = new CreateCoopCommand
-        {
-            Name = "Main Coop",
-            Location = "North Field"
-        };
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns((Guid?)null);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.Unauthorized");
-        result.Error.Message.Should().Be("Tenant not found");
-
-        _mockCoopRepository.Verify(x => x.ExistsByNameAsync(It.IsAny<string>()), Times.Never);
-        _mockCoopRepository.Verify(x => x.AddAsync(It.IsAny<Coop>()), Times.Never);
-    }
-
-    #endregion
-
     #region Validation Edge Cases
 
     [Fact]

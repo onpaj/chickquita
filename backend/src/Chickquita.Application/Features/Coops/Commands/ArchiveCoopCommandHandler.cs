@@ -44,20 +44,7 @@ public sealed class ArchiveCoopCommandHandler : IRequestHandler<ArchiveCoopComma
 
         try
         {
-            // Verify user is authenticated
-            if (!_currentUserService.IsAuthenticated)
-            {
-                _logger.LogWarning("ArchiveCoopCommand: User is not authenticated");
-                return Result<bool>.Failure(Error.Unauthorized("User is not authenticated"));
-            }
-
-            // Get current tenant ID
             var tenantId = _currentUserService.TenantId;
-            if (!tenantId.HasValue)
-            {
-                _logger.LogWarning("ArchiveCoopCommand: Tenant ID not found");
-                return Result<bool>.Failure(Error.Unauthorized("Tenant not found"));
-            }
 
             // Get the existing coop (including archived ones)
             var coop = await _coopRepository.GetByIdAsync(request.Id);
