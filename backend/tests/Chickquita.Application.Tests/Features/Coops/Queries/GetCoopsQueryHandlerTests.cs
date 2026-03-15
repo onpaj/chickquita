@@ -82,8 +82,8 @@ public class GetCoopsQueryHandlerTests
         _mockMapper.Setup(x => x.Map<List<CoopDto>>(coops))
             .Returns(new List<CoopDto> { dto1, dto2 });
 
-        _mockCoopRepository.Setup(x => x.GetFlocksCountAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(0);
+        _mockCoopRepository.Setup(x => x.GetAllFlockCountsAsync())
+            .ReturnsAsync(new Dictionary<Guid, int>());
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -97,6 +97,7 @@ public class GetCoopsQueryHandlerTests
         result.Value.Should().Contain(c => c.Name == "Secondary Coop");
 
         _mockCoopRepository.Verify(x => x.GetAllAsync(false), Times.Once);
+        _mockCoopRepository.Verify(x => x.GetAllFlockCountsAsync(), Times.Once);
     }
 
     [Fact]
@@ -128,8 +129,8 @@ public class GetCoopsQueryHandlerTests
         _mockMapper.Setup(x => x.Map<List<CoopDto>>(coops))
             .Returns(new List<CoopDto> { dto });
 
-        _mockCoopRepository.Setup(x => x.GetFlocksCountAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(0);
+        _mockCoopRepository.Setup(x => x.GetAllFlockCountsAsync())
+            .ReturnsAsync(new Dictionary<Guid, int>());
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -142,6 +143,7 @@ public class GetCoopsQueryHandlerTests
 
         // Verify that GetAllAsync was called with includeArchived = false
         _mockCoopRepository.Verify(x => x.GetAllAsync(false), Times.Once);
+        _mockCoopRepository.Verify(x => x.GetAllFlockCountsAsync(), Times.Once);
     }
 
     [Fact]
@@ -186,8 +188,8 @@ public class GetCoopsQueryHandlerTests
         _mockMapper.Setup(x => x.Map<List<CoopDto>>(coops))
             .Returns(new List<CoopDto> { dto1, dto2 });
 
-        _mockCoopRepository.Setup(x => x.GetFlocksCountAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(0);
+        _mockCoopRepository.Setup(x => x.GetAllFlockCountsAsync())
+            .ReturnsAsync(new Dictionary<Guid, int>());
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -201,6 +203,7 @@ public class GetCoopsQueryHandlerTests
 
         // Verify that GetAllAsync was called with includeArchived = true
         _mockCoopRepository.Verify(x => x.GetAllAsync(true), Times.Once);
+        _mockCoopRepository.Verify(x => x.GetAllFlockCountsAsync(), Times.Once);
     }
 
     [Fact]
@@ -279,8 +282,8 @@ public class GetCoopsQueryHandlerTests
         _mockMapper.Setup(x => x.Map<List<CoopDto>>(coops))
             .Returns(new List<CoopDto> { dto1, dto2 });
 
-        _mockCoopRepository.Setup(x => x.GetFlocksCountAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(0);
+        _mockCoopRepository.Setup(x => x.GetAllFlockCountsAsync())
+            .ReturnsAsync(new Dictionary<Guid, int>());
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -291,6 +294,7 @@ public class GetCoopsQueryHandlerTests
         result.Value.Should().AllSatisfy(c => c.TenantId.Should().Be(tenantId));
 
         _mockCoopRepository.Verify(x => x.GetAllAsync(false), Times.Once);
+        _mockCoopRepository.Verify(x => x.GetAllFlockCountsAsync(), Times.Once);
     }
 
     #endregion
@@ -342,8 +346,8 @@ public class GetCoopsQueryHandlerTests
         _mockMapper.Setup(x => x.Map<List<CoopDto>>(coops))
             .Returns(new List<CoopDto> { dto1, dto2 });
 
-        _mockCoopRepository.Setup(x => x.GetFlocksCountAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(0);
+        _mockCoopRepository.Setup(x => x.GetAllFlockCountsAsync())
+            .ReturnsAsync(new Dictionary<Guid, int>());
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -358,6 +362,7 @@ public class GetCoopsQueryHandlerTests
         result.Value[1].Name.Should().Be("Older Coop");
 
         _mockCoopRepository.Verify(x => x.GetAllAsync(false), Times.Once);
+        _mockCoopRepository.Verify(x => x.GetAllFlockCountsAsync(), Times.Once);
     }
 
     #endregion
@@ -404,11 +409,13 @@ public class GetCoopsQueryHandlerTests
         _mockMapper.Setup(x => x.Map<List<CoopDto>>(coops))
             .Returns(new List<CoopDto> { dto1, dto2 });
 
-        // Simulate different flock counts
-        _mockCoopRepository.Setup(x => x.GetFlocksCountAsync(coop1.Id))
-            .ReturnsAsync(3);
-        _mockCoopRepository.Setup(x => x.GetFlocksCountAsync(coop2.Id))
-            .ReturnsAsync(5);
+        // Simulate different flock counts returned in a single batch
+        _mockCoopRepository.Setup(x => x.GetAllFlockCountsAsync())
+            .ReturnsAsync(new Dictionary<Guid, int>
+            {
+                { coop1.Id, 3 },
+                { coop2.Id, 5 }
+            });
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -424,8 +431,51 @@ public class GetCoopsQueryHandlerTests
         resultCoop1.FlocksCount.Should().Be(3);
         resultCoop2.FlocksCount.Should().Be(5);
 
-        _mockCoopRepository.Verify(x => x.GetFlocksCountAsync(coop1.Id), Times.Once);
-        _mockCoopRepository.Verify(x => x.GetFlocksCountAsync(coop2.Id), Times.Once);
+        // Verify single batch call instead of N individual calls
+        _mockCoopRepository.Verify(x => x.GetAllFlockCountsAsync(), Times.Once);
+        _mockCoopRepository.Verify(x => x.GetFlocksCountAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_WhenCoopNotInFlockCountsDictionary_ShouldDefaultToZero()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var query = new GetCoopsQuery();
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+
+        var coop = Coop.Create(tenantId, "Empty Coop", "Location");
+        var coops = new List<Coop> { coop };
+
+        _mockCoopRepository.Setup(x => x.GetAllAsync(false))
+            .ReturnsAsync(coops);
+
+        var dto = new CoopDto
+        {
+            Id = coop.Id,
+            TenantId = tenantId,
+            Name = coop.Name,
+            Location = coop.Location,
+            IsActive = true,
+            FlocksCount = 0
+        };
+
+        _mockMapper.Setup(x => x.Map<List<CoopDto>>(coops))
+            .Returns(new List<CoopDto> { dto });
+
+        // Coop has no flocks — not present in the dictionary
+        _mockCoopRepository.Setup(x => x.GetAllFlockCountsAsync())
+            .ReturnsAsync(new Dictionary<Guid, int>());
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().HaveCount(1);
+        result.Value[0].FlocksCount.Should().Be(0);
     }
 
     #endregion
@@ -512,7 +562,7 @@ public class GetCoopsQueryHandlerTests
         _mockMapper.Setup(x => x.Map<List<CoopDto>>(coops))
             .Returns(new List<CoopDto> { dto });
 
-        _mockCoopRepository.Setup(x => x.GetFlocksCountAsync(coop.Id))
+        _mockCoopRepository.Setup(x => x.GetAllFlockCountsAsync())
             .ThrowsAsync(new Exception("Failed to get flocks count"));
 
         // Act

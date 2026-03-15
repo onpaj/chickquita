@@ -61,4 +61,10 @@ public interface ICoopRepository
     /// <param name="coopId">The coop ID</param>
     /// <returns>The number of flocks associated with the coop</returns>
     Task<int> GetFlocksCountAsync(Guid coopId);
+
+    /// <summary>
+    /// Gets the flock counts for all coops in a single batch query.
+    /// </summary>
+    /// <returns>A dictionary mapping coop ID to flock count</returns>
+    Task<Dictionary<Guid, int>> GetAllFlockCountsAsync();
 }
