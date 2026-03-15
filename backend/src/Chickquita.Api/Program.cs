@@ -88,23 +88,23 @@ builder.Services.AddHealthChecks()
         name: "database",
         tags: ["ready"]);
 
-// Configure CORS for development only
-if (builder.Environment.IsDevelopment())
-{
-    var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-        ?? new[] { "http://localhost:3100" };
+// Configure CORS for all environments — fail fast if required config is absent
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (allowedOrigins == null || allowedOrigins.Length == 0)
+    throw new InvalidOperationException(
+        "Cors:AllowedOrigins is required but not configured. " +
+        "Set the Cors__AllowedOrigins__0 environment variable.");
 
-    builder.Services.AddCors(options =>
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AppCors", policy =>
     {
-        options.AddPolicy("DevelopmentPolicy", policy =>
-        {
-            policy.WithOrigins(allowedOrigins)
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
-}
+});
 
 var app = builder.Build();
 
@@ -144,8 +144,10 @@ if (app.Environment.IsDevelopment())
         options.DisplayRequestDuration();
         options.EnableTryItOutByDefault();
     });
-    app.UseCors("DevelopmentPolicy");
 }
+
+// Apply CORS for all environments — must come before authentication/authorization
+app.UseCors("AppCors");
 
 app.UseHttpsRedirection();
 
