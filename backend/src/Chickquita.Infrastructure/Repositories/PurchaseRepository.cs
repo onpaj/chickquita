@@ -177,11 +177,8 @@ public class PurchaseRepository : IPurchaseRepository
     /// <inheritdoc />
     public async Task DeleteAsync(Guid id)
     {
-        var purchase = await _context.Purchases.FindAsync(id);
-        if (purchase != null)
-        {
-            _context.Purchases.Remove(purchase);
-            await _context.SaveChangesAsync();
-        }
+        await _context.Purchases
+            .Where(p => p.Id == id)
+            .ExecuteDeleteAsync();
     }
 }

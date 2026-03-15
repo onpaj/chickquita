@@ -70,12 +70,9 @@ public class CoopRepository : ICoopRepository
     /// <inheritdoc />
     public async Task DeleteAsync(Guid id)
     {
-        var coop = await _context.Coops.FindAsync(id);
-        if (coop != null)
-        {
-            _context.Coops.Remove(coop);
-            await _context.SaveChangesAsync();
-        }
+        await _context.Coops
+            .Where(c => c.Id == id)
+            .ExecuteDeleteAsync();
     }
 
     /// <inheritdoc />
