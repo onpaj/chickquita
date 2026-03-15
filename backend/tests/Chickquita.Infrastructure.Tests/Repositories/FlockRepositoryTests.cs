@@ -177,4 +177,79 @@ public class FlockRepositoryTests : IDisposable
             persisted!.Identifier.Should().Be("Detached Updated");
         }
     }
+
+    [Fact]
+    public async Task GetAllAsync_ReturnsFlocks_OrderedByCreatedAtDescending()
+    {
+        // Arrange: persist two flocks — the second one will have a later CreatedAt
+        Guid firstFlockId, secondFlockId;
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            var flock1 = Flock.Create(_tenantId, _coopId, "FLOCK-OLDER", DateTime.UtcNow.AddMonths(-3), 10, 1, 0);
+            await repo.AddAsync(flock1);
+            firstFlockId = flock1.Id;
+
+            // Small delay to ensure distinct CreatedAt values in SQLite
+            await Task.Delay(10);
+
+            var flock2 = Flock.Create(_tenantId, _coopId, "FLOCK-NEWER", DateTime.UtcNow.AddMonths(-1), 5, 1, 0);
+            await repo.AddAsync(flock2);
+            secondFlockId = flock2.Id;
+        }
+
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            var result = await repo.GetAllAsync();
+
+            result.Should().HaveCount(2);
+            // Newest first
+            result[0].Id.Should().Be(secondFlockId);
+            result[1].Id.Should().Be(firstFlockId);
+        }
+    }
+
+    [Fact]
+    public async Task GetByCoopIdAsync_ReturnsFlocks_OrderedByCreatedAtDescending()
+    {
+        // Arrange: add a second coop and flocks in both
+        Guid otherCoopId;
+        using (var ctx = CreateContext())
+        {
+            var otherCoop = Coop.Create(_tenantId, "Other Coop", null);
+            ctx.Coops.Add(otherCoop);
+            await ctx.SaveChangesAsync();
+            otherCoopId = otherCoop.Id;
+        }
+
+        Guid firstFlockId, secondFlockId;
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            var flock1 = Flock.Create(_tenantId, _coopId, "COOP-FLOCK-A", DateTime.UtcNow.AddMonths(-4), 8, 1, 0);
+            await repo.AddAsync(flock1);
+            firstFlockId = flock1.Id;
+
+            await Task.Delay(10);
+
+            var flock2 = Flock.Create(_tenantId, _coopId, "COOP-FLOCK-B", DateTime.UtcNow.AddMonths(-2), 12, 1, 0);
+            await repo.AddAsync(flock2);
+            secondFlockId = flock2.Id;
+
+            // Flock in other coop — should not appear in results
+            var flockOther = Flock.Create(_tenantId, otherCoopId, "OTHER-COOP-FLOCK", DateTime.UtcNow.AddMonths(-1), 6, 1, 0);
+            await repo.AddAsync(flockOther);
+        }
+
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            var result = await repo.GetByCoopIdAsync(_coopId);
+
+            result.Should().HaveCount(2);
+            result[0].Id.Should().Be(secondFlockId);
+            result[1].Id.Should().Be(firstFlockId);
+        }
+    }
 }
