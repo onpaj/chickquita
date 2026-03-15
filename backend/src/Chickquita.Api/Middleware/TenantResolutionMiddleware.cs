@@ -1,4 +1,5 @@
 using Chickquita.Application.Interfaces;
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
@@ -47,8 +48,17 @@ public class TenantResolutionMiddleware
                                   ?? clerkOrgId; // Fallback to org ID if name not in claims
 
                     // Create new tenant
-                    tenant = Tenant.Create(clerkOrgId, orgName);
-                    tenant = await tenantRepository.AddAsync(tenant);
+                    var createResult = Tenant.Create(clerkOrgId, orgName);
+                    if (createResult.IsFailure)
+                    {
+                        logger.LogError(
+                            "Failed to create tenant for Clerk org ID: {ClerkOrgId}. Error: {Error}",
+                            clerkOrgId,
+                            createResult.Error.Message);
+                        await _next(context);
+                        return;
+                    }
+                    tenant = await tenantRepository.AddAsync(createResult.Value);
 
                     logger.LogInformation(
                         "Auto-created tenant with ID: {TenantId} for Clerk org ID: {ClerkOrgId}",
