@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 
@@ -21,7 +22,7 @@ public class DailyRecordTests
     public void Create_WithValidData_ShouldSucceed()
     {
         // Arrange & Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
@@ -29,6 +30,8 @@ public class DailyRecordTests
             ValidNotes);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var dailyRecord = result.Value;
         dailyRecord.Should().NotBeNull();
         dailyRecord.Id.Should().NotBeEmpty();
         dailyRecord.TenantId.Should().Be(_validTenantId);
@@ -45,13 +48,15 @@ public class DailyRecordTests
     public void Create_WithoutNotes_ShouldSucceed()
     {
         // Arrange & Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
             ValidEggCount);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var dailyRecord = result.Value;
         dailyRecord.Should().NotBeNull();
         dailyRecord.Notes.Should().BeNull();
     }
@@ -60,13 +65,15 @@ public class DailyRecordTests
     public void Create_WithZeroEggCount_ShouldSucceed()
     {
         // Arrange & Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
             0);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var dailyRecord = result.Value;
         dailyRecord.Should().NotBeNull();
         dailyRecord.EggCount.Should().Be(0);
     }
@@ -75,8 +82,8 @@ public class DailyRecordTests
     public void Create_ShouldGenerateUniqueIds()
     {
         // Arrange & Act
-        var record1 = DailyRecord.Create(_validTenantId, _validFlockId, ValidRecordDate, 10);
-        var record2 = DailyRecord.Create(_validTenantId, _validFlockId, ValidRecordDate.AddDays(-1), 12);
+        var record1 = DailyRecord.Create(_validTenantId, _validFlockId, ValidRecordDate, 10).Value;
+        var record2 = DailyRecord.Create(_validTenantId, _validFlockId, ValidRecordDate.AddDays(-1), 12).Value;
 
         // Assert
         record1.Id.Should().NotBe(record2.Id);
@@ -89,13 +96,15 @@ public class DailyRecordTests
         var dateWithTime = DateTime.UtcNow.AddDays(-1).AddHours(14).AddMinutes(30);
 
         // Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             dateWithTime,
             ValidEggCount);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var dailyRecord = result.Value;
         dailyRecord.RecordDate.Hour.Should().Be(0);
         dailyRecord.RecordDate.Minute.Should().Be(0);
         dailyRecord.RecordDate.Second.Should().Be(0);
@@ -107,41 +116,39 @@ public class DailyRecordTests
     #region Validation Tests - Tenant and Flock ID
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowArgumentException()
+    public void Create_WithEmptyTenantId_ShouldReturnFailure()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
 
         // Act
-        var act = () => DailyRecord.Create(
+        var result = DailyRecord.Create(
             emptyTenantId,
             _validFlockId,
             ValidRecordDate,
             ValidEggCount);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Tenant ID cannot be empty.*")
-            .And.ParamName.Should().Be("tenantId");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Tenant ID cannot be empty");
     }
 
     [Fact]
-    public void Create_WithEmptyFlockId_ShouldThrowArgumentException()
+    public void Create_WithEmptyFlockId_ShouldReturnFailure()
     {
         // Arrange
         var emptyFlockId = Guid.Empty;
 
         // Act
-        var act = () => DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             emptyFlockId,
             ValidRecordDate,
             ValidEggCount);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Flock ID cannot be empty.*")
-            .And.ParamName.Should().Be("flockId");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Flock ID cannot be empty");
     }
 
     #endregion
@@ -149,22 +156,21 @@ public class DailyRecordTests
     #region Validation Tests - Record Date
 
     [Fact]
-    public void Create_WithFutureRecordDate_ShouldThrowArgumentException()
+    public void Create_WithFutureRecordDate_ShouldReturnFailure()
     {
         // Arrange
         var futureDate = DateTime.UtcNow.Date.AddDays(1);
 
         // Act
-        var act = () => DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             futureDate,
             ValidEggCount);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Record date cannot be in the future.*")
-            .And.ParamName.Should().Be("recordDate");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Record date cannot be in the future");
     }
 
     [Fact]
@@ -174,13 +180,15 @@ public class DailyRecordTests
         var today = DateTime.UtcNow.Date;
 
         // Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             today,
             ValidEggCount);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var dailyRecord = result.Value;
         dailyRecord.Should().NotBeNull();
         dailyRecord.RecordDate.Should().Be(today);
     }
@@ -192,13 +200,15 @@ public class DailyRecordTests
         var pastDate = DateTime.UtcNow.Date.AddYears(-1);
 
         // Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             pastDate,
             ValidEggCount);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var dailyRecord = result.Value;
         dailyRecord.Should().NotBeNull();
         dailyRecord.RecordDate.Should().Be(pastDate);
     }
@@ -210,14 +220,15 @@ public class DailyRecordTests
         var localDate = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Local);
 
         // Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             localDate,
             ValidEggCount);
 
         // Assert
-        dailyRecord.RecordDate.Kind.Should().Be(DateTimeKind.Utc);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.RecordDate.Kind.Should().Be(DateTimeKind.Utc);
     }
 
     [Fact]
@@ -227,14 +238,15 @@ public class DailyRecordTests
         var unspecifiedDate = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Unspecified);
 
         // Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             unspecifiedDate,
             ValidEggCount);
 
         // Assert
-        dailyRecord.RecordDate.Kind.Should().Be(DateTimeKind.Utc);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.RecordDate.Kind.Should().Be(DateTimeKind.Utc);
     }
 
     #endregion
@@ -242,32 +254,33 @@ public class DailyRecordTests
     #region Validation Tests - Egg Count
 
     [Fact]
-    public void Create_WithNegativeEggCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeEggCount_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
             -1);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Egg count cannot be negative.*")
-            .And.ParamName.Should().Be("eggCount");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Egg count cannot be negative");
     }
 
     [Fact]
     public void Create_WithLargeEggCount_ShouldSucceed()
     {
         // Arrange & Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
             1000);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var dailyRecord = result.Value;
         dailyRecord.Should().NotBeNull();
         dailyRecord.EggCount.Should().Be(1000);
     }
@@ -277,13 +290,13 @@ public class DailyRecordTests
     #region Validation Tests - Notes
 
     [Fact]
-    public void Create_WithNotesExceeding500Characters_ShouldThrowArgumentException()
+    public void Create_WithNotesExceeding500Characters_ShouldReturnFailure()
     {
         // Arrange
         var longNotes = new string('A', 501);
 
         // Act
-        var act = () => DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
@@ -291,9 +304,8 @@ public class DailyRecordTests
             longNotes);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Notes cannot exceed 500 characters.*")
-            .And.ParamName.Should().Be("notes");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Notes cannot exceed 500 characters");
     }
 
     [Fact]
@@ -303,7 +315,7 @@ public class DailyRecordTests
         var notes = new string('A', 500);
 
         // Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
@@ -311,6 +323,8 @@ public class DailyRecordTests
             notes);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var dailyRecord = result.Value;
         dailyRecord.Should().NotBeNull();
         dailyRecord.Notes.Should().Be(notes);
         dailyRecord.Notes!.Length.Should().Be(500);
@@ -320,7 +334,7 @@ public class DailyRecordTests
     public void Create_WithEmptyStringNotes_ShouldSucceed()
     {
         // Arrange & Act
-        var dailyRecord = DailyRecord.Create(
+        var result = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
@@ -328,6 +342,8 @@ public class DailyRecordTests
             string.Empty);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var dailyRecord = result.Value;
         dailyRecord.Should().NotBeNull();
         dailyRecord.Notes.Should().Be(string.Empty);
     }
@@ -345,7 +361,7 @@ public class DailyRecordTests
             _validFlockId,
             ValidRecordDate,
             ValidEggCount,
-            ValidNotes);
+            ValidNotes).Value;
         var originalCreatedAt = dailyRecord.CreatedAt;
         var originalUpdatedAt = dailyRecord.UpdatedAt;
         Thread.Sleep(10);
@@ -354,9 +370,10 @@ public class DailyRecordTests
         var newNotes = "Updated notes";
 
         // Act
-        dailyRecord.Update(newEggCount, newNotes);
+        var updateResult = dailyRecord.Update(newEggCount, newNotes);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         dailyRecord.EggCount.Should().Be(newEggCount);
         dailyRecord.Notes.Should().Be(newNotes);
         dailyRecord.CreatedAt.Should().Be(originalCreatedAt);
@@ -372,56 +389,55 @@ public class DailyRecordTests
             _validFlockId,
             ValidRecordDate,
             ValidEggCount,
-            ValidNotes);
+            ValidNotes).Value;
 
         var newEggCount = 25;
 
         // Act
-        dailyRecord.Update(newEggCount);
+        var updateResult = dailyRecord.Update(newEggCount);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         dailyRecord.EggCount.Should().Be(newEggCount);
         dailyRecord.Notes.Should().BeNull();
     }
 
     [Fact]
-    public void Update_WithNegativeEggCount_ShouldThrowArgumentException()
+    public void Update_WithNegativeEggCount_ShouldReturnFailure()
     {
         // Arrange
         var dailyRecord = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
-            ValidEggCount);
+            ValidEggCount).Value;
 
         // Act
-        var act = () => dailyRecord.Update(-1);
+        var updateResult = dailyRecord.Update(-1);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Egg count cannot be negative.*")
-            .And.ParamName.Should().Be("eggCount");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Egg count cannot be negative");
     }
 
     [Fact]
-    public void Update_WithNotesExceeding500Characters_ShouldThrowArgumentException()
+    public void Update_WithNotesExceeding500Characters_ShouldReturnFailure()
     {
         // Arrange
         var dailyRecord = DailyRecord.Create(
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
-            ValidEggCount);
+            ValidEggCount).Value;
 
         var longNotes = new string('B', 501);
 
         // Act
-        var act = () => dailyRecord.Update(10, longNotes);
+        var updateResult = dailyRecord.Update(10, longNotes);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Notes cannot exceed 500 characters.*")
-            .And.ParamName.Should().Be("notes");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Notes cannot exceed 500 characters");
     }
 
     [Fact]
@@ -432,13 +448,14 @@ public class DailyRecordTests
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
-            ValidEggCount);
+            ValidEggCount).Value;
         var originalRecordDate = dailyRecord.RecordDate;
 
         // Act
-        dailyRecord.Update(20, "New notes");
+        var updateResult = dailyRecord.Update(20, "New notes");
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         dailyRecord.RecordDate.Should().Be(originalRecordDate);
     }
 
@@ -450,12 +467,13 @@ public class DailyRecordTests
             _validTenantId,
             _validFlockId,
             ValidRecordDate,
-            ValidEggCount);
+            ValidEggCount).Value;
 
         // Act
-        dailyRecord.Update(20, "New notes");
+        var updateResult = dailyRecord.Update(20, "New notes");
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         dailyRecord.TenantId.Should().Be(_validTenantId);
         dailyRecord.FlockId.Should().Be(_validFlockId);
     }
@@ -473,8 +491,8 @@ public class DailyRecordTests
         var timeVariant2 = today.AddHours(17).AddMinutes(45);
 
         // Act
-        var record1 = DailyRecord.Create(_validTenantId, _validFlockId, timeVariant1, 10);
-        var record2 = DailyRecord.Create(_validTenantId, _validFlockId, timeVariant2, 12);
+        var record1 = DailyRecord.Create(_validTenantId, _validFlockId, timeVariant1, 10).Value;
+        var record2 = DailyRecord.Create(_validTenantId, _validFlockId, timeVariant2, 12).Value;
 
         // Assert
         record1.RecordDate.Should().Be(record2.RecordDate);

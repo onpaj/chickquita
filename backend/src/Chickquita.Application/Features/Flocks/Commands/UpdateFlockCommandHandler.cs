@@ -83,7 +83,9 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
             }
 
             // Update basic flock information
-            flock.Update(request.Identifier, request.HatchDate);
+            var updateResult = flock.Update(request.Identifier, request.HatchDate);
+            if (updateResult.IsFailure)
+                return Result<FlockDto>.Failure(updateResult.Error);
 
             // Update composition if provided and changed
             if (request.CurrentHens.HasValue || request.CurrentRoosters.HasValue || request.CurrentChicks.HasValue)
@@ -99,7 +101,9 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
 
                 if (compositionChanged)
                 {
-                    flock.UpdateComposition(newHens, newRoosters, newChicks, "Manual update");
+                    var compositionResult = flock.UpdateComposition(newHens, newRoosters, newChicks, "Manual update");
+                    if (compositionResult.IsFailure)
+                        return Result<FlockDto>.Failure(compositionResult.Error);
 
                     _logger.LogInformation(
                         "Updated composition for flock {FlockId}: Hens={Hens}, Roosters={Roosters}, Chicks={Chicks}",
@@ -121,15 +125,6 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
             var flockDto = _mapper.Map<FlockDto>(updatedFlock);
 
             return Result<FlockDto>.Success(flockDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while updating flock: {Message}",
-                ex.Message);
-
-            return Result<FlockDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

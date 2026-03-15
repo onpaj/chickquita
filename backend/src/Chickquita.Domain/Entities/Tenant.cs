@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -44,14 +46,14 @@ public class Tenant
     /// </summary>
     /// <param name="clerkOrgId">The Clerk Organization ID</param>
     /// <param name="name">The display name of the organization / farm</param>
-    /// <returns>A new Tenant instance</returns>
-    public static Tenant Create(string clerkOrgId, string name)
+    /// <returns>A Result containing the new Tenant instance, or a validation error</returns>
+    public static Result<Tenant> Create(string clerkOrgId, string name)
     {
         if (string.IsNullOrWhiteSpace(clerkOrgId))
-            throw new ArgumentException("Clerk org ID cannot be empty.", nameof(clerkOrgId));
+            return Error.Validation("Clerk org ID cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Name cannot be empty.", nameof(name));
+            return Error.Validation("Name cannot be empty.");
 
         var now = DateTime.UtcNow;
         return new Tenant
@@ -68,12 +70,15 @@ public class Tenant
     /// Updates the tenant's display name.
     /// </summary>
     /// <param name="name">The new display name</param>
-    public void UpdateName(string name)
+    /// <returns>A Result indicating success or a validation error</returns>
+    public Result UpdateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Name cannot be empty.", nameof(name));
+            return Error.Validation("Name cannot be empty.");
 
         Name = name;
         UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
     }
 }
