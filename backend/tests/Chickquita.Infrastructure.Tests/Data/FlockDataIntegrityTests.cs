@@ -1,4 +1,5 @@
 using Chickquita.Application.Interfaces;
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using Chickquita.Infrastructure.Data;
 using FluentAssertions;
@@ -39,11 +40,11 @@ public class FlockDataIntegrityTests : IDisposable
 
         _dbContext = new ApplicationDbContext(options, mockCurrentUserService.Object);
         _dbContext.Database.EnsureCreated();
-        var tenant = Tenant.Create("clerk_user_test", "test@example.com");
+        var tenant = Tenant.Create("clerk_user_test", "test@example.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         _dbContext.Tenants.Add(tenant);
 
-        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location");
+        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location").Value;
         _dbContext.Coops.Add(coop);
         _dbContext.SaveChanges();
 
@@ -56,60 +57,60 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task Flock_NotNullConstraint_TenantIdRequired()
     {
         // Arrange - Domain validation should prevent creating a flock with empty tenant ID
-        var act = () => Flock.Create(Guid.Empty, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var result = Flock.Create(Guid.Empty, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
 
         // Act & Assert - Should fail at domain level before reaching database
-        act.Should().Throw<ArgumentException>().WithMessage("*tenantId*");
+        result.IsFailure.Should().BeTrue("tenant ID is required");
     }
 
     [Fact]
     public async Task Flock_NotNullConstraint_CoopIdRequired()
     {
         // Arrange - try to create flock without coop
-        var act = () => Flock.Create(_tenantId, Guid.Empty, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var result = Flock.Create(_tenantId, Guid.Empty, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
 
         // Act & Assert - should fail at domain level
-        act.Should().Throw<ArgumentException>().WithMessage("*coopId*");
+        result.IsFailure.Should().BeTrue("coop ID is required");
     }
 
     [Fact]
     public async Task Flock_NotNullConstraint_IdentifierRequired()
     {
         // Arrange
-        var act = () => Flock.Create(_tenantId, _coopId, "", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var result = Flock.Create(_tenantId, _coopId, "", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
 
         // Act & Assert
-        act.Should().Throw<ArgumentException>().WithMessage("*identifier*");
+        result.IsFailure.Should().BeTrue("identifier is required");
     }
 
     [Fact]
     public async Task Flock_CheckConstraint_HensCannotBeNegative()
     {
         // Arrange
-        var act = () => Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), -1, 2, 5, null);
+        var result = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), -1, 2, 5, null);
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*hens*");
+        result.IsFailure.Should().BeTrue("hens cannot be negative");
     }
 
     [Fact]
     public async Task Flock_CheckConstraint_RoostersCannotBeNegative()
     {
         // Arrange
-        var act = () => Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, -1, 5, null);
+        var result = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, -1, 5, null);
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*roosters*");
+        result.IsFailure.Should().BeTrue("roosters cannot be negative");
     }
 
     [Fact]
     public async Task Flock_CheckConstraint_ChicksCannotBeNegative()
     {
         // Arrange
-        var act = () => Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, -1, null);
+        var result = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, -1, null);
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*chicks*");
+        result.IsFailure.Should().BeTrue("chicks cannot be negative");
     }
 
     [Fact]
@@ -117,7 +118,7 @@ public class FlockDataIntegrityTests : IDisposable
     {
         // Arrange
         var nonExistentCoopId = Guid.NewGuid();
-        var flock = Flock.Create(_tenantId, nonExistentCoopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, nonExistentCoopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
 
         // Act & Assert - Foreign key constraint should prevent this
@@ -129,11 +130,11 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task Flock_UniqueConstraint_IdentifierMustBeUniquePerCoop()
     {
         // Arrange
-        var flock1 = Flock.Create(_tenantId, _coopId, "FLOCK-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock1 = Flock.Create(_tenantId, _coopId, "FLOCK-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock1);
         await _dbContext.SaveChangesAsync();
 
-        var flock2 = Flock.Create(_tenantId, _coopId, "FLOCK-001", DateTime.UtcNow.AddMonths(-1), 8, 1, 3, null);
+        var flock2 = Flock.Create(_tenantId, _coopId, "FLOCK-001", DateTime.UtcNow.AddMonths(-1), 8, 1, 3, null).Value;
         _dbContext.Flocks.Add(flock2);
 
         // Act & Assert - Unique constraint should prevent duplicate
@@ -145,13 +146,13 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task Flock_UniqueConstraint_SameIdentifierAllowedInDifferentCoops()
     {
         // Arrange - Create second coop
-        var coop2 = Coop.Create(_tenantId, "Test Coop 2", "Test Location 2");
+        var coop2 = Coop.Create(_tenantId, "Test Coop 2", "Test Location 2").Value;
         _dbContext.Coops.Add(coop2);
         await _dbContext.SaveChangesAsync();
 
         // Create flocks with same identifier in different coops
-        var flock1 = Flock.Create(_tenantId, _coopId, "FLOCK-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
-        var flock2 = Flock.Create(_tenantId, coop2.Id, "FLOCK-001", DateTime.UtcNow.AddMonths(-1), 8, 1, 3, null);
+        var flock1 = Flock.Create(_tenantId, _coopId, "FLOCK-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
+        var flock2 = Flock.Create(_tenantId, coop2.Id, "FLOCK-001", DateTime.UtcNow.AddMonths(-1), 8, 1, 3, null).Value;
 
         _dbContext.Flocks.AddRange(flock1, flock2);
 
@@ -171,45 +172,45 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task FlockHistory_CheckConstraint_HensCannotBeNegative()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
         // Act - Try to create history with negative hens
-        var act = () => FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, -1, 2, 5, "Test", null);
+        var result = FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, -1, 2, 5, "Test", null);
 
         // Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*hens*");
+        result.IsFailure.Should().BeTrue("hens cannot be negative");
     }
 
     [Fact]
     public async Task FlockHistory_CheckConstraint_RoostersCannotBeNegative()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var act = () => FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, 10, -1, 5, "Test", null);
+        var result = FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, 10, -1, 5, "Test", null);
 
         // Assert
-        act.Should().Throw<ArgumentException>().WithMessage("*roosters*");
+        result.IsFailure.Should().BeTrue("roosters cannot be negative");
     }
 
     [Fact]
     public async Task FlockHistory_CheckConstraint_ChicksCannotBeNegative()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var act = () => FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, 10, 2, -1, "Test", null);
+        var result = FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, 10, 2, -1, "Test", null);
 
         // Assert
-        act.Should().Throw<ArgumentException>().WithMessage("*chicks*");
+        result.IsFailure.Should().BeTrue("chicks cannot be negative");
     }
 
     [Fact]
@@ -217,7 +218,7 @@ public class FlockDataIntegrityTests : IDisposable
     {
         // Arrange
         var nonExistentFlockId = Guid.NewGuid();
-        var history = FlockHistory.Create(_tenantId, nonExistentFlockId, DateTime.UtcNow, 10, 2, 5, "Test", null);
+        var history = FlockHistory.Create(_tenantId, nonExistentFlockId, DateTime.UtcNow, 10, 2, 5, "Test", null).Value;
         _dbContext.FlockHistory.Add(history);
 
         // Act & Assert
@@ -233,7 +234,7 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task FlockHistory_ImmutableFields_CannotUpdateHens()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -252,7 +253,7 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task FlockHistory_ImmutableFields_CannotUpdateRoosters()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -267,7 +268,7 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task FlockHistory_ImmutableFields_CannotUpdateChicks()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -282,7 +283,7 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task FlockHistory_ImmutableFields_CannotUpdateReason()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -297,7 +298,7 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task FlockHistory_ImmutableFields_CannotUpdateChangeDate()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -312,7 +313,7 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task FlockHistory_MutableField_CanUpdateNotes()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, "Initial notes");
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, "Initial notes").Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -320,7 +321,8 @@ public class FlockDataIntegrityTests : IDisposable
         var originalNotes = history.Notes;
 
         // Act - Update notes using the public method
-        history.UpdateNotes("Updated notes");
+        var updateResult = history.UpdateNotes("Updated notes");
+        updateResult.IsSuccess.Should().BeTrue();
         await _dbContext.SaveChangesAsync();
 
         // Assert
@@ -334,14 +336,15 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task FlockHistory_MultipleHistoryEntries_AllCreatedCorrectly()
     {
         // Arrange - Create flock with initial composition (this creates first history entry)
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
         var flockId = flock.Id;
 
         // Act - Update composition which creates additional history entries
-        flock.UpdateComposition(15, 3, 2, "Purchased new chickens", null);
+        var updateResult = flock.UpdateComposition(15, 3, 2, "Purchased new chickens", null);
+        updateResult.IsSuccess.Should().BeTrue();
 
         // Assert - Verify initial history entry exists
         _dbContext.ChangeTracker.Clear();
@@ -371,7 +374,7 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task SoftDelete_Archive_PreservesFlockInDatabase()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -396,8 +399,9 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task SoftDelete_Archive_PreservesFlockHistory()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
-        flock.UpdateComposition(15, 3, 2, "Updated before archive", null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
+        var updateResult = flock.UpdateComposition(15, 3, 2, "Updated before archive", null);
+        updateResult.IsSuccess.Should().BeTrue();
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -422,7 +426,7 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task SoftDelete_Activate_RestoresArchivedFlock()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -443,7 +447,7 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task SoftDelete_CascadeDelete_PreservesHistoryWhenCoopDeleted()
     {
         // Arrange
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         await _dbContext.SaveChangesAsync();
 
@@ -474,36 +478,28 @@ public class FlockDataIntegrityTests : IDisposable
     public async Task ApplicationValidation_MatchesDatabaseConstraints_RequiredFields()
     {
         // Arrange & Act - Domain validation should match DB NOT NULL constraints
-        var testCases = new[]
-        {
-            new { Field = "tenantId", Act = (Action)(() => Flock.Create(Guid.Empty, _coopId, "TEST", DateTime.UtcNow, 10, 2, 5, null)) },
-            new { Field = "coopId", Act = (Action)(() => Flock.Create(_tenantId, Guid.Empty, "TEST", DateTime.UtcNow, 10, 2, 5, null)) },
-            new { Field = "identifier", Act = (Action)(() => Flock.Create(_tenantId, _coopId, "", DateTime.UtcNow, 10, 2, 5, null)) },
-        };
+        var result1 = Flock.Create(Guid.Empty, _coopId, "TEST", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var result2 = Flock.Create(_tenantId, Guid.Empty, "TEST", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var result3 = Flock.Create(_tenantId, _coopId, "", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
 
         // Assert
-        foreach (var testCase in testCases)
-        {
-            testCase.Act.Should().Throw<ArgumentException>($"{testCase.Field} is required");
-        }
+        result1.IsFailure.Should().BeTrue("tenantId is required");
+        result2.IsFailure.Should().BeTrue("coopId is required");
+        result3.IsFailure.Should().BeTrue("identifier is required");
     }
 
     [Fact]
     public async Task ApplicationValidation_MatchesDatabaseConstraints_NonNegativeCounts()
     {
         // Arrange & Act - Domain validation should match DB CHECK constraints
-        var testCases = new[]
-        {
-            new { Field = "hens", Act = (Action)(() => Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow, -1, 2, 5, null)) },
-            new { Field = "roosters", Act = (Action)(() => Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow, 10, -1, 5, null)) },
-            new { Field = "chicks", Act = (Action)(() => Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow, 10, 2, -1, null)) },
-        };
+        var result1 = Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow.AddMonths(-2), -1, 2, 5, null);
+        var result2 = Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow.AddMonths(-2), 10, -1, 5, null);
+        var result3 = Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow.AddMonths(-2), 10, 2, -1, null);
 
         // Assert
-        foreach (var testCase in testCases)
-        {
-            testCase.Act.Should().Throw<ArgumentException>($"{testCase.Field} must be non-negative");
-        }
+        result1.IsFailure.Should().BeTrue("hens must be non-negative");
+        result2.IsFailure.Should().BeTrue("roosters must be non-negative");
+        result3.IsFailure.Should().BeTrue("chicks must be non-negative");
     }
 
     [Fact]
@@ -514,16 +510,18 @@ public class FlockDataIntegrityTests : IDisposable
         var longReason = new string('B', 51); // Max is 50
         var longNotes = new string('C', 501); // Max is 500
 
-        // Assert
-        var act1 = () => Flock.Create(_tenantId, _coopId, longIdentifier, DateTime.UtcNow, 10, 2, 5, null);
-        act1.Should().Throw<ArgumentException>().WithMessage("*identifier*");
+        // Assert - identifier max length
+        var result1 = Flock.Create(_tenantId, _coopId, longIdentifier, DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        result1.IsFailure.Should().BeTrue("identifier exceeds max length");
 
-        var flock = Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow, 10, 2, 5, null);
-        var act2 = () => flock.UpdateComposition(15, 3, 2, longReason, null);
-        act2.Should().Throw<ArgumentException>().WithMessage("*reason*");
+        // Assert - reason max length
+        var flock = Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
+        var updateResult = flock.UpdateComposition(15, 3, 2, longReason, null);
+        updateResult.IsFailure.Should().BeTrue("reason exceeds max length");
 
-        var act3 = () => FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, 10, 2, 5, "Test", longNotes);
-        act3.Should().Throw<ArgumentException>().WithMessage("*notes*");
+        // Assert - notes max length
+        var historyResult = FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, 10, 2, 5, "Test", longNotes);
+        historyResult.IsFailure.Should().BeTrue("notes exceed max length");
     }
 
     #endregion

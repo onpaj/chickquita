@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -75,8 +77,9 @@ public class DailyRecord
     /// <param name="recordDate">The date of the record</param>
     /// <param name="eggCount">Number of eggs collected</param>
     /// <param name="notes">Optional notes about the collection</param>
-    /// <returns>A new DailyRecord instance</returns>
-    public static DailyRecord Create(
+    /// <param name="collectionTime">Optional time of collection</param>
+    /// <returns>A Result containing the new DailyRecord instance, or a validation error</returns>
+    public static Result<DailyRecord> Create(
         Guid tenantId,
         Guid flockId,
         DateTime recordDate,
@@ -84,17 +87,11 @@ public class DailyRecord
         string? notes = null,
         TimeSpan? collectionTime = null)
     {
-        // Validate tenant ID
         if (tenantId == Guid.Empty)
-        {
-            throw new ArgumentException("Tenant ID cannot be empty.", nameof(tenantId));
-        }
+            return Error.Validation("Tenant ID cannot be empty.");
 
-        // Validate flock ID
         if (flockId == Guid.Empty)
-        {
-            throw new ArgumentException("Flock ID cannot be empty.", nameof(flockId));
-        }
+            return Error.Validation("Flock ID cannot be empty.");
 
         // Ensure recordDate is in UTC and normalize to date only (midnight)
         var recordDateUtc = recordDate.Kind switch
@@ -105,27 +102,18 @@ public class DailyRecord
             _ => DateTime.SpecifyKind(recordDate.Date, DateTimeKind.Utc)
         };
 
-        // Validate record date is not in the future
         if (recordDateUtc > DateTime.UtcNow.Date)
-        {
-            throw new ArgumentException("Record date cannot be in the future.", nameof(recordDate));
-        }
+            return Error.Validation("Record date cannot be in the future.");
 
-        // Validate egg count is non-negative
         if (eggCount < 0)
-        {
-            throw new ArgumentException("Egg count cannot be negative.", nameof(eggCount));
-        }
+            return Error.Validation("Egg count cannot be negative.");
 
-        // Validate notes length if provided
         if (notes != null && notes.Length > 500)
-        {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
-        }
+            return Error.Validation("Notes cannot exceed 500 characters.");
 
         var now = DateTime.UtcNow;
 
-        var dailyRecord = new DailyRecord
+        return new DailyRecord
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
@@ -137,8 +125,6 @@ public class DailyRecord
             CreatedAt = now,
             UpdatedAt = now
         };
-
-        return dailyRecord;
     }
 
     /// <summary>
@@ -147,19 +133,14 @@ public class DailyRecord
     /// <param name="eggCount">New egg count</param>
     /// <param name="notes">Optional notes</param>
     /// <param name="collectionTime">Optional collection time; null preserves the existing value</param>
-    public void Update(int eggCount, string? notes = null, TimeSpan? collectionTime = null)
+    /// <returns>A Result indicating success or a validation error</returns>
+    public Result Update(int eggCount, string? notes = null, TimeSpan? collectionTime = null)
     {
-        // Validate egg count is non-negative
         if (eggCount < 0)
-        {
-            throw new ArgumentException("Egg count cannot be negative.", nameof(eggCount));
-        }
+            return Error.Validation("Egg count cannot be negative.");
 
-        // Validate notes length if provided
         if (notes != null && notes.Length > 500)
-        {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
-        }
+            return Error.Validation("Notes cannot exceed 500 characters.");
 
         EggCount = eggCount;
         Notes = notes;
@@ -168,5 +149,7 @@ public class DailyRecord
             CollectionTime = collectionTime;
         }
         UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
     }
 }

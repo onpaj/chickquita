@@ -66,7 +66,10 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
             }
 
             // Create the coop entity
-            var coop = Coop.Create(tenantId.Value, request.Name, request.Location);
+            var coopResult = Coop.Create(tenantId.Value, request.Name, request.Location);
+            if (coopResult.IsFailure)
+                return Result<CoopDto>.Failure(coopResult.Error);
+            var coop = coopResult.Value;
 
             // Save to database
             var addedCoop = await _coopRepository.AddAsync(coop);
@@ -82,15 +85,6 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
             coopDto.FlocksCount = 0;
 
             return Result<CoopDto>.Success(coopDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while creating coop: {Message}",
-                ex.Message);
-
-            return Result<CoopDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

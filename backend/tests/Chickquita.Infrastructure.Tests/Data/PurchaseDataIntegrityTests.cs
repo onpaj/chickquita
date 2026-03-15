@@ -1,4 +1,5 @@
 using Chickquita.Application.Interfaces;
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using Chickquita.Infrastructure.Data;
 using FluentAssertions;
@@ -40,11 +41,11 @@ public class PurchaseDataIntegrityTests : IDisposable
 
         _dbContext = new ApplicationDbContext(options, mockCurrentUserService.Object);
         _dbContext.Database.EnsureCreated();
-        var tenant = Tenant.Create("clerk_user_test", "test@example.com");
+        var tenant = Tenant.Create("clerk_user_test", "test@example.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         _dbContext.Tenants.Add(tenant);
 
-        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location");
+        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location").Value;
         _dbContext.Coops.Add(coop);
         _dbContext.SaveChanges();
 
@@ -57,7 +58,7 @@ public class PurchaseDataIntegrityTests : IDisposable
     public async Task Purchase_NotNullConstraint_TenantIdRequired()
     {
         // Arrange - Domain validation should prevent creating purchase with empty tenant ID
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             Guid.Empty,
             "Feed",
             PurchaseType.Feed,
@@ -67,14 +68,14 @@ public class PurchaseDataIntegrityTests : IDisposable
             DateTime.UtcNow.AddDays(-5));
 
         // Act & Assert - Should fail at domain level before reaching database
-        act.Should().Throw<ArgumentException>().WithMessage("*tenantId*");
+        result.IsFailure.Should().BeTrue("tenant ID is required");
     }
 
     [Fact]
     public async Task Purchase_NotNullConstraint_NameRequired()
     {
         // Arrange
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _tenantId,
             string.Empty,
             PurchaseType.Feed,
@@ -84,14 +85,14 @@ public class PurchaseDataIntegrityTests : IDisposable
             DateTime.UtcNow.AddDays(-5));
 
         // Act & Assert
-        act.Should().Throw<ArgumentException>().WithMessage("*name*");
+        result.IsFailure.Should().BeTrue("name is required");
     }
 
     [Fact]
     public async Task Purchase_CheckConstraint_AmountCannotBeNegative()
     {
         // Arrange
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _tenantId,
             "Feed",
             PurchaseType.Feed,
@@ -101,14 +102,14 @@ public class PurchaseDataIntegrityTests : IDisposable
             DateTime.UtcNow.AddDays(-5));
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*amount*");
+        result.IsFailure.Should().BeTrue("amount cannot be negative");
     }
 
     [Fact]
     public async Task Purchase_CheckConstraint_QuantityMustBeGreaterThanZero()
     {
         // Arrange
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _tenantId,
             "Feed",
             PurchaseType.Feed,
@@ -118,7 +119,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             DateTime.UtcNow.AddDays(-5));
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*quantity*");
+        result.IsFailure.Should().BeTrue("quantity must be greater than zero");
     }
 
     [Fact]
@@ -128,7 +129,7 @@ public class PurchaseDataIntegrityTests : IDisposable
         var purchaseDate = DateTime.UtcNow.AddDays(-5);
         var consumedDate = purchaseDate.AddDays(-1);
 
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _tenantId,
             "Feed",
             PurchaseType.Feed,
@@ -140,7 +141,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             consumedDate);
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*consumed date*");
+        result.IsFailure.Should().BeTrue("consumed date cannot be before purchase date");
     }
 
     [Fact]
@@ -155,7 +156,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             25.50m,
             10.0m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-5));
+            DateTime.UtcNow.AddDays(-5)).Value;
         _dbContext.Purchases.Add(purchase);
 
         // Act & Assert - Foreign key constraint should prevent this
@@ -176,7 +177,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             10.0m,
             QuantityUnit.Kg,
             DateTime.UtcNow.AddDays(-5),
-            nonExistentCoopId);
+            nonExistentCoopId).Value;
         _dbContext.Purchases.Add(purchase);
 
         // Act & Assert - Foreign key constraint should prevent this
@@ -196,7 +197,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             10.0m,
             QuantityUnit.Kg,
             DateTime.UtcNow.AddDays(-5),
-            null);
+            null).Value;
         _dbContext.Purchases.Add(purchase);
 
         // Act
@@ -223,7 +224,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             25.50m,
             10.0m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-5));
+            DateTime.UtcNow.AddDays(-5)).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -251,7 +252,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             10.0m,
             QuantityUnit.Kg,
             DateTime.UtcNow.AddDays(-5),
-            _coopId);
+            _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -288,7 +289,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             purchaseDate,
             _coopId,
             consumedDate,
-            "High quality organic feed");
+            "High quality organic feed").Value;
 
         // Act
         _dbContext.Purchases.Add(purchase);
@@ -325,12 +326,12 @@ public class PurchaseDataIntegrityTests : IDisposable
             25.50m,
             10.0m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-5));
+            DateTime.UtcNow.AddDays(-5)).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
         // Act
-        purchase.Update(
+        var updateResult = purchase.Update(
             "Updated Feed Name",
             PurchaseType.Vitamins,
             30.00m,
@@ -340,6 +341,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             _coopId,
             DateTime.UtcNow.AddDays(-2),
             "Updated notes");
+        updateResult.IsSuccess.Should().BeTrue();
         await _dbContext.SaveChangesAsync();
 
         // Clear change tracker
@@ -378,7 +380,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             25.50m,
             10.0m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-5));
+            DateTime.UtcNow.AddDays(-5)).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -409,7 +411,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             25.50m,
             10.0m,
             unit,
-            DateTime.UtcNow.AddDays(-5));
+            DateTime.UtcNow.AddDays(-5)).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -439,7 +441,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             25.50m,
             10.0m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-5));
+            DateTime.UtcNow.AddDays(-5)).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -469,7 +471,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             10.0m,
             QuantityUnit.Kg,
             DateTime.UtcNow.AddDays(-5),
-            _coopId);
+            _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -499,7 +501,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             10.0m,
             QuantityUnit.Kg,
             DateTime.UtcNow.AddDays(-5),
-            null);
+            null).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -533,7 +535,7 @@ public class PurchaseDataIntegrityTests : IDisposable
                 25.50m,
                 10.0m,
                 QuantityUnit.Kg,
-                DateTime.UtcNow.AddDays(-i));
+                DateTime.UtcNow.AddDays(-i)).Value;
             _dbContext.Purchases.Add(purchase);
         }
         await _dbContext.SaveChangesAsync();
@@ -552,9 +554,9 @@ public class PurchaseDataIntegrityTests : IDisposable
     {
         // Arrange
         var targetDate = DateTime.UtcNow.AddDays(-5).Date;
-        var purchase1 = Purchase.Create(_tenantId, "Purchase 1", PurchaseType.Feed, 25.50m, 10.0m, QuantityUnit.Kg, targetDate);
-        var purchase2 = Purchase.Create(_tenantId, "Purchase 2", PurchaseType.Vitamins, 15.00m, 5.0m, QuantityUnit.Pcs, targetDate);
-        var purchase3 = Purchase.Create(_tenantId, "Purchase 3", PurchaseType.Bedding, 30.00m, 20.0m, QuantityUnit.Kg, DateTime.UtcNow.AddDays(-3));
+        var purchase1 = Purchase.Create(_tenantId, "Purchase 1", PurchaseType.Feed, 25.50m, 10.0m, QuantityUnit.Kg, targetDate).Value;
+        var purchase2 = Purchase.Create(_tenantId, "Purchase 2", PurchaseType.Vitamins, 15.00m, 5.0m, QuantityUnit.Pcs, targetDate).Value;
+        var purchase3 = Purchase.Create(_tenantId, "Purchase 3", PurchaseType.Bedding, 30.00m, 20.0m, QuantityUnit.Kg, DateTime.UtcNow.AddDays(-3)).Value;
 
         _dbContext.Purchases.AddRange(purchase1, purchase2, purchase3);
         await _dbContext.SaveChangesAsync();
@@ -572,9 +574,9 @@ public class PurchaseDataIntegrityTests : IDisposable
     public async Task Purchase_Query_ByType_ShouldBeEfficient()
     {
         // Arrange
-        var purchase1 = Purchase.Create(_tenantId, "Feed 1", PurchaseType.Feed, 25.50m, 10.0m, QuantityUnit.Kg, DateTime.UtcNow.AddDays(-5));
-        var purchase2 = Purchase.Create(_tenantId, "Feed 2", PurchaseType.Feed, 30.00m, 15.0m, QuantityUnit.Kg, DateTime.UtcNow.AddDays(-4));
-        var purchase3 = Purchase.Create(_tenantId, "Vitamins", PurchaseType.Vitamins, 15.00m, 5.0m, QuantityUnit.Pcs, DateTime.UtcNow.AddDays(-3));
+        var purchase1 = Purchase.Create(_tenantId, "Feed 1", PurchaseType.Feed, 25.50m, 10.0m, QuantityUnit.Kg, DateTime.UtcNow.AddDays(-5)).Value;
+        var purchase2 = Purchase.Create(_tenantId, "Feed 2", PurchaseType.Feed, 30.00m, 15.0m, QuantityUnit.Kg, DateTime.UtcNow.AddDays(-4)).Value;
+        var purchase3 = Purchase.Create(_tenantId, "Vitamins", PurchaseType.Vitamins, 15.00m, 5.0m, QuantityUnit.Pcs, DateTime.UtcNow.AddDays(-3)).Value;
 
         _dbContext.Purchases.AddRange(purchase1, purchase2, purchase3);
         await _dbContext.SaveChangesAsync();

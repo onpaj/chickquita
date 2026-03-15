@@ -81,13 +81,16 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
             }
 
             // Create the daily record entity
-            var dailyRecord = DailyRecord.Create(
+            var dailyRecordResult = DailyRecord.Create(
                 tenantId: tenantId.Value,
                 flockId: request.FlockId,
                 recordDate: request.RecordDate,
                 eggCount: request.EggCount,
                 notes: request.Notes,
                 collectionTime: collectionTime);
+            if (dailyRecordResult.IsFailure)
+                return Result<DailyRecordDto>.Failure(dailyRecordResult.Error);
+            var dailyRecord = dailyRecordResult.Value;
 
             // Save to database
             var addedDailyRecord = await _dailyRecordRepository.AddAsync(dailyRecord);
@@ -101,15 +104,6 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
             var dailyRecordDto = _mapper.Map<DailyRecordDto>(addedDailyRecord);
 
             return Result<DailyRecordDto>.Success(dailyRecordDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while creating daily record: {Message}",
-                ex.Message);
-
-            return Result<DailyRecordDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {
