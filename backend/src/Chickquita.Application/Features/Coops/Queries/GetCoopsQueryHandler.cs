@@ -61,10 +61,11 @@ public sealed class GetCoopsQueryHandler : IRequestHandler<GetCoopsQuery, Result
 
             var coopDtos = _mapper.Map<List<CoopDto>>(coops);
 
-            // Populate flocks count for each coop
+            // Populate flocks count using a single batch query to avoid N+1
+            var flockCounts = await _coopRepository.GetAllFlockCountsAsync();
             foreach (var coopDto in coopDtos)
             {
-                coopDto.FlocksCount = await _coopRepository.GetFlocksCountAsync(coopDto.Id);
+                coopDto.FlocksCount = flockCounts.TryGetValue(coopDto.Id, out var count) ? count : 0;
             }
 
             return Result<List<CoopDto>>.Success(coopDtos);
