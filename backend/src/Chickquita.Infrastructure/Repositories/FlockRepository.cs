@@ -75,8 +75,6 @@ public class FlockRepository : IFlockRepository
         }
 
         await _context.Flocks.AddAsync(flock);
-        await _context.SaveChangesAsync();
-
         return flock;
     }
 
@@ -121,8 +119,6 @@ public class FlockRepository : IFlockRepository
             }
         }
 
-        await _context.SaveChangesAsync();
-
         return flock;
     }
 
@@ -133,7 +129,6 @@ public class FlockRepository : IFlockRepository
         if (flock != null)
         {
             _context.Flocks.Remove(flock);
-            await _context.SaveChangesAsync();
         }
     }
 
