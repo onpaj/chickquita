@@ -58,8 +58,8 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = null
         };
 
-        var record1 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-2), 10, "Good day");
-        var record2 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-1), 12, "Great day");
+        var record1 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-2), 10, "Good day").Value;
+        var record2 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-1), 12, "Great day").Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -134,8 +134,8 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = null
         };
 
-        var record1 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-5), 10);
-        var record2 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-3), 12);
+        var record1 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-5), 10).Value;
+        var record2 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-3), 12).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -182,8 +182,8 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = endDate
         };
 
-        var record1 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(1), 10);
-        var record2 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(3), 12);
+        var record1 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(1), 10).Value;
+        var record2 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(3), 12).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -230,9 +230,9 @@ public class GetDailyRecordsQueryHandlerTests
 
 
         // Create records: some before startDate (should be excluded), some after (should be included)
-        var recordBeforeStart = DailyRecord.Create(tenantId, flockId, startDate.AddDays(-5), 8);
-        var recordAtStart = DailyRecord.Create(tenantId, flockId, startDate, 10);
-        var recordAfterStart = DailyRecord.Create(tenantId, flockId, startDate.AddDays(2), 12);
+        var recordBeforeStart = DailyRecord.Create(tenantId, flockId, startDate.AddDays(-5), 8).Value;
+        var recordAtStart = DailyRecord.Create(tenantId, flockId, startDate, 10).Value;
+        var recordAfterStart = DailyRecord.Create(tenantId, flockId, startDate.AddDays(2), 12).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -285,9 +285,9 @@ public class GetDailyRecordsQueryHandlerTests
 
 
         // Create records: some before endDate (should be included), some after (should be excluded)
-        var recordBeforeEnd = DailyRecord.Create(tenantId, flockId, endDate.AddDays(-2), 8);
-        var recordAtEnd = DailyRecord.Create(tenantId, flockId, endDate, 10);
-        var recordAfterEnd = DailyRecord.Create(tenantId, flockId, endDate.AddDays(2), 12);
+        var recordBeforeEnd = DailyRecord.Create(tenantId, flockId, endDate.AddDays(-2), 8).Value;
+        var recordAtEnd = DailyRecord.Create(tenantId, flockId, endDate, 10).Value;
+        var recordAfterEnd = DailyRecord.Create(tenantId, flockId, endDate.AddDays(2), 12).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -338,9 +338,9 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = endDate
         };
 
-        var recordInRange1 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(1), 10);
-        var recordInRange2 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(3), 12);
-        var recordOutOfRange = DailyRecord.Create(tenantId, flockId, startDate.AddDays(-2), 8);
+        var recordInRange1 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(1), 10).Value;
+        var recordInRange2 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(3), 12).Value;
+        var recordOutOfRange = DailyRecord.Create(tenantId, flockId, startDate.AddDays(-2), 8).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -390,8 +390,8 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = null
         };
 
-        var recordAfterStart = DailyRecord.Create(tenantId, flockId, startDate.AddDays(1), 10);
-        var recordBeforeStart = DailyRecord.Create(tenantId, flockId, startDate.AddDays(-2), 8);
+        var recordAfterStart = DailyRecord.Create(tenantId, flockId, startDate.AddDays(1), 10).Value;
+        var recordBeforeStart = DailyRecord.Create(tenantId, flockId, startDate.AddDays(-2), 8).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -437,9 +437,9 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = null
         };
 
-        var oldestRecord = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-10), 8);
-        var middleRecord = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-5), 10);
-        var newestRecord = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-1), 12);
+        var oldestRecord = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-10), 8).Value;
+        var middleRecord = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-5), 10).Value;
+        var newestRecord = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-1), 12).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

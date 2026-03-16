@@ -49,15 +49,19 @@ public sealed class SyncOrgCommandHandler : IRequestHandler<SyncOrgCommand, Resu
                     _logger.LogInformation(
                         "Updating name for tenant {TenantId} from '{OldName}' to '{NewName}'",
                         existing.Id, existing.Name, request.Name);
-                    existing.UpdateName(request.Name);
+                    var updateNameResult = existing.UpdateName(request.Name);
+                    if (updateNameResult.IsFailure)
+                        return Result<TenantDto>.Failure(updateNameResult.Error);
                     await _tenantRepository.UpdateAsync(existing);
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
                 }
                 return Result<TenantDto>.Success(_mapper.Map<TenantDto>(existing));
             }
 
-            var tenant = Tenant.Create(request.ClerkOrgId, request.Name);
-            var added = await _tenantRepository.AddAsync(tenant);
+            var tenantResult = Tenant.Create(request.ClerkOrgId, request.Name);
+            if (tenantResult.IsFailure)
+                return Result<TenantDto>.Failure(tenantResult.Error);
+            var added = await _tenantRepository.AddAsync(tenantResult.Value);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(

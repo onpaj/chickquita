@@ -28,6 +28,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public CreateFlockCommandHandler(
         IFlockRepository flockRepository,
         ICoopRepository coopRepository,
@@ -88,7 +89,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
             }
 
             // Create the flock entity with initial history entry
-            var flock = Flock.Create(
+            var flockResult = Flock.Create(
                 tenantId: tenantId.Value,
                 coopId: request.CoopId,
                 identifier: request.Identifier,
@@ -97,6 +98,9 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
                 initialRoosters: request.InitialRoosters,
                 initialChicks: request.InitialChicks,
                 notes: request.Notes);
+            if (flockResult.IsFailure)
+                return Result<FlockDto>.Failure(flockResult.Error);
+            var flock = flockResult.Value;
 
             // Save to database
             var addedFlock = await _flockRepository.AddAsync(flock);
@@ -111,15 +115,6 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
             var flockDto = _mapper.Map<FlockDto>(addedFlock);
 
             return Result<FlockDto>.Success(flockDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while creating flock: {Message}",
-                ex.Message);
-
-            return Result<FlockDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

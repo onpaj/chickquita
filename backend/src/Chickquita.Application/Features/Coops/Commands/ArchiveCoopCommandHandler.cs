@@ -21,6 +21,7 @@ public sealed class ArchiveCoopCommandHandler : IRequestHandler<ArchiveCoopComma
     /// <param name="coopRepository">The coop repository.</param>
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public ArchiveCoopCommandHandler(
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,

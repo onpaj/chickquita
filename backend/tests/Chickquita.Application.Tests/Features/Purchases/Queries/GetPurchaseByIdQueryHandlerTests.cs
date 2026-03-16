@@ -63,7 +63,7 @@ public class GetPurchaseByIdQueryHandlerTests
             DateTime.UtcNow.Date,
             null,
             null,
-            "Test notes");
+            "Test notes").Value;
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(purchase);
@@ -119,7 +119,7 @@ public class GetPurchaseByIdQueryHandlerTests
             10m,
             QuantityUnit.Package,
             DateTime.UtcNow.Date,
-            coopId);
+            coopId).Value;
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(purchase);

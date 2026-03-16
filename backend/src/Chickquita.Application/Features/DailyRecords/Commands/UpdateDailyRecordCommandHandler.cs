@@ -27,6 +27,7 @@ public sealed class UpdateDailyRecordCommandHandler : IRequestHandler<UpdateDail
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public UpdateDailyRecordCommandHandler(
         IDailyRecordRepository dailyRecordRepository,
         ICurrentUserService currentUserService,
@@ -94,7 +95,9 @@ public sealed class UpdateDailyRecordCommandHandler : IRequestHandler<UpdateDail
             }
 
             // Update the daily record
-            dailyRecord.Update(request.EggCount, request.Notes, collectionTime);
+            var updateResult = dailyRecord.Update(request.EggCount, request.Notes, collectionTime);
+            if (updateResult.IsFailure)
+                return Result<DailyRecordDto>.Failure(updateResult.Error);
 
             // Save to database
             var updatedDailyRecord = await _dailyRecordRepository.UpdateAsync(dailyRecord);
@@ -108,15 +111,6 @@ public sealed class UpdateDailyRecordCommandHandler : IRequestHandler<UpdateDail
             var dailyRecordDto = _mapper.Map<DailyRecordDto>(updatedDailyRecord);
 
             return Result<DailyRecordDto>.Success(dailyRecordDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while updating daily record: {Message}",
-                ex.Message);
-
-            return Result<DailyRecordDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

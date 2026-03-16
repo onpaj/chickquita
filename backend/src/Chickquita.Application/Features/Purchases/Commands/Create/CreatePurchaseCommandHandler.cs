@@ -28,6 +28,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public CreatePurchaseCommandHandler(
         IPurchaseRepository purchaseRepository,
         ICoopRepository coopRepository,
@@ -72,7 +73,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
             }
 
             // Create the purchase entity
-            var purchase = Purchase.Create(
+            var purchaseResult = Purchase.Create(
                 tenantId.Value,
                 request.Name,
                 request.Type,
@@ -83,6 +84,9 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
                 request.CoopId,
                 request.ConsumedDate,
                 request.Notes);
+            if (purchaseResult.IsFailure)
+                return Result<PurchaseDto>.Failure(purchaseResult.Error);
+            var purchase = purchaseResult.Value;
 
             // Save to database
             var addedPurchase = await _purchaseRepository.AddAsync(purchase);
@@ -96,15 +100,6 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
             var purchaseDto = _mapper.Map<PurchaseDto>(addedPurchase);
 
             return Result<PurchaseDto>.Success(purchaseDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while creating purchase: {Message}",
-                ex.Message);
-
-            return Result<PurchaseDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

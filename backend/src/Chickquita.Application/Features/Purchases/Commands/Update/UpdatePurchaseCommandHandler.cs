@@ -28,6 +28,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public UpdatePurchaseCommandHandler(
         IPurchaseRepository purchaseRepository,
         ICoopRepository coopRepository,
@@ -93,7 +94,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
             }
 
             // Update the purchase entity
-            purchase.Update(
+            var updateResult = purchase.Update(
                 request.Name,
                 request.Type,
                 request.Amount,
@@ -103,6 +104,8 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
                 request.CoopId,
                 request.ConsumedDate,
                 request.Notes);
+            if (updateResult.IsFailure)
+                return Result<PurchaseDto>.Failure(updateResult.Error);
 
             // Persist changes
             var updatedPurchase = await _purchaseRepository.UpdateAsync(purchase);
@@ -116,15 +119,6 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
             var purchaseDto = _mapper.Map<PurchaseDto>(updatedPurchase);
 
             return Result<PurchaseDto>.Success(purchaseDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while updating purchase: {Message}",
-                ex.Message);
-
-            return Result<PurchaseDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

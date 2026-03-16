@@ -26,6 +26,7 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public ArchiveFlockCommandHandler(
         IFlockRepository flockRepository,
         ICurrentUserService currentUserService,

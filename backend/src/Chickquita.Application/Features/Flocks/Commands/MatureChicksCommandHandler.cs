@@ -86,6 +86,7 @@ public sealed class MatureChicksCommandHandler : IRequestHandler<MatureChicksCom
                 notes: request.Notes);
 
             var updatedFlock = await _flockRepository.UpdateAsync(flock);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

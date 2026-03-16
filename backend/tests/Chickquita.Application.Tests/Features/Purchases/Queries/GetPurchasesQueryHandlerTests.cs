@@ -57,8 +57,8 @@ public class GetPurchasesQueryHandlerTests
 
         var purchases = new List<Purchase>
         {
-            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date),
-            Purchase.Create(tenantId, "Bedding 1", PurchaseType.Bedding, 50m, 5m, QuantityUnit.Package, DateTime.UtcNow.Date.AddDays(-1))
+            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date).Value,
+            Purchase.Create(tenantId, "Bedding 1", PurchaseType.Bedding, 50m, 5m, QuantityUnit.Package, DateTime.UtcNow.Date.AddDays(-1)).Value
         };
 
         _mockPurchaseRepository.Setup(x => x.GetWithFiltersAsync(null, null, null, null))
@@ -105,8 +105,8 @@ public class GetPurchasesQueryHandlerTests
 
         var purchases = new List<Purchase>
         {
-            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date.AddDays(-3)),
-            Purchase.Create(tenantId, "Feed 2", PurchaseType.Feed, 120m, 12m, QuantityUnit.Kg, DateTime.UtcNow.Date.AddDays(-1))
+            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date.AddDays(-3)).Value,
+            Purchase.Create(tenantId, "Feed 2", PurchaseType.Feed, 120m, 12m, QuantityUnit.Kg, DateTime.UtcNow.Date.AddDays(-1)).Value
         };
 
         _mockPurchaseRepository.Setup(x => x.GetWithFiltersAsync(fromDate, toDate, null, null))
@@ -149,8 +149,8 @@ public class GetPurchasesQueryHandlerTests
 
         var purchases = new List<Purchase>
         {
-            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date),
-            Purchase.Create(tenantId, "Feed 2", PurchaseType.Feed, 120m, 12m, QuantityUnit.Kg, DateTime.UtcNow.Date.AddDays(-1))
+            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date).Value,
+            Purchase.Create(tenantId, "Feed 2", PurchaseType.Feed, 120m, 12m, QuantityUnit.Kg, DateTime.UtcNow.Date.AddDays(-1)).Value
         };
 
         _mockPurchaseRepository.Setup(x => x.GetWithFiltersAsync(null, null, PurchaseType.Feed, null))
@@ -193,13 +193,13 @@ public class GetPurchasesQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.Date.AddMonths(-2), 10, 2, 0);
+        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.Date.AddMonths(-2), 10, 2, 0).Value;
         _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
             .ReturnsAsync(flock);
 
         var purchases = new List<Purchase>
         {
-            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date, coopId)
+            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date, coopId).Value
         };
 
         _mockPurchaseRepository.Setup(x => x.GetWithFiltersAsync(null, null, null, coopId))
@@ -248,13 +248,13 @@ public class GetPurchasesQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.Date.AddMonths(-2), 10, 2, 0);
+        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.Date.AddMonths(-2), 10, 2, 0).Value;
         _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
             .ReturnsAsync(flock);
 
         var purchases = new List<Purchase>
         {
-            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date.AddDays(-2), coopId)
+            Purchase.Create(tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg, DateTime.UtcNow.Date.AddDays(-2), coopId).Value
         };
 
         _mockPurchaseRepository.Setup(x => x.GetWithFiltersAsync(fromDate, toDate, PurchaseType.Feed, coopId))

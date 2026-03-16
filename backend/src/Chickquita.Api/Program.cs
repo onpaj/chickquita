@@ -88,17 +88,19 @@ builder.Services.AddHealthChecks()
         name: "database",
         tags: ["ready"]);
 
-// Configure CORS for all environments — origins are configured per environment in appsettings
-var corsAllowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-    ?? throw new InvalidOperationException(
-        "Cors:AllowedOrigins is not configured. Add it to appsettings.json or set the " +
-        "Cors__AllowedOrigins__0 environment variable.");
+// Configure CORS for all environments — fail fast if required config is absent
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+if (allowedOrigins == null || allowedOrigins.Length == 0)
+    throw new InvalidOperationException(
+        "Cors:AllowedOrigins is required but not configured. " +
+        "Set the Cors__AllowedOrigins__0 environment variable.");
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AppCors", policy =>
     {
-        policy.WithOrigins(corsAllowedOrigins)
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -131,9 +133,6 @@ app.Use(async (context, next) =>
     }
 });
 
-// Apply CORS before authentication so preflight OPTIONS requests are handled correctly
-app.UseCors("AppCors");
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -147,6 +146,9 @@ if (app.Environment.IsDevelopment())
         options.EnableTryItOutByDefault();
     });
 }
+
+// Apply CORS for all environments — must come before authentication/authorization
+app.UseCors("AppCors");
 
 app.UseHttpsRedirection();
 
