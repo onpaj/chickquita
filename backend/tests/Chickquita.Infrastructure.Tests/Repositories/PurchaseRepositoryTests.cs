@@ -456,6 +456,7 @@ public class PurchaseRepositoryTests : IDisposable
 
         // Act
         await _repository.DeleteAsync(purchaseId);
+        await _dbContext.SaveChangesAsync();
 
         // Assert
         var deletedPurchase = await _dbContext.Purchases.FindAsync(purchaseId);
