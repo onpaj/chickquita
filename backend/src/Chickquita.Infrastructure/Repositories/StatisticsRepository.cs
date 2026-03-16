@@ -56,17 +56,25 @@ public class StatisticsRepository : IStatisticsRepository
             .Where(c => c.TenantId == tenantId && c.IsActive)
             .CountAsync();
 
-        // Today's egg production (UTC date)
+        // Consolidate today/week/all-time egg counts into a single DB roundtrip
         var today = DateTime.UtcNow.Date;
-        var todayEggs = await _context.DailyRecords
-            .Where(dr => dr.TenantId == tenantId && dr.RecordDate.Date == today)
-            .SumAsync(dr => (int?)dr.EggCount) ?? 0;
-
-        // This week's egg production (last 7 days including today)
+        var tomorrow = today.AddDays(1);
         var weekStart = today.AddDays(-6);
-        var thisWeekEggs = await _context.DailyRecords
-            .Where(dr => dr.TenantId == tenantId && dr.RecordDate.Date >= weekStart && dr.RecordDate.Date <= today)
-            .SumAsync(dr => (int?)dr.EggCount) ?? 0;
+
+        var eggStats = await _context.DailyRecords
+            .Where(dr => dr.TenantId == tenantId)
+            .GroupBy(x => 1)
+            .Select(g => new
+            {
+                TodayEggs = g.Sum(dr => dr.RecordDate >= today && dr.RecordDate < tomorrow ? (int?)dr.EggCount : null) ?? 0,
+                ThisWeekEggs = g.Sum(dr => dr.RecordDate >= weekStart && dr.RecordDate < tomorrow ? (int?)dr.EggCount : null) ?? 0,
+                TotalEggs = g.Sum(dr => (int?)dr.EggCount) ?? 0
+            })
+            .FirstOrDefaultAsync();
+
+        var todayEggs = eggStats?.TodayEggs ?? 0;
+        var thisWeekEggs = eggStats?.ThisWeekEggs ?? 0;
+        var totalEggs = eggStats?.TotalEggs ?? 0;
 
         var avgEggsPerDay = thisWeekEggs / 7m;
 
@@ -74,10 +82,6 @@ public class StatisticsRepository : IStatisticsRepository
         var totalCosts = await _context.Purchases
             .Where(p => p.TenantId == tenantId)
             .SumAsync(p => (decimal?)p.Amount) ?? 0m;
-
-        var totalEggs = await _context.DailyRecords
-            .Where(dr => dr.TenantId == tenantId)
-            .SumAsync(dr => (int?)dr.EggCount) ?? 0;
 
         decimal? costPerEgg = totalEggs > 0 ? totalCosts / totalEggs : null;
 
