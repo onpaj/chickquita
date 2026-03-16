@@ -18,6 +18,7 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateDailyRecordCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateDailyRecordCommandHandler"/> class.
@@ -27,18 +28,21 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public CreateDailyRecordCommandHandler(
         IDailyRecordRepository dailyRecordRepository,
         IFlockRepository flockRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<CreateDailyRecordCommandHandler> logger)
+        ILogger<CreateDailyRecordCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _dailyRecordRepository = dailyRecordRepository;
         _flockRepository = flockRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -91,6 +95,7 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
 
             // Save to database
             var addedDailyRecord = await _dailyRecordRepository.AddAsync(dailyRecord);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Created new daily record with ID: {DailyRecordId} for flock: {FlockId}, tenant: {TenantId}",

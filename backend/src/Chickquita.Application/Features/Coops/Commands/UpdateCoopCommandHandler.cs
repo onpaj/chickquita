@@ -16,6 +16,7 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdateCoopCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateCoopCommandHandler"/> class.
@@ -24,16 +25,19 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public UpdateCoopCommandHandler(
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<UpdateCoopCommandHandler> logger)
+        ILogger<UpdateCoopCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -83,6 +87,7 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
 
             // Save to database
             await _coopRepository.UpdateAsync(coop);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Updated coop with ID: {CoopId} for tenant: {TenantId}",

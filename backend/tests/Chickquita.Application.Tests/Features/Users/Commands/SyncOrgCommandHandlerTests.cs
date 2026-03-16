@@ -18,9 +18,10 @@ public class SyncOrgCommandHandlerTests
     private readonly Mock<ITenantRepository> _repoMock = new();
     private readonly Mock<IMapper> _mapperMock = new();
     private readonly Mock<ILogger<SyncOrgCommandHandler>> _loggerMock = new();
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
     private SyncOrgCommandHandler CreateHandler()
-        => new(_repoMock.Object, _mapperMock.Object, _loggerMock.Object);
+        => new(_repoMock.Object, _mapperMock.Object, _loggerMock.Object, _unitOfWorkMock.Object);
 
     [Fact]
     public async Task Handle_NewOrg_CreatesAndReturnsTenant()

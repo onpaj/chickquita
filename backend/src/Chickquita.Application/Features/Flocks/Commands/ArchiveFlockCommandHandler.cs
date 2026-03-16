@@ -17,6 +17,7 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<ArchiveFlockCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ArchiveFlockCommandHandler"/> class.
@@ -25,16 +26,19 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public ArchiveFlockCommandHandler(
         IFlockRepository flockRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<ArchiveFlockCommandHandler> logger)
+        ILogger<ArchiveFlockCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _flockRepository = flockRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -79,6 +83,7 @@ public sealed class ArchiveFlockCommandHandler : IRequestHandler<ArchiveFlockCom
 
             // Save to database
             var archivedFlock = await _flockRepository.UpdateAsync(flock);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Archived flock with ID: {FlockId} for tenant: {TenantId}",

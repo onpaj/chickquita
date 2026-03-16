@@ -19,6 +19,7 @@ public class DeleteDailyRecordCommandHandlerTests
     private readonly Mock<IDailyRecordRepository> _mockDailyRecordRepository;
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<ILogger<DeleteDailyRecordCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly DeleteDailyRecordCommandHandler _handler;
 
     public DeleteDailyRecordCommandHandlerTests()
@@ -28,11 +29,13 @@ public class DeleteDailyRecordCommandHandlerTests
         _mockDailyRecordRepository = _fixture.Freeze<Mock<IDailyRecordRepository>>();
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<DeleteDailyRecordCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
 
         _handler = new DeleteDailyRecordCommandHandler(
             _mockDailyRecordRepository.Object,
             _mockCurrentUserService.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests

@@ -17,6 +17,7 @@ public sealed class UpdateFlockCompositionCommandHandler : IRequestHandler<Updat
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdateFlockCompositionCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateFlockCompositionCommandHandler"/> class.
@@ -25,16 +26,19 @@ public sealed class UpdateFlockCompositionCommandHandler : IRequestHandler<Updat
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public UpdateFlockCompositionCommandHandler(
         IFlockRepository flockRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<UpdateFlockCompositionCommandHandler> logger)
+        ILogger<UpdateFlockCompositionCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _flockRepository = flockRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -77,6 +81,7 @@ public sealed class UpdateFlockCompositionCommandHandler : IRequestHandler<Updat
 
             // Save to database
             var updatedFlock = await _flockRepository.UpdateAsync(flock);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Updated composition for flock {FlockId}: Hens={Hens}, Roosters={Roosters}, Chicks={Chicks} for tenant: {TenantId}",

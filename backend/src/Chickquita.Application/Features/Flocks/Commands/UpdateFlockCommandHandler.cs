@@ -17,6 +17,7 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdateFlockCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateFlockCommandHandler"/> class.
@@ -25,16 +26,19 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public UpdateFlockCommandHandler(
         IFlockRepository flockRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<UpdateFlockCommandHandler> logger)
+        ILogger<UpdateFlockCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _flockRepository = flockRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -87,6 +91,7 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
 
             // Save to database
             var updatedFlock = await _flockRepository.UpdateAsync(flock);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Updated flock with ID: {FlockId} for tenant: {TenantId}",
