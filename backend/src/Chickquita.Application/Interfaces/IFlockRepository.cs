@@ -58,6 +58,13 @@ public interface IFlockRepository
     Task DeleteAsync(Guid id);
 
     /// <summary>
+    /// Checks if a flock with the specified ID exists for the current tenant.
+    /// </summary>
+    /// <param name="id">The flock ID to check</param>
+    /// <returns>True if the flock exists, false otherwise</returns>
+    Task<bool> ExistsAsync(Guid id);
+
+    /// <summary>
     /// Checks if a flock with the specified identifier already exists within a coop for the current tenant.
     /// </summary>
     /// <param name="coopId">The coop ID</param>

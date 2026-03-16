@@ -57,16 +57,16 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         var flock1 = Flock.Create(tenantId, coopId, "Spring 2024", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
         var flock2 = Flock.Create(tenantId, coopId, "Winter 2024", DateTime.UtcNow.AddDays(-30), 8, 1, 3);
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.GetByCoopIdAsync(coopId, false))
             .ReturnsAsync(new List<Flock> { flock1, flock2 });
 
+        // Repository returns newest first (ordering is DB-side)
         var flockDtos = new List<FlockDto>
         {
             new FlockDto { Id = flock2.Id, Identifier = "Winter 2024", CreatedAt = DateTime.UtcNow.AddDays(-30) },
@@ -84,10 +84,10 @@ public class GetFlocksQueryHandlerTests
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(2);
 
-        // Verify ordering by CreatedAt descending (newest first)
+        // Ordering (newest first) is guaranteed by the repository
         result.Value[0].CreatedAt.Should().BeAfter(result.Value[1].CreatedAt);
 
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(coopId), Times.Once);
+        _mockCoopRepository.Verify(x => x.ExistsAsync(coopId), Times.Once);
         _mockFlockRepository.Verify(x => x.GetByCoopIdAsync(coopId, false), Times.Once);
         _mockMapper.Verify(x => x.Map<List<FlockDto>>(It.IsAny<List<Flock>>()), Times.Once);
     }
@@ -111,6 +111,7 @@ public class GetFlocksQueryHandlerTests
         _mockFlockRepository.Setup(x => x.GetAllAsync(false))
             .ReturnsAsync(new List<Flock> { flock1, flock2 });
 
+        // Repository returns newest first (ordering is DB-side)
         var flockDtos = new List<FlockDto>
         {
             new FlockDto { Id = flock2.Id, Identifier = "Flock B", CreatedAt = DateTime.UtcNow.AddDays(-30) },
@@ -128,10 +129,10 @@ public class GetFlocksQueryHandlerTests
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(2);
 
-        // Verify ordering by CreatedAt descending (newest first)
+        // Ordering (newest first) is guaranteed by the repository
         result.Value[0].CreatedAt.Should().BeAfter(result.Value[1].CreatedAt);
 
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
+        _mockCoopRepository.Verify(x => x.ExistsAsync(It.IsAny<Guid>()), Times.Never);
         _mockFlockRepository.Verify(x => x.GetAllAsync(false), Times.Once);
         _mockMapper.Verify(x => x.Map<List<FlockDto>>(It.IsAny<List<Flock>>()), Times.Once);
     }
@@ -148,11 +149,10 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.GetByCoopIdAsync(coopId, false))
             .ReturnsAsync(new List<Flock>());
 
@@ -167,7 +167,7 @@ public class GetFlocksQueryHandlerTests
         result.Value.Should().NotBeNull();
         result.Value.Should().BeEmpty();
 
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(coopId), Times.Once);
+        _mockCoopRepository.Verify(x => x.ExistsAsync(coopId), Times.Once);
         _mockFlockRepository.Verify(x => x.GetByCoopIdAsync(coopId, false), Times.Once);
     }
 
@@ -187,12 +187,11 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         var activeFlock = Flock.Create(tenantId, coopId, "Active Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5);
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.GetByCoopIdAsync(coopId, false))
             .ReturnsAsync(new List<Flock> { activeFlock });
 
@@ -228,14 +227,13 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = true
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         var activeFlock = Flock.Create(tenantId, coopId, "Active Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5);
         var archivedFlock = Flock.Create(tenantId, coopId, "Archived Flock", DateTime.UtcNow.AddDays(-90), 8, 1, 3);
         archivedFlock.Archive();
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.GetByCoopIdAsync(coopId, true))
             .ReturnsAsync(new List<Flock> { activeFlock, archivedFlock });
 
@@ -277,17 +275,17 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         var oldestFlock = Flock.Create(tenantId, coopId, "Oldest", DateTime.UtcNow.AddDays(-90), 10, 2, 5);
         var middleFlock = Flock.Create(tenantId, coopId, "Middle", DateTime.UtcNow.AddDays(-60), 8, 1, 3);
         var newestFlock = Flock.Create(tenantId, coopId, "Newest", DateTime.UtcNow.AddDays(-30), 12, 2, 6);
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.GetByCoopIdAsync(coopId, false))
             .ReturnsAsync(new List<Flock> { oldestFlock, middleFlock, newestFlock });
 
+        // Repository returns newest first (ordering is DB-side)
         var flockDtos = new List<FlockDto>
         {
             new FlockDto { Id = newestFlock.Id, Identifier = "Newest", CreatedAt = DateTime.UtcNow.AddDays(-30) },
@@ -336,8 +334,7 @@ public class GetFlocksQueryHandlerTests
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
-            .ReturnsAsync((Coop?)null);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(false);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -348,7 +345,7 @@ public class GetFlocksQueryHandlerTests
         result.Error.Code.Should().Be("Error.NotFound");
         result.Error.Message.Should().Be("Coop not found");
 
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(coopId), Times.Once);
+        _mockCoopRepository.Verify(x => x.ExistsAsync(coopId), Times.Once);
         _mockFlockRepository.Verify(x => x.GetByCoopIdAsync(It.IsAny<Guid>(), It.IsAny<bool>()), Times.Never);
     }
 
@@ -368,12 +365,11 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5);
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.GetByCoopIdAsync(coopId, false))
             .ReturnsAsync(new List<Flock> { flock });
 
@@ -431,10 +427,9 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.GetByCoopIdAsync(coopId, false))
             .ThrowsAsync(new Exception("Database connection failed"));
 

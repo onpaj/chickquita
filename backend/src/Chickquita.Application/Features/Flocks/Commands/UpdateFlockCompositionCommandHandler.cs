@@ -8,28 +8,28 @@ using Microsoft.Extensions.Logging;
 namespace Chickquita.Application.Features.Flocks.Commands;
 
 /// <summary>
-/// Handler for UpdateFlockCommand that updates basic flock information.
-/// Does not modify flock composition - use composition-specific handlers for that.
+/// Handler for UpdateFlockCompositionCommand that updates flock composition.
+/// Creates an immutable FlockHistory entry with reason "Manual update".
 /// </summary>
-public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockCommand, Result<FlockDto>>
+public sealed class UpdateFlockCompositionCommandHandler : IRequestHandler<UpdateFlockCompositionCommand, Result<FlockDto>>
 {
     private readonly IFlockRepository _flockRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
-    private readonly ILogger<UpdateFlockCommandHandler> _logger;
+    private readonly ILogger<UpdateFlockCompositionCommandHandler> _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UpdateFlockCommandHandler"/> class.
+    /// Initializes a new instance of the <see cref="UpdateFlockCompositionCommandHandler"/> class.
     /// </summary>
     /// <param name="flockRepository">The flock repository.</param>
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
-    public UpdateFlockCommandHandler(
+    public UpdateFlockCompositionCommandHandler(
         IFlockRepository flockRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<UpdateFlockCommandHandler> logger)
+        ILogger<UpdateFlockCompositionCommandHandler> logger)
     {
         _flockRepository = flockRepository;
         _currentUserService = currentUserService;
@@ -38,59 +38,52 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
     }
 
     /// <summary>
-    /// Handles the UpdateFlockCommand by updating basic flock information.
+    /// Handles the UpdateFlockCompositionCommand by updating flock composition and recording history.
     /// </summary>
-    /// <param name="request">The update flock command.</param>
+    /// <param name="request">The update flock composition command.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A result containing the updated flock DTO.</returns>
-    public async Task<Result<FlockDto>> Handle(UpdateFlockCommand request, CancellationToken cancellationToken)
+    public async Task<Result<FlockDto>> Handle(UpdateFlockCompositionCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation(
-            "Processing UpdateFlockCommand - FlockId: {FlockId}, Identifier: {Identifier}, HatchDate: {HatchDate}",
+            "Processing UpdateFlockCompositionCommand - FlockId: {FlockId}, Hens: {Hens}, Roosters: {Roosters}, Chicks: {Chicks}",
             request.FlockId,
-            request.Identifier,
-            request.HatchDate);
+            request.Hens,
+            request.Roosters,
+            request.Chicks);
 
         try
         {
             var tenantId = _currentUserService.TenantId;
 
-            // Get the flock (without history to improve performance)
-            var flock = await _flockRepository.GetByIdWithoutHistoryAsync(request.FlockId);
+            // Load flock with history so UpdateComposition can add the new entry
+            var flock = await _flockRepository.GetByIdAsync(request.FlockId);
             if (flock == null)
             {
                 _logger.LogWarning(
-                    "UpdateFlockCommand: Flock with ID {FlockId} not found for tenant {TenantId}",
+                    "UpdateFlockCompositionCommand: Flock with ID {FlockId} not found for tenant {TenantId}",
                     request.FlockId,
                     tenantId.Value);
                 return Result<FlockDto>.Failure(Error.NotFound("Flock not found"));
             }
 
-            // Check identifier uniqueness within the coop (excluding current flock)
-            var identifierExists = await _flockRepository.ExistsByIdentifierInCoopAsync(
-                flock.CoopId,
-                request.Identifier,
-                request.FlockId);
-
-            if (identifierExists)
-            {
-                _logger.LogWarning(
-                    "UpdateFlockCommand: Flock with identifier '{Identifier}' already exists in coop {CoopId}",
-                    request.Identifier,
-                    flock.CoopId);
-                return Result<FlockDto>.Failure(
-                    Error.Conflict("A flock with this identifier already exists in the coop"));
-            }
-
-            // Update basic flock information
-            flock.Update(request.Identifier, request.HatchDate);
+            // Use the domain method which also creates a FlockHistory entry
+            flock.UpdateComposition(
+                hens: request.Hens,
+                roosters: request.Roosters,
+                chicks: request.Chicks,
+                reason: "Manual update",
+                notes: request.Notes);
 
             // Save to database
             var updatedFlock = await _flockRepository.UpdateAsync(flock);
 
             _logger.LogInformation(
-                "Updated flock with ID: {FlockId} for tenant: {TenantId}",
+                "Updated composition for flock {FlockId}: Hens={Hens}, Roosters={Roosters}, Chicks={Chicks} for tenant: {TenantId}",
                 updatedFlock.Id,
+                request.Hens,
+                request.Roosters,
+                request.Chicks,
                 tenantId.Value);
 
             var flockDto = _mapper.Map<FlockDto>(updatedFlock);
@@ -101,7 +94,7 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
         {
             _logger.LogWarning(
                 ex,
-                "Validation error while updating flock: {Message}",
+                "Validation error while updating flock composition: {Message}",
                 ex.Message);
 
             return Result<FlockDto>.Failure(Error.Validation(ex.Message));
@@ -110,7 +103,7 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
         {
             _logger.LogError(
                 ex,
-                "Error occurred while updating flock with ID: {FlockId}",
+                "Error occurred while updating composition for flock with ID: {FlockId}",
                 request.FlockId);
 
             return Result<FlockDto>.Failure(
