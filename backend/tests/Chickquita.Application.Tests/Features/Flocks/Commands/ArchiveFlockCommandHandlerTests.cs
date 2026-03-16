@@ -62,7 +62,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 5);
+            initialChicks: 5).Value;
 
         Flock? capturedFlock = null;
 
@@ -116,7 +116,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 8,
             initialRoosters: 1,
-            initialChicks: 3);
+            initialChicks: 3).Value;
 
         var flockId = existingFlock.Id; // Use the actual flock ID
 
@@ -179,7 +179,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         // Archive it first
         existingFlock.Archive();
@@ -261,7 +261,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -333,7 +333,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -381,7 +381,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

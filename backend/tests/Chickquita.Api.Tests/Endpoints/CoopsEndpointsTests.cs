@@ -478,7 +478,7 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         // Mock repository to return hasFlocks = true
         var mockCoopRepo = new Mock<ICoopRepository>();
         mockCoopRepo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(Coop.Create(tenantId, "Test", "Location"));
+            .ReturnsAsync(Coop.Create(tenantId, "Test", "Location").Value);
         mockCoopRepo.Setup(r => r.HasFlocksAsync(It.IsAny<Guid>()))
             .ReturnsAsync(true);
 
@@ -754,7 +754,7 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
     private static async Task SeedTenant(IServiceScope scope, Guid tenantId, string clerkUserId)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com");
+        var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, tenantId);
         dbContext.Tenants.Add(tenant);
         await dbContext.SaveChangesAsync();
@@ -763,7 +763,7 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
     private static async Task<Guid> SeedCoop(IServiceScope scope, Guid tenantId, string name, string location)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var coop = Coop.Create(tenantId, name, location);
+        var coop = Coop.Create(tenantId, name, location).Value;
         dbContext.Coops.Add(coop);
         await dbContext.SaveChangesAsync();
         return coop.Id;

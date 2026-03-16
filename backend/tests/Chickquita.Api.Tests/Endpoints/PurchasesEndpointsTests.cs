@@ -1137,7 +1137,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
     private static async Task SeedTenant(IServiceScope scope, Guid tenantId, string clerkUserId)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com");
+        var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, tenantId);
         dbContext.Tenants.Add(tenant);
         await dbContext.SaveChangesAsync();
@@ -1146,7 +1146,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
     private static async Task<Guid> SeedCoop(IServiceScope scope, Guid tenantId, string name, string location)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var coop = Coop.Create(tenantId, name, location);
+        var coop = Coop.Create(tenantId, name, location).Value;
         dbContext.Coops.Add(coop);
         await dbContext.SaveChangesAsync();
         return coop.Id;
@@ -1166,7 +1166,7 @@ public class PurchasesEndpointsTests : IClassFixture<WebApplicationFactory<Progr
             null,
             null,
             null
-        );
+        ).Value;
         dbContext.Purchases.Add(purchase);
         await dbContext.SaveChangesAsync();
         return purchase.Id;
