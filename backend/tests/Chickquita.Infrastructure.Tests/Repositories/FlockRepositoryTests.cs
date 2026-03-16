@@ -40,11 +40,11 @@ public class FlockRepositoryTests : IDisposable
         using var setupContext = CreateContext();
         setupContext.Database.EnsureCreated();
 
-        var tenant = Tenant.Create("clerk_user_test", "test@example.com");
+        var tenant = Tenant.Create("clerk_user_test", "test@example.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         setupContext.Tenants.Add(tenant);
 
-        var coop = Coop.Create(_tenantId, "Test Coop", null);
+        var coop = Coop.Create(_tenantId, "Test Coop", null).Value;
         setupContext.Coops.Add(coop);
         setupContext.SaveChanges();
         _coopId = coop.Id;
@@ -71,7 +71,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "Original", DateTime.UtcNow.AddDays(-30), 10, 2, 0);
+            var flock = Flock.Create(_tenantId, _coopId, "Original", DateTime.UtcNow.AddDays(-30), 10, 2, 0).Value;
             await repo.AddAsync(flock);
             flockId = flock.Id;
         }
@@ -108,7 +108,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "Test Flock", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
+            var flock = Flock.Create(_tenantId, _coopId, "Test Flock", DateTime.UtcNow.AddDays(-60), 10, 2, 5).Value;
             await repo.AddAsync(flock);
             flockId = flock.Id;
         }
@@ -149,7 +149,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "Detached Flock", DateTime.UtcNow.AddDays(-30), 5, 1, 0);
+            var flock = Flock.Create(_tenantId, _coopId, "Detached Flock", DateTime.UtcNow.AddDays(-30), 5, 1, 0).Value;
             await repo.AddAsync(flock);
             flockId = flock.Id;
             detachedFlock = flock;
@@ -186,14 +186,14 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock1 = Flock.Create(_tenantId, _coopId, "FLOCK-OLDER", DateTime.UtcNow.AddMonths(-3), 10, 1, 0);
+            var flock1 = Flock.Create(_tenantId, _coopId, "FLOCK-OLDER", DateTime.UtcNow.AddMonths(-3), 10, 1, 0).Value;
             await repo.AddAsync(flock1);
             firstFlockId = flock1.Id;
 
             // Small delay to ensure distinct CreatedAt values in SQLite
             await Task.Delay(10);
 
-            var flock2 = Flock.Create(_tenantId, _coopId, "FLOCK-NEWER", DateTime.UtcNow.AddMonths(-1), 5, 1, 0);
+            var flock2 = Flock.Create(_tenantId, _coopId, "FLOCK-NEWER", DateTime.UtcNow.AddMonths(-1), 5, 1, 0).Value;
             await repo.AddAsync(flock2);
             secondFlockId = flock2.Id;
         }
@@ -217,7 +217,7 @@ public class FlockRepositoryTests : IDisposable
         Guid otherCoopId;
         using (var ctx = CreateContext())
         {
-            var otherCoop = Coop.Create(_tenantId, "Other Coop", null);
+            var otherCoop = Coop.Create(_tenantId, "Other Coop", null).Value;
             ctx.Coops.Add(otherCoop);
             await ctx.SaveChangesAsync();
             otherCoopId = otherCoop.Id;
@@ -227,18 +227,18 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock1 = Flock.Create(_tenantId, _coopId, "COOP-FLOCK-A", DateTime.UtcNow.AddMonths(-4), 8, 1, 0);
+            var flock1 = Flock.Create(_tenantId, _coopId, "COOP-FLOCK-A", DateTime.UtcNow.AddMonths(-4), 8, 1, 0).Value;
             await repo.AddAsync(flock1);
             firstFlockId = flock1.Id;
 
             await Task.Delay(10);
 
-            var flock2 = Flock.Create(_tenantId, _coopId, "COOP-FLOCK-B", DateTime.UtcNow.AddMonths(-2), 12, 1, 0);
+            var flock2 = Flock.Create(_tenantId, _coopId, "COOP-FLOCK-B", DateTime.UtcNow.AddMonths(-2), 12, 1, 0).Value;
             await repo.AddAsync(flock2);
             secondFlockId = flock2.Id;
 
             // Flock in other coop — should not appear in results
-            var flockOther = Flock.Create(_tenantId, otherCoopId, "OTHER-COOP-FLOCK", DateTime.UtcNow.AddMonths(-1), 6, 1, 0);
+            var flockOther = Flock.Create(_tenantId, otherCoopId, "OTHER-COOP-FLOCK", DateTime.UtcNow.AddMonths(-1), 6, 1, 0).Value;
             await repo.AddAsync(flockOther);
         }
 
