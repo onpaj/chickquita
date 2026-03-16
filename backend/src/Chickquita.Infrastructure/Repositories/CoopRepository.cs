@@ -48,11 +48,6 @@ public class CoopRepository : ICoopRepository
     /// <inheritdoc />
     public async Task<Coop> AddAsync(Coop coop)
     {
-        if (coop == null)
-        {
-            throw new ArgumentNullException(nameof(coop));
-        }
-
         await _context.Coops.AddAsync(coop);
         return coop;
     }
@@ -60,11 +55,6 @@ public class CoopRepository : ICoopRepository
     /// <inheritdoc />
     public async Task<Coop> UpdateAsync(Coop coop)
     {
-        if (coop == null)
-        {
-            throw new ArgumentNullException(nameof(coop));
-        }
-
         _context.Coops.Update(coop);
         return coop;
     }

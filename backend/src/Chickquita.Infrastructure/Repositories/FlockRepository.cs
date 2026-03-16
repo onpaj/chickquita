@@ -69,11 +69,6 @@ public class FlockRepository : IFlockRepository
     /// <inheritdoc />
     public async Task<Flock> AddAsync(Flock flock)
     {
-        if (flock == null)
-        {
-            throw new ArgumentNullException(nameof(flock));
-        }
-
         await _context.Flocks.AddAsync(flock);
         return flock;
     }
@@ -81,11 +76,6 @@ public class FlockRepository : IFlockRepository
     /// <inheritdoc />
     public async Task<Flock> UpdateAsync(Flock flock)
     {
-        if (flock == null)
-        {
-            throw new ArgumentNullException(nameof(flock));
-        }
-
         var entry = _context.Entry(flock);
         if (entry.State == EntityState.Detached)
         {
