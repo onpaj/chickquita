@@ -103,42 +103,42 @@ public class FlockHistory
     {
         if (tenantId == Guid.Empty)
         {
-            throw new DomainValidationException("Tenant ID cannot be empty.");
+            throw new DomainValidationException("Tenant ID cannot be empty.", "tenantId");
         }
 
         if (flockId == Guid.Empty)
         {
-            throw new DomainValidationException("Flock ID cannot be empty.");
+            throw new DomainValidationException("Flock ID cannot be empty.", "flockId");
         }
 
         if (hens < 0)
         {
-            throw new DomainValidationException("Hens count cannot be negative.");
+            throw new DomainValidationException("Hens count cannot be negative.", "hens");
         }
 
         if (roosters < 0)
         {
-            throw new DomainValidationException("Roosters count cannot be negative.");
+            throw new DomainValidationException("Roosters count cannot be negative.", "roosters");
         }
 
         if (chicks < 0)
         {
-            throw new DomainValidationException("Chicks count cannot be negative.");
+            throw new DomainValidationException("Chicks count cannot be negative.", "chicks");
         }
 
         if (string.IsNullOrWhiteSpace(reason))
         {
-            throw new DomainValidationException("Reason cannot be empty.");
+            throw new DomainValidationException("Reason cannot be empty.", "reason");
         }
 
         if (reason.Length > 50)
         {
-            throw new DomainValidationException("Reason cannot exceed 50 characters.");
+            throw new DomainValidationException("Reason cannot exceed 50 characters.", "reason");
         }
 
         if (notes?.Length > 500)
         {
-            throw new DomainValidationException("Notes cannot exceed 500 characters.");
+            throw new DomainValidationException("Notes cannot exceed 500 characters.", "notes");
         }
 
         var now = DateTime.UtcNow;
@@ -168,7 +168,7 @@ public class FlockHistory
     {
         if (notes?.Length > 500)
         {
-            throw new DomainValidationException("Notes cannot exceed 500 characters.");
+            throw new DomainValidationException("Notes cannot exceed 500 characters.", "notes");
         }
 
         Notes = notes;

@@ -110,24 +110,24 @@ public class Flock
         // Validate tenant ID
         if (tenantId == Guid.Empty)
         {
-            throw new DomainValidationException("Tenant ID cannot be empty.");
+            throw new DomainValidationException("Tenant ID cannot be empty.", "tenantId");
         }
 
         // Validate coop ID
         if (coopId == Guid.Empty)
         {
-            throw new DomainValidationException("Coop ID cannot be empty.");
+            throw new DomainValidationException("Coop ID cannot be empty.", "coopId");
         }
 
         // Validate identifier
         if (string.IsNullOrWhiteSpace(identifier))
         {
-            throw new DomainValidationException("Identifier cannot be empty.");
+            throw new DomainValidationException("Identifier cannot be empty.", "identifier");
         }
 
         if (identifier.Length > 50)
         {
-            throw new DomainValidationException("Identifier cannot exceed 50 characters.");
+            throw new DomainValidationException("Identifier cannot exceed 50 characters.", "identifier");
         }
 
         // Ensure hatchDate is in UTC
@@ -142,30 +142,30 @@ public class Flock
         // Validate hatch date
         if (hatchDateUtc > DateTime.UtcNow)
         {
-            throw new DomainValidationException("Hatch date cannot be in the future.");
+            throw new DomainValidationException("Hatch date cannot be in the future.", "hatchDate");
         }
 
         // Validate counts are non-negative
         if (initialHens < 0)
         {
-            throw new DomainValidationException("Initial hens count cannot be negative.");
+            throw new DomainValidationException("Initial hens count cannot be negative.", "initialHens");
         }
 
         if (initialRoosters < 0)
         {
-            throw new DomainValidationException("Initial roosters count cannot be negative.");
+            throw new DomainValidationException("Initial roosters count cannot be negative.", "initialRoosters");
         }
 
         if (initialChicks < 0)
         {
-            throw new DomainValidationException("Initial chicks count cannot be negative.");
+            throw new DomainValidationException("Initial chicks count cannot be negative.", "initialChicks");
         }
 
         // Validate at least one animal type has a positive count
         if (initialHens + initialRoosters + initialChicks == 0)
         {
             throw new DomainValidationException(
-                "At least one animal type must have a count greater than 0.");
+                "At least one animal type must have a count greater than 0.", "initialHens");
         }
 
         var now = DateTime.UtcNow;
@@ -212,12 +212,12 @@ public class Flock
     {
         if (string.IsNullOrWhiteSpace(identifier))
         {
-            throw new DomainValidationException("Identifier cannot be empty.");
+            throw new DomainValidationException("Identifier cannot be empty.", "identifier");
         }
 
         if (identifier.Length > 50)
         {
-            throw new DomainValidationException("Identifier cannot exceed 50 characters.");
+            throw new DomainValidationException("Identifier cannot exceed 50 characters.", "identifier");
         }
 
         // Ensure hatchDate is in UTC
@@ -231,7 +231,7 @@ public class Flock
 
         if (hatchDateUtc > DateTime.UtcNow)
         {
-            throw new DomainValidationException("Hatch date cannot be in the future.");
+            throw new DomainValidationException("Hatch date cannot be in the future.", "hatchDate");
         }
 
         Identifier = identifier;

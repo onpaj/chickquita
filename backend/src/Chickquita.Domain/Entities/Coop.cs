@@ -68,22 +68,22 @@ public class Coop
     {
         if (tenantId == Guid.Empty)
         {
-            throw new DomainValidationException("Tenant ID cannot be empty.");
+            throw new DomainValidationException("Tenant ID cannot be empty.", "tenantId");
         }
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new DomainValidationException("Coop name cannot be empty.");
+            throw new DomainValidationException("Coop name cannot be empty.", "name");
         }
 
         if (name.Length > 100)
         {
-            throw new DomainValidationException("Coop name cannot exceed 100 characters.");
+            throw new DomainValidationException("Coop name cannot exceed 100 characters.", "name");
         }
 
         if (location?.Length > 200)
         {
-            throw new DomainValidationException("Location cannot exceed 200 characters.");
+            throw new DomainValidationException("Location cannot exceed 200 characters.", "location");
         }
 
         var now = DateTime.UtcNow;
@@ -109,17 +109,17 @@ public class Coop
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new DomainValidationException("Coop name cannot be empty.");
+            throw new DomainValidationException("Coop name cannot be empty.", "name");
         }
 
         if (name.Length > 100)
         {
-            throw new DomainValidationException("Coop name cannot exceed 100 characters.");
+            throw new DomainValidationException("Coop name cannot exceed 100 characters.", "name");
         }
 
         if (location?.Length > 200)
         {
-            throw new DomainValidationException("Location cannot exceed 200 characters.");
+            throw new DomainValidationException("Location cannot exceed 200 characters.", "location");
         }
 
         Name = name;

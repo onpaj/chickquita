@@ -50,10 +50,10 @@ public class Tenant
     public static Tenant Create(string clerkOrgId, string name)
     {
         if (string.IsNullOrWhiteSpace(clerkOrgId))
-            throw new DomainValidationException("Clerk org ID cannot be empty.");
+            throw new DomainValidationException("Clerk org ID cannot be empty.", "clerkOrgId");
 
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainValidationException("Name cannot be empty.");
+            throw new DomainValidationException("Name cannot be empty.", "name");
 
         var now = DateTime.UtcNow;
         return new Tenant
@@ -73,7 +73,7 @@ public class Tenant
     public void UpdateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainValidationException("Name cannot be empty.");
+            throw new DomainValidationException("Name cannot be empty.", "name");
 
         Name = name;
         UpdatedAt = DateTime.UtcNow;

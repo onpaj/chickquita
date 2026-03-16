@@ -9,8 +9,16 @@ namespace Chickquita.Domain.Common;
 /// </summary>
 public sealed class DomainValidationException : Exception
 {
+    public string? ParamName { get; }
+
     public DomainValidationException(string message)
         : base(message)
     {
+    }
+
+    public DomainValidationException(string message, string paramName)
+        : base(message)
+    {
+        ParamName = paramName;
     }
 }

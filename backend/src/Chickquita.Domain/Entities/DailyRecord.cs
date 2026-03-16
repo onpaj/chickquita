@@ -89,13 +89,13 @@ public class DailyRecord
         // Validate tenant ID
         if (tenantId == Guid.Empty)
         {
-            throw new DomainValidationException("Tenant ID cannot be empty.");
+            throw new DomainValidationException("Tenant ID cannot be empty.", "tenantId");
         }
 
         // Validate flock ID
         if (flockId == Guid.Empty)
         {
-            throw new DomainValidationException("Flock ID cannot be empty.");
+            throw new DomainValidationException("Flock ID cannot be empty.", "flockId");
         }
 
         // Ensure recordDate is in UTC and normalize to date only (midnight)
@@ -110,19 +110,19 @@ public class DailyRecord
         // Validate record date is not in the future
         if (recordDateUtc > DateTime.UtcNow.Date)
         {
-            throw new DomainValidationException("Record date cannot be in the future.");
+            throw new DomainValidationException("Record date cannot be in the future.", "recordDate");
         }
 
         // Validate egg count is non-negative
         if (eggCount < 0)
         {
-            throw new DomainValidationException("Egg count cannot be negative.");
+            throw new DomainValidationException("Egg count cannot be negative.", "eggCount");
         }
 
         // Validate notes length if provided
         if (notes != null && notes.Length > 500)
         {
-            throw new DomainValidationException("Notes cannot exceed 500 characters.");
+            throw new DomainValidationException("Notes cannot exceed 500 characters.", "notes");
         }
 
         var now = DateTime.UtcNow;
@@ -154,13 +154,13 @@ public class DailyRecord
         // Validate egg count is non-negative
         if (eggCount < 0)
         {
-            throw new DomainValidationException("Egg count cannot be negative.");
+            throw new DomainValidationException("Egg count cannot be negative.", "eggCount");
         }
 
         // Validate notes length if provided
         if (notes != null && notes.Length > 500)
         {
-            throw new DomainValidationException("Notes cannot exceed 500 characters.");
+            throw new DomainValidationException("Notes cannot exceed 500 characters.", "notes");
         }
 
         EggCount = eggCount;
