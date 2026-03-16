@@ -65,8 +65,7 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
             if (request.CoopId.HasValue)
             {
                 // Verify the coop exists and belongs to the current tenant
-                var coop = await _coopRepository.GetByIdAsync(request.CoopId.Value);
-                if (coop == null)
+                if (!await _coopRepository.ExistsAsync(request.CoopId.Value))
                 {
                     _logger.LogWarning(
                         "GetFlocksQuery: Coop not found with ID: {CoopId}",

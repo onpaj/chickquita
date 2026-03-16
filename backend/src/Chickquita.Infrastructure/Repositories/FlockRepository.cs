@@ -138,6 +138,10 @@ public class FlockRepository : IFlockRepository
     }
 
     /// <inheritdoc />
+    public Task<bool> ExistsAsync(Guid id)
+        => _context.Flocks.AnyAsync(f => f.Id == id);
+
+    /// <inheritdoc />
     public async Task<bool> ExistsByIdentifierInCoopAsync(Guid coopId, string identifier)
     {
         if (string.IsNullOrWhiteSpace(identifier))

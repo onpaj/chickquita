@@ -79,6 +79,10 @@ public class CoopRepository : ICoopRepository
     }
 
     /// <inheritdoc />
+    public Task<bool> ExistsAsync(Guid id)
+        => _context.Coops.AnyAsync(c => c.Id == id);
+
+    /// <inheritdoc />
     public async Task<bool> ExistsByNameAsync(string name)
     {
         if (string.IsNullOrWhiteSpace(name))

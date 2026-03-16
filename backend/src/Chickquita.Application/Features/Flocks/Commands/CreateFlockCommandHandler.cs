@@ -60,8 +60,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
             var tenantId = _currentUserService.TenantId;
 
             // Check if the coop exists and belongs to the current tenant
-            var coop = await _coopRepository.GetByIdAsync(request.CoopId);
-            if (coop == null)
+            if (!await _coopRepository.ExistsAsync(request.CoopId))
             {
                 _logger.LogWarning(
                     "CreateFlockCommand: Coop with ID {CoopId} not found for tenant {TenantId}",
