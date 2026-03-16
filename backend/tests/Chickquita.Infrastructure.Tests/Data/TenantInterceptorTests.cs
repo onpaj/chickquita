@@ -15,7 +15,7 @@ namespace Chickquita.Infrastructure.Tests.Data;
 /// </summary>
 public class TenantInterceptorTests
 {
-    private readonly Mock<ITenantService> _tenantServiceMock;
+    private readonly Mock<ICurrentUserService> _currentUserServiceMock;
     private readonly Mock<ILogger<TenantInterceptor>> _loggerMock;
     private readonly TenantInterceptor _interceptor;
     private readonly Guid _tenantId = Guid.NewGuid();
@@ -26,9 +26,9 @@ public class TenantInterceptorTests
 
     public TenantInterceptorTests()
     {
-        _tenantServiceMock = new Mock<ITenantService>();
+        _currentUserServiceMock = new Mock<ICurrentUserService>();
         _loggerMock = new Mock<ILogger<TenantInterceptor>>();
-        _interceptor = new TenantInterceptor(_tenantServiceMock.Object, _loggerMock.Object);
+        _interceptor = new TenantInterceptor(_currentUserServiceMock.Object, _loggerMock.Object);
     }
 
     // -------------------------------------------------------------------------
@@ -38,7 +38,7 @@ public class TenantInterceptorTests
     [Fact]
     public void ConnectionOpened_WhenTenantExists_CallsExecuteNonQuery()
     {
-        _tenantServiceMock.Setup(s => s.GetCurrentTenantId()).Returns(_tenantId);
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(_tenantId);
 
         var (connectionMock, commandMock, _) = BuildMockedConnection();
 
@@ -50,7 +50,7 @@ public class TenantInterceptorTests
     [Fact]
     public void ConnectionOpened_WhenTenantExists_SetsCorrectCommandText()
     {
-        _tenantServiceMock.Setup(s => s.GetCurrentTenantId()).Returns(_tenantId);
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(_tenantId);
 
         var (connectionMock, commandMock, _) = BuildMockedConnection();
 
@@ -62,7 +62,7 @@ public class TenantInterceptorTests
     [Fact]
     public void ConnectionOpened_WhenNoTenant_DoesNotCreateCommand()
     {
-        _tenantServiceMock.Setup(s => s.GetCurrentTenantId()).Returns((Guid?)null);
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns((Guid?)null);
 
         var connectionMock = new Mock<DbConnection>();
 
@@ -78,7 +78,7 @@ public class TenantInterceptorTests
     [Fact]
     public async Task ConnectionOpenedAsync_WhenTenantExists_CallsExecuteNonQueryAsync()
     {
-        _tenantServiceMock.Setup(s => s.GetCurrentTenantId()).Returns(_tenantId);
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns(_tenantId);
 
         var (connectionMock, commandMock, _) = BuildMockedConnection();
 
@@ -92,7 +92,7 @@ public class TenantInterceptorTests
     [Fact]
     public async Task ConnectionOpenedAsync_WhenNoTenant_DoesNotCreateCommand()
     {
-        _tenantServiceMock.Setup(s => s.GetCurrentTenantId()).Returns((Guid?)null);
+        _currentUserServiceMock.Setup(s => s.TenantId).Returns((Guid?)null);
 
         var connectionMock = new Mock<DbConnection>();
 
