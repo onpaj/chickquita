@@ -42,6 +42,13 @@ public interface ICoopRepository
     Task DeleteAsync(Guid id);
 
     /// <summary>
+    /// Checks if a coop with the specified ID exists for the current tenant.
+    /// </summary>
+    /// <param name="id">The coop ID to check</param>
+    /// <returns>True if the coop exists, false otherwise</returns>
+    Task<bool> ExistsAsync(Guid id);
+
+    /// <summary>
     /// Checks if a coop with the specified name already exists for the current tenant.
     /// </summary>
     /// <param name="name">The coop name to check</param>
