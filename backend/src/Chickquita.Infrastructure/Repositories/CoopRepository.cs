@@ -101,4 +101,13 @@ public class CoopRepository : ICoopRepository
     {
         return await _context.Flocks.CountAsync(f => f.CoopId == coopId);
     }
+
+    /// <inheritdoc />
+    public async Task<Dictionary<Guid, int>> GetAllFlockCountsAsync()
+    {
+        return await _context.Flocks
+            .GroupBy(f => f.CoopId)
+            .Select(g => new { CoopId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.CoopId, x => x.Count);
+    }
 }
