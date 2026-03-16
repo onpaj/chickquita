@@ -60,7 +60,7 @@ public class DeleteDailyRecordCommandHandlerTests
             flockId,
             recordDate,
             25,
-            "Daily record to be deleted").Value;
+            "Daily record to be deleted");
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -94,7 +94,7 @@ public class DeleteDailyRecordCommandHandlerTests
             Id = dailyRecordId
         };
 
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, 10, null).Value;
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, 10, null);
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -127,7 +127,7 @@ public class DeleteDailyRecordCommandHandlerTests
             Id = dailyRecordId
         };
 
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, oldRecordDate, 15, "Old record").Value;
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, oldRecordDate, 15, "Old record");
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -231,7 +231,7 @@ public class DeleteDailyRecordCommandHandlerTests
             Id = dailyRecordId
         };
 
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, 20, "Test").Value;
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, 20, "Test");
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

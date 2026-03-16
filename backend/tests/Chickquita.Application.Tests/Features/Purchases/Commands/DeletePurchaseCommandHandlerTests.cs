@@ -62,7 +62,7 @@ public class DeletePurchaseCommandHandlerTests
             250.50m,
             25m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.Date).Value;
+            DateTime.UtcNow.Date);
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
@@ -141,7 +141,7 @@ public class DeletePurchaseCommandHandlerTests
             250.50m,
             25m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.Date).Value;
+            DateTime.UtcNow.Date);
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
@@ -184,7 +184,7 @@ public class DeletePurchaseCommandHandlerTests
             250.50m,
             25m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.Date).Value;
+            DateTime.UtcNow.Date);
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
