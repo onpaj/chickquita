@@ -177,4 +177,48 @@ public class FlockRepositoryTests : IDisposable
             persisted!.Identifier.Should().Be("Detached Updated");
         }
     }
+
+    [Fact]
+    public async Task DeleteAsync_WhenFlockExists_ShouldRemoveFromDatabase()
+    {
+        // Arrange
+        var flockId = Guid.Empty;
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            var flock = Flock.Create(_tenantId, _coopId, "To Delete", DateTime.UtcNow.AddDays(-10), 5, 0, 0);
+            await repo.AddAsync(flock);
+            flockId = flock.Id;
+        }
+
+        // Act
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            await repo.DeleteAsync(flockId);
+        }
+
+        // Assert
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            var deleted = await repo.GetByIdWithoutHistoryAsync(flockId);
+            deleted.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WhenFlockDoesNotExist_ShouldNotThrow()
+    {
+        // Arrange
+        var nonExistentId = Guid.NewGuid();
+
+        // Act
+        using var ctx = CreateContext();
+        var repo = new FlockRepository(ctx);
+        var act = async () => await repo.DeleteAsync(nonExistentId);
+
+        // Assert
+        await act.Should().NotThrowAsync();
+    }
 }

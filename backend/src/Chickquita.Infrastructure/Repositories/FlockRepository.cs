@@ -129,12 +129,9 @@ public class FlockRepository : IFlockRepository
     /// <inheritdoc />
     public async Task DeleteAsync(Guid id)
     {
-        var flock = await _context.Flocks.FindAsync(id);
-        if (flock != null)
-        {
-            _context.Flocks.Remove(flock);
-            await _context.SaveChangesAsync();
-        }
+        await _context.Flocks
+            .Where(f => f.Id == id)
+            .ExecuteDeleteAsync();
     }
 
     /// <inheritdoc />
