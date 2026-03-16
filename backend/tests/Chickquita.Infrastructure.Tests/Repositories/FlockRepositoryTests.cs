@@ -40,11 +40,11 @@ public class FlockRepositoryTests : IDisposable
         using var setupContext = CreateContext();
         setupContext.Database.EnsureCreated();
 
-        var tenant = Tenant.Create("clerk_user_test", "test@example.com").Value;
+        var tenant = Tenant.Create("clerk_user_test", "test@example.com");
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         setupContext.Tenants.Add(tenant);
 
-        var coop = Coop.Create(_tenantId, "Test Coop", null).Value;
+        var coop = Coop.Create(_tenantId, "Test Coop", null);
         setupContext.Coops.Add(coop);
         setupContext.SaveChanges();
         _coopId = coop.Id;
@@ -71,7 +71,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "Original", DateTime.UtcNow.AddDays(-30), 10, 2, 0).Value;
+            var flock = Flock.Create(_tenantId, _coopId, "Original", DateTime.UtcNow.AddDays(-30), 10, 2, 0);
             await repo.AddAsync(flock);
             flockId = flock.Id;
         }
@@ -108,7 +108,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "Test Flock", DateTime.UtcNow.AddDays(-60), 10, 2, 5).Value;
+            var flock = Flock.Create(_tenantId, _coopId, "Test Flock", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
             await repo.AddAsync(flock);
             flockId = flock.Id;
         }
@@ -149,7 +149,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "Detached Flock", DateTime.UtcNow.AddDays(-30), 5, 1, 0).Value;
+            var flock = Flock.Create(_tenantId, _coopId, "Detached Flock", DateTime.UtcNow.AddDays(-30), 5, 1, 0);
             await repo.AddAsync(flock);
             flockId = flock.Id;
             detachedFlock = flock;
