@@ -88,8 +88,6 @@ public sealed class MatureChicksCommandHandler : IRequestHandler<MatureChicksCom
             var updatedFlock = await _flockRepository.UpdateAsync(flock);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
             _logger.LogInformation(
                 "Matured {ChicksToMature} chicks in flock {FlockId}: +{Hens} hens, +{Roosters} roosters",
                 request.ChicksToMature,

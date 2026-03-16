@@ -86,38 +86,17 @@ public class FlockRepository : IFlockRepository
             throw new ArgumentNullException(nameof(flock));
         }
 
-        var entry = _context.Entry(flock);
-        if (entry.State == EntityState.Detached)
+        if (_context.Entry(flock).State == EntityState.Detached)
         {
             // Entity was not loaded by this context (e.g. came from a previous scope).
             // Calling Update() walks the entity graph via TrackGraph and marks everything
             // as Modified so SaveChanges generates the correct UPDATE statements.
             _context.Flocks.Update(flock);
         }
-        else
-        {
-            // Entity is already tracked by this context (loaded via GetByIdWithoutHistoryAsync).
-            // EF Core's snapshot change tracker detects property mutations automatically.
-            //
-            // When a new FlockHistory entry is added via UpdateComposition, EF Core's internal
-            // observable collection for History immediately fires a CollectionChanged event.
-            // The fix-up handler tracks the new entity — but because it has a non-default GUID
-            // key, EF Core assumes the entity already exists in the DB and marks it Modified
-            // rather than Added. SaveChanges then generates UPDATE instead of INSERT, which
-            // affects 0 rows (the row doesn't exist yet) and throws DbUpdateConcurrencyException.
-            //
-            // Fix: correct the state from Modified to Added for each entry currently in
-            // flock.History. These are all new entities added since the flock was loaded
-            // (GetByIdWithoutHistoryAsync loads without history, so the collection starts empty).
-            foreach (var historyItem in flock.History)
-            {
-                var historyEntry = _context.Entry(historyItem);
-                if (historyEntry.State == EntityState.Modified)
-                {
-                    historyEntry.State = EntityState.Added;
-                }
-            }
-        }
+        // For already-tracked entities, EF Core's snapshot change tracker detects property
+        // mutations automatically. New FlockHistory entries added via UpdateComposition are
+        // correctly marked Added (not Modified) because FlockHistoryConfiguration sets
+        // ValueGeneratedNever(), telling EF Core the app always provides the key.
 
         return flock;
     }
