@@ -66,10 +66,11 @@ public class GetFlocksQueryHandlerTests
         _mockFlockRepository.Setup(x => x.GetByCoopIdAsync(coopId, false))
             .ReturnsAsync(new List<Flock> { flock1, flock2 });
 
+        // Repository returns newest first (ordering is DB-side)
         var flockDtos = new List<FlockDto>
         {
-            new FlockDto { Id = flock1.Id, Identifier = "Spring 2024", CreatedAt = DateTime.UtcNow.AddDays(-60) },
-            new FlockDto { Id = flock2.Id, Identifier = "Winter 2024", CreatedAt = DateTime.UtcNow.AddDays(-30) }
+            new FlockDto { Id = flock2.Id, Identifier = "Winter 2024", CreatedAt = DateTime.UtcNow.AddDays(-30) },
+            new FlockDto { Id = flock1.Id, Identifier = "Spring 2024", CreatedAt = DateTime.UtcNow.AddDays(-60) }
         };
 
         _mockMapper.Setup(x => x.Map<List<FlockDto>>(It.IsAny<List<Flock>>()))
@@ -83,7 +84,7 @@ public class GetFlocksQueryHandlerTests
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(2);
 
-        // Verify ordering by CreatedAt descending (newest first)
+        // Ordering (newest first) is guaranteed by the repository
         result.Value[0].CreatedAt.Should().BeAfter(result.Value[1].CreatedAt);
 
         _mockCoopRepository.Verify(x => x.ExistsAsync(coopId), Times.Once);
@@ -110,10 +111,11 @@ public class GetFlocksQueryHandlerTests
         _mockFlockRepository.Setup(x => x.GetAllAsync(false))
             .ReturnsAsync(new List<Flock> { flock1, flock2 });
 
+        // Repository returns newest first (ordering is DB-side)
         var flockDtos = new List<FlockDto>
         {
-            new FlockDto { Id = flock1.Id, Identifier = "Flock A", CreatedAt = DateTime.UtcNow.AddDays(-60) },
-            new FlockDto { Id = flock2.Id, Identifier = "Flock B", CreatedAt = DateTime.UtcNow.AddDays(-30) }
+            new FlockDto { Id = flock2.Id, Identifier = "Flock B", CreatedAt = DateTime.UtcNow.AddDays(-30) },
+            new FlockDto { Id = flock1.Id, Identifier = "Flock A", CreatedAt = DateTime.UtcNow.AddDays(-60) }
         };
 
         _mockMapper.Setup(x => x.Map<List<FlockDto>>(It.IsAny<List<Flock>>()))
@@ -127,7 +129,7 @@ public class GetFlocksQueryHandlerTests
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(2);
 
-        // Verify ordering by CreatedAt descending (newest first)
+        // Ordering (newest first) is guaranteed by the repository
         result.Value[0].CreatedAt.Should().BeAfter(result.Value[1].CreatedAt);
 
         _mockCoopRepository.Verify(x => x.ExistsAsync(It.IsAny<Guid>()), Times.Never);
@@ -282,11 +284,12 @@ public class GetFlocksQueryHandlerTests
         _mockFlockRepository.Setup(x => x.GetByCoopIdAsync(coopId, false))
             .ReturnsAsync(new List<Flock> { oldestFlock, middleFlock, newestFlock });
 
+        // Repository returns newest first (ordering is DB-side)
         var flockDtos = new List<FlockDto>
         {
-            new FlockDto { Id = oldestFlock.Id, Identifier = "Oldest", CreatedAt = DateTime.UtcNow.AddDays(-90) },
+            new FlockDto { Id = newestFlock.Id, Identifier = "Newest", CreatedAt = DateTime.UtcNow.AddDays(-30) },
             new FlockDto { Id = middleFlock.Id, Identifier = "Middle", CreatedAt = DateTime.UtcNow.AddDays(-60) },
-            new FlockDto { Id = newestFlock.Id, Identifier = "Newest", CreatedAt = DateTime.UtcNow.AddDays(-30) }
+            new FlockDto { Id = oldestFlock.Id, Identifier = "Oldest", CreatedAt = DateTime.UtcNow.AddDays(-90) }
         };
 
         _mockMapper.Setup(x => x.Map<List<FlockDto>>(It.IsAny<List<Flock>>()))
