@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -66,22 +68,22 @@ public class Coop
     {
         if (tenantId == Guid.Empty)
         {
-            throw new ArgumentException("Tenant ID cannot be empty.", nameof(tenantId));
+            throw new DomainValidationException("Tenant ID cannot be empty.");
         }
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Coop name cannot be empty.", nameof(name));
+            throw new DomainValidationException("Coop name cannot be empty.");
         }
 
         if (name.Length > 100)
         {
-            throw new ArgumentException("Coop name cannot exceed 100 characters.", nameof(name));
+            throw new DomainValidationException("Coop name cannot exceed 100 characters.");
         }
 
         if (location?.Length > 200)
         {
-            throw new ArgumentException("Location cannot exceed 200 characters.", nameof(location));
+            throw new DomainValidationException("Location cannot exceed 200 characters.");
         }
 
         var now = DateTime.UtcNow;
@@ -107,17 +109,17 @@ public class Coop
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Coop name cannot be empty.", nameof(name));
+            throw new DomainValidationException("Coop name cannot be empty.");
         }
 
         if (name.Length > 100)
         {
-            throw new ArgumentException("Coop name cannot exceed 100 characters.", nameof(name));
+            throw new DomainValidationException("Coop name cannot exceed 100 characters.");
         }
 
         if (location?.Length > 200)
         {
-            throw new ArgumentException("Location cannot exceed 200 characters.", nameof(location));
+            throw new DomainValidationException("Location cannot exceed 200 characters.");
         }
 
         Name = name;

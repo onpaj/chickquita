@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 
@@ -47,7 +48,7 @@ public class CoopTests
     }
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowArgumentException()
+    public void Create_WithEmptyTenantId_ShouldThrowDomainValidationException()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
@@ -56,7 +57,7 @@ public class CoopTests
         var act = () => Coop.Create(emptyTenantId, ValidName);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Tenant ID cannot be empty.*")
             .And.ParamName.Should().Be("tenantId");
     }
@@ -65,19 +66,19 @@ public class CoopTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceName_ShouldThrowArgumentException(string? invalidName)
+    public void Create_WithNullOrWhitespaceName_ShouldThrowDomainValidationException(string? invalidName)
     {
         // Arrange & Act
         var act = () => Coop.Create(_validTenantId, invalidName!);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Coop name cannot be empty.*")
             .And.ParamName.Should().Be("name");
     }
 
     [Fact]
-    public void Create_WithNameExceeding100Characters_ShouldThrowArgumentException()
+    public void Create_WithNameExceeding100Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var longName = new string('A', 101);
@@ -86,7 +87,7 @@ public class CoopTests
         var act = () => Coop.Create(_validTenantId, longName);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Coop name cannot exceed 100 characters.*")
             .And.ParamName.Should().Be("name");
     }
@@ -107,7 +108,7 @@ public class CoopTests
     }
 
     [Fact]
-    public void Create_WithLocationExceeding200Characters_ShouldThrowArgumentException()
+    public void Create_WithLocationExceeding200Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var longLocation = new string('B', 201);
@@ -116,7 +117,7 @@ public class CoopTests
         var act = () => Coop.Create(_validTenantId, ValidName, longLocation);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Location cannot exceed 200 characters.*")
             .And.ParamName.Should().Be("location");
     }
@@ -192,7 +193,7 @@ public class CoopTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Update_WithNullOrWhitespaceName_ShouldThrowArgumentException(string? invalidName)
+    public void Update_WithNullOrWhitespaceName_ShouldThrowDomainValidationException(string? invalidName)
     {
         // Arrange
         var coop = Coop.Create(_validTenantId, ValidName);
@@ -201,13 +202,13 @@ public class CoopTests
         var act = () => coop.Update(invalidName!);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Coop name cannot be empty.*")
             .And.ParamName.Should().Be("name");
     }
 
     [Fact]
-    public void Update_WithNameExceeding100Characters_ShouldThrowArgumentException()
+    public void Update_WithNameExceeding100Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var coop = Coop.Create(_validTenantId, ValidName);
@@ -217,13 +218,13 @@ public class CoopTests
         var act = () => coop.Update(longName);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Coop name cannot exceed 100 characters.*")
             .And.ParamName.Should().Be("name");
     }
 
     [Fact]
-    public void Update_WithLocationExceeding200Characters_ShouldThrowArgumentException()
+    public void Update_WithLocationExceeding200Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var coop = Coop.Create(_validTenantId, ValidName);
@@ -233,7 +234,7 @@ public class CoopTests
         var act = () => coop.Update(ValidName, longLocation);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Location cannot exceed 200 characters.*")
             .And.ParamName.Should().Be("location");
     }

@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -108,24 +110,24 @@ public class Flock
         // Validate tenant ID
         if (tenantId == Guid.Empty)
         {
-            throw new ArgumentException("Tenant ID cannot be empty.", nameof(tenantId));
+            throw new DomainValidationException("Tenant ID cannot be empty.");
         }
 
         // Validate coop ID
         if (coopId == Guid.Empty)
         {
-            throw new ArgumentException("Coop ID cannot be empty.", nameof(coopId));
+            throw new DomainValidationException("Coop ID cannot be empty.");
         }
 
         // Validate identifier
         if (string.IsNullOrWhiteSpace(identifier))
         {
-            throw new ArgumentException("Identifier cannot be empty.", nameof(identifier));
+            throw new DomainValidationException("Identifier cannot be empty.");
         }
 
         if (identifier.Length > 50)
         {
-            throw new ArgumentException("Identifier cannot exceed 50 characters.", nameof(identifier));
+            throw new DomainValidationException("Identifier cannot exceed 50 characters.");
         }
 
         // Ensure hatchDate is in UTC
@@ -140,31 +142,30 @@ public class Flock
         // Validate hatch date
         if (hatchDateUtc > DateTime.UtcNow)
         {
-            throw new ArgumentException("Hatch date cannot be in the future.", nameof(hatchDate));
+            throw new DomainValidationException("Hatch date cannot be in the future.");
         }
 
         // Validate counts are non-negative
         if (initialHens < 0)
         {
-            throw new ArgumentException("Initial hens count cannot be negative.", nameof(initialHens));
+            throw new DomainValidationException("Initial hens count cannot be negative.");
         }
 
         if (initialRoosters < 0)
         {
-            throw new ArgumentException("Initial roosters count cannot be negative.", nameof(initialRoosters));
+            throw new DomainValidationException("Initial roosters count cannot be negative.");
         }
 
         if (initialChicks < 0)
         {
-            throw new ArgumentException("Initial chicks count cannot be negative.", nameof(initialChicks));
+            throw new DomainValidationException("Initial chicks count cannot be negative.");
         }
 
         // Validate at least one animal type has a positive count
         if (initialHens + initialRoosters + initialChicks == 0)
         {
-            throw new ArgumentException(
-                "At least one animal type must have a count greater than 0.",
-                nameof(initialHens));
+            throw new DomainValidationException(
+                "At least one animal type must have a count greater than 0.");
         }
 
         var now = DateTime.UtcNow;
@@ -211,12 +212,12 @@ public class Flock
     {
         if (string.IsNullOrWhiteSpace(identifier))
         {
-            throw new ArgumentException("Identifier cannot be empty.", nameof(identifier));
+            throw new DomainValidationException("Identifier cannot be empty.");
         }
 
         if (identifier.Length > 50)
         {
-            throw new ArgumentException("Identifier cannot exceed 50 characters.", nameof(identifier));
+            throw new DomainValidationException("Identifier cannot exceed 50 characters.");
         }
 
         // Ensure hatchDate is in UTC
@@ -230,7 +231,7 @@ public class Flock
 
         if (hatchDateUtc > DateTime.UtcNow)
         {
-            throw new ArgumentException("Hatch date cannot be in the future.", nameof(hatchDate));
+            throw new DomainValidationException("Hatch date cannot be in the future.");
         }
 
         Identifier = identifier;
@@ -250,22 +251,22 @@ public class Flock
     {
         if (hens < 0)
         {
-            throw new ArgumentException("Hens count cannot be negative.", nameof(hens));
+            throw new DomainValidationException("Hens count cannot be negative.");
         }
 
         if (roosters < 0)
         {
-            throw new ArgumentException("Roosters count cannot be negative.", nameof(roosters));
+            throw new DomainValidationException("Roosters count cannot be negative.");
         }
 
         if (chicks < 0)
         {
-            throw new ArgumentException("Chicks count cannot be negative.", nameof(chicks));
+            throw new DomainValidationException("Chicks count cannot be negative.");
         }
 
         if (string.IsNullOrWhiteSpace(reason))
         {
-            throw new ArgumentException("Reason cannot be empty.", nameof(reason));
+            throw new DomainValidationException("Reason cannot be empty.");
         }
 
         // Create history entry with new composition

@@ -113,7 +113,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
 
             return Result<PurchaseDto>.Success(purchaseDto);
         }
-        catch (ArgumentException ex)
+        catch (DomainValidationException ex)
         {
             _logger.LogWarning(
                 ex,

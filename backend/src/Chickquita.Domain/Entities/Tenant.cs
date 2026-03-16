@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -48,10 +50,10 @@ public class Tenant
     public static Tenant Create(string clerkOrgId, string name)
     {
         if (string.IsNullOrWhiteSpace(clerkOrgId))
-            throw new ArgumentException("Clerk org ID cannot be empty.", nameof(clerkOrgId));
+            throw new DomainValidationException("Clerk org ID cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Name cannot be empty.", nameof(name));
+            throw new DomainValidationException("Name cannot be empty.");
 
         var now = DateTime.UtcNow;
         return new Tenant
@@ -71,7 +73,7 @@ public class Tenant
     public void UpdateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Name cannot be empty.", nameof(name));
+            throw new DomainValidationException("Name cannot be empty.");
 
         Name = name;
         UpdatedAt = DateTime.UtcNow;

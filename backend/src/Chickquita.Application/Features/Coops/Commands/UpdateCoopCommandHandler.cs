@@ -96,7 +96,7 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
 
             return Result<CoopDto>.Success(coopDto);
         }
-        catch (ArgumentException ex)
+        catch (DomainValidationException ex)
         {
             _logger.LogWarning(
                 ex,

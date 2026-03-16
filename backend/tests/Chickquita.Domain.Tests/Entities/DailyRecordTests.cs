@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 
@@ -107,7 +108,7 @@ public class DailyRecordTests
     #region Validation Tests - Tenant and Flock ID
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowArgumentException()
+    public void Create_WithEmptyTenantId_ShouldThrowDomainValidationException()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
@@ -120,13 +121,13 @@ public class DailyRecordTests
             ValidEggCount);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Tenant ID cannot be empty.*")
             .And.ParamName.Should().Be("tenantId");
     }
 
     [Fact]
-    public void Create_WithEmptyFlockId_ShouldThrowArgumentException()
+    public void Create_WithEmptyFlockId_ShouldThrowDomainValidationException()
     {
         // Arrange
         var emptyFlockId = Guid.Empty;
@@ -139,7 +140,7 @@ public class DailyRecordTests
             ValidEggCount);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Flock ID cannot be empty.*")
             .And.ParamName.Should().Be("flockId");
     }
@@ -149,7 +150,7 @@ public class DailyRecordTests
     #region Validation Tests - Record Date
 
     [Fact]
-    public void Create_WithFutureRecordDate_ShouldThrowArgumentException()
+    public void Create_WithFutureRecordDate_ShouldThrowDomainValidationException()
     {
         // Arrange
         var futureDate = DateTime.UtcNow.Date.AddDays(1);
@@ -162,7 +163,7 @@ public class DailyRecordTests
             ValidEggCount);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Record date cannot be in the future.*")
             .And.ParamName.Should().Be("recordDate");
     }
@@ -242,7 +243,7 @@ public class DailyRecordTests
     #region Validation Tests - Egg Count
 
     [Fact]
-    public void Create_WithNegativeEggCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeEggCount_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => DailyRecord.Create(
@@ -252,7 +253,7 @@ public class DailyRecordTests
             -1);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Egg count cannot be negative.*")
             .And.ParamName.Should().Be("eggCount");
     }
@@ -277,7 +278,7 @@ public class DailyRecordTests
     #region Validation Tests - Notes
 
     [Fact]
-    public void Create_WithNotesExceeding500Characters_ShouldThrowArgumentException()
+    public void Create_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var longNotes = new string('A', 501);
@@ -291,7 +292,7 @@ public class DailyRecordTests
             longNotes);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Notes cannot exceed 500 characters.*")
             .And.ParamName.Should().Be("notes");
     }
@@ -385,7 +386,7 @@ public class DailyRecordTests
     }
 
     [Fact]
-    public void Update_WithNegativeEggCount_ShouldThrowArgumentException()
+    public void Update_WithNegativeEggCount_ShouldThrowDomainValidationException()
     {
         // Arrange
         var dailyRecord = DailyRecord.Create(
@@ -398,13 +399,13 @@ public class DailyRecordTests
         var act = () => dailyRecord.Update(-1);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Egg count cannot be negative.*")
             .And.ParamName.Should().Be("eggCount");
     }
 
     [Fact]
-    public void Update_WithNotesExceeding500Characters_ShouldThrowArgumentException()
+    public void Update_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var dailyRecord = DailyRecord.Create(
@@ -419,7 +420,7 @@ public class DailyRecordTests
         var act = () => dailyRecord.Update(10, longNotes);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Notes cannot exceed 500 characters.*")
             .And.ParamName.Should().Be("notes");
     }

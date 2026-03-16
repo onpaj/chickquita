@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 
@@ -32,13 +33,13 @@ public class TenantTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceOrgId_ShouldThrowArgumentException(string? invalidOrgId)
+    public void Create_WithNullOrWhitespaceOrgId_ShouldThrowDomainValidationException(string? invalidOrgId)
     {
         // Arrange & Act
         var act = () => Tenant.Create(invalidOrgId!, ValidName);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Clerk org ID cannot be empty.*")
             .And.ParamName.Should().Be("clerkOrgId");
     }
@@ -47,13 +48,13 @@ public class TenantTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceName_ShouldThrowArgumentException(string? invalidName)
+    public void Create_WithNullOrWhitespaceName_ShouldThrowDomainValidationException(string? invalidName)
     {
         // Arrange & Act
         var act = () => Tenant.Create(ValidOrgId, invalidName!);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Name cannot be empty.*")
             .And.ParamName.Should().Be("name");
     }
@@ -89,7 +90,7 @@ public class TenantTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void UpdateName_WithNullOrWhitespaceName_ShouldThrowArgumentException(string? invalidName)
+    public void UpdateName_WithNullOrWhitespaceName_ShouldThrowDomainValidationException(string? invalidName)
     {
         // Arrange
         var tenant = Tenant.Create(ValidOrgId, ValidName);
@@ -98,7 +99,7 @@ public class TenantTests
         var act = () => tenant.UpdateName(invalidName!);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Name cannot be empty.*")
             .And.ParamName.Should().Be("name");
     }

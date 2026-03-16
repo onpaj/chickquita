@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 
@@ -123,7 +124,7 @@ public class FlockHistoryTests
     #region Validation Tests - Tenant and Flock ID
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowArgumentException()
+    public void Create_WithEmptyTenantId_ShouldThrowDomainValidationException()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
@@ -139,13 +140,13 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Tenant ID cannot be empty.*")
             .And.ParamName.Should().Be("tenantId");
     }
 
     [Fact]
-    public void Create_WithEmptyFlockId_ShouldThrowArgumentException()
+    public void Create_WithEmptyFlockId_ShouldThrowDomainValidationException()
     {
         // Arrange
         var emptyFlockId = Guid.Empty;
@@ -161,7 +162,7 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Flock ID cannot be empty.*")
             .And.ParamName.Should().Be("flockId");
     }
@@ -171,7 +172,7 @@ public class FlockHistoryTests
     #region Validation Tests - Counts
 
     [Fact]
-    public void Create_WithNegativeHensCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeHensCount_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => FlockHistory.Create(
@@ -184,13 +185,13 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Hens count cannot be negative.*")
             .And.ParamName.Should().Be("hens");
     }
 
     [Fact]
-    public void Create_WithNegativeRoostersCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeRoostersCount_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => FlockHistory.Create(
@@ -203,13 +204,13 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Roosters count cannot be negative.*")
             .And.ParamName.Should().Be("roosters");
     }
 
     [Fact]
-    public void Create_WithNegativeChicksCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeChicksCount_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => FlockHistory.Create(
@@ -222,7 +223,7 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Chicks count cannot be negative.*")
             .And.ParamName.Should().Be("chicks");
     }
@@ -235,7 +236,7 @@ public class FlockHistoryTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceReason_ShouldThrowArgumentException(string? invalidReason)
+    public void Create_WithNullOrWhitespaceReason_ShouldThrowDomainValidationException(string? invalidReason)
     {
         // Arrange & Act
         var act = () => FlockHistory.Create(
@@ -248,13 +249,13 @@ public class FlockHistoryTests
             invalidReason!);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Reason cannot be empty.*")
             .And.ParamName.Should().Be("reason");
     }
 
     [Fact]
-    public void Create_WithReasonExceeding50Characters_ShouldThrowArgumentException()
+    public void Create_WithReasonExceeding50Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var longReason = new string('A', 51);
@@ -270,7 +271,7 @@ public class FlockHistoryTests
             longReason);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Reason cannot exceed 50 characters.*")
             .And.ParamName.Should().Be("reason");
     }
@@ -302,7 +303,7 @@ public class FlockHistoryTests
     #region Validation Tests - Notes
 
     [Fact]
-    public void Create_WithNotesExceeding500Characters_ShouldThrowArgumentException()
+    public void Create_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var longNotes = new string('B', 501);
@@ -319,7 +320,7 @@ public class FlockHistoryTests
             longNotes);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Notes cannot exceed 500 characters.*")
             .And.ParamName.Should().Be("notes");
     }
@@ -522,7 +523,7 @@ public class FlockHistoryTests
     }
 
     [Fact]
-    public void UpdateNotes_WithNotesExceeding500Characters_ShouldThrowArgumentException()
+    public void UpdateNotes_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var history = FlockHistory.Create(
@@ -540,7 +541,7 @@ public class FlockHistoryTests
         var act = () => history.UpdateNotes(longNotes);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Notes cannot exceed 500 characters.*")
             .And.ParamName.Should().Be("notes");
     }

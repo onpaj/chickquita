@@ -93,7 +93,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
 
             return Result<PurchaseDto>.Success(purchaseDto);
         }
-        catch (ArgumentException ex)
+        catch (DomainValidationException ex)
         {
             _logger.LogWarning(
                 ex,

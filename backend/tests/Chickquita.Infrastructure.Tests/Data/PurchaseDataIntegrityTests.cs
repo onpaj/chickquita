@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Application.Interfaces;
 using Chickquita.Domain.Entities;
 using Chickquita.Infrastructure.Data;
@@ -67,7 +68,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             DateTime.UtcNow.AddDays(-5));
 
         // Act & Assert - Should fail at domain level before reaching database
-        act.Should().Throw<ArgumentException>().WithMessage("*tenantId*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*tenantId*");
     }
 
     [Fact]
@@ -84,7 +85,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             DateTime.UtcNow.AddDays(-5));
 
         // Act & Assert
-        act.Should().Throw<ArgumentException>().WithMessage("*name*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*name*");
     }
 
     [Fact]
@@ -101,7 +102,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             DateTime.UtcNow.AddDays(-5));
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*amount*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*amount*");
     }
 
     [Fact]
@@ -118,7 +119,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             DateTime.UtcNow.AddDays(-5));
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*quantity*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*quantity*");
     }
 
     [Fact]
@@ -140,7 +141,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             consumedDate);
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*consumed date*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*consumed date*");
     }
 
     [Fact]

@@ -97,7 +97,7 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
 
             return Result<FlockDto>.Success(flockDto);
         }
-        catch (ArgumentException ex)
+        catch (DomainValidationException ex)
         {
             _logger.LogWarning(
                 ex,

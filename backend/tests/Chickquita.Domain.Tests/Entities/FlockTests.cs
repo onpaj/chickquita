@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 
@@ -162,7 +163,7 @@ public class FlockTests
     #region Validation Tests - Tenant and Coop ID
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowArgumentException()
+    public void Create_WithEmptyTenantId_ShouldThrowDomainValidationException()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
@@ -178,13 +179,13 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Tenant ID cannot be empty.*")
             .And.ParamName.Should().Be("tenantId");
     }
 
     [Fact]
-    public void Create_WithEmptyCoopId_ShouldThrowArgumentException()
+    public void Create_WithEmptyCoopId_ShouldThrowDomainValidationException()
     {
         // Arrange
         var emptyCoopId = Guid.Empty;
@@ -200,7 +201,7 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Coop ID cannot be empty.*")
             .And.ParamName.Should().Be("coopId");
     }
@@ -213,7 +214,7 @@ public class FlockTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceIdentifier_ShouldThrowArgumentException(string? invalidIdentifier)
+    public void Create_WithNullOrWhitespaceIdentifier_ShouldThrowDomainValidationException(string? invalidIdentifier)
     {
         // Arrange & Act
         var act = () => Flock.Create(
@@ -226,13 +227,13 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Identifier cannot be empty.*")
             .And.ParamName.Should().Be("identifier");
     }
 
     [Fact]
-    public void Create_WithIdentifierExceeding50Characters_ShouldThrowArgumentException()
+    public void Create_WithIdentifierExceeding50Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var longIdentifier = new string('A', 51);
@@ -248,7 +249,7 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Identifier cannot exceed 50 characters.*")
             .And.ParamName.Should().Be("identifier");
     }
@@ -280,7 +281,7 @@ public class FlockTests
     #region Validation Tests - Hatch Date
 
     [Fact]
-    public void Create_WithFutureHatchDate_ShouldThrowArgumentException()
+    public void Create_WithFutureHatchDate_ShouldThrowDomainValidationException()
     {
         // Arrange
         var futureDate = DateTime.UtcNow.AddDays(1);
@@ -296,7 +297,7 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Hatch date cannot be in the future.*")
             .And.ParamName.Should().Be("hatchDate");
     }
@@ -348,7 +349,7 @@ public class FlockTests
     #region Validation Tests - Counts
 
     [Fact]
-    public void Create_WithNegativeHensCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeHensCount_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => Flock.Create(
@@ -361,13 +362,13 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Initial hens count cannot be negative.*")
             .And.ParamName.Should().Be("initialHens");
     }
 
     [Fact]
-    public void Create_WithNegativeRoostersCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeRoostersCount_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => Flock.Create(
@@ -380,13 +381,13 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Initial roosters count cannot be negative.*")
             .And.ParamName.Should().Be("initialRoosters");
     }
 
     [Fact]
-    public void Create_WithNegativeChicksCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeChicksCount_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => Flock.Create(
@@ -399,13 +400,13 @@ public class FlockTests
             -1);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Initial chicks count cannot be negative.*")
             .And.ParamName.Should().Be("initialChicks");
     }
 
     [Fact]
-    public void Create_WithAllZeroCounts_ShouldThrowArgumentException()
+    public void Create_WithAllZeroCounts_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => Flock.Create(
@@ -418,7 +419,7 @@ public class FlockTests
             0);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("At least one animal type must have a count greater than 0.*")
             .And.ParamName.Should().Be("initialHens");
     }

@@ -83,7 +83,7 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
 
             return Result<CoopDto>.Success(coopDto);
         }
-        catch (ArgumentException ex)
+        catch (DomainValidationException ex)
         {
             _logger.LogWarning(
                 ex,

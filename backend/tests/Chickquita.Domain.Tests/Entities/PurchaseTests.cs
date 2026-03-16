@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 
@@ -227,7 +228,7 @@ public class PurchaseTests
     #region Validation Tests - Tenant ID
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowArgumentException()
+    public void Create_WithEmptyTenantId_ShouldThrowDomainValidationException()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
@@ -243,7 +244,7 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Tenant ID cannot be empty.*")
             .And.ParamName.Should().Be("tenantId");
     }
@@ -253,7 +254,7 @@ public class PurchaseTests
     #region Validation Tests - Name
 
     [Fact]
-    public void Create_WithEmptyName_ShouldThrowArgumentException()
+    public void Create_WithEmptyName_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => Purchase.Create(
@@ -266,13 +267,13 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Purchase name cannot be empty.*")
             .And.ParamName.Should().Be("name");
     }
 
     [Fact]
-    public void Create_WithWhitespaceName_ShouldThrowArgumentException()
+    public void Create_WithWhitespaceName_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => Purchase.Create(
@@ -285,13 +286,13 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Purchase name cannot be empty.*")
             .And.ParamName.Should().Be("name");
     }
 
     [Fact]
-    public void Create_WithNameExceeding100Characters_ShouldThrowArgumentException()
+    public void Create_WithNameExceeding100Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var longName = new string('A', 101);
@@ -307,7 +308,7 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Purchase name cannot exceed 100 characters.*")
             .And.ParamName.Should().Be("name");
     }
@@ -339,7 +340,7 @@ public class PurchaseTests
     #region Validation Tests - Amount
 
     [Fact]
-    public void Create_WithNegativeAmount_ShouldThrowArgumentException()
+    public void Create_WithNegativeAmount_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => Purchase.Create(
@@ -352,7 +353,7 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Amount cannot be negative.*")
             .And.ParamName.Should().Be("amount");
     }
@@ -380,7 +381,7 @@ public class PurchaseTests
     #region Validation Tests - Quantity
 
     [Fact]
-    public void Create_WithZeroQuantity_ShouldThrowArgumentException()
+    public void Create_WithZeroQuantity_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => Purchase.Create(
@@ -393,13 +394,13 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Quantity must be greater than zero.*")
             .And.ParamName.Should().Be("quantity");
     }
 
     [Fact]
-    public void Create_WithNegativeQuantity_ShouldThrowArgumentException()
+    public void Create_WithNegativeQuantity_ShouldThrowDomainValidationException()
     {
         // Arrange & Act
         var act = () => Purchase.Create(
@@ -412,7 +413,7 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Quantity must be greater than zero.*")
             .And.ParamName.Should().Be("quantity");
     }
@@ -484,7 +485,7 @@ public class PurchaseTests
     #region Validation Tests - Consumed Date
 
     [Fact]
-    public void Create_WithConsumedDateBeforePurchaseDate_ShouldThrowArgumentException()
+    public void Create_WithConsumedDateBeforePurchaseDate_ShouldThrowDomainValidationException()
     {
         // Arrange
         var consumedDate = ValidPurchaseDate.AddDays(-1);
@@ -502,7 +503,7 @@ public class PurchaseTests
             consumedDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Consumed date cannot be before purchase date.*")
             .And.ParamName.Should().Be("consumedDate");
     }
@@ -555,7 +556,7 @@ public class PurchaseTests
     #region Validation Tests - Notes
 
     [Fact]
-    public void Create_WithNotesExceeding500Characters_ShouldThrowArgumentException()
+    public void Create_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var longNotes = new string('A', 501);
@@ -574,7 +575,7 @@ public class PurchaseTests
             longNotes);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Notes cannot exceed 500 characters.*")
             .And.ParamName.Should().Be("notes");
     }
@@ -705,7 +706,7 @@ public class PurchaseTests
     }
 
     [Fact]
-    public void Update_WithNegativeAmount_ShouldThrowArgumentException()
+    public void Update_WithNegativeAmount_ShouldThrowDomainValidationException()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -721,13 +722,13 @@ public class PurchaseTests
         var act = () => purchase.Update(ValidName, ValidType, -1m, ValidQuantity, ValidUnit, ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Amount cannot be negative.*")
             .And.ParamName.Should().Be("amount");
     }
 
     [Fact]
-    public void Update_WithZeroQuantity_ShouldThrowArgumentException()
+    public void Update_WithZeroQuantity_ShouldThrowDomainValidationException()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -743,13 +744,13 @@ public class PurchaseTests
         var act = () => purchase.Update(ValidName, ValidType, ValidAmount, 0m, ValidUnit, ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Quantity must be greater than zero.*")
             .And.ParamName.Should().Be("quantity");
     }
 
     [Fact]
-    public void Update_WithConsumedDateBeforePurchaseDate_ShouldThrowArgumentException()
+    public void Update_WithConsumedDateBeforePurchaseDate_ShouldThrowDomainValidationException()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -768,13 +769,13 @@ public class PurchaseTests
         var act = () => purchase.Update(ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, newPurchaseDate, null, consumedDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Consumed date cannot be before purchase date.*")
             .And.ParamName.Should().Be("consumedDate");
     }
 
     [Fact]
-    public void Update_WithEmptyName_ShouldThrowArgumentException()
+    public void Update_WithEmptyName_ShouldThrowDomainValidationException()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -790,13 +791,13 @@ public class PurchaseTests
         var act = () => purchase.Update(string.Empty, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Purchase name cannot be empty.*")
             .And.ParamName.Should().Be("name");
     }
 
     [Fact]
-    public void Update_WithNameExceeding100Characters_ShouldThrowArgumentException()
+    public void Update_WithNameExceeding100Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -814,13 +815,13 @@ public class PurchaseTests
         var act = () => purchase.Update(longName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Purchase name cannot exceed 100 characters.*")
             .And.ParamName.Should().Be("name");
     }
 
     [Fact]
-    public void Update_WithNotesExceeding500Characters_ShouldThrowArgumentException()
+    public void Update_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -838,7 +839,7 @@ public class PurchaseTests
         var act = () => purchase.Update(ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate, null, null, longNotes);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<DomainValidationException>()
             .WithMessage("Notes cannot exceed 500 characters.*")
             .And.ParamName.Should().Be("notes");
     }

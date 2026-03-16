@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -191,30 +193,30 @@ public class Purchase
         // Validate tenant ID
         if (tenantId == Guid.Empty)
         {
-            throw new ArgumentException("Tenant ID cannot be empty.", nameof(tenantId));
+            throw new DomainValidationException("Tenant ID cannot be empty.");
         }
 
         // Validate name
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Purchase name cannot be empty.", nameof(name));
+            throw new DomainValidationException("Purchase name cannot be empty.");
         }
 
         if (name.Length > 100)
         {
-            throw new ArgumentException("Purchase name cannot exceed 100 characters.", nameof(name));
+            throw new DomainValidationException("Purchase name cannot exceed 100 characters.");
         }
 
         // Validate amount
         if (amount < 0)
         {
-            throw new ArgumentException("Amount cannot be negative.", nameof(amount));
+            throw new DomainValidationException("Amount cannot be negative.");
         }
 
         // Validate quantity
         if (quantity <= 0)
         {
-            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+            throw new DomainValidationException("Quantity must be greater than zero.");
         }
 
         // Normalize purchase date to UTC and date only (midnight)
@@ -241,14 +243,14 @@ public class Purchase
             // Validate consumed date is not before purchase date
             if (consumedDateUtc < purchaseDateUtc)
             {
-                throw new ArgumentException("Consumed date cannot be before purchase date.", nameof(consumedDate));
+                throw new DomainValidationException("Consumed date cannot be before purchase date.");
             }
         }
 
         // Validate notes length if provided
         if (notes != null && notes.Length > 500)
         {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
+            throw new DomainValidationException("Notes cannot exceed 500 characters.");
         }
 
         var now = DateTime.UtcNow;
@@ -297,24 +299,24 @@ public class Purchase
         // Validate name
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Purchase name cannot be empty.", nameof(name));
+            throw new DomainValidationException("Purchase name cannot be empty.");
         }
 
         if (name.Length > 100)
         {
-            throw new ArgumentException("Purchase name cannot exceed 100 characters.", nameof(name));
+            throw new DomainValidationException("Purchase name cannot exceed 100 characters.");
         }
 
         // Validate amount
         if (amount < 0)
         {
-            throw new ArgumentException("Amount cannot be negative.", nameof(amount));
+            throw new DomainValidationException("Amount cannot be negative.");
         }
 
         // Validate quantity
         if (quantity <= 0)
         {
-            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+            throw new DomainValidationException("Quantity must be greater than zero.");
         }
 
         // Normalize purchase date to UTC and date only (midnight)
@@ -341,14 +343,14 @@ public class Purchase
             // Validate consumed date is not before purchase date
             if (consumedDateUtc < purchaseDateUtc)
             {
-                throw new ArgumentException("Consumed date cannot be before purchase date.", nameof(consumedDate));
+                throw new DomainValidationException("Consumed date cannot be before purchase date.");
             }
         }
 
         // Validate notes length if provided
         if (notes != null && notes.Length > 500)
         {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
+            throw new DomainValidationException("Notes cannot exceed 500 characters.");
         }
 
         Name = name;

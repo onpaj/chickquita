@@ -105,7 +105,7 @@ public sealed class UpdateDailyRecordCommandHandler : IRequestHandler<UpdateDail
 
             return Result<DailyRecordDto>.Success(dailyRecordDto);
         }
-        catch (ArgumentException ex)
+        catch (DomainValidationException ex)
         {
             _logger.LogWarning(
                 ex,

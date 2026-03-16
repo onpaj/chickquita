@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -101,42 +103,42 @@ public class FlockHistory
     {
         if (tenantId == Guid.Empty)
         {
-            throw new ArgumentException("Tenant ID cannot be empty.", nameof(tenantId));
+            throw new DomainValidationException("Tenant ID cannot be empty.");
         }
 
         if (flockId == Guid.Empty)
         {
-            throw new ArgumentException("Flock ID cannot be empty.", nameof(flockId));
+            throw new DomainValidationException("Flock ID cannot be empty.");
         }
 
         if (hens < 0)
         {
-            throw new ArgumentException("Hens count cannot be negative.", nameof(hens));
+            throw new DomainValidationException("Hens count cannot be negative.");
         }
 
         if (roosters < 0)
         {
-            throw new ArgumentException("Roosters count cannot be negative.", nameof(roosters));
+            throw new DomainValidationException("Roosters count cannot be negative.");
         }
 
         if (chicks < 0)
         {
-            throw new ArgumentException("Chicks count cannot be negative.", nameof(chicks));
+            throw new DomainValidationException("Chicks count cannot be negative.");
         }
 
         if (string.IsNullOrWhiteSpace(reason))
         {
-            throw new ArgumentException("Reason cannot be empty.", nameof(reason));
+            throw new DomainValidationException("Reason cannot be empty.");
         }
 
         if (reason.Length > 50)
         {
-            throw new ArgumentException("Reason cannot exceed 50 characters.", nameof(reason));
+            throw new DomainValidationException("Reason cannot exceed 50 characters.");
         }
 
         if (notes?.Length > 500)
         {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
+            throw new DomainValidationException("Notes cannot exceed 500 characters.");
         }
 
         var now = DateTime.UtcNow;
@@ -166,7 +168,7 @@ public class FlockHistory
     {
         if (notes?.Length > 500)
         {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
+            throw new DomainValidationException("Notes cannot exceed 500 characters.");
         }
 
         Notes = notes;

@@ -102,7 +102,7 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
 
             return Result<DailyRecordDto>.Success(dailyRecordDto);
         }
-        catch (ArgumentException ex)
+        catch (DomainValidationException ex)
         {
             _logger.LogWarning(
                 ex,

@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -87,13 +89,13 @@ public class DailyRecord
         // Validate tenant ID
         if (tenantId == Guid.Empty)
         {
-            throw new ArgumentException("Tenant ID cannot be empty.", nameof(tenantId));
+            throw new DomainValidationException("Tenant ID cannot be empty.");
         }
 
         // Validate flock ID
         if (flockId == Guid.Empty)
         {
-            throw new ArgumentException("Flock ID cannot be empty.", nameof(flockId));
+            throw new DomainValidationException("Flock ID cannot be empty.");
         }
 
         // Ensure recordDate is in UTC and normalize to date only (midnight)
@@ -108,19 +110,19 @@ public class DailyRecord
         // Validate record date is not in the future
         if (recordDateUtc > DateTime.UtcNow.Date)
         {
-            throw new ArgumentException("Record date cannot be in the future.", nameof(recordDate));
+            throw new DomainValidationException("Record date cannot be in the future.");
         }
 
         // Validate egg count is non-negative
         if (eggCount < 0)
         {
-            throw new ArgumentException("Egg count cannot be negative.", nameof(eggCount));
+            throw new DomainValidationException("Egg count cannot be negative.");
         }
 
         // Validate notes length if provided
         if (notes != null && notes.Length > 500)
         {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
+            throw new DomainValidationException("Notes cannot exceed 500 characters.");
         }
 
         var now = DateTime.UtcNow;
@@ -152,13 +154,13 @@ public class DailyRecord
         // Validate egg count is non-negative
         if (eggCount < 0)
         {
-            throw new ArgumentException("Egg count cannot be negative.", nameof(eggCount));
+            throw new DomainValidationException("Egg count cannot be negative.");
         }
 
         // Validate notes length if provided
         if (notes != null && notes.Length > 500)
         {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
+            throw new DomainValidationException("Notes cannot exceed 500 characters.");
         }
 
         EggCount = eggCount;

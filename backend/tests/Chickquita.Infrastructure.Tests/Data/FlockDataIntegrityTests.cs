@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Application.Interfaces;
 using Chickquita.Domain.Entities;
 using Chickquita.Infrastructure.Data;
@@ -59,7 +60,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => Flock.Create(Guid.Empty, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
 
         // Act & Assert - Should fail at domain level before reaching database
-        act.Should().Throw<ArgumentException>().WithMessage("*tenantId*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*tenantId*");
     }
 
     [Fact]
@@ -69,7 +70,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => Flock.Create(_tenantId, Guid.Empty, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
 
         // Act & Assert - should fail at domain level
-        act.Should().Throw<ArgumentException>().WithMessage("*coopId*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*coopId*");
     }
 
     [Fact]
@@ -79,7 +80,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => Flock.Create(_tenantId, _coopId, "", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
 
         // Act & Assert
-        act.Should().Throw<ArgumentException>().WithMessage("*identifier*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*identifier*");
     }
 
     [Fact]
@@ -89,7 +90,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), -1, 2, 5, null);
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*hens*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*hens*");
     }
 
     [Fact]
@@ -99,7 +100,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, -1, 5, null);
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*roosters*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*roosters*");
     }
 
     [Fact]
@@ -109,7 +110,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => Flock.Create(_tenantId, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, -1, null);
 
         // Act & Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*chicks*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*chicks*");
     }
 
     [Fact]
@@ -179,7 +180,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, -1, 2, 5, "Test", null);
 
         // Assert - Domain validation catches this
-        act.Should().Throw<ArgumentException>().WithMessage("*hens*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*hens*");
     }
 
     [Fact]
@@ -194,7 +195,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, 10, -1, 5, "Test", null);
 
         // Assert
-        act.Should().Throw<ArgumentException>().WithMessage("*roosters*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*roosters*");
     }
 
     [Fact]
@@ -209,7 +210,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, 10, 2, -1, "Test", null);
 
         // Assert
-        act.Should().Throw<ArgumentException>().WithMessage("*chicks*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*chicks*");
     }
 
     [Fact]
@@ -484,7 +485,7 @@ public class FlockDataIntegrityTests : IDisposable
         // Assert
         foreach (var testCase in testCases)
         {
-            testCase.Act.Should().Throw<ArgumentException>($"{testCase.Field} is required");
+            testCase.Act.Should().Throw<DomainValidationException>($"{testCase.Field} is required");
         }
     }
 
@@ -502,7 +503,7 @@ public class FlockDataIntegrityTests : IDisposable
         // Assert
         foreach (var testCase in testCases)
         {
-            testCase.Act.Should().Throw<ArgumentException>($"{testCase.Field} must be non-negative");
+            testCase.Act.Should().Throw<DomainValidationException>($"{testCase.Field} must be non-negative");
         }
     }
 
@@ -516,14 +517,14 @@ public class FlockDataIntegrityTests : IDisposable
 
         // Assert
         var act1 = () => Flock.Create(_tenantId, _coopId, longIdentifier, DateTime.UtcNow, 10, 2, 5, null);
-        act1.Should().Throw<ArgumentException>().WithMessage("*identifier*");
+        act1.Should().Throw<DomainValidationException>().WithMessage("*identifier*");
 
         var flock = Flock.Create(_tenantId, _coopId, "TEST", DateTime.UtcNow, 10, 2, 5, null);
         var act2 = () => flock.UpdateComposition(15, 3, 2, longReason, null);
-        act2.Should().Throw<ArgumentException>().WithMessage("*reason*");
+        act2.Should().Throw<DomainValidationException>().WithMessage("*reason*");
 
         var act3 = () => FlockHistory.Create(_tenantId, flock.Id, DateTime.UtcNow, 10, 2, 5, "Test", longNotes);
-        act3.Should().Throw<ArgumentException>().WithMessage("*notes*");
+        act3.Should().Throw<DomainValidationException>().WithMessage("*notes*");
     }
 
     #endregion
