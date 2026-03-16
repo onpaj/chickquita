@@ -70,32 +70,33 @@ public static class DependencyInjection
         // Register tenant service
         services.AddScoped<ITenantService, TenantService>();
 
-        // Configure JWT Bearer Authentication
-        var clerkAuthority = configuration["Clerk:Authority"];
+        // Configure JWT Bearer Authentication — fail fast if required config is absent
+        var clerkAuthority = configuration["Clerk:Authority"]
+            ?? throw new InvalidOperationException(
+                "Clerk:Authority is required but not configured. " +
+                "Set the Clerk__Authority environment variable.");
+
         var clerkAudience = configuration["Clerk:Audience"];
 
-        if (!string.IsNullOrEmpty(clerkAuthority))
-        {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.Authority = clerkAuthority;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.Authority = clerkAuthority;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = !string.IsNullOrEmpty(clerkAudience),
-                        ValidAudience = clerkAudience,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ClockSkew = TimeSpan.FromMinutes(5)
-                    };
+                    ValidateIssuer = true,
+                    ValidateAudience = !string.IsNullOrEmpty(clerkAudience),
+                    ValidAudience = clerkAudience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ClockSkew = TimeSpan.FromMinutes(5)
+                };
 
-                    // Map the Clerk "sub" claim to ClaimTypes.NameIdentifier
-                    options.MapInboundClaims = false;
-                });
+                // Map the Clerk "sub" claim to ClaimTypes.NameIdentifier
+                options.MapInboundClaims = false;
+            });
 
-            services.AddAuthorization();
-        }
+        services.AddAuthorization();
 
         return services;
     }
