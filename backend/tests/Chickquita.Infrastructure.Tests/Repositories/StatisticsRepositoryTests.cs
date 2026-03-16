@@ -5,6 +5,7 @@ using Chickquita.Infrastructure.Repositories;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Moq;
 using Xunit;
 
@@ -47,12 +48,25 @@ public class StatisticsRepositoryTests : IDisposable
                     v => v.HasValue ? TimeSpan.FromTicks(v.Value) : (TimeSpan?)null);
 
             // SQLite doesn't support SUM on decimal (TEXT) columns — map all decimals to REAL
+            var decimalConverter = new ValueConverter<decimal, double>(v => (double)v, v => (decimal)v);
+            var nullableDecimalConverter = new ValueConverter<decimal?, double?>(
+                v => v.HasValue ? (double?)v.Value : null,
+                v => v.HasValue ? (decimal?)v.Value : null);
+
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
-                foreach (var property in entityType.GetProperties()
-                    .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+                foreach (var property in entityType.GetProperties())
                 {
-                    property.SetColumnType("REAL");
+                    if (property.ClrType == typeof(decimal))
+                    {
+                        property.SetColumnType("REAL");
+                        property.SetValueConverter(decimalConverter);
+                    }
+                    else if (property.ClrType == typeof(decimal?))
+                    {
+                        property.SetColumnType("REAL");
+                        property.SetValueConverter(nullableDecimalConverter);
+                    }
                 }
             }
         }
