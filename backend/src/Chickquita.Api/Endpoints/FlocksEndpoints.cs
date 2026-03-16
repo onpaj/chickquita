@@ -79,6 +79,15 @@ public static class FlocksEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
+
+        // PUT /api/flocks/{id}/composition - Update flock composition (hens, roosters, chicks)
+        flocksGroup.MapPut("/{id:guid}/composition", UpdateFlockComposition)
+            .WithName("UpdateFlockComposition")
+            .WithOpenApi()
+            .Produces<FlockDto>()
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetFlocks(
@@ -176,6 +185,17 @@ public static class FlocksEndpoints
     private static async Task<IResult> MatureChicks(
         [FromRoute] Guid id,
         [FromBody] MatureChicksCommand command,
+        [FromServices] IMediator mediator)
+    {
+        command.FlockId = id;
+        var result = await mediator.Send(command);
+
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> UpdateFlockComposition(
+        [FromRoute] Guid id,
+        [FromBody] UpdateFlockCompositionCommand command,
         [FromServices] IMediator mediator)
     {
         command.FlockId = id;
