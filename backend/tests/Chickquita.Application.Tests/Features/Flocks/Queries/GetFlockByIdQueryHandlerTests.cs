@@ -51,7 +51,7 @@ public class GetFlockByIdQueryHandlerTests
         var flockId = Guid.NewGuid();
         var query = new GetFlockByIdQuery { FlockId = flockId };
 
-        var flock = Flock.Create(tenantId, coopId, "Spring 2024", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
+        var flock = Flock.Create(tenantId, coopId, "Spring 2024", DateTime.UtcNow.AddDays(-60), 10, 2, 5).Value;
 
         var expectedDto = new FlockDto
         {
@@ -100,7 +100,7 @@ public class GetFlockByIdQueryHandlerTests
         var flockId = Guid.NewGuid();
         var query = new GetFlockByIdQuery { FlockId = flockId };
 
-        var flock = Flock.Create(tenantId, coopId, "Spring 2024", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
+        var flock = Flock.Create(tenantId, coopId, "Spring 2024", DateTime.UtcNow.AddDays(-60), 10, 2, 5).Value;
 
         var historyDto1 = new FlockHistoryDto
         {
@@ -231,7 +231,7 @@ public class GetFlockByIdQueryHandlerTests
         var flockId = Guid.NewGuid();
         var query = new GetFlockByIdQuery { FlockId = flockId };
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5);
+        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
 
         var expectedDto = new FlockDto
         {
@@ -270,7 +270,7 @@ public class GetFlockByIdQueryHandlerTests
         var flockId = Guid.NewGuid();
         var query = new GetFlockByIdQuery { FlockId = flockId };
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5);
+        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
 
         var expectedDto = new FlockDto
         {
@@ -354,7 +354,7 @@ public class GetFlockByIdQueryHandlerTests
         var flockId = Guid.NewGuid();
         var query = new GetFlockByIdQuery { FlockId = flockId };
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5);
+        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

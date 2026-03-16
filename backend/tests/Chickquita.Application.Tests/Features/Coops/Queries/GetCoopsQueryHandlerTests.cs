@@ -52,8 +52,8 @@ public class GetCoopsQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var activeCoop1 = Coop.Create(tenantId, "Main Coop", "North Field");
-        var activeCoop2 = Coop.Create(tenantId, "Secondary Coop", "South Field");
+        var activeCoop1 = Coop.Create(tenantId, "Main Coop", "North Field").Value;
+        var activeCoop2 = Coop.Create(tenantId, "Secondary Coop", "South Field").Value;
         var coops = new List<Coop> { activeCoop1, activeCoop2 };
 
         _mockCoopRepository.Setup(x => x.GetAllAsync(false))
@@ -110,7 +110,7 @@ public class GetCoopsQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var activeCoop = Coop.Create(tenantId, "Main Coop", "North Field");
+        var activeCoop = Coop.Create(tenantId, "Main Coop", "North Field").Value;
         var coops = new List<Coop> { activeCoop };
 
         _mockCoopRepository.Setup(x => x.GetAllAsync(false))
@@ -156,8 +156,8 @@ public class GetCoopsQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var activeCoop = Coop.Create(tenantId, "Main Coop", "North Field");
-        var archivedCoop = Coop.Create(tenantId, "Old Coop", "West Field");
+        var activeCoop = Coop.Create(tenantId, "Main Coop", "North Field").Value;
+        var archivedCoop = Coop.Create(tenantId, "Old Coop", "West Field").Value;
         archivedCoop.Deactivate();
 
         var coops = new List<Coop> { activeCoop, archivedCoop };
@@ -252,8 +252,8 @@ public class GetCoopsQueryHandlerTests
 
         // The repository should handle tenant isolation via RLS and global query filters
         // so we only get back coops for this tenant
-        var tenantCoop1 = Coop.Create(tenantId, "Tenant Coop 1", "Location 1");
-        var tenantCoop2 = Coop.Create(tenantId, "Tenant Coop 2", "Location 2");
+        var tenantCoop1 = Coop.Create(tenantId, "Tenant Coop 1", "Location 1").Value;
+        var tenantCoop2 = Coop.Create(tenantId, "Tenant Coop 2", "Location 2").Value;
         var coops = new List<Coop> { tenantCoop1, tenantCoop2 };
 
         _mockCoopRepository.Setup(x => x.GetAllAsync(false))
@@ -312,8 +312,8 @@ public class GetCoopsQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
         // Create coops with different creation dates (repository returns them sorted)
-        var olderCoop = Coop.Create(tenantId, "Older Coop", "Location 1");
-        var newerCoop = Coop.Create(tenantId, "Newer Coop", "Location 2");
+        var olderCoop = Coop.Create(tenantId, "Older Coop", "Location 1").Value;
+        var newerCoop = Coop.Create(tenantId, "Newer Coop", "Location 2").Value;
 
         // Repository should return coops sorted by CreatedAt descending (newest first)
         var coops = new List<Coop> { newerCoop, olderCoop };
@@ -379,8 +379,8 @@ public class GetCoopsQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var coop1 = Coop.Create(tenantId, "Coop 1", "Location 1");
-        var coop2 = Coop.Create(tenantId, "Coop 2", "Location 2");
+        var coop1 = Coop.Create(tenantId, "Coop 1", "Location 1").Value;
+        var coop2 = Coop.Create(tenantId, "Coop 2", "Location 2").Value;
         var coops = new List<Coop> { coop1, coop2 };
 
         _mockCoopRepository.Setup(x => x.GetAllAsync(false))
@@ -446,7 +446,7 @@ public class GetCoopsQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var coop = Coop.Create(tenantId, "Empty Coop", "Location");
+        var coop = Coop.Create(tenantId, "Empty Coop", "Location").Value;
         var coops = new List<Coop> { coop };
 
         _mockCoopRepository.Setup(x => x.GetAllAsync(false))
@@ -515,7 +515,7 @@ public class GetCoopsQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var coops = new List<Coop> { Coop.Create(tenantId, "Test Coop", "Test Location") };
+        var coops = new List<Coop> { Coop.Create(tenantId, "Test Coop", "Test Location").Value };
 
         _mockCoopRepository.Setup(x => x.GetAllAsync(false))
             .ReturnsAsync(coops);
@@ -543,7 +543,7 @@ public class GetCoopsQueryHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var coop = Coop.Create(tenantId, "Test Coop", "Test Location");
+        var coop = Coop.Create(tenantId, "Test Coop", "Test Location").Value;
         var coops = new List<Coop> { coop };
 
         _mockCoopRepository.Setup(x => x.GetAllAsync(false))

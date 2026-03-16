@@ -26,7 +26,7 @@ public class PurchaseTests
     public void Create_WithValidData_ShouldSucceed()
     {
         // Arrange & Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -39,6 +39,8 @@ public class PurchaseTests
             ValidNotes);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.Id.Should().NotBeEmpty();
         purchase.TenantId.Should().Be(_validTenantId);
@@ -60,7 +62,7 @@ public class PurchaseTests
     public void Create_WithoutOptionalFields_ShouldSucceed()
     {
         // Arrange & Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -70,6 +72,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.CoopId.Should().BeNull();
         purchase.ConsumedDate.Should().BeNull();
@@ -80,7 +84,7 @@ public class PurchaseTests
     public void Create_WithZeroAmount_ShouldSucceed()
     {
         // Arrange & Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -90,6 +94,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.Amount.Should().Be(0m);
     }
@@ -101,7 +107,7 @@ public class PurchaseTests
         var consumedDate = ValidPurchaseDate.AddDays(2);
 
         // Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -113,6 +119,8 @@ public class PurchaseTests
             consumedDate);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.ConsumedDate.Should().Be(consumedDate);
     }
@@ -121,8 +129,8 @@ public class PurchaseTests
     public void Create_ShouldGenerateUniqueIds()
     {
         // Arrange & Act
-        var purchase1 = Purchase.Create(_validTenantId, ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
-        var purchase2 = Purchase.Create(_validTenantId, ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
+        var purchase1 = Purchase.Create(_validTenantId, ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate).Value;
+        var purchase2 = Purchase.Create(_validTenantId, ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate).Value;
 
         // Assert
         purchase1.Id.Should().NotBe(purchase2.Id);
@@ -135,7 +143,7 @@ public class PurchaseTests
         var dateWithTime = DateTime.UtcNow.AddDays(-5).AddHours(14).AddMinutes(30);
 
         // Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -145,6 +153,8 @@ public class PurchaseTests
             dateWithTime);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.PurchaseDate.Hour.Should().Be(0);
         purchase.PurchaseDate.Minute.Should().Be(0);
         purchase.PurchaseDate.Second.Should().Be(0);
@@ -158,7 +168,7 @@ public class PurchaseTests
         var dateWithTime = DateTime.UtcNow.AddDays(-3).AddHours(18).AddMinutes(45);
 
         // Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -170,6 +180,8 @@ public class PurchaseTests
             dateWithTime);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.ConsumedDate!.Value.Hour.Should().Be(0);
         purchase.ConsumedDate!.Value.Minute.Should().Be(0);
         purchase.ConsumedDate!.Value.Second.Should().Be(0);
@@ -186,7 +198,7 @@ public class PurchaseTests
     public void Create_WithAllPurchaseTypes_ShouldSucceed(PurchaseType type)
     {
         // Arrange & Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             type,
@@ -196,6 +208,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.Type.Should().Be(type);
     }
@@ -209,7 +223,7 @@ public class PurchaseTests
     public void Create_WithAllQuantityUnits_ShouldSucceed(QuantityUnit unit)
     {
         // Arrange & Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -219,6 +233,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.Unit.Should().Be(unit);
     }
@@ -228,13 +244,13 @@ public class PurchaseTests
     #region Validation Tests - Tenant ID
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowDomainValidationException()
+    public void Create_WithEmptyTenantId_ShouldReturnFailure()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
 
         // Act
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             emptyTenantId,
             ValidName,
             ValidType,
@@ -244,8 +260,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Tenant ID cannot be empty.*");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Tenant ID cannot be empty");
     }
 
     #endregion
@@ -253,10 +269,10 @@ public class PurchaseTests
     #region Validation Tests - Name
 
     [Fact]
-    public void Create_WithEmptyName_ShouldThrowDomainValidationException()
+    public void Create_WithEmptyName_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             string.Empty,
             ValidType,
@@ -266,15 +282,15 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot be empty.*");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Purchase name cannot be empty");
     }
 
     [Fact]
-    public void Create_WithWhitespaceName_ShouldThrowDomainValidationException()
+    public void Create_WithWhitespaceName_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             "   ",
             ValidType,
@@ -284,18 +300,18 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot be empty.*");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Purchase name cannot be empty");
     }
 
     [Fact]
-    public void Create_WithNameExceeding100Characters_ShouldThrowDomainValidationException()
+    public void Create_WithNameExceeding100Characters_ShouldReturnFailure()
     {
         // Arrange
         var longName = new string('A', 101);
 
         // Act
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             longName,
             ValidType,
@@ -305,8 +321,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot exceed 100 characters.*");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Purchase name cannot exceed 100 characters");
     }
 
     [Fact]
@@ -316,7 +332,7 @@ public class PurchaseTests
         var name = new string('A', 100);
 
         // Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             name,
             ValidType,
@@ -326,6 +342,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.Name.Should().Be(name);
         purchase.Name.Length.Should().Be(100);
@@ -336,10 +354,10 @@ public class PurchaseTests
     #region Validation Tests - Amount
 
     [Fact]
-    public void Create_WithNegativeAmount_ShouldThrowDomainValidationException()
+    public void Create_WithNegativeAmount_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -349,15 +367,15 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Amount cannot be negative.*");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Amount cannot be negative");
     }
 
     [Fact]
     public void Create_WithLargeAmount_ShouldSucceed()
     {
         // Arrange & Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -367,6 +385,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.Amount.Should().Be(999999.99m);
     }
@@ -376,10 +396,10 @@ public class PurchaseTests
     #region Validation Tests - Quantity
 
     [Fact]
-    public void Create_WithZeroQuantity_ShouldThrowDomainValidationException()
+    public void Create_WithZeroQuantity_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -389,15 +409,15 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Quantity must be greater than zero.*");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Quantity must be greater than zero");
     }
 
     [Fact]
-    public void Create_WithNegativeQuantity_ShouldThrowDomainValidationException()
+    public void Create_WithNegativeQuantity_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -407,15 +427,15 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Quantity must be greater than zero.*");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Quantity must be greater than zero");
     }
 
     [Fact]
     public void Create_WithDecimalQuantity_ShouldSucceed()
     {
         // Arrange & Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -425,6 +445,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.Quantity.Should().Be(2.5m);
     }
@@ -440,7 +462,7 @@ public class PurchaseTests
         var localDate = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Local);
 
         // Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -450,7 +472,8 @@ public class PurchaseTests
             localDate);
 
         // Assert
-        purchase.PurchaseDate.Kind.Should().Be(DateTimeKind.Utc);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.PurchaseDate.Kind.Should().Be(DateTimeKind.Utc);
     }
 
     [Fact]
@@ -460,7 +483,7 @@ public class PurchaseTests
         var unspecifiedDate = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Unspecified);
 
         // Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -470,7 +493,8 @@ public class PurchaseTests
             unspecifiedDate);
 
         // Assert
-        purchase.PurchaseDate.Kind.Should().Be(DateTimeKind.Utc);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.PurchaseDate.Kind.Should().Be(DateTimeKind.Utc);
     }
 
     #endregion
@@ -478,13 +502,13 @@ public class PurchaseTests
     #region Validation Tests - Consumed Date
 
     [Fact]
-    public void Create_WithConsumedDateBeforePurchaseDate_ShouldThrowDomainValidationException()
+    public void Create_WithConsumedDateBeforePurchaseDate_ShouldReturnFailure()
     {
         // Arrange
         var consumedDate = ValidPurchaseDate.AddDays(-1);
 
         // Act
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -496,15 +520,15 @@ public class PurchaseTests
             consumedDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Consumed date cannot be before purchase date.*");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Consumed date cannot be before purchase date");
     }
 
     [Fact]
     public void Create_WithConsumedDateEqualToPurchaseDate_ShouldSucceed()
     {
         // Arrange & Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -516,6 +540,8 @@ public class PurchaseTests
             ValidPurchaseDate);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.ConsumedDate.Should().Be(ValidPurchaseDate);
     }
@@ -528,7 +554,7 @@ public class PurchaseTests
         var purchaseDate = new DateTime(2024, 1, 15, 0, 0, 0, DateTimeKind.Utc);
 
         // Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -540,7 +566,8 @@ public class PurchaseTests
             localDate);
 
         // Assert
-        purchase.ConsumedDate!.Value.Kind.Should().Be(DateTimeKind.Utc);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.ConsumedDate!.Value.Kind.Should().Be(DateTimeKind.Utc);
     }
 
     #endregion
@@ -548,13 +575,13 @@ public class PurchaseTests
     #region Validation Tests - Notes
 
     [Fact]
-    public void Create_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
+    public void Create_WithNotesExceeding500Characters_ShouldReturnFailure()
     {
         // Arrange
         var longNotes = new string('A', 501);
 
         // Act
-        var act = () => Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -567,8 +594,8 @@ public class PurchaseTests
             longNotes);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Notes cannot exceed 500 characters.*");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Notes cannot exceed 500 characters");
     }
 
     [Fact]
@@ -578,7 +605,7 @@ public class PurchaseTests
         var notes = new string('A', 500);
 
         // Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -591,6 +618,8 @@ public class PurchaseTests
             notes);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.Notes.Should().Be(notes);
         purchase.Notes!.Length.Should().Be(500);
@@ -600,7 +629,7 @@ public class PurchaseTests
     public void Create_WithEmptyStringNotes_ShouldSucceed()
     {
         // Arrange & Act
-        var purchase = Purchase.Create(
+        var result = Purchase.Create(
             _validTenantId,
             ValidName,
             ValidType,
@@ -613,6 +642,8 @@ public class PurchaseTests
             string.Empty);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var purchase = result.Value;
         purchase.Should().NotBeNull();
         purchase.Notes.Should().Be(string.Empty);
     }
@@ -632,7 +663,7 @@ public class PurchaseTests
             ValidAmount,
             ValidQuantity,
             ValidUnit,
-            ValidPurchaseDate);
+            ValidPurchaseDate).Value;
         var originalCreatedAt = purchase.CreatedAt;
         var originalUpdatedAt = purchase.UpdatedAt;
         Thread.Sleep(10);
@@ -647,9 +678,10 @@ public class PurchaseTests
         var newNotes = "Updated notes";
 
         // Act
-        purchase.Update(newName, newType, newAmount, newQuantity, newUnit, newPurchaseDate, _validCoopId, newConsumedDate, newNotes);
+        var updateResult = purchase.Update(newName, newType, newAmount, newQuantity, newUnit, newPurchaseDate, _validCoopId, newConsumedDate, newNotes);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         purchase.Name.Should().Be(newName);
         purchase.Type.Should().Be(newType);
         purchase.Amount.Should().Be(newAmount);
@@ -677,7 +709,7 @@ public class PurchaseTests
             ValidPurchaseDate,
             _validCoopId,
             ValidPurchaseDate.AddDays(1),
-            ValidNotes);
+            ValidNotes).Value;
 
         var newName = "Updated Feed";
         var newType = PurchaseType.Bedding;
@@ -687,9 +719,10 @@ public class PurchaseTests
         var newPurchaseDate = ValidPurchaseDate.AddDays(2);
 
         // Act
-        purchase.Update(newName, newType, newAmount, newQuantity, newUnit, newPurchaseDate);
+        var updateResult = purchase.Update(newName, newType, newAmount, newQuantity, newUnit, newPurchaseDate);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         purchase.Name.Should().Be(newName);
         purchase.CoopId.Should().BeNull();
         purchase.ConsumedDate.Should().BeNull();
@@ -697,7 +730,7 @@ public class PurchaseTests
     }
 
     [Fact]
-    public void Update_WithNegativeAmount_ShouldThrowDomainValidationException()
+    public void Update_WithNegativeAmount_ShouldReturnFailure()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -707,18 +740,18 @@ public class PurchaseTests
             ValidAmount,
             ValidQuantity,
             ValidUnit,
-            ValidPurchaseDate);
+            ValidPurchaseDate).Value;
 
         // Act
-        var act = () => purchase.Update(ValidName, ValidType, -1m, ValidQuantity, ValidUnit, ValidPurchaseDate);
+        var updateResult = purchase.Update(ValidName, ValidType, -1m, ValidQuantity, ValidUnit, ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Amount cannot be negative.*");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Amount cannot be negative");
     }
 
     [Fact]
-    public void Update_WithZeroQuantity_ShouldThrowDomainValidationException()
+    public void Update_WithZeroQuantity_ShouldReturnFailure()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -728,18 +761,18 @@ public class PurchaseTests
             ValidAmount,
             ValidQuantity,
             ValidUnit,
-            ValidPurchaseDate);
+            ValidPurchaseDate).Value;
 
         // Act
-        var act = () => purchase.Update(ValidName, ValidType, ValidAmount, 0m, ValidUnit, ValidPurchaseDate);
+        var updateResult = purchase.Update(ValidName, ValidType, ValidAmount, 0m, ValidUnit, ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Quantity must be greater than zero.*");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Quantity must be greater than zero");
     }
 
     [Fact]
-    public void Update_WithConsumedDateBeforePurchaseDate_ShouldThrowDomainValidationException()
+    public void Update_WithConsumedDateBeforePurchaseDate_ShouldReturnFailure()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -749,21 +782,21 @@ public class PurchaseTests
             ValidAmount,
             ValidQuantity,
             ValidUnit,
-            ValidPurchaseDate);
+            ValidPurchaseDate).Value;
 
         var newPurchaseDate = ValidPurchaseDate.AddDays(5);
         var consumedDate = ValidPurchaseDate.AddDays(2);
 
         // Act
-        var act = () => purchase.Update(ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, newPurchaseDate, null, consumedDate);
+        var updateResult = purchase.Update(ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, newPurchaseDate, null, consumedDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Consumed date cannot be before purchase date.*");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Consumed date cannot be before purchase date");
     }
 
     [Fact]
-    public void Update_WithEmptyName_ShouldThrowDomainValidationException()
+    public void Update_WithEmptyName_ShouldReturnFailure()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -773,18 +806,18 @@ public class PurchaseTests
             ValidAmount,
             ValidQuantity,
             ValidUnit,
-            ValidPurchaseDate);
+            ValidPurchaseDate).Value;
 
         // Act
-        var act = () => purchase.Update(string.Empty, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
+        var updateResult = purchase.Update(string.Empty, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot be empty.*");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Purchase name cannot be empty");
     }
 
     [Fact]
-    public void Update_WithNameExceeding100Characters_ShouldThrowDomainValidationException()
+    public void Update_WithNameExceeding100Characters_ShouldReturnFailure()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -794,20 +827,20 @@ public class PurchaseTests
             ValidAmount,
             ValidQuantity,
             ValidUnit,
-            ValidPurchaseDate);
+            ValidPurchaseDate).Value;
 
         var longName = new string('B', 101);
 
         // Act
-        var act = () => purchase.Update(longName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
+        var updateResult = purchase.Update(longName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot exceed 100 characters.*");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Purchase name cannot exceed 100 characters");
     }
 
     [Fact]
-    public void Update_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
+    public void Update_WithNotesExceeding500Characters_ShouldReturnFailure()
     {
         // Arrange
         var purchase = Purchase.Create(
@@ -817,16 +850,16 @@ public class PurchaseTests
             ValidAmount,
             ValidQuantity,
             ValidUnit,
-            ValidPurchaseDate);
+            ValidPurchaseDate).Value;
 
         var longNotes = new string('B', 501);
 
         // Act
-        var act = () => purchase.Update(ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate, null, null, longNotes);
+        var updateResult = purchase.Update(ValidName, ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate, null, null, longNotes);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Notes cannot exceed 500 characters.*");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Notes cannot exceed 500 characters");
     }
 
     [Fact]
@@ -840,12 +873,13 @@ public class PurchaseTests
             ValidAmount,
             ValidQuantity,
             ValidUnit,
-            ValidPurchaseDate);
+            ValidPurchaseDate).Value;
 
         // Act
-        purchase.Update("Updated", ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
+        var updateResult = purchase.Update("Updated", ValidType, ValidAmount, ValidQuantity, ValidUnit, ValidPurchaseDate);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         purchase.TenantId.Should().Be(_validTenantId);
     }
 

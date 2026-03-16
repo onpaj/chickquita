@@ -24,7 +24,7 @@ public class FlockHistoryTests
     public void Create_WithValidData_ShouldSucceed()
     {
         // Arrange & Act
-        var history = FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -34,6 +34,8 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var history = result.Value;
         history.Should().NotBeNull();
         history.Id.Should().NotBeEmpty();
         history.TenantId.Should().Be(_validTenantId);
@@ -56,7 +58,7 @@ public class FlockHistoryTests
         var notes = "First batch of chickens";
 
         // Act
-        var history = FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -67,6 +69,8 @@ public class FlockHistoryTests
             notes);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var history = result.Value;
         history.Should().NotBeNull();
         history.Notes.Should().Be(notes);
     }
@@ -75,7 +79,7 @@ public class FlockHistoryTests
     public void Create_WithoutNotes_ShouldHaveNullNotes()
     {
         // Arrange & Act
-        var history = FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -85,14 +89,15 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        history.Notes.Should().BeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Notes.Should().BeNull();
     }
 
     [Fact]
     public void Create_WithZeroCounts_ShouldSucceed()
     {
         // Arrange & Act
-        var history = FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -102,6 +107,8 @@ public class FlockHistoryTests
             "All sold");
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var history = result.Value;
         history.Should().NotBeNull();
         history.Hens.Should().Be(0);
         history.Roosters.Should().Be(0);
@@ -112,8 +119,8 @@ public class FlockHistoryTests
     public void Create_ShouldGenerateUniqueIds()
     {
         // Arrange & Act
-        var history1 = FlockHistory.Create(_validTenantId, _validFlockId, ValidChangeDate, 5, 1, 0, "Reason 1");
-        var history2 = FlockHistory.Create(_validTenantId, _validFlockId, ValidChangeDate, 5, 1, 0, "Reason 2");
+        var history1 = FlockHistory.Create(_validTenantId, _validFlockId, ValidChangeDate, 5, 1, 0, "Reason 1").Value;
+        var history2 = FlockHistory.Create(_validTenantId, _validFlockId, ValidChangeDate, 5, 1, 0, "Reason 2").Value;
 
         // Assert
         history1.Id.Should().NotBe(history2.Id);
@@ -124,13 +131,13 @@ public class FlockHistoryTests
     #region Validation Tests - Tenant and Flock ID
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowDomainValidationException()
+    public void Create_WithEmptyTenantId_ShouldReturnFailure()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
 
         // Act
-        var act = () => FlockHistory.Create(
+        var result = FlockHistory.Create(
             emptyTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -140,19 +147,18 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Tenant ID cannot be empty.*")
-            .And.ParamName.Should().Be("tenantId");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Tenant ID cannot be empty");
     }
 
     [Fact]
-    public void Create_WithEmptyFlockId_ShouldThrowDomainValidationException()
+    public void Create_WithEmptyFlockId_ShouldReturnFailure()
     {
         // Arrange
         var emptyFlockId = Guid.Empty;
 
         // Act
-        var act = () => FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             emptyFlockId,
             ValidChangeDate,
@@ -162,9 +168,8 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Flock ID cannot be empty.*")
-            .And.ParamName.Should().Be("flockId");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Flock ID cannot be empty");
     }
 
     #endregion
@@ -172,10 +177,10 @@ public class FlockHistoryTests
     #region Validation Tests - Counts
 
     [Fact]
-    public void Create_WithNegativeHensCount_ShouldThrowDomainValidationException()
+    public void Create_WithNegativeHensCount_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -185,16 +190,15 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Hens count cannot be negative.*")
-            .And.ParamName.Should().Be("hens");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Hens count cannot be negative");
     }
 
     [Fact]
-    public void Create_WithNegativeRoostersCount_ShouldThrowDomainValidationException()
+    public void Create_WithNegativeRoostersCount_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -204,16 +208,15 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Roosters count cannot be negative.*")
-            .And.ParamName.Should().Be("roosters");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Roosters count cannot be negative");
     }
 
     [Fact]
-    public void Create_WithNegativeChicksCount_ShouldThrowDomainValidationException()
+    public void Create_WithNegativeChicksCount_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -223,9 +226,8 @@ public class FlockHistoryTests
             ValidReason);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Chicks count cannot be negative.*")
-            .And.ParamName.Should().Be("chicks");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Chicks count cannot be negative");
     }
 
     #endregion
@@ -236,10 +238,10 @@ public class FlockHistoryTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceReason_ShouldThrowDomainValidationException(string? invalidReason)
+    public void Create_WithNullOrWhitespaceReason_ShouldReturnFailure(string? invalidReason)
     {
         // Arrange & Act
-        var act = () => FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -249,19 +251,18 @@ public class FlockHistoryTests
             invalidReason!);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Reason cannot be empty.*")
-            .And.ParamName.Should().Be("reason");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Reason cannot be empty");
     }
 
     [Fact]
-    public void Create_WithReasonExceeding50Characters_ShouldThrowDomainValidationException()
+    public void Create_WithReasonExceeding50Characters_ShouldReturnFailure()
     {
         // Arrange
         var longReason = new string('A', 51);
 
         // Act
-        var act = () => FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -271,9 +272,8 @@ public class FlockHistoryTests
             longReason);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Reason cannot exceed 50 characters.*")
-            .And.ParamName.Should().Be("reason");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Reason cannot exceed 50 characters");
     }
 
     [Fact]
@@ -283,7 +283,7 @@ public class FlockHistoryTests
         var reason = new string('A', 50);
 
         // Act
-        var history = FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -293,6 +293,8 @@ public class FlockHistoryTests
             reason);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var history = result.Value;
         history.Should().NotBeNull();
         history.Reason.Should().Be(reason);
         history.Reason.Length.Should().Be(50);
@@ -303,13 +305,13 @@ public class FlockHistoryTests
     #region Validation Tests - Notes
 
     [Fact]
-    public void Create_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
+    public void Create_WithNotesExceeding500Characters_ShouldReturnFailure()
     {
         // Arrange
         var longNotes = new string('B', 501);
 
         // Act
-        var act = () => FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -320,9 +322,8 @@ public class FlockHistoryTests
             longNotes);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Notes cannot exceed 500 characters.*")
-            .And.ParamName.Should().Be("notes");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Notes cannot exceed 500 characters");
     }
 
     [Fact]
@@ -332,7 +333,7 @@ public class FlockHistoryTests
         var notes = new string('B', 500);
 
         // Act
-        var history = FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -343,6 +344,8 @@ public class FlockHistoryTests
             notes);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var history = result.Value;
         history.Should().NotBeNull();
         history.Notes.Should().Be(notes);
         history.Notes!.Length.Should().Be(500);
@@ -363,7 +366,7 @@ public class FlockHistoryTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            ValidReason);
+            ValidReason).Value;
 
         var originalHens = history.Hens;
         var originalRoosters = history.Roosters;
@@ -386,7 +389,7 @@ public class FlockHistoryTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            ValidReason);
+            ValidReason).Value;
 
         var originalReason = history.Reason;
 
@@ -405,7 +408,7 @@ public class FlockHistoryTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            ValidReason);
+            ValidReason).Value;
 
         var originalChangeDate = history.ChangeDate;
 
@@ -424,7 +427,7 @@ public class FlockHistoryTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            ValidReason);
+            ValidReason).Value;
 
         var originalTenantId = history.TenantId;
         var originalFlockId = history.FlockId;
@@ -449,16 +452,17 @@ public class FlockHistoryTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            ValidReason);
+            ValidReason).Value;
 
         var originalUpdatedAt = history.UpdatedAt;
         Thread.Sleep(10);
         var newNotes = "Updated notes";
 
         // Act
-        history.UpdateNotes(newNotes);
+        var updateResult = history.UpdateNotes(newNotes);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         history.Notes.Should().Be(newNotes);
         history.UpdatedAt.Should().BeAfter(originalUpdatedAt);
     }
@@ -475,12 +479,13 @@ public class FlockHistoryTests
             ValidRoosters,
             ValidChicks,
             ValidReason,
-            "Initial notes");
+            "Initial notes").Value;
 
         // Act
-        history.UpdateNotes(null);
+        var updateResult = history.UpdateNotes(null);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         history.Notes.Should().BeNull();
     }
 
@@ -495,7 +500,7 @@ public class FlockHistoryTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            ValidReason);
+            ValidReason).Value;
 
         var originalId = history.Id;
         var originalTenantId = history.TenantId;
@@ -508,9 +513,10 @@ public class FlockHistoryTests
         var originalCreatedAt = history.CreatedAt;
 
         // Act
-        history.UpdateNotes("New notes");
+        var updateResult = history.UpdateNotes("New notes");
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         history.Id.Should().Be(originalId);
         history.TenantId.Should().Be(originalTenantId);
         history.FlockId.Should().Be(originalFlockId);
@@ -523,7 +529,7 @@ public class FlockHistoryTests
     }
 
     [Fact]
-    public void UpdateNotes_WithNotesExceeding500Characters_ShouldThrowDomainValidationException()
+    public void UpdateNotes_WithNotesExceeding500Characters_ShouldReturnFailure()
     {
         // Arrange
         var history = FlockHistory.Create(
@@ -533,17 +539,16 @@ public class FlockHistoryTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            ValidReason);
+            ValidReason).Value;
 
         var longNotes = new string('C', 501);
 
         // Act
-        var act = () => history.UpdateNotes(longNotes);
+        var updateResult = history.UpdateNotes(longNotes);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Notes cannot exceed 500 characters.*")
-            .And.ParamName.Should().Be("notes");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Notes cannot exceed 500 characters");
     }
 
     [Fact]
@@ -557,14 +562,15 @@ public class FlockHistoryTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            ValidReason);
+            ValidReason).Value;
 
         var notes = new string('C', 500);
 
         // Act
-        history.UpdateNotes(notes);
+        var updateResult = history.UpdateNotes(notes);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         history.Notes.Should().Be(notes);
         history.Notes!.Length.Should().Be(500);
     }
@@ -580,19 +586,23 @@ public class FlockHistoryTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            ValidReason);
+            ValidReason).Value;
 
         // Act & Assert
-        history.UpdateNotes("First update");
+        var result1 = history.UpdateNotes("First update");
+        result1.IsSuccess.Should().BeTrue();
         history.Notes.Should().Be("First update");
 
-        history.UpdateNotes("Second update");
+        var result2 = history.UpdateNotes("Second update");
+        result2.IsSuccess.Should().BeTrue();
         history.Notes.Should().Be("Second update");
 
-        history.UpdateNotes(null);
+        var result3 = history.UpdateNotes(null);
+        result3.IsSuccess.Should().BeTrue();
         history.Notes.Should().BeNull();
 
-        history.UpdateNotes("Third update");
+        var result4 = history.UpdateNotes("Third update");
+        result4.IsSuccess.Should().BeTrue();
         history.Notes.Should().Be("Third update");
     }
 
@@ -609,7 +619,7 @@ public class FlockHistoryTests
     public void Create_WithCommonReasonValues_ShouldSucceed(string reason)
     {
         // Arrange & Act
-        var history = FlockHistory.Create(
+        var result = FlockHistory.Create(
             _validTenantId,
             _validFlockId,
             ValidChangeDate,
@@ -619,6 +629,8 @@ public class FlockHistoryTests
             reason);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var history = result.Value;
         history.Should().NotBeNull();
         history.Reason.Should().Be(reason);
     }

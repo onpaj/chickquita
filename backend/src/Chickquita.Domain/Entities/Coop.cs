@@ -63,28 +63,20 @@ public class Coop
     /// <param name="tenantId">The ID of the tenant that owns this coop</param>
     /// <param name="name">The name of the coop</param>
     /// <param name="location">Optional location description</param>
-    /// <returns>A new Coop instance</returns>
-    public static Coop Create(Guid tenantId, string name, string? location = null)
+    /// <returns>A Result containing the new Coop instance, or a validation error</returns>
+    public static Result<Coop> Create(Guid tenantId, string name, string? location = null)
     {
         if (tenantId == Guid.Empty)
-        {
-            throw new DomainValidationException("Tenant ID cannot be empty.", "tenantId");
-        }
+            return Error.Validation("Tenant ID cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new DomainValidationException("Coop name cannot be empty.", "name");
-        }
+            return Error.Validation("Coop name cannot be empty.");
 
         if (name.Length > 100)
-        {
-            throw new DomainValidationException("Coop name cannot exceed 100 characters.", "name");
-        }
+            return Error.Validation("Coop name cannot exceed 100 characters.");
 
         if (location?.Length > 200)
-        {
-            throw new DomainValidationException("Location cannot exceed 200 characters.", "location");
-        }
+            return Error.Validation("Location cannot exceed 200 characters.");
 
         var now = DateTime.UtcNow;
 
@@ -105,26 +97,23 @@ public class Coop
     /// </summary>
     /// <param name="name">The new name</param>
     /// <param name="location">The new location</param>
-    public void Update(string name, string? location = null)
+    /// <returns>A Result indicating success or a validation error</returns>
+    public Result Update(string name, string? location = null)
     {
         if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new DomainValidationException("Coop name cannot be empty.", "name");
-        }
+            return Error.Validation("Coop name cannot be empty.");
 
         if (name.Length > 100)
-        {
-            throw new DomainValidationException("Coop name cannot exceed 100 characters.", "name");
-        }
+            return Error.Validation("Coop name cannot exceed 100 characters.");
 
         if (location?.Length > 200)
-        {
-            throw new DomainValidationException("Location cannot exceed 200 characters.", "location");
-        }
+            return Error.Validation("Location cannot exceed 200 characters.");
 
         Name = name;
         Location = location;
         UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
     }
 
     /// <summary>

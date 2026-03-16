@@ -74,16 +74,16 @@ public class DailyRecordRepositoryTests : IDisposable
         _dbContext.Database.EnsureCreated();
 
         _repository = new DailyRecordRepository(_dbContext);
-        var tenant = Tenant.Create("clerk_user_test", "test@example.com");
+        var tenant = Tenant.Create("clerk_user_test", "test@example.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         _dbContext.Tenants.Add(tenant);
 
-        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location");
+        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location").Value;
         _dbContext.Coops.Add(coop);
         _dbContext.SaveChanges();
         _coopId = coop.Id;
 
-        var flock = Flock.Create(_tenantId, _coopId, "TEST-FLOCK", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "TEST-FLOCK", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         _dbContext.SaveChanges();
         _flockId = flock.Id;
@@ -95,9 +95,9 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task GetAllAsync_ReturnsAllDailyRecords_OrderedByDateDescending()
     {
         // Arrange
-        var record1 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-2), 10, "Record 1");
-        var record2 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-1), 15, "Record 2");
-        var record3 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 12, "Record 3");
+        var record1 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-2), 10, "Record 1").Value;
+        var record2 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-1), 15, "Record 2").Value;
+        var record3 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 12, "Record 3").Value;
 
         _dbContext.DailyRecords.AddRange(record1, record2, record3);
         await _dbContext.SaveChangesAsync();
@@ -116,7 +116,7 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task GetAllAsync_IncludesFlockNavigationProperty()
     {
         // Arrange
-        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null);
+        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null).Value;
         _dbContext.DailyRecords.Add(record);
         await _dbContext.SaveChangesAsync();
 
@@ -137,13 +137,13 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task GetByFlockIdAsync_ReturnsRecordsForSpecificFlock()
     {
         // Arrange
-        var flock2 = Flock.Create(_tenantId, _coopId, "FLOCK-2", DateTime.UtcNow.AddMonths(-1), 5, 1, 2, null);
+        var flock2 = Flock.Create(_tenantId, _coopId, "FLOCK-2", DateTime.UtcNow.AddMonths(-1), 5, 1, 2, null).Value;
         _dbContext.Flocks.Add(flock2);
         await _dbContext.SaveChangesAsync();
 
-        var record1 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-1), 10, null);
-        var record2 = DailyRecord.Create(_tenantId, flock2.Id, DateTime.UtcNow.AddDays(-1), 5, null);
-        var record3 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 12, null);
+        var record1 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-1), 10, null).Value;
+        var record2 = DailyRecord.Create(_tenantId, flock2.Id, DateTime.UtcNow.AddDays(-1), 5, null).Value;
+        var record3 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 12, null).Value;
 
         _dbContext.DailyRecords.AddRange(record1, record2, record3);
         await _dbContext.SaveChangesAsync();
@@ -181,9 +181,9 @@ public class DailyRecordRepositoryTests : IDisposable
         var date2 = DateTime.UtcNow.AddDays(-3);
         var date3 = DateTime.UtcNow.AddDays(-1);
 
-        var record1 = DailyRecord.Create(_tenantId, _flockId, date1, 10, null);
-        var record2 = DailyRecord.Create(_tenantId, _flockId, date2, 15, null);
-        var record3 = DailyRecord.Create(_tenantId, _flockId, date3, 12, null);
+        var record1 = DailyRecord.Create(_tenantId, _flockId, date1, 10, null).Value;
+        var record2 = DailyRecord.Create(_tenantId, _flockId, date2, 15, null).Value;
+        var record3 = DailyRecord.Create(_tenantId, _flockId, date3, 12, null).Value;
 
         _dbContext.DailyRecords.AddRange(record1, record2, record3);
         await _dbContext.SaveChangesAsync();
@@ -201,7 +201,7 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task GetByFlockIdAndDateRangeAsync_ReturnsEmptyList_WhenNoRecordsInRange()
     {
         // Arrange
-        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null);
+        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null).Value;
         _dbContext.DailyRecords.Add(record);
         await _dbContext.SaveChangesAsync();
 
@@ -223,7 +223,7 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task GetByIdAsync_ReturnsRecord_WhenRecordExists()
     {
         // Arrange
-        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, "Test record");
+        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, "Test record").Value;
         _dbContext.DailyRecords.Add(record);
         await _dbContext.SaveChangesAsync();
 
@@ -241,7 +241,7 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task GetByIdAsync_IncludesFlockNavigationProperty()
     {
         // Arrange
-        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null);
+        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null).Value;
         _dbContext.DailyRecords.Add(record);
         await _dbContext.SaveChangesAsync();
 
@@ -275,7 +275,7 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task GetByIdWithoutNavigationAsync_ReturnsRecord_WithoutNavigationProperties()
     {
         // Arrange
-        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null);
+        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null).Value;
         _dbContext.DailyRecords.Add(record);
         await _dbContext.SaveChangesAsync();
 
@@ -298,7 +298,7 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task AddAsync_AddsDailyRecord_Successfully()
     {
         // Arrange
-        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, "Test record");
+        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, "Test record").Value;
 
         // Act
         var result = await _repository.AddAsync(record);
@@ -331,7 +331,7 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task UpdateAsync_UpdatesDailyRecord_Successfully()
     {
         // Arrange
-        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, "Original notes");
+        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, "Original notes").Value;
         _dbContext.DailyRecords.Add(record);
         await _dbContext.SaveChangesAsync();
 
@@ -368,7 +368,7 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task DeleteAsync_DeletesDailyRecord_Successfully()
     {
         // Arrange
-        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null);
+        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null).Value;
         _dbContext.DailyRecords.Add(record);
         await _dbContext.SaveChangesAsync();
 
@@ -377,6 +377,9 @@ public class DailyRecordRepositoryTests : IDisposable
         // Act
         await _repository.DeleteAsync(recordId);
         await _dbContext.SaveChangesAsync();
+
+        // ExecuteDeleteAsync bypasses EF identity map; detach to force DB lookup
+        _dbContext.Entry(record).State = EntityState.Detached;
 
         // Assert
         _dbContext.ChangeTracker.Clear(); // ExecuteDeleteAsync bypasses change tracker; clear it before querying
@@ -405,9 +408,9 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task GetCountByFlockIdAsync_ReturnsCorrectCount()
     {
         // Arrange
-        var record1 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-2), 10, null);
-        var record2 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-1), 15, null);
-        var record3 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 12, null);
+        var record1 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-2), 10, null).Value;
+        var record2 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-1), 15, null).Value;
+        var record3 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 12, null).Value;
 
         _dbContext.DailyRecords.AddRange(record1, record2, record3);
         await _dbContext.SaveChangesAsync();
@@ -437,9 +440,9 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task GetTotalEggCountByFlockIdAsync_ReturnsSumOfEggCounts()
     {
         // Arrange
-        var record1 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-2), 10, null);
-        var record2 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-1), 15, null);
-        var record3 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 12, null);
+        var record1 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-2), 10, null).Value;
+        var record2 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow.AddDays(-1), 15, null).Value;
+        var record3 = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 12, null).Value;
 
         _dbContext.DailyRecords.AddRange(record1, record2, record3);
         await _dbContext.SaveChangesAsync();
@@ -470,11 +473,11 @@ public class DailyRecordRepositoryTests : IDisposable
     {
         // Arrange - Multiple records on the same date should be allowed (issue #107)
         var recordDate = DateTime.UtcNow.Date;
-        var record1 = DailyRecord.Create(_tenantId, _flockId, recordDate, 10, null);
+        var record1 = DailyRecord.Create(_tenantId, _flockId, recordDate, 10, null).Value;
         _dbContext.DailyRecords.Add(record1);
         await _dbContext.SaveChangesAsync();
 
-        var record2 = DailyRecord.Create(_tenantId, _flockId, recordDate, 15, null);
+        var record2 = DailyRecord.Create(_tenantId, _flockId, recordDate, 15, null).Value;
         _dbContext.DailyRecords.Add(record2);
 
         // Act & Assert - Should succeed without throwing
@@ -492,7 +495,7 @@ public class DailyRecordRepositoryTests : IDisposable
     {
         // Arrange
         var nonExistentFlockId = Guid.NewGuid();
-        var record = DailyRecord.Create(_tenantId, nonExistentFlockId, DateTime.UtcNow, 10, null);
+        var record = DailyRecord.Create(_tenantId, nonExistentFlockId, DateTime.UtcNow, 10, null).Value;
         _dbContext.DailyRecords.Add(record);
 
         // Act & Assert
@@ -504,7 +507,7 @@ public class DailyRecordRepositoryTests : IDisposable
     public async Task DailyRecord_CascadeDelete_DeletedWhenFlockIsDeleted()
     {
         // Arrange
-        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null);
+        var record = DailyRecord.Create(_tenantId, _flockId, DateTime.UtcNow, 10, null).Value;
         _dbContext.DailyRecords.Add(record);
         await _dbContext.SaveChangesAsync();
 

@@ -20,9 +20,11 @@ public class CoopTests
     public void Create_WithValidData_ShouldSucceed()
     {
         // Arrange & Act
-        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation);
+        var result = Coop.Create(_validTenantId, ValidName, ValidLocation);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var coop = result.Value;
         coop.Should().NotBeNull();
         coop.Id.Should().NotBeEmpty();
         coop.TenantId.Should().Be(_validTenantId);
@@ -38,9 +40,11 @@ public class CoopTests
     public void Create_WithValidDataWithoutLocation_ShouldSucceed()
     {
         // Arrange & Act
-        var coop = Coop.Create(_validTenantId, ValidName);
+        var result = Coop.Create(_validTenantId, ValidName);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var coop = result.Value;
         coop.Should().NotBeNull();
         coop.Name.Should().Be(ValidName);
         coop.Location.Should().BeNull();
@@ -48,48 +52,45 @@ public class CoopTests
     }
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowDomainValidationException()
+    public void Create_WithEmptyTenantId_ShouldReturnFailure()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
 
         // Act
-        var act = () => Coop.Create(emptyTenantId, ValidName);
+        var result = Coop.Create(emptyTenantId, ValidName);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Tenant ID cannot be empty.*")
-            .And.ParamName.Should().Be("tenantId");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Tenant ID cannot be empty");
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceName_ShouldThrowDomainValidationException(string? invalidName)
+    public void Create_WithNullOrWhitespaceName_ShouldReturnFailure(string? invalidName)
     {
         // Arrange & Act
-        var act = () => Coop.Create(_validTenantId, invalidName!);
+        var result = Coop.Create(_validTenantId, invalidName!);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Coop name cannot be empty.*")
-            .And.ParamName.Should().Be("name");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Coop name cannot be empty");
     }
 
     [Fact]
-    public void Create_WithNameExceeding100Characters_ShouldThrowDomainValidationException()
+    public void Create_WithNameExceeding100Characters_ShouldReturnFailure()
     {
         // Arrange
         var longName = new string('A', 101);
 
         // Act
-        var act = () => Coop.Create(_validTenantId, longName);
+        var result = Coop.Create(_validTenantId, longName);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Coop name cannot exceed 100 characters.*")
-            .And.ParamName.Should().Be("name");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Coop name cannot exceed 100 characters");
     }
 
     [Fact]
@@ -99,27 +100,28 @@ public class CoopTests
         var name = new string('A', 100);
 
         // Act
-        var coop = Coop.Create(_validTenantId, name);
+        var result = Coop.Create(_validTenantId, name);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var coop = result.Value;
         coop.Should().NotBeNull();
         coop.Name.Should().Be(name);
         coop.Name.Length.Should().Be(100);
     }
 
     [Fact]
-    public void Create_WithLocationExceeding200Characters_ShouldThrowDomainValidationException()
+    public void Create_WithLocationExceeding200Characters_ShouldReturnFailure()
     {
         // Arrange
         var longLocation = new string('B', 201);
 
         // Act
-        var act = () => Coop.Create(_validTenantId, ValidName, longLocation);
+        var result = Coop.Create(_validTenantId, ValidName, longLocation);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Location cannot exceed 200 characters.*")
-            .And.ParamName.Should().Be("location");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Location cannot exceed 200 characters");
     }
 
     [Fact]
@@ -129,9 +131,11 @@ public class CoopTests
         var location = new string('B', 200);
 
         // Act
-        var coop = Coop.Create(_validTenantId, ValidName, location);
+        var result = Coop.Create(_validTenantId, ValidName, location);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var coop = result.Value;
         coop.Should().NotBeNull();
         coop.Location.Should().Be(location);
         coop.Location!.Length.Should().Be(200);
@@ -141,8 +145,8 @@ public class CoopTests
     public void Create_ShouldGenerateUniqueIds()
     {
         // Arrange & Act
-        var coop1 = Coop.Create(_validTenantId, "Coop 1");
-        var coop2 = Coop.Create(_validTenantId, "Coop 2");
+        var coop1 = Coop.Create(_validTenantId, "Coop 1").Value;
+        var coop2 = Coop.Create(_validTenantId, "Coop 2").Value;
 
         // Assert
         coop1.Id.Should().NotBe(coop2.Id);
@@ -156,7 +160,7 @@ public class CoopTests
     public void Update_WithValidData_ShouldUpdateNameAndLocation()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation);
+        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation).Value;
         var originalCreatedAt = coop.CreatedAt;
         var originalUpdatedAt = coop.UpdatedAt;
         Thread.Sleep(10); // Ensure time difference
@@ -165,9 +169,10 @@ public class CoopTests
         var newLocation = "South Field";
 
         // Act
-        coop.Update(newName, newLocation);
+        var updateResult = coop.Update(newName, newLocation);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         coop.Name.Should().Be(newName);
         coop.Location.Should().Be(newLocation);
         coop.CreatedAt.Should().Be(originalCreatedAt);
@@ -178,13 +183,14 @@ public class CoopTests
     public void Update_WithNullLocation_ShouldClearLocation()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation);
+        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation).Value;
         var newName = "Updated Coop";
 
         // Act
-        coop.Update(newName, null);
+        var updateResult = coop.Update(newName, null);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         coop.Name.Should().Be(newName);
         coop.Location.Should().BeNull();
     }
@@ -193,66 +199,64 @@ public class CoopTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Update_WithNullOrWhitespaceName_ShouldThrowDomainValidationException(string? invalidName)
+    public void Update_WithNullOrWhitespaceName_ShouldReturnFailure(string? invalidName)
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName);
+        var coop = Coop.Create(_validTenantId, ValidName).Value;
 
         // Act
-        var act = () => coop.Update(invalidName!);
+        var updateResult = coop.Update(invalidName!);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Coop name cannot be empty.*")
-            .And.ParamName.Should().Be("name");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Coop name cannot be empty");
     }
 
     [Fact]
-    public void Update_WithNameExceeding100Characters_ShouldThrowDomainValidationException()
+    public void Update_WithNameExceeding100Characters_ShouldReturnFailure()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName);
+        var coop = Coop.Create(_validTenantId, ValidName).Value;
         var longName = new string('C', 101);
 
         // Act
-        var act = () => coop.Update(longName);
+        var updateResult = coop.Update(longName);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Coop name cannot exceed 100 characters.*")
-            .And.ParamName.Should().Be("name");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Coop name cannot exceed 100 characters");
     }
 
     [Fact]
-    public void Update_WithLocationExceeding200Characters_ShouldThrowDomainValidationException()
+    public void Update_WithLocationExceeding200Characters_ShouldReturnFailure()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName);
+        var coop = Coop.Create(_validTenantId, ValidName).Value;
         var longLocation = new string('D', 201);
 
         // Act
-        var act = () => coop.Update(ValidName, longLocation);
+        var updateResult = coop.Update(ValidName, longLocation);
 
         // Assert
-        act.Should().Throw<DomainValidationException>()
-            .WithMessage("Location cannot exceed 200 characters.*")
-            .And.ParamName.Should().Be("location");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Location cannot exceed 200 characters");
     }
 
     [Fact]
     public void Update_ShouldNotModifyOtherProperties()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation);
+        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation).Value;
         var originalId = coop.Id;
         var originalTenantId = coop.TenantId;
         var originalIsActive = coop.IsActive;
         var originalCreatedAt = coop.CreatedAt;
 
         // Act
-        coop.Update("New Name", "New Location");
+        var updateResult = coop.Update("New Name", "New Location");
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         coop.Id.Should().Be(originalId);
         coop.TenantId.Should().Be(originalTenantId);
         coop.IsActive.Should().Be(originalIsActive);
@@ -267,7 +271,7 @@ public class CoopTests
     public void Deactivate_ShouldSetIsActiveToFalse()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName);
+        var coop = Coop.Create(_validTenantId, ValidName).Value;
         var originalUpdatedAt = coop.UpdatedAt;
         Thread.Sleep(10); // Ensure time difference
 
@@ -283,7 +287,7 @@ public class CoopTests
     public void Deactivate_WhenAlreadyDeactivated_ShouldRemainDeactivated()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName);
+        var coop = Coop.Create(_validTenantId, ValidName).Value;
         coop.Deactivate();
         Thread.Sleep(10);
         var previousUpdatedAt = coop.UpdatedAt;
@@ -300,7 +304,7 @@ public class CoopTests
     public void Deactivate_ShouldNotModifyOtherProperties()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation);
+        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation).Value;
         var originalId = coop.Id;
         var originalTenantId = coop.TenantId;
         var originalName = coop.Name;
@@ -326,7 +330,7 @@ public class CoopTests
     public void Activate_ShouldSetIsActiveToTrue()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName);
+        var coop = Coop.Create(_validTenantId, ValidName).Value;
         coop.Deactivate();
         Thread.Sleep(10); // Ensure time difference
         var originalUpdatedAt = coop.UpdatedAt;
@@ -343,7 +347,7 @@ public class CoopTests
     public void Activate_WhenAlreadyActive_ShouldRemainActive()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName);
+        var coop = Coop.Create(_validTenantId, ValidName).Value;
         Thread.Sleep(10);
         var previousUpdatedAt = coop.UpdatedAt;
 
@@ -359,7 +363,7 @@ public class CoopTests
     public void Activate_ShouldNotModifyOtherProperties()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation);
+        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation).Value;
         coop.Deactivate();
         var originalId = coop.Id;
         var originalTenantId = coop.TenantId;
@@ -386,13 +390,14 @@ public class CoopTests
     public void Lifecycle_CreateUpdateDeactivateActivate_ShouldMaintainConsistency()
     {
         // Arrange & Act - Create
-        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation);
+        var coop = Coop.Create(_validTenantId, ValidName, ValidLocation).Value;
         var originalId = coop.Id;
         var originalTenantId = coop.TenantId;
 
         // Act - Update
         Thread.Sleep(10);
-        coop.Update("Updated Name", "Updated Location");
+        var updateResult = coop.Update("Updated Name", "Updated Location");
+        updateResult.IsSuccess.Should().BeTrue();
 
         // Act - Deactivate
         Thread.Sleep(10);
@@ -422,9 +427,11 @@ public class CoopTests
         var minimalName = "A"; // Single character name
 
         // Act
-        var coop = Coop.Create(_validTenantId, minimalName);
+        var result = Coop.Create(_validTenantId, minimalName);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var coop = result.Value;
         coop.Should().NotBeNull();
         coop.Name.Should().Be(minimalName);
         coop.Location.Should().BeNull();
@@ -434,13 +441,14 @@ public class CoopTests
     public void Update_WithMinimalValidData_ShouldSucceed()
     {
         // Arrange
-        var coop = Coop.Create(_validTenantId, ValidName);
+        var coop = Coop.Create(_validTenantId, ValidName).Value;
         var minimalName = "B";
 
         // Act
-        coop.Update(minimalName);
+        var updateResult = coop.Update(minimalName);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         coop.Name.Should().Be(minimalName);
     }
 
@@ -451,10 +459,11 @@ public class CoopTests
         var specialName = "Coop #1 - Main (Active)";
 
         // Act
-        var coop = Coop.Create(_validTenantId, specialName);
+        var result = Coop.Create(_validTenantId, specialName);
 
         // Assert
-        coop.Name.Should().Be(specialName);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Name.Should().Be(specialName);
     }
 
     [Fact]
@@ -464,10 +473,11 @@ public class CoopTests
         var unicodeName = "Kurník 🐔 Hlavní";
 
         // Act
-        var coop = Coop.Create(_validTenantId, unicodeName);
+        var result = Coop.Create(_validTenantId, unicodeName);
 
         // Assert
-        coop.Name.Should().Be(unicodeName);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Name.Should().Be(unicodeName);
     }
 
     #endregion

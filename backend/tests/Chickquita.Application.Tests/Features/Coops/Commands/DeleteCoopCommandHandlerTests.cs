@@ -47,7 +47,7 @@ public class DeleteCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location");
+        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location").Value;
 
         var command = new DeleteCoopCommand { Id = coopId };
 
@@ -78,7 +78,7 @@ public class DeleteCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop to Delete");
+        var existingCoop = Coop.Create(tenantId, "Coop to Delete").Value;
 
         var command = new DeleteCoopCommand { Id = coopId };
 
@@ -109,7 +109,7 @@ public class DeleteCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop with Flocks", "Location");
+        var existingCoop = Coop.Create(tenantId, "Coop with Flocks", "Location").Value;
 
         var command = new DeleteCoopCommand { Id = coopId };
 
@@ -176,7 +176,7 @@ public class DeleteCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location");
+        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location").Value;
 
         var command = new DeleteCoopCommand { Id = coopId };
 
@@ -205,7 +205,7 @@ public class DeleteCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location");
+        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location").Value;
 
         var command = new DeleteCoopCommand { Id = coopId };
 
@@ -241,7 +241,7 @@ public class DeleteCoopCommandHandlerTests
         // If the repository returns a coop, the handler assumes it belongs to the current tenant
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location");
+        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location").Value;
 
         var command = new DeleteCoopCommand { Id = coopId };
 
@@ -305,7 +305,7 @@ public class DeleteCoopCommandHandlerTests
         // This test documents the actual behavior: hard delete from database
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location");
+        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location").Value;
 
         var command = new DeleteCoopCommand { Id = coopId };
 
@@ -343,7 +343,7 @@ public class DeleteCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location");
+        var existingCoop = Coop.Create(tenantId, "Coop to Delete", "Location").Value;
 
         var command = new DeleteCoopCommand { Id = coopId };
 

@@ -90,8 +90,8 @@ public class FlockHistory
     /// <param name="chicks">Number of chicks</param>
     /// <param name="reason">Reason for the change</param>
     /// <param name="notes">Optional notes</param>
-    /// <returns>A new FlockHistory instance</returns>
-    public static FlockHistory Create(
+    /// <returns>A Result containing the new FlockHistory instance, or a validation error</returns>
+    public static Result<FlockHistory> Create(
         Guid tenantId,
         Guid flockId,
         DateTime changeDate,
@@ -102,44 +102,28 @@ public class FlockHistory
         string? notes = null)
     {
         if (tenantId == Guid.Empty)
-        {
-            throw new DomainValidationException("Tenant ID cannot be empty.", "tenantId");
-        }
+            return Error.Validation("Tenant ID cannot be empty.");
 
         if (flockId == Guid.Empty)
-        {
-            throw new DomainValidationException("Flock ID cannot be empty.", "flockId");
-        }
+            return Error.Validation("Flock ID cannot be empty.");
 
         if (hens < 0)
-        {
-            throw new DomainValidationException("Hens count cannot be negative.", "hens");
-        }
+            return Error.Validation("Hens count cannot be negative.");
 
         if (roosters < 0)
-        {
-            throw new DomainValidationException("Roosters count cannot be negative.", "roosters");
-        }
+            return Error.Validation("Roosters count cannot be negative.");
 
         if (chicks < 0)
-        {
-            throw new DomainValidationException("Chicks count cannot be negative.", "chicks");
-        }
+            return Error.Validation("Chicks count cannot be negative.");
 
         if (string.IsNullOrWhiteSpace(reason))
-        {
-            throw new DomainValidationException("Reason cannot be empty.", "reason");
-        }
+            return Error.Validation("Reason cannot be empty.");
 
         if (reason.Length > 50)
-        {
-            throw new DomainValidationException("Reason cannot exceed 50 characters.", "reason");
-        }
+            return Error.Validation("Reason cannot exceed 50 characters.");
 
         if (notes?.Length > 500)
-        {
-            throw new DomainValidationException("Notes cannot exceed 500 characters.", "notes");
-        }
+            return Error.Validation("Notes cannot exceed 500 characters.");
 
         var now = DateTime.UtcNow;
 
@@ -164,14 +148,15 @@ public class FlockHistory
     /// This is the only field that can be modified after creation.
     /// </summary>
     /// <param name="notes">The new notes</param>
-    public void UpdateNotes(string? notes)
+    /// <returns>A Result indicating success or a validation error</returns>
+    public Result UpdateNotes(string? notes)
     {
         if (notes?.Length > 500)
-        {
-            throw new DomainValidationException("Notes cannot exceed 500 characters.", "notes");
-        }
+            return Error.Validation("Notes cannot exceed 500 characters.");
 
         Notes = notes;
         UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
     }
 }

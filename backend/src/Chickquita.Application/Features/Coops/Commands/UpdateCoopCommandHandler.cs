@@ -25,6 +25,7 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public UpdateCoopCommandHandler(
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
@@ -82,7 +83,9 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
             }
 
             // Update the coop entity
-            coop.Update(request.Name, request.Location);
+            var updateResult = coop.Update(request.Name, request.Location);
+            if (updateResult.IsFailure)
+                return Result<CoopDto>.Failure(updateResult.Error);
 
             // Save to database
             await _coopRepository.UpdateAsync(coop);
@@ -99,15 +102,6 @@ public sealed class UpdateCoopCommandHandler : IRequestHandler<UpdateCoopCommand
             coopDto.FlocksCount = await _coopRepository.GetFlocksCountAsync(coopDto.Id);
 
             return Result<CoopDto>.Success(coopDto);
-        }
-        catch (DomainValidationException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while updating coop: {Message}",
-                ex.Message);
-
-            return Result<CoopDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

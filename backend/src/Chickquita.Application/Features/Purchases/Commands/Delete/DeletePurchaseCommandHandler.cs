@@ -21,6 +21,7 @@ public sealed class DeletePurchaseCommandHandler : IRequestHandler<DeletePurchas
     /// <param name="purchaseRepository">The purchase repository.</param>
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public DeletePurchaseCommandHandler(
         IPurchaseRepository purchaseRepository,
         ICurrentUserService currentUserService,

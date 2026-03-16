@@ -80,7 +80,7 @@ public class CreateFlockCommandHandlerTests
             command.InitialHens,
             command.InitialRoosters,
             command.InitialChicks,
-            command.Notes);
+            command.Notes).Value;
 
         _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
             .ReturnsAsync(createdFlock);
@@ -150,7 +150,7 @@ public class CreateFlockCommandHandlerTests
             command.HatchDate,
             command.InitialHens,
             command.InitialRoosters,
-            command.InitialChicks);
+            command.InitialChicks).Value;
 
         _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
             .ReturnsAsync(createdFlock);
@@ -207,7 +207,7 @@ public class CreateFlockCommandHandlerTests
             command.InitialHens,
             command.InitialRoosters,
             command.InitialChicks,
-            command.Notes);
+            command.Notes).Value;
 
         _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
             .ReturnsAsync(createdFlock);
@@ -604,7 +604,7 @@ public class CreateFlockCommandHandlerTests
             command.HatchDate,
             command.InitialHens,
             command.InitialRoosters,
-            command.InitialChicks);
+            command.InitialChicks).Value;
 
         _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
             .ReturnsAsync(createdFlock);

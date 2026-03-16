@@ -62,7 +62,7 @@ public class CreateCoopCommandHandlerTests
         _mockCoopRepository.Setup(x => x.ExistsByNameAsync(command.Name))
             .ReturnsAsync(false);
 
-        var createdCoop = Coop.Create(tenantId, command.Name, command.Location);
+        var createdCoop = Coop.Create(tenantId, command.Name, command.Location).Value;
         _mockCoopRepository.Setup(x => x.AddAsync(It.IsAny<Coop>()))
             .ReturnsAsync(createdCoop);
 
@@ -112,7 +112,7 @@ public class CreateCoopCommandHandlerTests
         _mockCoopRepository.Setup(x => x.ExistsByNameAsync(command.Name))
             .ReturnsAsync(false);
 
-        var createdCoop = Coop.Create(tenantId, command.Name, command.Location);
+        var createdCoop = Coop.Create(tenantId, command.Name, command.Location).Value;
         _mockCoopRepository.Setup(x => x.AddAsync(It.IsAny<Coop>()))
             .ReturnsAsync(createdCoop);
 

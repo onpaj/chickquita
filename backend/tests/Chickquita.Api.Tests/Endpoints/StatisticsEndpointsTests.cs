@@ -475,7 +475,7 @@ public class StatisticsEndpointsTests : IClassFixture<WebApplicationFactory<Prog
     private static async Task SeedTenant(IServiceScope scope, Guid tenantId, string clerkUserId)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com");
+        var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, tenantId);
         dbContext.Tenants.Add(tenant);
         await dbContext.SaveChangesAsync();
@@ -484,7 +484,7 @@ public class StatisticsEndpointsTests : IClassFixture<WebApplicationFactory<Prog
     private static async Task<Guid> SeedCoop(IServiceScope scope, Guid tenantId, string name, string location)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var coop = Coop.Create(tenantId, name, location);
+        var coop = Coop.Create(tenantId, name, location).Value;
         dbContext.Coops.Add(coop);
         await dbContext.SaveChangesAsync();
         return coop.Id;
@@ -494,7 +494,7 @@ public class StatisticsEndpointsTests : IClassFixture<WebApplicationFactory<Prog
         DateTime hatchDate, int hens, int roosters, int chicks)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var flock = Flock.Create(tenantId, coopId, identifier, hatchDate, hens, roosters, chicks, "Test notes");
+        var flock = Flock.Create(tenantId, coopId, identifier, hatchDate, hens, roosters, chicks, "Test notes").Value;
         dbContext.Flocks.Add(flock);
         await dbContext.SaveChangesAsync();
         return flock.Id;
