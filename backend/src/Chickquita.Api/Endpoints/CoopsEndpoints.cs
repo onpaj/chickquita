@@ -17,20 +17,35 @@ public static class CoopsEndpoints
 
         group.MapGet("", GetCoops)
             .WithName("GetCoops")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get all coops";
+                op.Description = "Retrieves all coops for the current tenant. Optionally include archived coops.";
+                return op;
+            })
             .Produces<List<CoopDto>>()
             .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapGet("/{id:guid}", GetCoopById)
             .WithName("GetCoopById")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get coop by ID";
+                op.Description = "Retrieves a specific coop by its ID.";
+                return op;
+            })
             .Produces<CoopDto>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("", CreateCoop)
             .WithName("CreateCoop")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Create a new coop";
+                op.Description = "Creates a new coop for the current tenant.";
+                return op;
+            })
             .Produces<CoopDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -38,7 +53,12 @@ public static class CoopsEndpoints
 
         group.MapPut("/{id:guid}", UpdateCoop)
             .WithName("UpdateCoop")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Update a coop";
+                op.Description = "Updates the name or description of an existing coop.";
+                return op;
+            })
             .Produces<CoopDto>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -47,7 +67,12 @@ public static class CoopsEndpoints
 
         group.MapDelete("/{id:guid}", DeleteCoop)
             .WithName("DeleteCoop")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Delete a coop";
+                op.Description = "Permanently deletes the specified coop. Fails if the coop has active flocks.";
+                return op;
+            })
             .Produces<bool>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -55,7 +80,12 @@ public static class CoopsEndpoints
 
         group.MapPatch("/{id:guid}/archive", ArchiveCoop)
             .WithName("ArchiveCoop")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Archive a coop";
+                op.Description = "Archives the specified coop, marking it as inactive.";
+                return op;
+            })
             .Produces<bool>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
