@@ -149,7 +149,6 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
