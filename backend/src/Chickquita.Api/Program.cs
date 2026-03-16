@@ -89,7 +89,8 @@ builder.Services.AddHealthChecks()
         tags: ["ready"]);
 
 // Configure CORS for all environments — fail fast if required config is absent
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
 if (allowedOrigins == null || allowedOrigins.Length == 0)
     throw new InvalidOperationException(
         "Cors:AllowedOrigins is required but not configured. " +

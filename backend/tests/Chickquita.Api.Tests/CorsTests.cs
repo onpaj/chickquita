@@ -80,7 +80,7 @@ public class CorsTests
         // Arrange — override config to remove Cors:AllowedOrigins entirely
         var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
-            builder.UseSetting("Cors:AllowedOrigins", "");
+            builder.UseSetting("Cors:AllowedOrigins:0", "");
 
             builder.ConfigureServices(services =>
             {
