@@ -79,9 +79,10 @@ public class StatisticsRepository : IStatisticsRepository
         var avgEggsPerDay = thisWeekEggs / 7m;
 
         // All-time cost per egg
-        var totalCosts = await _context.Purchases
+        // Cast to double for SQLite compatibility (SQLite doesn't support decimal Sum)
+        var totalCosts = (decimal)(await _context.Purchases
             .Where(p => p.TenantId == tenantId)
-            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+            .SumAsync(p => (double?)p.Amount) ?? 0.0);
 
         decimal? costPerEgg = totalEggs > 0 ? totalCosts / totalEggs : null;
 
