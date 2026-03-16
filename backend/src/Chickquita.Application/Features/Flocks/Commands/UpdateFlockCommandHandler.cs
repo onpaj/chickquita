@@ -86,7 +86,9 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
             }
 
             // Update basic flock information
-            flock.Update(request.Identifier, request.HatchDate);
+            var updateResult = flock.Update(request.Identifier, request.HatchDate);
+            if (updateResult.IsFailure)
+                return Result<FlockDto>.Failure(updateResult.Error);
 
             // Save to database
             var updatedFlock = await _flockRepository.UpdateAsync(flock);
@@ -100,15 +102,6 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
             var flockDto = _mapper.Map<FlockDto>(updatedFlock);
 
             return Result<FlockDto>.Success(flockDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while updating flock: {Message}",
-                ex.Message);
-
-            return Result<FlockDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

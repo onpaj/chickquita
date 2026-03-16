@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -88,8 +90,8 @@ public class FlockHistory
     /// <param name="chicks">Number of chicks</param>
     /// <param name="reason">Reason for the change</param>
     /// <param name="notes">Optional notes</param>
-    /// <returns>A new FlockHistory instance</returns>
-    public static FlockHistory Create(
+    /// <returns>A Result containing the new FlockHistory instance, or a validation error</returns>
+    public static Result<FlockHistory> Create(
         Guid tenantId,
         Guid flockId,
         DateTime changeDate,
@@ -100,44 +102,28 @@ public class FlockHistory
         string? notes = null)
     {
         if (tenantId == Guid.Empty)
-        {
-            throw new ArgumentException("Tenant ID cannot be empty.", nameof(tenantId));
-        }
+            return Error.Validation("Tenant ID cannot be empty.");
 
         if (flockId == Guid.Empty)
-        {
-            throw new ArgumentException("Flock ID cannot be empty.", nameof(flockId));
-        }
+            return Error.Validation("Flock ID cannot be empty.");
 
         if (hens < 0)
-        {
-            throw new ArgumentException("Hens count cannot be negative.", nameof(hens));
-        }
+            return Error.Validation("Hens count cannot be negative.");
 
         if (roosters < 0)
-        {
-            throw new ArgumentException("Roosters count cannot be negative.", nameof(roosters));
-        }
+            return Error.Validation("Roosters count cannot be negative.");
 
         if (chicks < 0)
-        {
-            throw new ArgumentException("Chicks count cannot be negative.", nameof(chicks));
-        }
+            return Error.Validation("Chicks count cannot be negative.");
 
         if (string.IsNullOrWhiteSpace(reason))
-        {
-            throw new ArgumentException("Reason cannot be empty.", nameof(reason));
-        }
+            return Error.Validation("Reason cannot be empty.");
 
         if (reason.Length > 50)
-        {
-            throw new ArgumentException("Reason cannot exceed 50 characters.", nameof(reason));
-        }
+            return Error.Validation("Reason cannot exceed 50 characters.");
 
         if (notes?.Length > 500)
-        {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
-        }
+            return Error.Validation("Notes cannot exceed 500 characters.");
 
         var now = DateTime.UtcNow;
 
@@ -162,14 +148,15 @@ public class FlockHistory
     /// This is the only field that can be modified after creation.
     /// </summary>
     /// <param name="notes">The new notes</param>
-    public void UpdateNotes(string? notes)
+    /// <returns>A Result indicating success or a validation error</returns>
+    public Result UpdateNotes(string? notes)
     {
         if (notes?.Length > 500)
-        {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
-        }
+            return Error.Validation("Notes cannot exceed 500 characters.");
 
         Notes = notes;
         UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
     }
 }

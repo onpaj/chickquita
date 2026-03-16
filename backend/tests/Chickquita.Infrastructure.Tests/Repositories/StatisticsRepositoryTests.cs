@@ -91,16 +91,16 @@ public class StatisticsRepositoryTests : IDisposable
 
         _repository = new StatisticsRepository(_dbContext, mockCurrentUserService.Object);
 
-        var tenant = Tenant.Create("clerk_stats_test", "stats@example.com");
+        var tenant = Tenant.Create("clerk_stats_test", "stats@example.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         _dbContext.Tenants.Add(tenant);
 
-        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location");
+        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location").Value;
         _dbContext.Coops.Add(coop);
         _dbContext.SaveChanges();
         _coopId = coop.Id;
 
-        var flock = Flock.Create(_tenantId, _coopId, "FLOCK-A", DateTime.UtcNow.AddMonths(-3), 20, 2, 5, null);
+        var flock = Flock.Create(_tenantId, _coopId, "FLOCK-A", DateTime.UtcNow.AddMonths(-3), 20, 2, 5, null).Value;
         _dbContext.Flocks.Add(flock);
         _dbContext.SaveChanges();
         _flockId = flock.Id;
@@ -129,7 +129,7 @@ public class StatisticsRepositoryTests : IDisposable
     public async Task GetDashboardStatsAsync_TodayRecord_CountsInTodayAndWeek()
     {
         var today = DateTime.UtcNow.Date;
-        var record = DailyRecord.Create(_tenantId, _flockId, today, 15, null);
+        var record = DailyRecord.Create(_tenantId, _flockId, today, 15, null).Value;
         _dbContext.DailyRecords.Add(record);
         await _dbContext.SaveChangesAsync();
 
@@ -143,8 +143,8 @@ public class StatisticsRepositoryTests : IDisposable
     public async Task GetDashboardStatsAsync_OldRecord_NotCountedInTodayOrWeek()
     {
         var today = DateTime.UtcNow.Date;
-        var old = DailyRecord.Create(_tenantId, _flockId, today.AddDays(-10), 50, null);
-        var todayRec = DailyRecord.Create(_tenantId, _flockId, today, 8, null);
+        var old = DailyRecord.Create(_tenantId, _flockId, today.AddDays(-10), 50, null).Value;
+        var todayRec = DailyRecord.Create(_tenantId, _flockId, today, 8, null).Value;
         _dbContext.DailyRecords.AddRange(old, todayRec);
         await _dbContext.SaveChangesAsync();
 
@@ -159,7 +159,7 @@ public class StatisticsRepositoryTests : IDisposable
     {
         var today = DateTime.UtcNow.Date;
         var yesterday = today.AddDays(-1);
-        var rec = DailyRecord.Create(_tenantId, _flockId, yesterday, 12, null);
+        var rec = DailyRecord.Create(_tenantId, _flockId, yesterday, 12, null).Value;
         _dbContext.DailyRecords.Add(rec);
         await _dbContext.SaveChangesAsync();
 
@@ -174,7 +174,7 @@ public class StatisticsRepositoryTests : IDisposable
     {
         var today = DateTime.UtcNow.Date;
         var records = Enumerable.Range(0, 5).Select(i =>
-            DailyRecord.Create(_tenantId, _flockId, today.AddDays(-i), 10, null)
+            DailyRecord.Create(_tenantId, _flockId, today.AddDays(-i), 10, null).Value
         ).ToList();
         _dbContext.DailyRecords.AddRange(records);
         await _dbContext.SaveChangesAsync();
@@ -194,12 +194,12 @@ public class StatisticsRepositoryTests : IDisposable
     public async Task GetDashboardStatsAsync_WithCostsAndEggs_ComputesCostPerEgg()
     {
         var today = DateTime.UtcNow.Date;
-        var record = DailyRecord.Create(_tenantId, _flockId, today, 100, null);
+        var record = DailyRecord.Create(_tenantId, _flockId, today, 100, null).Value;
         _dbContext.DailyRecords.Add(record);
 
         var purchase = Purchase.Create(
             _tenantId, "Feed", PurchaseType.Feed, 50m, 10m, QuantityUnit.Kg,
-            today, _coopId);
+            today, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -213,7 +213,7 @@ public class StatisticsRepositoryTests : IDisposable
     {
         var purchase = Purchase.Create(
             _tenantId, "Feed", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -242,7 +242,7 @@ public class StatisticsRepositoryTests : IDisposable
     [Fact]
     public async Task GetDashboardStatsAsync_InactiveFlock_NotCounted()
     {
-        var inactiveFlock = Flock.Create(_tenantId, _coopId, "INACTIVE", DateTime.UtcNow.AddMonths(-6), 15, 1, 0, null);
+        var inactiveFlock = Flock.Create(_tenantId, _coopId, "INACTIVE", DateTime.UtcNow.AddMonths(-6), 15, 1, 0, null).Value;
         inactiveFlock.Archive();
         _dbContext.Flocks.Add(inactiveFlock);
         await _dbContext.SaveChangesAsync();
@@ -263,19 +263,19 @@ public class StatisticsRepositoryTests : IDisposable
         var today = DateTime.UtcNow.Date;
 
         // Seed other tenant's data directly (bypassing RLS filter)
-        var otherTenant = Tenant.Create("other_user", "other@example.com");
+        var otherTenant = Tenant.Create("other_user", "other@example.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(otherTenant, otherTenantId);
         _dbContext.Tenants.Add(otherTenant);
 
-        var otherCoop = Coop.Create(otherTenantId, "Other Coop", null);
+        var otherCoop = Coop.Create(otherTenantId, "Other Coop", null).Value;
         _dbContext.Coops.Add(otherCoop);
         await _dbContext.SaveChangesAsync();
 
-        var otherFlock = Flock.Create(otherTenantId, otherCoop.Id, "OTHER-FLOCK", DateTime.UtcNow.AddMonths(-1), 50, 5, 10, null);
+        var otherFlock = Flock.Create(otherTenantId, otherCoop.Id, "OTHER-FLOCK", DateTime.UtcNow.AddMonths(-1), 50, 5, 10, null).Value;
         _dbContext.Flocks.Add(otherFlock);
         await _dbContext.SaveChangesAsync();
 
-        var otherRecord = DailyRecord.Create(otherTenantId, otherFlock.Id, today, 200, null);
+        var otherRecord = DailyRecord.Create(otherTenantId, otherFlock.Id, today, 200, null).Value;
         _dbContext.DailyRecords.Add(otherRecord);
         await _dbContext.SaveChangesAsync();
 

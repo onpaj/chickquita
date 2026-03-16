@@ -40,11 +40,11 @@ public class FlockRepositoryTests : IDisposable
         using var setupContext = CreateContext();
         setupContext.Database.EnsureCreated();
 
-        var tenant = Tenant.Create("clerk_user_test", "test@example.com");
+        var tenant = Tenant.Create("clerk_user_test", "test@example.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         setupContext.Tenants.Add(tenant);
 
-        var coop = Coop.Create(_tenantId, "Test Coop", null);
+        var coop = Coop.Create(_tenantId, "Test Coop", null).Value;
         setupContext.Coops.Add(coop);
         setupContext.SaveChanges();
         _coopId = coop.Id;
@@ -71,7 +71,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "Original", DateTime.UtcNow.AddDays(-30), 10, 2, 0);
+            var flock = Flock.Create(_tenantId, _coopId, "Original", DateTime.UtcNow.AddDays(-30), 10, 2, 0).Value;
             await repo.AddAsync(flock);
             await ctx.SaveChangesAsync();
             flockId = flock.Id;
@@ -110,7 +110,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "Test Flock", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
+            var flock = Flock.Create(_tenantId, _coopId, "Test Flock", DateTime.UtcNow.AddDays(-60), 10, 2, 5).Value;
             await repo.AddAsync(flock);
             await ctx.SaveChangesAsync();
             flockId = flock.Id;
@@ -155,13 +155,13 @@ public class FlockRepositoryTests : IDisposable
         {
             var repo = new FlockRepository(ctx);
 
-            var flock1 = Flock.Create(_tenantId, _coopId, "Alpha", DateTime.UtcNow.AddDays(-90), 5, 1, 0);
+            var flock1 = Flock.Create(_tenantId, _coopId, "Alpha", DateTime.UtcNow.AddDays(-90), 5, 1, 0).Value;
             typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock1, baseTime.AddDays(-2));
 
-            var flock2 = Flock.Create(_tenantId, _coopId, "Beta", DateTime.UtcNow.AddDays(-60), 6, 1, 0);
+            var flock2 = Flock.Create(_tenantId, _coopId, "Beta", DateTime.UtcNow.AddDays(-60), 6, 1, 0).Value;
             typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock2, baseTime.AddDays(-1));
 
-            var flock3 = Flock.Create(_tenantId, _coopId, "Gamma", DateTime.UtcNow.AddDays(-30), 7, 1, 0);
+            var flock3 = Flock.Create(_tenantId, _coopId, "Gamma", DateTime.UtcNow.AddDays(-30), 7, 1, 0).Value;
             typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock3, baseTime);
 
             ctx.Flocks.AddRange(flock1, flock2, flock3);
@@ -188,10 +188,10 @@ public class FlockRepositoryTests : IDisposable
 
         using (var ctx = CreateContext())
         {
-            var flock1 = Flock.Create(_tenantId, _coopId, "Older", DateTime.UtcNow.AddDays(-60), 5, 1, 0);
+            var flock1 = Flock.Create(_tenantId, _coopId, "Older", DateTime.UtcNow.AddDays(-60), 5, 1, 0).Value;
             typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock1, baseTime.AddDays(-1));
 
-            var flock2 = Flock.Create(_tenantId, _coopId, "Newer", DateTime.UtcNow.AddDays(-30), 6, 1, 0);
+            var flock2 = Flock.Create(_tenantId, _coopId, "Newer", DateTime.UtcNow.AddDays(-30), 6, 1, 0).Value;
             typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock2, baseTime);
 
             ctx.Flocks.AddRange(flock1, flock2);
@@ -217,7 +217,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "Detached Flock", DateTime.UtcNow.AddDays(-30), 5, 1, 0);
+            var flock = Flock.Create(_tenantId, _coopId, "Detached Flock", DateTime.UtcNow.AddDays(-30), 5, 1, 0).Value;
             await repo.AddAsync(flock);
             await ctx.SaveChangesAsync();
             flockId = flock.Id;
@@ -256,7 +256,7 @@ public class FlockRepositoryTests : IDisposable
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "TO-DELETE", DateTime.UtcNow.AddDays(-10), 5, 1, 0);
+            var flock = Flock.Create(_tenantId, _coopId, "TO-DELETE", DateTime.UtcNow.AddDays(-10), 5, 1, 0).Value;
             await repo.AddAsync(flock);
             flockId = flock.Id;
         }

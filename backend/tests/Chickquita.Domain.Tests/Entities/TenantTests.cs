@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 
@@ -16,9 +17,11 @@ public class TenantTests
     public void Create_WithValidData_ShouldSucceed()
     {
         // Arrange & Act
-        var tenant = Tenant.Create(ValidOrgId, ValidName);
+        var result = Tenant.Create(ValidOrgId, ValidName);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var tenant = result.Value;
         tenant.Should().NotBeNull();
         tenant.Id.Should().NotBeEmpty();
         tenant.ClerkOrgId.Should().Be(ValidOrgId);
@@ -32,38 +35,36 @@ public class TenantTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceOrgId_ShouldThrowArgumentException(string? invalidOrgId)
+    public void Create_WithNullOrWhitespaceOrgId_ShouldReturnFailure(string? invalidOrgId)
     {
         // Arrange & Act
-        var act = () => Tenant.Create(invalidOrgId!, ValidName);
+        var result = Tenant.Create(invalidOrgId!, ValidName);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Clerk org ID cannot be empty.*")
-            .And.ParamName.Should().Be("clerkOrgId");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Clerk org ID cannot be empty");
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceName_ShouldThrowArgumentException(string? invalidName)
+    public void Create_WithNullOrWhitespaceName_ShouldReturnFailure(string? invalidName)
     {
         // Arrange & Act
-        var act = () => Tenant.Create(ValidOrgId, invalidName!);
+        var result = Tenant.Create(ValidOrgId, invalidName!);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Name cannot be empty.*")
-            .And.ParamName.Should().Be("name");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Name cannot be empty");
     }
 
     [Fact]
     public void Create_ShouldGenerateUniqueIds()
     {
         // Arrange & Act
-        var tenant1 = Tenant.Create(ValidOrgId, "Farm 1");
-        var tenant2 = Tenant.Create(ValidOrgId, "Farm 2");
+        var tenant1 = Tenant.Create(ValidOrgId, "Farm 1").Value;
+        var tenant2 = Tenant.Create(ValidOrgId, "Farm 2").Value;
 
         // Assert
         tenant1.Id.Should().NotBe(tenant2.Id);
@@ -73,14 +74,15 @@ public class TenantTests
     public void UpdateName_WithValidName_ShouldUpdateNameAndTimestamp()
     {
         // Arrange
-        var tenant = Tenant.Create(ValidOrgId, "Old Name");
+        var tenant = Tenant.Create(ValidOrgId, "Old Name").Value;
         var originalUpdatedAt = tenant.UpdatedAt;
         Thread.Sleep(10); // Ensure time difference
 
         // Act
-        tenant.UpdateName("New Name");
+        var updateResult = tenant.UpdateName("New Name");
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         tenant.Name.Should().Be("New Name");
         tenant.UpdatedAt.Should().BeAfter(originalUpdatedAt);
     }
@@ -89,17 +91,16 @@ public class TenantTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void UpdateName_WithNullOrWhitespaceName_ShouldThrowArgumentException(string? invalidName)
+    public void UpdateName_WithNullOrWhitespaceName_ShouldReturnFailure(string? invalidName)
     {
         // Arrange
-        var tenant = Tenant.Create(ValidOrgId, ValidName);
+        var tenant = Tenant.Create(ValidOrgId, ValidName).Value;
 
         // Act
-        var act = () => tenant.UpdateName(invalidName!);
+        var updateResult = tenant.UpdateName(invalidName!);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Name cannot be empty.*")
-            .And.ParamName.Should().Be("name");
+        updateResult.IsFailure.Should().BeTrue();
+        updateResult.Error.Message.Should().Contain("Name cannot be empty");
     }
 }

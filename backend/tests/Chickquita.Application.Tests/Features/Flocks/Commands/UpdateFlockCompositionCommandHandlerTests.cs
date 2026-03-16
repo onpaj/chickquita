@@ -65,7 +65,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 5);
+            initialChicks: 5).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -127,7 +127,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 5);
+            initialChicks: 5).Value;
 
         Flock? capturedFlock = null;
 
@@ -178,7 +178,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 2);
+            initialChicks: 2).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -261,7 +261,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -302,7 +302,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -347,7 +347,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 2);
+            initialChicks: 2).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

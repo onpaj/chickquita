@@ -68,12 +68,15 @@ public sealed class UpdateFlockCompositionCommandHandler : IRequestHandler<Updat
             }
 
             // Use the domain method which also creates a FlockHistory entry
-            flock.UpdateComposition(
+            var compositionResult = flock.UpdateComposition(
                 hens: request.Hens,
                 roosters: request.Roosters,
                 chicks: request.Chicks,
                 reason: "Manual update",
                 notes: request.Notes);
+
+            if (compositionResult.IsFailure)
+                return Result<FlockDto>.Failure(compositionResult.Error);
 
             // Save to database
             var updatedFlock = await _flockRepository.UpdateAsync(flock);
