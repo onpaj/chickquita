@@ -376,6 +376,7 @@ public class DailyRecordRepositoryTests : IDisposable
 
         // Act
         await _repository.DeleteAsync(recordId);
+        await _dbContext.SaveChangesAsync();
 
         // Assert
         var deletedRecord = await _dbContext.DailyRecords.FindAsync(recordId);

@@ -83,8 +83,6 @@ public class DailyRecordRepository : IDailyRecordRepository
         }
 
         await _context.DailyRecords.AddAsync(dailyRecord);
-        await _context.SaveChangesAsync();
-
         return dailyRecord;
     }
 
@@ -97,8 +95,6 @@ public class DailyRecordRepository : IDailyRecordRepository
         }
 
         _context.DailyRecords.Update(dailyRecord);
-        await _context.SaveChangesAsync();
-
         return dailyRecord;
     }
 
@@ -109,7 +105,6 @@ public class DailyRecordRepository : IDailyRecordRepository
         if (dailyRecord != null)
         {
             _context.DailyRecords.Remove(dailyRecord);
-            await _context.SaveChangesAsync();
         }
     }
 

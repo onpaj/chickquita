@@ -13,6 +13,7 @@ public sealed class DeletePurchaseCommandHandler : IRequestHandler<DeletePurchas
     private readonly IPurchaseRepository _purchaseRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<DeletePurchaseCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DeletePurchaseCommandHandler"/> class.
@@ -23,11 +24,13 @@ public sealed class DeletePurchaseCommandHandler : IRequestHandler<DeletePurchas
     public DeletePurchaseCommandHandler(
         IPurchaseRepository purchaseRepository,
         ICurrentUserService currentUserService,
-        ILogger<DeletePurchaseCommandHandler> logger)
+        ILogger<DeletePurchaseCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _purchaseRepository = purchaseRepository;
         _currentUserService = currentUserService;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -68,6 +71,7 @@ public sealed class DeletePurchaseCommandHandler : IRequestHandler<DeletePurchas
 
             // Delete the purchase
             await _purchaseRepository.DeleteAsync(request.PurchaseId);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Deleted purchase with ID: {PurchaseId} for tenant: {TenantId}",

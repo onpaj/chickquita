@@ -37,67 +37,67 @@ public class StatisticsRepository : IStatisticsRepository
     {
         var tenantId = GetTenantId();
 
-        // Optimized single-query aggregation for flocks
+        var today     = DateTime.UtcNow.Date;
+        var tomorrow  = today.AddDays(1);
+        var weekStart = today.AddDays(-6);
+
+        // Query 1: flock aggregation (count, hens, roosters, chicks)
         var flockStats = await _context.Flocks
             .Where(f => f.TenantId == tenantId && f.IsActive)
-            .GroupBy(f => 1) // Group all records together for aggregation
+            .GroupBy(f => 1)
             .Select(g => new
             {
                 ActiveFlocks = g.Count(),
-                TotalHens = g.Sum(f => f.CurrentHens),
+                TotalHens     = g.Sum(f => f.CurrentHens),
                 TotalRoosters = g.Sum(f => f.CurrentRoosters),
-                TotalChicks = g.Sum(f => f.CurrentChicks),
-                TotalAnimals = g.Sum(f => f.CurrentHens + f.CurrentRoosters + f.CurrentChicks)
+                TotalChicks   = g.Sum(f => f.CurrentChicks),
+                TotalAnimals  = g.Sum(f => f.CurrentHens + f.CurrentRoosters + f.CurrentChicks)
             })
             .FirstOrDefaultAsync();
 
-        // Get count of active coops
+        // Query 2: active coops count
         var totalCoops = await _context.Coops
             .Where(c => c.TenantId == tenantId && c.IsActive)
             .CountAsync();
 
-        // Consolidate today/week/all-time egg counts into a single DB roundtrip
-        var today = DateTime.UtcNow.Date;
-        var tomorrow = today.AddDays(1);
-        var weekStart = today.AddDays(-6);
-
+        // Query 3: today's eggs, this week's eggs, and all-time eggs in a single aggregation.
+        // Using conditional SUM (CASE WHEN) instead of three separate roundtrips.
         var eggStats = await _context.DailyRecords
             .Where(dr => dr.TenantId == tenantId)
-            .GroupBy(x => 1)
+            .GroupBy(dr => 1)
             .Select(g => new
             {
-                TodayEggs = g.Sum(dr => dr.RecordDate >= today && dr.RecordDate < tomorrow ? (int?)dr.EggCount : null) ?? 0,
+                TodayEggs    = g.Sum(dr => dr.RecordDate >= today    && dr.RecordDate < tomorrow ? (int?)dr.EggCount : null) ?? 0,
                 ThisWeekEggs = g.Sum(dr => dr.RecordDate >= weekStart && dr.RecordDate < tomorrow ? (int?)dr.EggCount : null) ?? 0,
-                TotalEggs = g.Sum(dr => (int?)dr.EggCount) ?? 0
+                TotalEggs    = g.Sum(dr => (int?)dr.EggCount) ?? 0
             })
             .FirstOrDefaultAsync();
 
-        var todayEggs = eggStats?.TodayEggs ?? 0;
-        var thisWeekEggs = eggStats?.ThisWeekEggs ?? 0;
-        var totalEggs = eggStats?.TotalEggs ?? 0;
-
-        var avgEggsPerDay = thisWeekEggs / 7m;
-
-        // All-time cost per egg
+        // Query 4: all-time purchase costs
         // Cast to double for SQLite compatibility (SQLite doesn't support decimal Sum)
         var totalCosts = (decimal)(await _context.Purchases
             .Where(p => p.TenantId == tenantId)
             .SumAsync(p => (double?)p.Amount) ?? 0.0);
 
+        var todayEggs    = eggStats?.TodayEggs    ?? 0;
+        var thisWeekEggs = eggStats?.ThisWeekEggs ?? 0;
+        var totalEggs    = eggStats?.TotalEggs    ?? 0;
+
+        var avgEggsPerDay = thisWeekEggs / 7m;
         decimal? costPerEgg = totalEggs > 0 ? totalCosts / totalEggs : null;
 
         return new DashboardStatsDto
         {
-            TotalCoops = totalCoops,
-            ActiveFlocks = flockStats?.ActiveFlocks ?? 0,
-            TotalHens = flockStats?.TotalHens ?? 0,
+            TotalCoops    = totalCoops,
+            ActiveFlocks  = flockStats?.ActiveFlocks  ?? 0,
+            TotalHens     = flockStats?.TotalHens     ?? 0,
             TotalRoosters = flockStats?.TotalRoosters ?? 0,
-            TotalChicks = flockStats?.TotalChicks ?? 0,
-            TotalAnimals = flockStats?.TotalAnimals ?? 0,
-            TodayEggs = todayEggs,
-            ThisWeekEggs = thisWeekEggs,
+            TotalChicks   = flockStats?.TotalChicks   ?? 0,
+            TotalAnimals  = flockStats?.TotalAnimals  ?? 0,
+            TodayEggs     = todayEggs,
+            ThisWeekEggs  = thisWeekEggs,
             AvgEggsPerDay = avgEggsPerDay,
-            CostPerEgg = costPerEgg
+            CostPerEgg    = costPerEgg
         };
     }
 
