@@ -78,7 +78,7 @@ public class CreatePurchaseCommandHandlerTests
             command.PurchaseDate,
             null,
             null,
-            command.Notes);
+            command.Notes).Value;
 
         _mockPurchaseRepository.Setup(x => x.AddAsync(It.IsAny<Purchase>()))
             .ReturnsAsync(createdPurchase);
@@ -136,7 +136,7 @@ public class CreatePurchaseCommandHandlerTests
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
 
-        var existingCoop = Coop.Create(tenantId, "Main Coop", "North Field");
+        var existingCoop = Coop.Create(tenantId, "Main Coop", "North Field").Value;
         _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
             .ReturnsAsync(existingCoop);
 
@@ -148,7 +148,7 @@ public class CreatePurchaseCommandHandlerTests
             command.Quantity,
             command.Unit,
             command.PurchaseDate,
-            coopId);
+            coopId).Value;
 
         _mockPurchaseRepository.Setup(x => x.AddAsync(It.IsAny<Purchase>()))
             .ReturnsAsync(createdPurchase);
@@ -211,7 +211,7 @@ public class CreatePurchaseCommandHandlerTests
             command.Unit,
             command.PurchaseDate,
             null,
-            command.ConsumedDate);
+            command.ConsumedDate).Value;
 
         _mockPurchaseRepository.Setup(x => x.AddAsync(It.IsAny<Purchase>()))
             .ReturnsAsync(createdPurchase);

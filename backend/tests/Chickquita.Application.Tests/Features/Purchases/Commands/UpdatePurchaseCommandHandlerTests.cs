@@ -77,7 +77,7 @@ public class UpdatePurchaseCommandHandlerTests
             250.50m,
             25m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.Date.AddDays(-1));
+            DateTime.UtcNow.Date.AddDays(-1)).Value;
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
@@ -144,12 +144,12 @@ public class UpdatePurchaseCommandHandlerTests
             150.00m,
             10m,
             QuantityUnit.Package,
-            DateTime.UtcNow.Date.AddDays(-1));
+            DateTime.UtcNow.Date.AddDays(-1)).Value;
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
 
-        var existingCoop = Coop.Create(tenantId, "Main Coop", "North Field");
+        var existingCoop = Coop.Create(tenantId, "Main Coop", "North Field").Value;
         _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
             .ReturnsAsync(existingCoop);
 
@@ -252,7 +252,7 @@ public class UpdatePurchaseCommandHandlerTests
             150.00m,
             10m,
             QuantityUnit.Package,
-            DateTime.UtcNow.Date.AddDays(-1));
+            DateTime.UtcNow.Date.AddDays(-1)).Value;
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
@@ -305,7 +305,7 @@ public class UpdatePurchaseCommandHandlerTests
             250.50m,
             25m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.Date.AddDays(-1));
+            DateTime.UtcNow.Date.AddDays(-1)).Value;
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
@@ -356,7 +356,7 @@ public class UpdatePurchaseCommandHandlerTests
             250.50m,
             25m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.Date.AddDays(-1));
+            DateTime.UtcNow.Date.AddDays(-1)).Value;
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
@@ -400,7 +400,7 @@ public class UpdatePurchaseCommandHandlerTests
             250.50m,
             25m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.Date.AddDays(-1));
+            DateTime.UtcNow.Date.AddDays(-1)).Value;
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
@@ -446,7 +446,7 @@ public class UpdatePurchaseCommandHandlerTests
             250.50m,
             25m,
             QuantityUnit.Kg,
-            DateTime.UtcNow.Date.AddDays(-1));
+            DateTime.UtcNow.Date.AddDays(-1)).Value;
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
