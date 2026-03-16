@@ -101,11 +101,9 @@ public class DailyRecordRepository : IDailyRecordRepository
     /// <inheritdoc />
     public async Task DeleteAsync(Guid id)
     {
-        var dailyRecord = await _context.DailyRecords.FindAsync(id);
-        if (dailyRecord != null)
-        {
-            _context.DailyRecords.Remove(dailyRecord);
-        }
+        await _context.DailyRecords
+            .Where(dr => dr.Id == id)
+            .ExecuteDeleteAsync();
     }
 
     /// <inheritdoc />
