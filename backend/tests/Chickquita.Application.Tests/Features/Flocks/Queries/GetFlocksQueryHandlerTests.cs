@@ -69,8 +69,8 @@ public class GetFlocksQueryHandlerTests
 
         var flockDtos = new List<FlockDto>
         {
-            new FlockDto { Id = flock1.Id, Identifier = "Spring 2024", CreatedAt = DateTime.UtcNow.AddDays(-60) },
-            new FlockDto { Id = flock2.Id, Identifier = "Winter 2024", CreatedAt = DateTime.UtcNow.AddDays(-30) }
+            new FlockDto { Id = flock2.Id, Identifier = "Winter 2024", CreatedAt = DateTime.UtcNow.AddDays(-30) },
+            new FlockDto { Id = flock1.Id, Identifier = "Spring 2024", CreatedAt = DateTime.UtcNow.AddDays(-60) }
         };
 
         _mockMapper.Setup(x => x.Map<List<FlockDto>>(It.IsAny<List<Flock>>()))
@@ -113,8 +113,8 @@ public class GetFlocksQueryHandlerTests
 
         var flockDtos = new List<FlockDto>
         {
-            new FlockDto { Id = flock1.Id, Identifier = "Flock A", CreatedAt = DateTime.UtcNow.AddDays(-60) },
-            new FlockDto { Id = flock2.Id, Identifier = "Flock B", CreatedAt = DateTime.UtcNow.AddDays(-30) }
+            new FlockDto { Id = flock2.Id, Identifier = "Flock B", CreatedAt = DateTime.UtcNow.AddDays(-30) },
+            new FlockDto { Id = flock1.Id, Identifier = "Flock A", CreatedAt = DateTime.UtcNow.AddDays(-60) }
         };
 
         _mockMapper.Setup(x => x.Map<List<FlockDto>>(It.IsAny<List<Flock>>()))
@@ -290,9 +290,9 @@ public class GetFlocksQueryHandlerTests
 
         var flockDtos = new List<FlockDto>
         {
-            new FlockDto { Id = oldestFlock.Id, Identifier = "Oldest", CreatedAt = DateTime.UtcNow.AddDays(-90) },
+            new FlockDto { Id = newestFlock.Id, Identifier = "Newest", CreatedAt = DateTime.UtcNow.AddDays(-30) },
             new FlockDto { Id = middleFlock.Id, Identifier = "Middle", CreatedAt = DateTime.UtcNow.AddDays(-60) },
-            new FlockDto { Id = newestFlock.Id, Identifier = "Newest", CreatedAt = DateTime.UtcNow.AddDays(-30) }
+            new FlockDto { Id = oldestFlock.Id, Identifier = "Oldest", CreatedAt = DateTime.UtcNow.AddDays(-90) }
         };
 
         _mockMapper.Setup(x => x.Map<List<FlockDto>>(It.IsAny<List<Flock>>()))
