@@ -36,9 +36,7 @@ public class TenantInterceptor : DbConnectionInterceptor
         DbConnection connection,
         ConnectionEndEventData eventData)
     {
-        SetTenantContextAsync(connection, CancellationToken.None)
-            .GetAwaiter()
-            .GetResult();
+        SetTenantContext(connection);
         base.ConnectionOpened(connection, eventData);
     }
 
@@ -57,6 +55,28 @@ public class TenantInterceptor : DbConnectionInterceptor
             param.Value = tenantId.Value;
             cmd.Parameters.Add(param);
             await cmd.ExecuteNonQueryAsync(cancellationToken);
+        }
+        else
+        {
+            _logger.LogDebug("No tenant context available - skipping RLS context setup");
+        }
+    }
+
+    private void SetTenantContext(DbConnection connection)
+    {
+        var tenantId = _tenantService.GetCurrentTenantId();
+
+        if (tenantId.HasValue)
+        {
+            _logger.LogDebug("Setting RLS context for tenant: {TenantId}", tenantId.Value);
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT set_tenant_context(@tenantId)";
+            var param = cmd.CreateParameter();
+            param.ParameterName = "tenantId";
+            param.Value = tenantId.Value;
+            cmd.Parameters.Add(param);
+            cmd.ExecuteNonQuery();
         }
         else
         {
