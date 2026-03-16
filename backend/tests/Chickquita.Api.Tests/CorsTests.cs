@@ -9,8 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Chickquita.Api.Tests;
 
 /// <summary>
-/// Verifies that CORS is applied in all environments and that startup fails fast
-/// when Cors:AllowedOrigins is missing or empty.
+/// Verifies that CORS is applied in all environments and that the app starts
+/// gracefully (no crash) when Cors:AllowedOrigins is missing or empty.
 /// </summary>
 public class CorsTests
 {
@@ -75,10 +75,10 @@ public class CorsTests
     }
 
     [Fact]
-    public void WebApplication_WhenCorsAllowedOriginsMissing_ThrowsInvalidOperationException()
+    public async Task WebApplication_WhenCorsAllowedOriginsMissing_StartsSuccessfullyAndBlocksCrossOrigin()
     {
         // Arrange — override config to remove Cors:AllowedOrigins entirely
-        var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseSetting("Cors:AllowedOrigins:0", "");
 
@@ -90,15 +90,21 @@ public class CorsTests
                     services.Remove(descriptor);
 
                 services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseInMemoryDatabase($"CorsFailFastDb_{Guid.NewGuid()}"));
+                    options.UseInMemoryDatabase($"CorsNoOriginDb_{Guid.NewGuid()}"));
             });
         });
 
-        // Act — creating the client triggers WebApplication.Build() which runs our validation
-        var act = () => factory.CreateClient();
+        // Act — app should start without throwing
+        var client = factory.CreateClient();
 
-        // Assert
-        act.Should().Throw<Exception>()
-            .WithMessage("*Cors:AllowedOrigins*");
+        using var request = new HttpRequestMessage(HttpMethod.Options, "/health");
+        request.Headers.Add("Origin", "https://any-origin.example.com");
+        request.Headers.Add("Access-Control-Request-Method", "GET");
+
+        var response = await client.SendAsync(request);
+
+        // Assert — CORS should block all cross-origin requests when no origins are configured
+        response.Headers.Contains("Access-Control-Allow-Origin").Should().BeFalse(
+            "when Cors:AllowedOrigins is not configured, all cross-origin requests should be blocked");
     }
 }
