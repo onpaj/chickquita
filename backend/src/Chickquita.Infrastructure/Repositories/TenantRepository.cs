@@ -35,8 +35,6 @@ public class TenantRepository : ITenantRepository
             throw new ArgumentNullException(nameof(tenant));
 
         await _context.Tenants.AddAsync(tenant);
-        await _context.SaveChangesAsync();
-
         return tenant;
     }
 
@@ -45,9 +43,7 @@ public class TenantRepository : ITenantRepository
         if (tenant == null)
             throw new ArgumentNullException(nameof(tenant));
 
-        _context.Tenants.Update(tenant);
-        await _context.SaveChangesAsync();
-    }
+        _context.Tenants.Update(tenant);    }
 
     public async Task<bool> ExistsByClerkOrgIdAsync(string clerkOrgId)
     {

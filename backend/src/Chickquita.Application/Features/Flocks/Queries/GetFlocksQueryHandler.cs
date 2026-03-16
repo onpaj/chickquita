@@ -89,10 +89,8 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
                 tenantId.Value,
                 request.IncludeInactive);
 
-            // Map to DTOs and sort by creation date (newest first)
-            var flockDtos = _mapper.Map<List<FlockDto>>(flocks)
-                .OrderByDescending(f => f.CreatedAt)
-                .ToList();
+            // Map to DTOs — ordering is handled by the repository (CreatedAt descending)
+            var flockDtos = _mapper.Map<List<FlockDto>>(flocks);
 
             return Result<List<FlockDto>>.Success(flockDtos);
         }

@@ -376,8 +376,10 @@ public class DailyRecordRepositoryTests : IDisposable
 
         // Act
         await _repository.DeleteAsync(recordId);
+        await _dbContext.SaveChangesAsync();
 
         // Assert
+        _dbContext.ChangeTracker.Clear(); // ExecuteDeleteAsync bypasses change tracker; clear it before querying
         var deletedRecord = await _dbContext.DailyRecords.FindAsync(recordId);
         deletedRecord.Should().BeNull();
     }
