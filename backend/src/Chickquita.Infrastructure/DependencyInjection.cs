@@ -64,9 +64,6 @@ public static class DependencyInjection
         // Register current user service
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        // Register tenant service
-        services.AddScoped<ITenantService, TenantService>();
-
         // Configure JWT Bearer Authentication — fail fast if required config is absent
         var clerkAuthority = configuration["Clerk:Authority"]
             ?? throw new InvalidOperationException(

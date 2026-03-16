@@ -14,12 +14,12 @@ namespace Chickquita.Infrastructure.Data.Interceptors;
 /// </summary>
 public class TenantInterceptor : DbConnectionInterceptor
 {
-    private readonly ITenantService _tenantService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<TenantInterceptor> _logger;
 
-    public TenantInterceptor(ITenantService tenantService, ILogger<TenantInterceptor> logger)
+    public TenantInterceptor(ICurrentUserService currentUserService, ILogger<TenantInterceptor> logger)
     {
-        _tenantService = tenantService;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -36,15 +36,13 @@ public class TenantInterceptor : DbConnectionInterceptor
         DbConnection connection,
         ConnectionEndEventData eventData)
     {
-        SetTenantContextAsync(connection, CancellationToken.None)
-            .GetAwaiter()
-            .GetResult();
+        SetTenantContext(connection);
         base.ConnectionOpened(connection, eventData);
     }
 
     private async Task SetTenantContextAsync(DbConnection connection, CancellationToken cancellationToken)
     {
-        var tenantId = _tenantService.GetCurrentTenantId();
+        var tenantId = _currentUserService.TenantId;
 
         if (tenantId.HasValue)
         {
@@ -57,6 +55,28 @@ public class TenantInterceptor : DbConnectionInterceptor
             param.Value = tenantId.Value;
             cmd.Parameters.Add(param);
             await cmd.ExecuteNonQueryAsync(cancellationToken);
+        }
+        else
+        {
+            _logger.LogDebug("No tenant context available - skipping RLS context setup");
+        }
+    }
+
+    private void SetTenantContext(DbConnection connection)
+    {
+        var tenantId = _currentUserService.TenantId;
+
+        if (tenantId.HasValue)
+        {
+            _logger.LogDebug("Setting RLS context for tenant: {TenantId}", tenantId.Value);
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT set_tenant_context(@tenantId)";
+            var param = cmd.CreateParameter();
+            param.ParameterName = "tenantId";
+            param.Value = tenantId.Value;
+            cmd.Parameters.Add(param);
+            cmd.ExecuteNonQuery();
         }
         else
         {

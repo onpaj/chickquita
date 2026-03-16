@@ -81,16 +81,12 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
             }
 
             // Validate coop reference if provided
-            if (request.CoopId.HasValue)
+            if (request.CoopId.HasValue && !await _coopRepository.ExistsAsync(request.CoopId.Value))
             {
-                var coop = await _coopRepository.GetByIdAsync(request.CoopId.Value);
-                if (coop == null)
-                {
-                    _logger.LogWarning(
-                        "UpdatePurchaseCommand: Coop with ID {CoopId} not found",
-                        request.CoopId.Value);
-                    return Result<PurchaseDto>.Failure(Error.NotFound($"Coop with ID {request.CoopId.Value} not found"));
-                }
+                _logger.LogWarning(
+                    "UpdatePurchaseCommand: Coop with ID {CoopId} not found",
+                    request.CoopId.Value);
+                return Result<PurchaseDto>.Failure(Error.NotFound($"Coop with ID {request.CoopId.Value} not found"));
             }
 
             // Update the purchase entity

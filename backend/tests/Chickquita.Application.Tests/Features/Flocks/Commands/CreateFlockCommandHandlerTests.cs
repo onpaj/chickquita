@@ -62,11 +62,9 @@ public class CreateFlockCommandHandlerTests
             Notes = "First batch"
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
-            .ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -113,7 +111,7 @@ public class CreateFlockCommandHandlerTests
         result.Value.TenantId.Should().Be(tenantId);
         result.Value.IsActive.Should().BeTrue();
 
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(coopId), Times.Once);
+        _mockCoopRepository.Verify(x => x.ExistsAsync(coopId), Times.Once);
         _mockFlockRepository.Verify(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier), Times.Once);
         _mockFlockRepository.Verify(x => x.AddAsync(It.IsAny<Flock>()), Times.Once);
         _mockMapper.Verify(x => x.Map<FlockDto>(It.IsAny<Flock>()), Times.Once);
@@ -135,10 +133,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -192,10 +189,9 @@ public class CreateFlockCommandHandlerTests
             Notes = null
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -243,10 +239,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 3
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -290,10 +285,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 2
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -336,10 +330,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 2
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -381,10 +374,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 7
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -426,10 +418,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 2
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -473,10 +464,9 @@ public class CreateFlockCommandHandlerTests
             Notes = notes
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -522,8 +512,7 @@ public class CreateFlockCommandHandlerTests
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
-            .ReturnsAsync((Coop?)null); // Coop not found
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(false);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -534,7 +523,7 @@ public class CreateFlockCommandHandlerTests
         result.Error.Code.Should().Be("Error.NotFound");
         result.Error.Message.Should().Be("Coop not found");
 
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(coopId), Times.Once);
+        _mockCoopRepository.Verify(x => x.ExistsAsync(coopId), Times.Once);
         _mockFlockRepository.Verify(x => x.AddAsync(It.IsAny<Flock>()), Times.Never);
     }
 
@@ -558,10 +547,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(true); // Simulate duplicate identifier
 
@@ -597,10 +585,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop2 = Coop.Create(tenantId, "Second Coop", "South Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coop2Id)).ReturnsAsync(coop2);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coop2Id)).ReturnsAsync(true);
 
         // The identifier exists in coop1, but not in coop2
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coop2Id, sharedIdentifier))
@@ -663,10 +650,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -698,10 +684,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -733,10 +718,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -768,10 +752,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = -3 // Negative count
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -803,10 +786,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
 
@@ -840,10 +822,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, It.IsAny<string>()))
             .ReturnsAsync(false);
 
@@ -876,10 +857,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, It.IsAny<string>()))
             .ReturnsAsync(false);
 
@@ -915,10 +895,9 @@ public class CreateFlockCommandHandlerTests
             InitialChicks = 0
         };
 
-        var coop = Coop.Create(tenantId, "Main Coop", "North Field");
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId)).ReturnsAsync(coop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
         _mockFlockRepository.Setup(x => x.ExistsByIdentifierInCoopAsync(coopId, command.Identifier))
             .ReturnsAsync(false);
         _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
