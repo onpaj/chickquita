@@ -43,11 +43,11 @@ public class PurchaseRepositoryTests : IDisposable
         _dbContext.Database.EnsureCreated();
 
         _repository = new PurchaseRepository(_dbContext, mockCurrentUserService.Object);
-        var tenant = Tenant.Create("clerk_user_test", "test@example.com");
+        var tenant = Tenant.Create("clerk_user_test", "test@example.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, _tenantId);
         _dbContext.Tenants.Add(tenant);
 
-        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location");
+        var coop = Coop.Create(_tenantId, "Test Coop", "Test Location").Value;
         _dbContext.Coops.Add(coop);
         _dbContext.SaveChanges();
         _coopId = coop.Id;
@@ -61,13 +61,13 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase1 = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-2), _coopId);
+            DateTime.UtcNow.AddDays(-2), _coopId).Value;
         var purchase2 = Purchase.Create(
             _tenantId, "Vitamins 1", PurchaseType.Vitamins, 50m, 5m, QuantityUnit.Pcs,
-            DateTime.UtcNow.AddDays(-1), _coopId);
+            DateTime.UtcNow.AddDays(-1), _coopId).Value;
         var purchase3 = Purchase.Create(
             _tenantId, "Bedding 1", PurchaseType.Bedding, 75m, 20m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
 
         _dbContext.Purchases.AddRange(purchase1, purchase2, purchase3);
         await _dbContext.SaveChangesAsync();
@@ -88,7 +88,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -121,7 +121,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId, null, "Test notes");
+            DateTime.UtcNow, _coopId, null, "Test notes").Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -142,7 +142,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -182,13 +182,13 @@ public class PurchaseRepositoryTests : IDisposable
 
         var purchase1 = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            date1, _coopId);
+            date1, _coopId).Value;
         var purchase2 = Purchase.Create(
             _tenantId, "Vitamins 1", PurchaseType.Vitamins, 50m, 5m, QuantityUnit.Pcs,
-            date2, _coopId);
+            date2, _coopId).Value;
         var purchase3 = Purchase.Create(
             _tenantId, "Bedding 1", PurchaseType.Bedding, 75m, 20m, QuantityUnit.Kg,
-            date3, _coopId);
+            date3, _coopId).Value;
 
         _dbContext.Purchases.AddRange(purchase1, purchase2, purchase3);
         await _dbContext.SaveChangesAsync();
@@ -208,7 +208,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -230,10 +230,10 @@ public class PurchaseRepositoryTests : IDisposable
 
         var purchase1 = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            date1, _coopId);
+            date1, _coopId).Value;
         var purchase2 = Purchase.Create(
             _tenantId, "Vitamins 1", PurchaseType.Vitamins, 50m, 5m, QuantityUnit.Pcs,
-            date2, _coopId);
+            date2, _coopId).Value;
 
         _dbContext.Purchases.AddRange(purchase1, purchase2);
         await _dbContext.SaveChangesAsync();
@@ -257,13 +257,13 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase1 = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-2), _coopId);
+            DateTime.UtcNow.AddDays(-2), _coopId).Value;
         var purchase2 = Purchase.Create(
             _tenantId, "Feed 2", PurchaseType.Feed, 150m, 15m, QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-1), _coopId);
+            DateTime.UtcNow.AddDays(-1), _coopId).Value;
         var purchase3 = Purchase.Create(
             _tenantId, "Vitamins 1", PurchaseType.Vitamins, 50m, 5m, QuantityUnit.Pcs,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
 
         _dbContext.Purchases.AddRange(purchase1, purchase2, purchase3);
         await _dbContext.SaveChangesAsync();
@@ -282,7 +282,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -299,10 +299,10 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase1 = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-2), _coopId);
+            DateTime.UtcNow.AddDays(-2), _coopId).Value;
         var purchase2 = Purchase.Create(
             _tenantId, "Feed 2", PurchaseType.Feed, 150m, 15m, QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-1), _coopId);
+            DateTime.UtcNow.AddDays(-1), _coopId).Value;
 
         _dbContext.Purchases.AddRange(purchase1, purchase2);
         await _dbContext.SaveChangesAsync();
@@ -326,16 +326,16 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase1 = Purchase.Create(
             _tenantId, "Chicken Feed", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         var purchase2 = Purchase.Create(
             _tenantId, "Vitamins", PurchaseType.Vitamins, 50m, 5m, QuantityUnit.Pcs,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         var purchase3 = Purchase.Create(
             _tenantId, "Chicken Feed", PurchaseType.Feed, 120m, 12m, QuantityUnit.Kg,
-            DateTime.UtcNow.AddDays(-1), _coopId);
+            DateTime.UtcNow.AddDays(-1), _coopId).Value;
         var purchase4 = Purchase.Create(
             _tenantId, "Bedding", PurchaseType.Bedding, 75m, 20m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
 
         _dbContext.Purchases.AddRange(purchase1, purchase2, purchase3, purchase4);
         await _dbContext.SaveChangesAsync();
@@ -368,7 +368,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId, null, "Test notes");
+            DateTime.UtcNow, _coopId, null, "Test notes").Value;
 
         // Act
         var result = await _repository.AddAsync(purchase);
@@ -404,7 +404,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId, null, "Original notes");
+            DateTime.UtcNow, _coopId, null, "Original notes").Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -448,7 +448,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -484,22 +484,22 @@ public class PurchaseRepositoryTests : IDisposable
     {
         // Arrange
         var tenant2Id = Guid.NewGuid();
-        var tenant2 = Tenant.Create("clerk_user_test2", "test2@example.com");
+        var tenant2 = Tenant.Create("clerk_user_test2", "test2@example.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant2, tenant2Id);
         _dbContext.Tenants.Add(tenant2);
         await _dbContext.SaveChangesAsync();
 
-        var coop2 = Coop.Create(tenant2Id, "Coop 2", "Location 2");
+        var coop2 = Coop.Create(tenant2Id, "Coop 2", "Location 2").Value;
         _dbContext.Coops.Add(coop2);
         await _dbContext.SaveChangesAsync();
 
         // Add purchases for both tenants
         var purchase1 = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         var purchase2 = Purchase.Create(
             tenant2Id, "Feed 2", PurchaseType.Feed, 150m, 15m, QuantityUnit.Kg,
-            DateTime.UtcNow, coop2.Id);
+            DateTime.UtcNow, coop2.Id).Value;
 
         _dbContext.Purchases.AddRange(purchase1, purchase2);
         await _dbContext.SaveChangesAsync();
@@ -524,7 +524,7 @@ public class PurchaseRepositoryTests : IDisposable
         var nonExistentTenantId = Guid.NewGuid();
         var purchase = Purchase.Create(
             nonExistentTenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
 
         // Act & Assert
@@ -538,7 +538,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, null);
+            DateTime.UtcNow, null).Value;
         _dbContext.Purchases.Add(purchase);
 
         // Act
@@ -556,7 +556,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
@@ -578,7 +578,7 @@ public class PurchaseRepositoryTests : IDisposable
         // Arrange
         var purchase = Purchase.Create(
             _tenantId, "Feed 1", PurchaseType.Feed, 100m, 10m, QuantityUnit.Kg,
-            DateTime.UtcNow, _coopId);
+            DateTime.UtcNow, _coopId).Value;
         _dbContext.Purchases.Add(purchase);
         await _dbContext.SaveChangesAsync();
 
