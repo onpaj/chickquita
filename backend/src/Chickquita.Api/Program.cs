@@ -88,22 +88,31 @@ builder.Services.AddHealthChecks()
         name: "database",
         tags: ["ready"]);
 
-// Configure CORS for all environments — fail fast if required config is absent
+// Configure CORS for all environments
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-    ?.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-if (allowedOrigins == null || allowedOrigins.Length == 0)
-    throw new InvalidOperationException(
-        "Cors:AllowedOrigins is required but not configured. " +
+    ?.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray()
+    ?? Array.Empty<string>();
+
+if (allowedOrigins.Length == 0)
+{
+    Console.WriteLine(
+        "WARNING: Cors:AllowedOrigins is not configured. " +
+        "Cross-origin requests will be blocked. " +
         "Set the Cors__AllowedOrigins__0 environment variable.");
+}
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AppCors", policy =>
     {
-        policy.WithOrigins(allowedOrigins)
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
+        if (allowedOrigins.Length > 0)
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
+        // No origins configured — CORS policy blocks all cross-origin requests (secure default)
     });
 });
 
