@@ -458,6 +458,9 @@ public class PurchaseRepositoryTests : IDisposable
         await _repository.DeleteAsync(purchaseId);
         await _dbContext.SaveChangesAsync();
 
+        // ExecuteDeleteAsync bypasses EF identity map; detach to force DB lookup
+        _dbContext.Entry(purchase).State = EntityState.Detached;
+
         // Assert
         _dbContext.ChangeTracker.Clear(); // ExecuteDeleteAsync bypasses change tracker; clear it before querying
         var deletedPurchase = await _dbContext.Purchases.FindAsync(purchaseId);
