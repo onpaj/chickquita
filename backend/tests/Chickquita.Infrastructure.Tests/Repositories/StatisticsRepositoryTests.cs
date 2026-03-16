@@ -45,6 +45,16 @@ public class StatisticsRepositoryTests : IDisposable
                 .HasConversion(
                     v => v.HasValue ? v.Value.Ticks : (long?)null,
                     v => v.HasValue ? TimeSpan.FromTicks(v.Value) : (TimeSpan?)null);
+
+            // SQLite doesn't support SUM on decimal (TEXT) columns — map all decimals to REAL
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties()
+                    .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+                {
+                    property.SetColumnType("REAL");
+                }
+            }
         }
     }
 
