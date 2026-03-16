@@ -73,6 +73,7 @@ public class FlockRepositoryTests : IDisposable
             var repo = new FlockRepository(ctx);
             var flock = Flock.Create(_tenantId, _coopId, "Original", DateTime.UtcNow.AddDays(-30), 10, 2, 0);
             await repo.AddAsync(flock);
+            await ctx.SaveChangesAsync();
             flockId = flock.Id;
         }
 
@@ -87,6 +88,7 @@ public class FlockRepositoryTests : IDisposable
 
             // UpdateAsync should detect the entity is already tracked and skip Update()
             var result = await repo.UpdateAsync(trackedFlock);
+            await ctx.SaveChangesAsync();
             result.Identifier.Should().Be("Updated Name");
         }
 
@@ -110,6 +112,7 @@ public class FlockRepositoryTests : IDisposable
             var repo = new FlockRepository(ctx);
             var flock = Flock.Create(_tenantId, _coopId, "Test Flock", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
             await repo.AddAsync(flock);
+            await ctx.SaveChangesAsync();
             flockId = flock.Id;
         }
 
@@ -125,6 +128,7 @@ public class FlockRepositoryTests : IDisposable
             trackedFlock!.UpdateComposition(12, 2, 5, "Manual update");
 
             await repo.UpdateAsync(trackedFlock);
+            await ctx.SaveChangesAsync();
         }
 
         // Assert: new history entry must be persisted
@@ -215,6 +219,7 @@ public class FlockRepositoryTests : IDisposable
             var repo = new FlockRepository(ctx);
             var flock = Flock.Create(_tenantId, _coopId, "Detached Flock", DateTime.UtcNow.AddDays(-30), 5, 1, 0);
             await repo.AddAsync(flock);
+            await ctx.SaveChangesAsync();
             flockId = flock.Id;
             detachedFlock = flock;
         }
@@ -229,6 +234,7 @@ public class FlockRepositoryTests : IDisposable
 
             detachedFlock.Update("Detached Updated", DateTime.UtcNow.AddDays(-10));
             var result = await repo.UpdateAsync(detachedFlock);
+            await ctx.SaveChangesAsync();
             result.Identifier.Should().Be("Detached Updated");
         }
 
