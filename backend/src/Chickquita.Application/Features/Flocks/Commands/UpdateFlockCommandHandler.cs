@@ -17,6 +17,7 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdateFlockCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateFlockCommandHandler"/> class.
@@ -29,12 +30,14 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
         IFlockRepository flockRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<UpdateFlockCommandHandler> logger)
+        ILogger<UpdateFlockCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _flockRepository = flockRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -85,33 +88,9 @@ public sealed class UpdateFlockCommandHandler : IRequestHandler<UpdateFlockComma
             // Update basic flock information
             flock.Update(request.Identifier, request.HatchDate);
 
-            // Update composition if provided and changed
-            if (request.CurrentHens.HasValue || request.CurrentRoosters.HasValue || request.CurrentChicks.HasValue)
-            {
-                var newHens = request.CurrentHens ?? flock.CurrentHens;
-                var newRoosters = request.CurrentRoosters ?? flock.CurrentRoosters;
-                var newChicks = request.CurrentChicks ?? flock.CurrentChicks;
-
-                var compositionChanged =
-                    newHens != flock.CurrentHens ||
-                    newRoosters != flock.CurrentRoosters ||
-                    newChicks != flock.CurrentChicks;
-
-                if (compositionChanged)
-                {
-                    flock.UpdateComposition(newHens, newRoosters, newChicks, "Manual update");
-
-                    _logger.LogInformation(
-                        "Updated composition for flock {FlockId}: Hens={Hens}, Roosters={Roosters}, Chicks={Chicks}",
-                        flock.Id,
-                        newHens,
-                        newRoosters,
-                        newChicks);
-                }
-            }
-
             // Save to database
             var updatedFlock = await _flockRepository.UpdateAsync(flock);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Updated flock with ID: {FlockId} for tenant: {TenantId}",

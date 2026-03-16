@@ -30,7 +30,7 @@ public class FlockRepository : IFlockRepository
         }
 
         return await query
-            .OrderByDescending(f => f.HatchDate)
+            .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
     }
 
@@ -47,7 +47,7 @@ public class FlockRepository : IFlockRepository
         }
 
         return await query
-            .OrderByDescending(f => f.HatchDate)
+            .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
     }
 
@@ -75,8 +75,6 @@ public class FlockRepository : IFlockRepository
         }
 
         await _context.Flocks.AddAsync(flock);
-        await _context.SaveChangesAsync();
-
         return flock;
     }
 
@@ -121,8 +119,6 @@ public class FlockRepository : IFlockRepository
             }
         }
 
-        await _context.SaveChangesAsync();
-
         return flock;
     }
 
@@ -133,6 +129,10 @@ public class FlockRepository : IFlockRepository
             .Where(f => f.Id == id)
             .ExecuteDeleteAsync();
     }
+
+    /// <inheritdoc />
+    public Task<bool> ExistsAsync(Guid id)
+        => _context.Flocks.AnyAsync(f => f.Id == id);
 
     /// <inheritdoc />
     public async Task<bool> ExistsByIdentifierInCoopAsync(Guid coopId, string identifier)

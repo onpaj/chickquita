@@ -456,6 +456,7 @@ public class PurchaseRepositoryTests : IDisposable
 
         // Act
         await _repository.DeleteAsync(purchaseId);
+        await _dbContext.SaveChangesAsync();
 
         // Assert
         _dbContext.ChangeTracker.Clear(); // ExecuteDeleteAsync bypasses change tracker; clear it before querying

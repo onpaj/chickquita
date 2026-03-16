@@ -19,6 +19,7 @@ public class DeletePurchaseCommandHandlerTests
     private readonly Mock<IPurchaseRepository> _mockPurchaseRepository;
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<ILogger<DeletePurchaseCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly DeletePurchaseCommandHandler _handler;
 
     public DeletePurchaseCommandHandlerTests()
@@ -28,11 +29,14 @@ public class DeletePurchaseCommandHandlerTests
         _mockPurchaseRepository = _fixture.Freeze<Mock<IPurchaseRepository>>();
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<DeletePurchaseCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new DeletePurchaseCommandHandler(
             _mockPurchaseRepository.Object,
             _mockCurrentUserService.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests

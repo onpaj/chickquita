@@ -18,6 +18,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateFlockCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateFlockCommandHandler"/> class.
@@ -32,13 +33,15 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<CreateFlockCommandHandler> logger)
+        ILogger<CreateFlockCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _flockRepository = flockRepository;
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -60,8 +63,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
             var tenantId = _currentUserService.TenantId;
 
             // Check if the coop exists and belongs to the current tenant
-            var coop = await _coopRepository.GetByIdAsync(request.CoopId);
-            if (coop == null)
+            if (!await _coopRepository.ExistsAsync(request.CoopId))
             {
                 _logger.LogWarning(
                     "CreateFlockCommand: Coop with ID {CoopId} not found for tenant {TenantId}",
@@ -98,6 +100,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
 
             // Save to database
             var addedFlock = await _flockRepository.AddAsync(flock);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Created new flock with ID: {FlockId} for coop: {CoopId}, tenant: {TenantId}",

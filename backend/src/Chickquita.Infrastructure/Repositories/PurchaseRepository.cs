@@ -155,8 +155,6 @@ public class PurchaseRepository : IPurchaseRepository
         }
 
         await _context.Purchases.AddAsync(purchase);
-        await _context.SaveChangesAsync();
-
         return purchase;
     }
 
@@ -169,8 +167,6 @@ public class PurchaseRepository : IPurchaseRepository
         }
 
         _context.Purchases.Update(purchase);
-        await _context.SaveChangesAsync();
-
         return purchase;
     }
 

@@ -18,6 +18,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdatePurchaseCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdatePurchaseCommandHandler"/> class.
@@ -32,13 +33,15 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<UpdatePurchaseCommandHandler> logger)
+        ILogger<UpdatePurchaseCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _purchaseRepository = purchaseRepository;
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -81,16 +84,12 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
             }
 
             // Validate coop reference if provided
-            if (request.CoopId.HasValue)
+            if (request.CoopId.HasValue && !await _coopRepository.ExistsAsync(request.CoopId.Value))
             {
-                var coop = await _coopRepository.GetByIdAsync(request.CoopId.Value);
-                if (coop == null)
-                {
-                    _logger.LogWarning(
-                        "UpdatePurchaseCommand: Coop with ID {CoopId} not found",
-                        request.CoopId.Value);
-                    return Result<PurchaseDto>.Failure(Error.NotFound($"Coop with ID {request.CoopId.Value} not found"));
-                }
+                _logger.LogWarning(
+                    "UpdatePurchaseCommand: Coop with ID {CoopId} not found",
+                    request.CoopId.Value);
+                return Result<PurchaseDto>.Failure(Error.NotFound($"Coop with ID {request.CoopId.Value} not found"));
             }
 
             // Update the purchase entity
@@ -107,6 +106,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
 
             // Persist changes
             var updatedPurchase = await _purchaseRepository.UpdateAsync(purchase);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Updated purchase with ID: {PurchaseId} for tenant: {TenantId}",
