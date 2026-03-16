@@ -74,9 +74,10 @@ public class StatisticsRepository : IStatisticsRepository
             .FirstOrDefaultAsync();
 
         // Query 4: all-time purchase costs
-        var totalCosts = await _context.Purchases
+        // Cast to double for SQLite compatibility (SQLite doesn't support decimal Sum)
+        var totalCosts = (decimal)(await _context.Purchases
             .Where(p => p.TenantId == tenantId)
-            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+            .SumAsync(p => (double?)p.Amount) ?? 0.0);
 
         var todayEggs    = eggStats?.TodayEggs    ?? 0;
         var thisWeekEggs = eggStats?.ThisWeekEggs ?? 0;
