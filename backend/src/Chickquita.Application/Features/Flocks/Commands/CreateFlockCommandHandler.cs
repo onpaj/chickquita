@@ -28,6 +28,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public CreateFlockCommandHandler(
         IFlockRepository flockRepository,
         ICoopRepository coopRepository,

@@ -27,6 +27,7 @@ public sealed class UpdateDailyRecordCommandHandler : IRequestHandler<UpdateDail
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public UpdateDailyRecordCommandHandler(
         IDailyRecordRepository dailyRecordRepository,
         ICurrentUserService currentUserService,

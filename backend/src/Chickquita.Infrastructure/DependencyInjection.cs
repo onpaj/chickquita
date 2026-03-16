@@ -46,6 +46,9 @@ public static class DependencyInjection
                 .AddInterceptors(tenantInterceptor);
         });
 
+        // Register unit of work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         // Register repositories
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<ICoopRepository, CoopRepository>();

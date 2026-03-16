@@ -4,9 +4,11 @@ using Chickquita.Infrastructure.Data;
 namespace Chickquita.Infrastructure;
 
 /// <summary>
-/// EF Core implementation of IUnitOfWork that delegates to ApplicationDbContext.
+/// EF Core implementation of IUnitOfWork.
+/// Delegates SaveChangesAsync to the shared ApplicationDbContext instance so that
+/// all repository changes tracked within the same DI scope are committed atomically.
 /// </summary>
-public sealed class UnitOfWork : IUnitOfWork
+public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _context;
 

@@ -43,7 +43,8 @@ public class TenantRepository : ITenantRepository
         if (tenant == null)
             throw new ArgumentNullException(nameof(tenant));
 
-        _context.Tenants.Update(tenant);    }
+        _context.Tenants.Update(tenant);
+    }
 
     public async Task<bool> ExistsByClerkOrgIdAsync(string clerkOrgId)
     {

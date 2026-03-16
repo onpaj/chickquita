@@ -21,6 +21,7 @@ public sealed class DeleteDailyRecordCommandHandler : IRequestHandler<DeleteDail
     /// <param name="dailyRecordRepository">The daily record repository.</param>
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public DeleteDailyRecordCommandHandler(
         IDailyRecordRepository dailyRecordRepository,
         ICurrentUserService currentUserService,

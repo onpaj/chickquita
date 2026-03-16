@@ -28,6 +28,7 @@ public sealed class CreateDailyRecordCommandHandler : IRequestHandler<CreateDail
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public CreateDailyRecordCommandHandler(
         IDailyRecordRepository dailyRecordRepository,
         IFlockRepository flockRepository,
