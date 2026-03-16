@@ -17,17 +17,20 @@ public sealed class MatureChicksCommandHandler : IRequestHandler<MatureChicksCom
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<MatureChicksCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     public MatureChicksCommandHandler(
         IFlockRepository flockRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<MatureChicksCommandHandler> logger)
+        ILogger<MatureChicksCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _flockRepository = flockRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     public async Task<Result<FlockDto>> Handle(MatureChicksCommand request, CancellationToken cancellationToken)
@@ -83,6 +86,8 @@ public sealed class MatureChicksCommandHandler : IRequestHandler<MatureChicksCom
                 notes: request.Notes);
 
             var updatedFlock = await _flockRepository.UpdateAsync(flock);
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Matured {ChicksToMature} chicks in flock {FlockId}: +{Hens} hens, +{Roosters} roosters",

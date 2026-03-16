@@ -83,8 +83,6 @@ public class DailyRecordRepository : IDailyRecordRepository
         }
 
         await _context.DailyRecords.AddAsync(dailyRecord);
-        await _context.SaveChangesAsync();
-
         return dailyRecord;
     }
 
@@ -97,20 +95,15 @@ public class DailyRecordRepository : IDailyRecordRepository
         }
 
         _context.DailyRecords.Update(dailyRecord);
-        await _context.SaveChangesAsync();
-
         return dailyRecord;
     }
 
     /// <inheritdoc />
     public async Task DeleteAsync(Guid id)
     {
-        var dailyRecord = await _context.DailyRecords.FindAsync(id);
-        if (dailyRecord != null)
-        {
-            _context.DailyRecords.Remove(dailyRecord);
-            await _context.SaveChangesAsync();
-        }
+        await _context.DailyRecords
+            .Where(dr => dr.Id == id)
+            .ExecuteDeleteAsync();
     }
 
     /// <inheritdoc />
