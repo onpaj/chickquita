@@ -73,6 +73,7 @@ public class FlockRepositoryTests : IDisposable
             var repo = new FlockRepository(ctx);
             var flock = Flock.Create(_tenantId, _coopId, "Original", DateTime.UtcNow.AddDays(-30), 10, 2, 0);
             await repo.AddAsync(flock);
+            await ctx.SaveChangesAsync();
             flockId = flock.Id;
         }
 
@@ -87,6 +88,7 @@ public class FlockRepositoryTests : IDisposable
 
             // UpdateAsync should detect the entity is already tracked and skip Update()
             var result = await repo.UpdateAsync(trackedFlock);
+            await ctx.SaveChangesAsync();
             result.Identifier.Should().Be("Updated Name");
         }
 
@@ -110,6 +112,7 @@ public class FlockRepositoryTests : IDisposable
             var repo = new FlockRepository(ctx);
             var flock = Flock.Create(_tenantId, _coopId, "Test Flock", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
             await repo.AddAsync(flock);
+            await ctx.SaveChangesAsync();
             flockId = flock.Id;
         }
 
@@ -125,6 +128,7 @@ public class FlockRepositoryTests : IDisposable
             trackedFlock!.UpdateComposition(12, 2, 5, "Manual update");
 
             await repo.UpdateAsync(trackedFlock);
+            await ctx.SaveChangesAsync();
         }
 
         // Assert: new history entry must be persisted
@@ -141,6 +145,70 @@ public class FlockRepositoryTests : IDisposable
     }
 
     [Fact]
+    public async Task GetAllAsync_ShouldReturnFlocksOrderedByCreatedAtDescending()
+    {
+        // Arrange: persist three flocks with distinct CreatedAt values via reflection
+        var flockIds = new List<Guid>();
+        var baseTime = DateTime.UtcNow;
+
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+
+            var flock1 = Flock.Create(_tenantId, _coopId, "Alpha", DateTime.UtcNow.AddDays(-90), 5, 1, 0);
+            typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock1, baseTime.AddDays(-2));
+
+            var flock2 = Flock.Create(_tenantId, _coopId, "Beta", DateTime.UtcNow.AddDays(-60), 6, 1, 0);
+            typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock2, baseTime.AddDays(-1));
+
+            var flock3 = Flock.Create(_tenantId, _coopId, "Gamma", DateTime.UtcNow.AddDays(-30), 7, 1, 0);
+            typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock3, baseTime);
+
+            ctx.Flocks.AddRange(flock1, flock2, flock3);
+            await ctx.SaveChangesAsync();
+            flockIds.AddRange(new[] { flock1.Id, flock2.Id, flock3.Id });
+        }
+
+        // Act
+        using var readCtx = CreateContext();
+        var result = await new FlockRepository(readCtx).GetAllAsync();
+
+        // Assert: newest (Gamma) first, oldest (Alpha) last
+        result.Should().HaveCount(3);
+        result[0].Identifier.Should().Be("Gamma");
+        result[1].Identifier.Should().Be("Beta");
+        result[2].Identifier.Should().Be("Alpha");
+    }
+
+    [Fact]
+    public async Task GetByCoopIdAsync_ShouldReturnFlocksOrderedByCreatedAtDescending()
+    {
+        // Arrange: persist two flocks for _coopId with distinct CreatedAt values
+        var baseTime = DateTime.UtcNow;
+
+        using (var ctx = CreateContext())
+        {
+            var flock1 = Flock.Create(_tenantId, _coopId, "Older", DateTime.UtcNow.AddDays(-60), 5, 1, 0);
+            typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock1, baseTime.AddDays(-1));
+
+            var flock2 = Flock.Create(_tenantId, _coopId, "Newer", DateTime.UtcNow.AddDays(-30), 6, 1, 0);
+            typeof(Flock).GetProperty(nameof(Flock.CreatedAt))!.SetValue(flock2, baseTime);
+
+            ctx.Flocks.AddRange(flock1, flock2);
+            await ctx.SaveChangesAsync();
+        }
+
+        // Act
+        using var readCtx = CreateContext();
+        var result = await new FlockRepository(readCtx).GetByCoopIdAsync(_coopId);
+
+        // Assert: newest first
+        result.Should().HaveCount(2);
+        result[0].Identifier.Should().Be("Newer");
+        result[1].Identifier.Should().Be("Older");
+    }
+
+    [Fact]
     public async Task UpdateAsync_WhenEntityIsDetached_ShouldStillSaveChanges()
     {
         // Arrange: persist a flock in a dedicated context
@@ -151,6 +219,7 @@ public class FlockRepositoryTests : IDisposable
             var repo = new FlockRepository(ctx);
             var flock = Flock.Create(_tenantId, _coopId, "Detached Flock", DateTime.UtcNow.AddDays(-30), 5, 1, 0);
             await repo.AddAsync(flock);
+            await ctx.SaveChangesAsync();
             flockId = flock.Id;
             detachedFlock = flock;
         }
@@ -165,6 +234,7 @@ public class FlockRepositoryTests : IDisposable
 
             detachedFlock.Update("Detached Updated", DateTime.UtcNow.AddDays(-10));
             var result = await repo.UpdateAsync(detachedFlock);
+            await ctx.SaveChangesAsync();
             result.Identifier.Should().Be("Detached Updated");
         }
 
@@ -179,26 +249,26 @@ public class FlockRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task DeleteAsync_WhenFlockExists_ShouldRemoveFromDatabase()
+    public async Task DeleteAsync_RemovesFlock_WithoutLoadingEntity()
     {
-        // Arrange
+        // Arrange: persist a flock
         var flockId = Guid.Empty;
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
-            var flock = Flock.Create(_tenantId, _coopId, "To Delete", DateTime.UtcNow.AddDays(-10), 5, 0, 0);
+            var flock = Flock.Create(_tenantId, _coopId, "TO-DELETE", DateTime.UtcNow.AddDays(-10), 5, 1, 0);
             await repo.AddAsync(flock);
             flockId = flock.Id;
         }
 
-        // Act
+        // Act: delete via a fresh context — ExecuteDeleteAsync issues a direct DELETE WHERE
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
             await repo.DeleteAsync(flockId);
         }
 
-        // Assert
+        // Assert: flock no longer exists
         using (var ctx = CreateContext())
         {
             var repo = new FlockRepository(ctx);
@@ -208,17 +278,15 @@ public class FlockRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task DeleteAsync_WhenFlockDoesNotExist_ShouldNotThrow()
+    public async Task DeleteAsync_DoesNotThrow_WhenFlockDoesNotExist()
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
 
-        // Act
+        // Act & Assert — ExecuteDeleteAsync on an empty match set should be a no-op
         using var ctx = CreateContext();
         var repo = new FlockRepository(ctx);
         var act = async () => await repo.DeleteAsync(nonExistentId);
-
-        // Assert
         await act.Should().NotThrowAsync();
     }
 }

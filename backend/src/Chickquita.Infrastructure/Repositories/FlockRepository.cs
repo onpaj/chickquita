@@ -30,7 +30,7 @@ public class FlockRepository : IFlockRepository
         }
 
         return await query
-            .OrderByDescending(f => f.HatchDate)
+            .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
     }
 
@@ -47,7 +47,7 @@ public class FlockRepository : IFlockRepository
         }
 
         return await query
-            .OrderByDescending(f => f.HatchDate)
+            .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
     }
 
@@ -75,8 +75,6 @@ public class FlockRepository : IFlockRepository
         }
 
         await _context.Flocks.AddAsync(flock);
-        await _context.SaveChangesAsync();
-
         return flock;
     }
 
@@ -120,8 +118,6 @@ public class FlockRepository : IFlockRepository
                 }
             }
         }
-
-        await _context.SaveChangesAsync();
 
         return flock;
     }

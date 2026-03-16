@@ -13,6 +13,7 @@ public sealed class DeleteDailyRecordCommandHandler : IRequestHandler<DeleteDail
     private readonly IDailyRecordRepository _dailyRecordRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<DeleteDailyRecordCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DeleteDailyRecordCommandHandler"/> class.
@@ -23,11 +24,13 @@ public sealed class DeleteDailyRecordCommandHandler : IRequestHandler<DeleteDail
     public DeleteDailyRecordCommandHandler(
         IDailyRecordRepository dailyRecordRepository,
         ICurrentUserService currentUserService,
-        ILogger<DeleteDailyRecordCommandHandler> logger)
+        ILogger<DeleteDailyRecordCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _dailyRecordRepository = dailyRecordRepository;
         _currentUserService = currentUserService;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -59,6 +62,7 @@ public sealed class DeleteDailyRecordCommandHandler : IRequestHandler<DeleteDail
 
             // Delete the daily record
             await _dailyRecordRepository.DeleteAsync(request.Id);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Deleted daily record with ID: {DailyRecordId} for tenant: {TenantId}",

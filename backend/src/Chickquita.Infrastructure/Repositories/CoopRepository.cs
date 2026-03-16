@@ -48,8 +48,6 @@ public class CoopRepository : ICoopRepository
         }
 
         await _context.Coops.AddAsync(coop);
-        await _context.SaveChangesAsync();
-
         return coop;
     }
 
@@ -62,8 +60,6 @@ public class CoopRepository : ICoopRepository
         }
 
         _context.Coops.Update(coop);
-        await _context.SaveChangesAsync();
-
         return coop;
     }
 
