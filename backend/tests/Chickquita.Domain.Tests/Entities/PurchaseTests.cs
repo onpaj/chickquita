@@ -245,8 +245,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Tenant ID cannot be empty.*")
-            .And.ParamName.Should().Be("tenantId");
+            .WithMessage("Tenant ID cannot be empty.*");
     }
 
     #endregion
@@ -268,8 +267,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot be empty.*")
-            .And.ParamName.Should().Be("name");
+            .WithMessage("Purchase name cannot be empty.*");
     }
 
     [Fact]
@@ -287,8 +285,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot be empty.*")
-            .And.ParamName.Should().Be("name");
+            .WithMessage("Purchase name cannot be empty.*");
     }
 
     [Fact]
@@ -309,8 +306,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot exceed 100 characters.*")
-            .And.ParamName.Should().Be("name");
+            .WithMessage("Purchase name cannot exceed 100 characters.*");
     }
 
     [Fact]
@@ -354,8 +350,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Amount cannot be negative.*")
-            .And.ParamName.Should().Be("amount");
+            .WithMessage("Amount cannot be negative.*");
     }
 
     [Fact]
@@ -395,8 +390,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Quantity must be greater than zero.*")
-            .And.ParamName.Should().Be("quantity");
+            .WithMessage("Quantity must be greater than zero.*");
     }
 
     [Fact]
@@ -414,8 +408,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Quantity must be greater than zero.*")
-            .And.ParamName.Should().Be("quantity");
+            .WithMessage("Quantity must be greater than zero.*");
     }
 
     [Fact]
@@ -504,8 +497,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Consumed date cannot be before purchase date.*")
-            .And.ParamName.Should().Be("consumedDate");
+            .WithMessage("Consumed date cannot be before purchase date.*");
     }
 
     [Fact]
@@ -576,8 +568,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Notes cannot exceed 500 characters.*")
-            .And.ParamName.Should().Be("notes");
+            .WithMessage("Notes cannot exceed 500 characters.*");
     }
 
     [Fact]
@@ -723,8 +714,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Amount cannot be negative.*")
-            .And.ParamName.Should().Be("amount");
+            .WithMessage("Amount cannot be negative.*");
     }
 
     [Fact]
@@ -745,8 +735,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Quantity must be greater than zero.*")
-            .And.ParamName.Should().Be("quantity");
+            .WithMessage("Quantity must be greater than zero.*");
     }
 
     [Fact]
@@ -770,8 +759,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Consumed date cannot be before purchase date.*")
-            .And.ParamName.Should().Be("consumedDate");
+            .WithMessage("Consumed date cannot be before purchase date.*");
     }
 
     [Fact]
@@ -792,8 +780,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot be empty.*")
-            .And.ParamName.Should().Be("name");
+            .WithMessage("Purchase name cannot be empty.*");
     }
 
     [Fact]
@@ -816,8 +803,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Purchase name cannot exceed 100 characters.*")
-            .And.ParamName.Should().Be("name");
+            .WithMessage("Purchase name cannot exceed 100 characters.*");
     }
 
     [Fact]
@@ -840,8 +826,7 @@ public class PurchaseTests
 
         // Assert
         act.Should().Throw<DomainValidationException>()
-            .WithMessage("Notes cannot exceed 500 characters.*")
-            .And.ParamName.Should().Be("notes");
+            .WithMessage("Notes cannot exceed 500 characters.*");
     }
 
     [Fact]

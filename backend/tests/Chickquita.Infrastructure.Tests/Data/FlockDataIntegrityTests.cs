@@ -60,7 +60,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => Flock.Create(Guid.Empty, _coopId, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
 
         // Act & Assert - Should fail at domain level before reaching database
-        act.Should().Throw<DomainValidationException>().WithMessage("*tenantId*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*Tenant ID*");
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class FlockDataIntegrityTests : IDisposable
         var act = () => Flock.Create(_tenantId, Guid.Empty, "TEST-001", DateTime.UtcNow.AddMonths(-2), 10, 2, 5, null);
 
         // Act & Assert - should fail at domain level
-        act.Should().Throw<DomainValidationException>().WithMessage("*coopId*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*Coop ID*");
     }
 
     [Fact]

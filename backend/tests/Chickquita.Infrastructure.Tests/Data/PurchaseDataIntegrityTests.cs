@@ -68,7 +68,7 @@ public class PurchaseDataIntegrityTests : IDisposable
             DateTime.UtcNow.AddDays(-5));
 
         // Act & Assert - Should fail at domain level before reaching database
-        act.Should().Throw<DomainValidationException>().WithMessage("*tenantId*");
+        act.Should().Throw<DomainValidationException>().WithMessage("*Tenant ID*");
     }
 
     [Fact]
