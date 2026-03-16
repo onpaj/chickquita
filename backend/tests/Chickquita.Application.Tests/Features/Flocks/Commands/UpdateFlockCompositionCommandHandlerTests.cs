@@ -22,6 +22,7 @@ public class UpdateFlockCompositionCommandHandlerTests
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<ILogger<UpdateFlockCompositionCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly UpdateFlockCompositionCommandHandler _handler;
 
     public UpdateFlockCompositionCommandHandlerTests()
@@ -32,12 +33,14 @@ public class UpdateFlockCompositionCommandHandlerTests
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<UpdateFlockCompositionCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
 
         _handler = new UpdateFlockCompositionCommandHandler(
             _mockFlockRepository.Object,
             _mockCurrentUserService.Object,
             _mockMapper.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests
@@ -65,7 +68,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 5);
+            initialChicks: 5).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -127,7 +130,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 5);
+            initialChicks: 5).Value;
 
         Flock? capturedFlock = null;
 
@@ -178,7 +181,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 2);
+            initialChicks: 2).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -261,7 +264,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -302,7 +305,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -347,7 +350,7 @@ public class UpdateFlockCompositionCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 2);
+            initialChicks: 2).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

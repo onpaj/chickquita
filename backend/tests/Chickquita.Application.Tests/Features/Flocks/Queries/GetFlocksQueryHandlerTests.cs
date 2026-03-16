@@ -57,8 +57,8 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var flock1 = Flock.Create(tenantId, coopId, "Spring 2024", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
-        var flock2 = Flock.Create(tenantId, coopId, "Winter 2024", DateTime.UtcNow.AddDays(-30), 8, 1, 3);
+        var flock1 = Flock.Create(tenantId, coopId, "Spring 2024", DateTime.UtcNow.AddDays(-60), 10, 2, 5).Value;
+        var flock2 = Flock.Create(tenantId, coopId, "Winter 2024", DateTime.UtcNow.AddDays(-30), 8, 1, 3).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -103,8 +103,8 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var flock1 = Flock.Create(tenantId, Guid.NewGuid(), "Flock A", DateTime.UtcNow.AddDays(-60), 10, 2, 5);
-        var flock2 = Flock.Create(tenantId, Guid.NewGuid(), "Flock B", DateTime.UtcNow.AddDays(-30), 8, 1, 3);
+        var flock1 = Flock.Create(tenantId, Guid.NewGuid(), "Flock A", DateTime.UtcNow.AddDays(-60), 10, 2, 5).Value;
+        var flock2 = Flock.Create(tenantId, Guid.NewGuid(), "Flock B", DateTime.UtcNow.AddDays(-30), 8, 1, 3).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -149,7 +149,6 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
@@ -187,7 +186,7 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var activeFlock = Flock.Create(tenantId, coopId, "Active Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5);
+        var activeFlock = Flock.Create(tenantId, coopId, "Active Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -227,8 +226,8 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = true
         };
 
-        var activeFlock = Flock.Create(tenantId, coopId, "Active Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5);
-        var archivedFlock = Flock.Create(tenantId, coopId, "Archived Flock", DateTime.UtcNow.AddDays(-90), 8, 1, 3);
+        var activeFlock = Flock.Create(tenantId, coopId, "Active Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
+        var archivedFlock = Flock.Create(tenantId, coopId, "Archived Flock", DateTime.UtcNow.AddDays(-90), 8, 1, 3).Value;
         archivedFlock.Archive();
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
@@ -275,9 +274,9 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var oldestFlock = Flock.Create(tenantId, coopId, "Oldest", DateTime.UtcNow.AddDays(-90), 10, 2, 5);
-        var middleFlock = Flock.Create(tenantId, coopId, "Middle", DateTime.UtcNow.AddDays(-60), 8, 1, 3);
-        var newestFlock = Flock.Create(tenantId, coopId, "Newest", DateTime.UtcNow.AddDays(-30), 12, 2, 6);
+        var oldestFlock = Flock.Create(tenantId, coopId, "Oldest", DateTime.UtcNow.AddDays(-90), 10, 2, 5).Value;
+        var middleFlock = Flock.Create(tenantId, coopId, "Middle", DateTime.UtcNow.AddDays(-60), 8, 1, 3).Value;
+        var newestFlock = Flock.Create(tenantId, coopId, "Newest", DateTime.UtcNow.AddDays(-30), 12, 2, 6).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -365,7 +364,7 @@ public class GetFlocksQueryHandlerTests
             IncludeInactive = false
         };
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5);
+        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

@@ -13,6 +13,7 @@ public sealed class DeleteCoopCommandHandler : IRequestHandler<DeleteCoopCommand
     private readonly ICoopRepository _coopRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<DeleteCoopCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DeleteCoopCommandHandler"/> class.
@@ -20,14 +21,17 @@ public sealed class DeleteCoopCommandHandler : IRequestHandler<DeleteCoopCommand
     /// <param name="coopRepository">The coop repository.</param>
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public DeleteCoopCommandHandler(
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
-        ILogger<DeleteCoopCommandHandler> logger)
+        ILogger<DeleteCoopCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -69,6 +73,7 @@ public sealed class DeleteCoopCommandHandler : IRequestHandler<DeleteCoopCommand
 
             // Delete the coop
             await _coopRepository.DeleteAsync(request.Id);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Deleted coop with ID: {CoopId} for tenant: {TenantId}",

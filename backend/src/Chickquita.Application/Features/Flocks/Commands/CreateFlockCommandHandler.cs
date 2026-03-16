@@ -18,6 +18,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateFlockCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateFlockCommandHandler"/> class.
@@ -27,18 +28,21 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public CreateFlockCommandHandler(
         IFlockRepository flockRepository,
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<CreateFlockCommandHandler> logger)
+        ILogger<CreateFlockCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _flockRepository = flockRepository;
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -85,7 +89,7 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
             }
 
             // Create the flock entity with initial history entry
-            var flock = Flock.Create(
+            var flockResult = Flock.Create(
                 tenantId: tenantId.Value,
                 coopId: request.CoopId,
                 identifier: request.Identifier,
@@ -94,9 +98,13 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
                 initialRoosters: request.InitialRoosters,
                 initialChicks: request.InitialChicks,
                 notes: request.Notes);
+            if (flockResult.IsFailure)
+                return Result<FlockDto>.Failure(flockResult.Error);
+            var flock = flockResult.Value;
 
             // Save to database
             var addedFlock = await _flockRepository.AddAsync(flock);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Created new flock with ID: {FlockId} for coop: {CoopId}, tenant: {TenantId}",
@@ -107,15 +115,6 @@ public sealed class CreateFlockCommandHandler : IRequestHandler<CreateFlockComma
             var flockDto = _mapper.Map<FlockDto>(addedFlock);
 
             return Result<FlockDto>.Success(flockDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while creating flock: {Message}",
-                ex.Message);
-
-            return Result<FlockDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

@@ -21,7 +21,7 @@ public class TenantResolutionMiddlewareTests
     {
         // Arrange
         var clerkOrgId = "org_abc123";
-        var tenant = Tenant.Create(clerkOrgId, "Smith Farm");
+        var tenant = Tenant.Create(clerkOrgId, "Smith Farm").Value;
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
@@ -59,7 +59,7 @@ public class TenantResolutionMiddlewareTests
     {
         // Arrange
         var clerkOrgId = "org_abc123";
-        var tenant = Tenant.Create(clerkOrgId, "Smith Farm");
+        var tenant = Tenant.Create(clerkOrgId, "Smith Farm").Value;
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
@@ -96,7 +96,7 @@ public class TenantResolutionMiddlewareTests
         // Arrange
         var clerkOrgId = "org_abc123";
         var orgName = "Smith Farm";
-        var createdTenant = Tenant.Create(clerkOrgId, orgName);
+        var createdTenant = Tenant.Create(clerkOrgId, orgName).Value;
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
@@ -146,7 +146,7 @@ public class TenantResolutionMiddlewareTests
     {
         // Arrange
         var clerkOrgId = "org_abc123";
-        var tenant = Tenant.Create(clerkOrgId, "Smith Farm");
+        var tenant = Tenant.Create(clerkOrgId, "Smith Farm").Value;
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository
@@ -251,7 +251,7 @@ public class TenantResolutionMiddlewareTests
         // Arrange
         var clerkOrgId = "org_abc123";
         var expectedFallbackName = clerkOrgId; // Middleware falls back to org ID as name
-        var createdTenant = Tenant.Create(clerkOrgId, expectedFallbackName);
+        var createdTenant = Tenant.Create(clerkOrgId, expectedFallbackName).Value;
 
         var mockTenantRepository = new Mock<ITenantRepository>();
         mockTenantRepository

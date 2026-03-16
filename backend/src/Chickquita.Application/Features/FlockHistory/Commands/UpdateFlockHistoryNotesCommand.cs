@@ -51,15 +51,18 @@ public sealed class UpdateFlockHistoryNotesCommandHandler
     private readonly IFlockHistoryRepository _repository;
     private readonly IMapper _mapper;
     private readonly IValidator<UpdateFlockHistoryNotesCommand> _validator;
+    private readonly IUnitOfWork _unitOfWork;
 
     public UpdateFlockHistoryNotesCommandHandler(
         IFlockHistoryRepository repository,
         IMapper mapper,
-        IValidator<UpdateFlockHistoryNotesCommand> validator)
+        IValidator<UpdateFlockHistoryNotesCommand> validator,
+        IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _mapper = mapper;
         _validator = validator;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     public async Task<Result<FlockHistoryDto>> Handle(
@@ -92,6 +95,7 @@ public sealed class UpdateFlockHistoryNotesCommandHandler
 
         // Save changes
         await _repository.UpdateAsync(historyEntry);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Map to DTO and return
         var dto = _mapper.Map<FlockHistoryDto>(historyEntry);

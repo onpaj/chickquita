@@ -22,6 +22,7 @@ public class UpdateCoopCommandHandlerTests
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<ILogger<UpdateCoopCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly UpdateCoopCommandHandler _handler;
 
     public UpdateCoopCommandHandlerTests()
@@ -32,12 +33,15 @@ public class UpdateCoopCommandHandlerTests
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<UpdateCoopCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new UpdateCoopCommandHandler(
             _mockCoopRepository.Object,
             _mockCurrentUserService.Object,
             _mockMapper.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests
@@ -48,7 +52,7 @@ public class UpdateCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location");
+        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location").Value;
 
         var command = new UpdateCoopCommand
         {
@@ -103,7 +107,7 @@ public class UpdateCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop Name", "Old Location");
+        var existingCoop = Coop.Create(tenantId, "Coop Name", "Old Location").Value;
 
         var command = new UpdateCoopCommand
         {
@@ -147,7 +151,7 @@ public class UpdateCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Coop Name", "Old Location");
+        var existingCoop = Coop.Create(tenantId, "Coop Name", "Old Location").Value;
 
         var command = new UpdateCoopCommand
         {
@@ -233,7 +237,7 @@ public class UpdateCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location");
+        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location").Value;
 
         var command = new UpdateCoopCommand
         {
@@ -273,7 +277,7 @@ public class UpdateCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location");
+        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location").Value;
 
         var command = new UpdateCoopCommand
         {
@@ -305,7 +309,7 @@ public class UpdateCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location");
+        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location").Value;
         var longName = new string('A', 101);
 
         var command = new UpdateCoopCommand
@@ -336,7 +340,7 @@ public class UpdateCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location");
+        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location").Value;
         var longLocation = new string('B', 201);
 
         var command = new UpdateCoopCommand
@@ -374,7 +378,7 @@ public class UpdateCoopCommandHandlerTests
         var coopId = Guid.NewGuid();
 
         // Coop belongs to a different tenant
-        var otherTenantCoop = Coop.Create(otherTenantId, "Other Tenant Coop", "Other Location");
+        var otherTenantCoop = Coop.Create(otherTenantId, "Other Tenant Coop", "Other Location").Value;
 
         var command = new UpdateCoopCommand
         {
@@ -413,7 +417,7 @@ public class UpdateCoopCommandHandlerTests
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
-        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location");
+        var existingCoop = Coop.Create(tenantId, "Old Name", "Old Location").Value;
 
         var command = new UpdateCoopCommand
         {

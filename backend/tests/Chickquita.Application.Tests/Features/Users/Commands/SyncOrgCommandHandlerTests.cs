@@ -18,15 +18,21 @@ public class SyncOrgCommandHandlerTests
     private readonly Mock<ITenantRepository> _repoMock = new();
     private readonly Mock<IMapper> _mapperMock = new();
     private readonly Mock<ILogger<SyncOrgCommandHandler>> _loggerMock = new();
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork = new();
+
+    public SyncOrgCommandHandlerTests()
+    {
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+    }
 
     private SyncOrgCommandHandler CreateHandler()
-        => new(_repoMock.Object, _mapperMock.Object, _loggerMock.Object);
+        => new(_repoMock.Object, _mapperMock.Object, _loggerMock.Object, _mockUnitOfWork.Object);
 
     [Fact]
     public async Task Handle_NewOrg_CreatesAndReturnsTenant()
     {
         var command = new SyncOrgCommand { ClerkOrgId = "org_abc", Name = "Smith Farm" };
-        var created = Tenant.Create("org_abc", "Smith Farm");
+        var created = Tenant.Create("org_abc", "Smith Farm").Value;
 
         _repoMock.Setup(r => r.GetByClerkOrgIdAsync("org_abc")).ReturnsAsync((Tenant?)null);
         _repoMock.Setup(r => r.AddAsync(It.IsAny<Tenant>())).ReturnsAsync(created);
@@ -43,7 +49,7 @@ public class SyncOrgCommandHandlerTests
     public async Task Handle_ExistingOrg_UpdatesNameAndReturnsExisting()
     {
         var command = new SyncOrgCommand { ClerkOrgId = "org_abc", Name = "New Name" };
-        var existing = Tenant.Create("org_abc", "Old Name");
+        var existing = Tenant.Create("org_abc", "Old Name").Value;
 
         _repoMock.Setup(r => r.GetByClerkOrgIdAsync("org_abc")).ReturnsAsync(existing);
         _mapperMock.Setup(m => m.Map<TenantDto>(existing)).Returns(new TenantDto { ClerkOrgId = "org_abc" });
@@ -61,7 +67,7 @@ public class SyncOrgCommandHandlerTests
     public async Task Handle_ExistingOrg_SameName_DoesNotCallUpdate()
     {
         var command = new SyncOrgCommand { ClerkOrgId = "org_abc", Name = "Same Name" };
-        var existing = Tenant.Create("org_abc", "Same Name");
+        var existing = Tenant.Create("org_abc", "Same Name").Value;
 
         _repoMock.Setup(r => r.GetByClerkOrgIdAsync("org_abc")).ReturnsAsync(existing);
         _mapperMock.Setup(m => m.Map<TenantDto>(existing)).Returns(new TenantDto());

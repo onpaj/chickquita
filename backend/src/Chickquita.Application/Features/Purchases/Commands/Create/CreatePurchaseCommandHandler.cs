@@ -18,6 +18,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<CreatePurchaseCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreatePurchaseCommandHandler"/> class.
@@ -27,18 +28,21 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public CreatePurchaseCommandHandler(
         IPurchaseRepository purchaseRepository,
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<CreatePurchaseCommandHandler> logger)
+        ILogger<CreatePurchaseCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _purchaseRepository = purchaseRepository;
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -69,7 +73,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
             }
 
             // Create the purchase entity
-            var purchase = Purchase.Create(
+            var purchaseResult = Purchase.Create(
                 tenantId.Value,
                 request.Name,
                 request.Type,
@@ -80,9 +84,13 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
                 request.CoopId,
                 request.ConsumedDate,
                 request.Notes);
+            if (purchaseResult.IsFailure)
+                return Result<PurchaseDto>.Failure(purchaseResult.Error);
+            var purchase = purchaseResult.Value;
 
             // Save to database
             var addedPurchase = await _purchaseRepository.AddAsync(purchase);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Created new purchase with ID: {PurchaseId} for tenant: {TenantId}",
@@ -92,15 +100,6 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
             var purchaseDto = _mapper.Map<PurchaseDto>(addedPurchase);
 
             return Result<PurchaseDto>.Success(purchaseDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while creating purchase: {Message}",
-                ex.Message);
-
-            return Result<PurchaseDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

@@ -17,6 +17,7 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateCoopCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateCoopCommandHandler"/> class.
@@ -25,16 +26,19 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public CreateCoopCommandHandler(
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<CreateCoopCommandHandler> logger)
+        ILogger<CreateCoopCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -66,10 +70,14 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
             }
 
             // Create the coop entity
-            var coop = Coop.Create(tenantId.Value, request.Name, request.Location);
+            var coopResult = Coop.Create(tenantId.Value, request.Name, request.Location);
+            if (coopResult.IsFailure)
+                return Result<CoopDto>.Failure(coopResult.Error);
+            var coop = coopResult.Value;
 
             // Save to database
             var addedCoop = await _coopRepository.AddAsync(coop);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Created new coop with ID: {CoopId} for tenant: {TenantId}",
@@ -82,15 +90,6 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
             coopDto.FlocksCount = 0;
 
             return Result<CoopDto>.Success(coopDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while creating coop: {Message}",
-                ex.Message);
-
-            return Result<CoopDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

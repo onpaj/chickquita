@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Chickquita.Api.Endpoints;
+using Chickquita.Api.Tests.Helpers;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Features.Coops.Commands;
 using Chickquita.Application.Interfaces;
@@ -9,7 +10,9 @@ using Chickquita.Infrastructure.Data;
 using Chickquita.Infrastructure.Repositories;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -37,25 +40,19 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         var tenantId = Guid.NewGuid();
         var mockCurrentUser = CreateMockCurrentUser("clerk_user_1", tenantId);
 
-        using var scope = _factory.WithWebHostBuilder(builder =>
+        var factory = _factory.WithWebHostBuilder(builder =>
         {
             builder.ConfigureServices(services =>
             {
                 ReplaceWithInMemoryDatabase(services);
                 ReplaceCurrentUserService(services, mockCurrentUser);
             });
-        }).Services.CreateScope();
+        });
 
+        using var scope = factory.Services.CreateScope();
         await SeedTenant(scope, tenantId, "clerk_user_1");
 
-        var client = _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                ReplaceWithInMemoryDatabase(services);
-                ReplaceCurrentUserService(services, mockCurrentUser);
-            });
-        }).CreateClient();
+        var client = factory.CreateClient();
 
         var command = new CreateCoopCommand
         {
@@ -478,7 +475,7 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         // Mock repository to return hasFlocks = true
         var mockCoopRepo = new Mock<ICoopRepository>();
         mockCoopRepo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(Coop.Create(tenantId, "Test", "Location"));
+            .ReturnsAsync(Coop.Create(tenantId, "Test", "Location").Value);
         mockCoopRepo.Setup(r => r.HasFlocksAsync(It.IsAny<Guid>()))
             .ReturnsAsync(true);
 
@@ -709,15 +706,30 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
             services.Remove(descriptor);
         }
 
-        // Use a unique database name for each test to ensure isolation
-        var databaseName = $"TestDb_{Guid.NewGuid()}";
+        // Use an open SQLite in-memory connection shared across all DbContext instances
+        // within this factory. ExecuteDeleteAsync requires a relational provider.
+        var connection = new SqliteConnection("DataSource=:memory:");
+        connection.Open();
+        services.AddSingleton(connection);
 
+        // Register DbContextOptions<ApplicationDbContext> for SQLite.
+        // AddDbContext also registers ApplicationDbContext as scoped — we replace that below.
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
         {
-            options.UseInMemoryDatabase(databaseName);
+            var conn = serviceProvider.GetRequiredService<SqliteConnection>();
+            options.UseSqlite(conn);
             options.EnableSensitiveDataLogging();
-            // ConfigureWarnings to ignore query filter warnings in tests
-            options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.QueryIterationFailed));
+        });
+
+        // Override the ApplicationDbContext factory to return SqliteApplicationDbContext
+        // so that OnModelCreating applies the TimeSpan? → INTEGER converter.
+        var appContextDescriptors = services.Where(d => d.ServiceType == typeof(ApplicationDbContext)).ToList();
+        foreach (var d in appContextDescriptors) services.Remove(d);
+        services.AddScoped<ApplicationDbContext>(sp =>
+        {
+            var opts = sp.GetRequiredService<DbContextOptions<ApplicationDbContext>>();
+            var currentUser = sp.GetRequiredService<ICurrentUserService>();
+            return new SqliteApplicationDbContext(opts, currentUser);
         });
 
         // Bypass authentication for tests
@@ -727,6 +739,9 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
                 .RequireAssertion(_ => true)
                 .Build();
         });
+
+        // Ensure SQLite schema is created in every child factory (seeder and HTTP client).
+        services.AddTransient<IStartupFilter, DatabaseInitializerStartupFilter>();
     }
 
     private static void ReplaceCurrentUserService(IServiceCollection services, Mock<ICurrentUserService> mock)
@@ -754,7 +769,8 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
     private static async Task SeedTenant(IServiceScope scope, Guid tenantId, string clerkUserId)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com");
+        await dbContext.Database.EnsureCreatedAsync();
+        var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, tenantId);
         dbContext.Tenants.Add(tenant);
         await dbContext.SaveChangesAsync();
@@ -763,7 +779,7 @@ public class CoopsEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
     private static async Task<Guid> SeedCoop(IServiceScope scope, Guid tenantId, string name, string location)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var coop = Coop.Create(tenantId, name, location);
+        var coop = Coop.Create(tenantId, name, location).Value;
         dbContext.Coops.Add(coop);
         await dbContext.SaveChangesAsync();
         return coop.Id;

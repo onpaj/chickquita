@@ -22,6 +22,7 @@ public class ArchiveFlockCommandHandlerTests
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<ILogger<ArchiveFlockCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly ArchiveFlockCommandHandler _handler;
 
     public ArchiveFlockCommandHandlerTests()
@@ -32,12 +33,15 @@ public class ArchiveFlockCommandHandlerTests
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<ArchiveFlockCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new ArchiveFlockCommandHandler(
             _mockFlockRepository.Object,
             _mockCurrentUserService.Object,
             _mockMapper.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests
@@ -62,7 +66,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 5);
+            initialChicks: 5).Value;
 
         Flock? capturedFlock = null;
 
@@ -116,7 +120,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-30),
             initialHens: 8,
             initialRoosters: 1,
-            initialChicks: 3);
+            initialChicks: 3).Value;
 
         var flockId = existingFlock.Id; // Use the actual flock ID
 
@@ -179,7 +183,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 5,
             initialRoosters: 1,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         // Archive it first
         existingFlock.Archive();
@@ -261,7 +265,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -333,7 +337,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -381,7 +385,7 @@ public class ArchiveFlockCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             initialHens: 10,
             initialRoosters: 2,
-            initialChicks: 0);
+            initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

@@ -23,6 +23,7 @@ public class CreatePurchaseCommandHandlerTests
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<ILogger<CreatePurchaseCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly CreatePurchaseCommandHandler _handler;
 
     public CreatePurchaseCommandHandlerTests()
@@ -34,13 +35,16 @@ public class CreatePurchaseCommandHandlerTests
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<CreatePurchaseCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new CreatePurchaseCommandHandler(
             _mockPurchaseRepository.Object,
             _mockCoopRepository.Object,
             _mockCurrentUserService.Object,
             _mockMapper.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests
@@ -74,7 +78,7 @@ public class CreatePurchaseCommandHandlerTests
             command.PurchaseDate,
             null,
             null,
-            command.Notes);
+            command.Notes).Value;
 
         _mockPurchaseRepository.Setup(x => x.AddAsync(It.IsAny<Purchase>()))
             .ReturnsAsync(createdPurchase);
@@ -141,7 +145,7 @@ public class CreatePurchaseCommandHandlerTests
             command.Quantity,
             command.Unit,
             command.PurchaseDate,
-            coopId);
+            coopId).Value;
 
         _mockPurchaseRepository.Setup(x => x.AddAsync(It.IsAny<Purchase>()))
             .ReturnsAsync(createdPurchase);
@@ -204,7 +208,7 @@ public class CreatePurchaseCommandHandlerTests
             command.Unit,
             command.PurchaseDate,
             null,
-            command.ConsumedDate);
+            command.ConsumedDate).Value;
 
         _mockPurchaseRepository.Setup(x => x.AddAsync(It.IsAny<Purchase>()))
             .ReturnsAsync(createdPurchase);

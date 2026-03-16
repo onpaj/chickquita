@@ -23,6 +23,7 @@ public class CreateDailyRecordCommandHandlerTests
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<ILogger<CreateDailyRecordCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly CreateDailyRecordCommandHandler _handler;
 
     public CreateDailyRecordCommandHandlerTests()
@@ -34,13 +35,16 @@ public class CreateDailyRecordCommandHandlerTests
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<CreateDailyRecordCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new CreateDailyRecordCommandHandler(
             _mockDailyRecordRepository.Object,
             _mockFlockRepository.Object,
             _mockCurrentUserService.Object,
             _mockMapper.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests
@@ -68,7 +72,7 @@ public class CreateDailyRecordCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             10,
             2,
-            0);
+            0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -80,7 +84,7 @@ public class CreateDailyRecordCommandHandlerTests
             flockId,
             recordDate,
             command.EggCount,
-            command.Notes);
+            command.Notes).Value;
 
         _mockDailyRecordRepository.Setup(x => x.AddAsync(It.IsAny<DailyRecord>()))
             .ReturnsAsync(createdDailyRecord);
@@ -138,13 +142,13 @@ public class CreateDailyRecordCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             10,
             2,
-            0);
+            0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
 
-        var createdDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, 0, command.Notes);
+        var createdDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, 0, command.Notes).Value;
         _mockDailyRecordRepository.Setup(x => x.AddAsync(It.IsAny<DailyRecord>()))
             .ReturnsAsync(createdDailyRecord);
 
@@ -188,13 +192,13 @@ public class CreateDailyRecordCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             10,
             2,
-            0);
+            0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
         _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId)).ReturnsAsync(flock);
 
-        var createdDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, command.EggCount);
+        var createdDailyRecord = DailyRecord.Create(tenantId, flockId, recordDate, command.EggCount).Value;
         _mockDailyRecordRepository.Setup(x => x.AddAsync(It.IsAny<DailyRecord>()))
             .ReturnsAsync(createdDailyRecord);
 
@@ -276,7 +280,7 @@ public class CreateDailyRecordCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             10,
             2,
-            0);
+            0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -316,7 +320,7 @@ public class CreateDailyRecordCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             10,
             2,
-            0);
+            0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -358,7 +362,7 @@ public class CreateDailyRecordCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             10,
             2,
-            0);
+            0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -402,7 +406,7 @@ public class CreateDailyRecordCommandHandlerTests
             DateTime.UtcNow.AddDays(-60),
             10,
             2,
-            0);
+            0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

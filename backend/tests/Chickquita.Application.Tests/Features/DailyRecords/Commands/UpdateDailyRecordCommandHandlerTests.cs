@@ -22,6 +22,7 @@ public class UpdateDailyRecordCommandHandlerTests
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<ILogger<UpdateDailyRecordCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly UpdateDailyRecordCommandHandler _handler;
 
     public UpdateDailyRecordCommandHandlerTests()
@@ -32,12 +33,15 @@ public class UpdateDailyRecordCommandHandlerTests
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<UpdateDailyRecordCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new UpdateDailyRecordCommandHandler(
             _mockDailyRecordRepository.Object,
             _mockCurrentUserService.Object,
             _mockMapper.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests
@@ -64,7 +68,7 @@ public class UpdateDailyRecordCommandHandlerTests
             flockId,
             today,
             25,
-            "Original notes");
+            "Original notes").Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -116,7 +120,7 @@ public class UpdateDailyRecordCommandHandlerTests
             Notes = "No eggs today"
         };
 
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 5, "Original");
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 5, "Original").Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -153,7 +157,7 @@ public class UpdateDailyRecordCommandHandlerTests
             Notes = null
         };
 
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 15, "Old notes");
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 15, "Old notes").Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -194,7 +198,7 @@ public class UpdateDailyRecordCommandHandlerTests
         };
 
         // Create a daily record from yesterday
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, yesterday, 25, "Original");
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, yesterday, 25, "Original").Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -230,7 +234,7 @@ public class UpdateDailyRecordCommandHandlerTests
             Notes = "Trying to update old record"
         };
 
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, oneWeekAgo, 20, "Old data");
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, oneWeekAgo, 20, "Old data").Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -304,7 +308,7 @@ public class UpdateDailyRecordCommandHandlerTests
             Notes = "Invalid egg count"
         };
 
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 10, "Original");
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 10, "Original").Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -340,7 +344,7 @@ public class UpdateDailyRecordCommandHandlerTests
             Notes = longNotes
         };
 
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 15, "Original");
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 15, "Original").Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
@@ -378,7 +382,7 @@ public class UpdateDailyRecordCommandHandlerTests
             EggCount = 25
         };
 
-        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 20, "Original");
+        var existingDailyRecord = DailyRecord.Create(tenantId, flockId, today, 20, "Original").Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);

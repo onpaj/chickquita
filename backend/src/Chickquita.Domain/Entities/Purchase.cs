@@ -1,3 +1,5 @@
+using Chickquita.Domain.Common;
+
 namespace Chickquita.Domain.Entities;
 
 /// <summary>
@@ -175,8 +177,8 @@ public class Purchase
     /// <param name="coopId">Optional ID of the coop this purchase is associated with</param>
     /// <param name="consumedDate">Optional date when the item was consumed</param>
     /// <param name="notes">Optional notes about the purchase</param>
-    /// <returns>A new Purchase instance</returns>
-    public static Purchase Create(
+    /// <returns>A Result containing the new Purchase instance, or a validation error</returns>
+    public static Result<Purchase> Create(
         Guid tenantId,
         string name,
         PurchaseType type,
@@ -188,34 +190,20 @@ public class Purchase
         DateTime? consumedDate = null,
         string? notes = null)
     {
-        // Validate tenant ID
         if (tenantId == Guid.Empty)
-        {
-            throw new ArgumentException("Tenant ID cannot be empty.", nameof(tenantId));
-        }
+            return Error.Validation("Tenant ID cannot be empty.");
 
-        // Validate name
         if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Purchase name cannot be empty.", nameof(name));
-        }
+            return Error.Validation("Purchase name cannot be empty.");
 
         if (name.Length > 100)
-        {
-            throw new ArgumentException("Purchase name cannot exceed 100 characters.", nameof(name));
-        }
+            return Error.Validation("Purchase name cannot exceed 100 characters.");
 
-        // Validate amount
         if (amount < 0)
-        {
-            throw new ArgumentException("Amount cannot be negative.", nameof(amount));
-        }
+            return Error.Validation("Amount cannot be negative.");
 
-        // Validate quantity
         if (quantity <= 0)
-        {
-            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
-        }
+            return Error.Validation("Quantity must be greater than zero.");
 
         // Normalize purchase date to UTC and date only (midnight)
         var purchaseDateUtc = purchaseDate.Kind switch
@@ -238,18 +226,12 @@ public class Purchase
                 _ => DateTime.SpecifyKind(consumedDate.Value.Date, DateTimeKind.Utc)
             };
 
-            // Validate consumed date is not before purchase date
             if (consumedDateUtc < purchaseDateUtc)
-            {
-                throw new ArgumentException("Consumed date cannot be before purchase date.", nameof(consumedDate));
-            }
+                return Error.Validation("Consumed date cannot be before purchase date.");
         }
 
-        // Validate notes length if provided
         if (notes != null && notes.Length > 500)
-        {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
-        }
+            return Error.Validation("Notes cannot exceed 500 characters.");
 
         var now = DateTime.UtcNow;
 
@@ -283,7 +265,8 @@ public class Purchase
     /// <param name="coopId">Optional ID of the coop this purchase is associated with</param>
     /// <param name="consumedDate">Optional date when the item was consumed</param>
     /// <param name="notes">Optional notes about the purchase</param>
-    public void Update(
+    /// <returns>A Result indicating success or a validation error</returns>
+    public Result Update(
         string name,
         PurchaseType type,
         decimal amount,
@@ -294,28 +277,17 @@ public class Purchase
         DateTime? consumedDate = null,
         string? notes = null)
     {
-        // Validate name
         if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Purchase name cannot be empty.", nameof(name));
-        }
+            return Error.Validation("Purchase name cannot be empty.");
 
         if (name.Length > 100)
-        {
-            throw new ArgumentException("Purchase name cannot exceed 100 characters.", nameof(name));
-        }
+            return Error.Validation("Purchase name cannot exceed 100 characters.");
 
-        // Validate amount
         if (amount < 0)
-        {
-            throw new ArgumentException("Amount cannot be negative.", nameof(amount));
-        }
+            return Error.Validation("Amount cannot be negative.");
 
-        // Validate quantity
         if (quantity <= 0)
-        {
-            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
-        }
+            return Error.Validation("Quantity must be greater than zero.");
 
         // Normalize purchase date to UTC and date only (midnight)
         var purchaseDateUtc = purchaseDate.Kind switch
@@ -338,18 +310,12 @@ public class Purchase
                 _ => DateTime.SpecifyKind(consumedDate.Value.Date, DateTimeKind.Utc)
             };
 
-            // Validate consumed date is not before purchase date
             if (consumedDateUtc < purchaseDateUtc)
-            {
-                throw new ArgumentException("Consumed date cannot be before purchase date.", nameof(consumedDate));
-            }
+                return Error.Validation("Consumed date cannot be before purchase date.");
         }
 
-        // Validate notes length if provided
         if (notes != null && notes.Length > 500)
-        {
-            throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(notes));
-        }
+            return Error.Validation("Notes cannot exceed 500 characters.");
 
         Name = name;
         Type = type;
@@ -361,5 +327,7 @@ public class Purchase
         ConsumedDate = consumedDateUtc;
         Notes = notes;
         UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
     }
 }

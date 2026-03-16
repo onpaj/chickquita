@@ -13,6 +13,7 @@ public sealed class ArchiveCoopCommandHandler : IRequestHandler<ArchiveCoopComma
     private readonly ICoopRepository _coopRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<ArchiveCoopCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ArchiveCoopCommandHandler"/> class.
@@ -20,14 +21,17 @@ public sealed class ArchiveCoopCommandHandler : IRequestHandler<ArchiveCoopComma
     /// <param name="coopRepository">The coop repository.</param>
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public ArchiveCoopCommandHandler(
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
-        ILogger<ArchiveCoopCommandHandler> logger)
+        ILogger<ArchiveCoopCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -68,6 +72,7 @@ public sealed class ArchiveCoopCommandHandler : IRequestHandler<ArchiveCoopComma
             // Archive the coop (soft delete)
             coop.Deactivate();
             await _coopRepository.UpdateAsync(coop);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Archived coop with ID: {CoopId} for tenant: {TenantId}",

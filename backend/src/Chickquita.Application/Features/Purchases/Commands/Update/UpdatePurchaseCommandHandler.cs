@@ -18,6 +18,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdatePurchaseCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdatePurchaseCommandHandler"/> class.
@@ -27,18 +28,21 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
     /// <param name="currentUserService">The current user service.</param>
     /// <param name="mapper">The AutoMapper instance.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     public UpdatePurchaseCommandHandler(
         IPurchaseRepository purchaseRepository,
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<UpdatePurchaseCommandHandler> logger)
+        ILogger<UpdatePurchaseCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _purchaseRepository = purchaseRepository;
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -90,7 +94,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
             }
 
             // Update the purchase entity
-            purchase.Update(
+            var updateResult = purchase.Update(
                 request.Name,
                 request.Type,
                 request.Amount,
@@ -100,9 +104,12 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
                 request.CoopId,
                 request.ConsumedDate,
                 request.Notes);
+            if (updateResult.IsFailure)
+                return Result<PurchaseDto>.Failure(updateResult.Error);
 
             // Persist changes
             var updatedPurchase = await _purchaseRepository.UpdateAsync(purchase);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Updated purchase with ID: {PurchaseId} for tenant: {TenantId}",
@@ -112,15 +119,6 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
             var purchaseDto = _mapper.Map<PurchaseDto>(updatedPurchase);
 
             return Result<PurchaseDto>.Success(purchaseDto);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Validation error while updating purchase: {Message}",
-                ex.Message);
-
-            return Result<PurchaseDto>.Failure(Error.Validation(ex.Message));
         }
         catch (Exception ex)
         {

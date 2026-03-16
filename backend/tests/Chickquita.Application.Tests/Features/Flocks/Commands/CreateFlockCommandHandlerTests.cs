@@ -23,6 +23,7 @@ public class CreateFlockCommandHandlerTests
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<ILogger<CreateFlockCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly CreateFlockCommandHandler _handler;
 
     public CreateFlockCommandHandlerTests()
@@ -34,13 +35,16 @@ public class CreateFlockCommandHandlerTests
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<CreateFlockCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new CreateFlockCommandHandler(
             _mockFlockRepository.Object,
             _mockCoopRepository.Object,
             _mockCurrentUserService.Object,
             _mockMapper.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests
@@ -76,7 +80,7 @@ public class CreateFlockCommandHandlerTests
             command.InitialHens,
             command.InitialRoosters,
             command.InitialChicks,
-            command.Notes);
+            command.Notes).Value;
 
         _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
             .ReturnsAsync(createdFlock);
@@ -146,7 +150,7 @@ public class CreateFlockCommandHandlerTests
             command.HatchDate,
             command.InitialHens,
             command.InitialRoosters,
-            command.InitialChicks);
+            command.InitialChicks).Value;
 
         _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
             .ReturnsAsync(createdFlock);
@@ -203,7 +207,7 @@ public class CreateFlockCommandHandlerTests
             command.InitialHens,
             command.InitialRoosters,
             command.InitialChicks,
-            command.Notes);
+            command.Notes).Value;
 
         _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
             .ReturnsAsync(createdFlock);
@@ -600,7 +604,7 @@ public class CreateFlockCommandHandlerTests
             command.HatchDate,
             command.InitialHens,
             command.InitialRoosters,
-            command.InitialChicks);
+            command.InitialChicks).Value;
 
         _mockFlockRepository.Setup(x => x.AddAsync(It.IsAny<Flock>()))
             .ReturnsAsync(createdFlock);

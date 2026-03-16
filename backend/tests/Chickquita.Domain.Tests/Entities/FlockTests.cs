@@ -1,3 +1,4 @@
+using Chickquita.Domain.Common;
 using Chickquita.Domain.Entities;
 using FluentAssertions;
 
@@ -23,7 +24,7 @@ public class FlockTests
     public void Create_WithValidData_ShouldSucceed()
     {
         // Arrange & Act
-        var flock = Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -33,6 +34,8 @@ public class FlockTests
             ValidChicks);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var flock = result.Value;
         flock.Should().NotBeNull();
         flock.Id.Should().NotBeEmpty();
         flock.TenantId.Should().Be(_validTenantId);
@@ -52,7 +55,7 @@ public class FlockTests
     public void Create_WithOnlyHens_ShouldSucceed()
     {
         // Arrange & Act
-        var flock = Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             "Hens Only",
@@ -62,6 +65,8 @@ public class FlockTests
             0);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var flock = result.Value;
         flock.Should().NotBeNull();
         flock.CurrentHens.Should().Be(20);
         flock.CurrentRoosters.Should().Be(0);
@@ -72,7 +77,7 @@ public class FlockTests
     public void Create_WithOnlyRoosters_ShouldSucceed()
     {
         // Arrange & Act
-        var flock = Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             "Roosters Only",
@@ -82,6 +87,8 @@ public class FlockTests
             0);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var flock = result.Value;
         flock.Should().NotBeNull();
         flock.CurrentHens.Should().Be(0);
         flock.CurrentRoosters.Should().Be(5);
@@ -92,7 +99,7 @@ public class FlockTests
     public void Create_WithOnlyChicks_ShouldSucceed()
     {
         // Arrange & Act
-        var flock = Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             "Chicks Only",
@@ -102,6 +109,8 @@ public class FlockTests
             15);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var flock = result.Value;
         flock.Should().NotBeNull();
         flock.CurrentHens.Should().Be(0);
         flock.CurrentRoosters.Should().Be(0);
@@ -115,7 +124,7 @@ public class FlockTests
         var notes = "First batch of chickens";
 
         // Act
-        var flock = Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -126,14 +135,15 @@ public class FlockTests
             notes);
 
         // Assert
-        flock.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
     }
 
     [Fact]
     public void Create_WithoutNotes_ShouldSucceed()
     {
         // Arrange & Act
-        var flock = Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -143,15 +153,16 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        flock.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
     }
 
     [Fact]
     public void Create_ShouldGenerateUniqueIds()
     {
         // Arrange & Act
-        var flock1 = Flock.Create(_validTenantId, _validCoopId, "Flock 1", ValidHatchDate, 5, 1, 0);
-        var flock2 = Flock.Create(_validTenantId, _validCoopId, "Flock 2", ValidHatchDate, 5, 1, 0);
+        var flock1 = Flock.Create(_validTenantId, _validCoopId, "Flock 1", ValidHatchDate, 5, 1, 0).Value;
+        var flock2 = Flock.Create(_validTenantId, _validCoopId, "Flock 2", ValidHatchDate, 5, 1, 0).Value;
 
         // Assert
         flock1.Id.Should().NotBe(flock2.Id);
@@ -162,13 +173,13 @@ public class FlockTests
     #region Validation Tests - Tenant and Coop ID
 
     [Fact]
-    public void Create_WithEmptyTenantId_ShouldThrowArgumentException()
+    public void Create_WithEmptyTenantId_ShouldReturnFailure()
     {
         // Arrange
         var emptyTenantId = Guid.Empty;
 
         // Act
-        var act = () => Flock.Create(
+        var result = Flock.Create(
             emptyTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -178,19 +189,18 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Tenant ID cannot be empty.*")
-            .And.ParamName.Should().Be("tenantId");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Tenant ID cannot be empty");
     }
 
     [Fact]
-    public void Create_WithEmptyCoopId_ShouldThrowArgumentException()
+    public void Create_WithEmptyCoopId_ShouldReturnFailure()
     {
         // Arrange
         var emptyCoopId = Guid.Empty;
 
         // Act
-        var act = () => Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             emptyCoopId,
             ValidIdentifier,
@@ -200,9 +210,8 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Coop ID cannot be empty.*")
-            .And.ParamName.Should().Be("coopId");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Coop ID cannot be empty");
     }
 
     #endregion
@@ -213,10 +222,10 @@ public class FlockTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhitespaceIdentifier_ShouldThrowArgumentException(string? invalidIdentifier)
+    public void Create_WithNullOrWhitespaceIdentifier_ShouldReturnFailure(string? invalidIdentifier)
     {
         // Arrange & Act
-        var act = () => Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             invalidIdentifier!,
@@ -226,19 +235,18 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Identifier cannot be empty.*")
-            .And.ParamName.Should().Be("identifier");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Identifier cannot be empty");
     }
 
     [Fact]
-    public void Create_WithIdentifierExceeding50Characters_ShouldThrowArgumentException()
+    public void Create_WithIdentifierExceeding50Characters_ShouldReturnFailure()
     {
         // Arrange
         var longIdentifier = new string('A', 51);
 
         // Act
-        var act = () => Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             longIdentifier,
@@ -248,9 +256,8 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Identifier cannot exceed 50 characters.*")
-            .And.ParamName.Should().Be("identifier");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Identifier cannot exceed 50 characters");
     }
 
     [Fact]
@@ -260,7 +267,7 @@ public class FlockTests
         var identifier = new string('A', 50);
 
         // Act
-        var flock = Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             identifier,
@@ -270,6 +277,8 @@ public class FlockTests
             ValidChicks);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var flock = result.Value;
         flock.Should().NotBeNull();
         flock.Identifier.Should().Be(identifier);
         flock.Identifier.Length.Should().Be(50);
@@ -280,13 +289,13 @@ public class FlockTests
     #region Validation Tests - Hatch Date
 
     [Fact]
-    public void Create_WithFutureHatchDate_ShouldThrowArgumentException()
+    public void Create_WithFutureHatchDate_ShouldReturnFailure()
     {
         // Arrange
         var futureDate = DateTime.UtcNow.AddDays(1);
 
         // Act
-        var act = () => Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -296,9 +305,8 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Hatch date cannot be in the future.*")
-            .And.ParamName.Should().Be("hatchDate");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Hatch date cannot be in the future");
     }
 
     [Fact]
@@ -308,7 +316,7 @@ public class FlockTests
         var today = DateTime.UtcNow;
 
         // Act
-        var flock = Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -318,6 +326,8 @@ public class FlockTests
             ValidChicks);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var flock = result.Value;
         flock.Should().NotBeNull();
         flock.HatchDate.Should().BeCloseTo(today, TimeSpan.FromSeconds(1));
     }
@@ -329,7 +339,7 @@ public class FlockTests
         var pastDate = DateTime.UtcNow.AddYears(-1);
 
         // Act
-        var flock = Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -339,6 +349,8 @@ public class FlockTests
             ValidChicks);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
+        var flock = result.Value;
         flock.Should().NotBeNull();
         flock.HatchDate.Should().Be(pastDate);
     }
@@ -348,10 +360,10 @@ public class FlockTests
     #region Validation Tests - Counts
 
     [Fact]
-    public void Create_WithNegativeHensCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeHensCount_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -361,16 +373,15 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Initial hens count cannot be negative.*")
-            .And.ParamName.Should().Be("initialHens");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Initial hens count cannot be negative");
     }
 
     [Fact]
-    public void Create_WithNegativeRoostersCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeRoostersCount_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -380,16 +391,15 @@ public class FlockTests
             ValidChicks);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Initial roosters count cannot be negative.*")
-            .And.ParamName.Should().Be("initialRoosters");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Initial roosters count cannot be negative");
     }
 
     [Fact]
-    public void Create_WithNegativeChicksCount_ShouldThrowArgumentException()
+    public void Create_WithNegativeChicksCount_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -399,16 +409,15 @@ public class FlockTests
             -1);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("Initial chicks count cannot be negative.*")
-            .And.ParamName.Should().Be("initialChicks");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("Initial chicks count cannot be negative");
     }
 
     [Fact]
-    public void Create_WithAllZeroCounts_ShouldThrowArgumentException()
+    public void Create_WithAllZeroCounts_ShouldReturnFailure()
     {
         // Arrange & Act
-        var act = () => Flock.Create(
+        var result = Flock.Create(
             _validTenantId,
             _validCoopId,
             ValidIdentifier,
@@ -418,9 +427,8 @@ public class FlockTests
             0);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("At least one animal type must have a count greater than 0.*")
-            .And.ParamName.Should().Be("initialHens");
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("At least one animal type must have a count greater than 0");
     }
 
     #endregion
@@ -438,7 +446,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
 
         // Assert
         flock.History.Should().NotBeNull();
@@ -456,7 +464,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
 
         // Assert
         var initialHistory = flock.History.First();
@@ -475,7 +483,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
         var afterCreate = DateTime.UtcNow;
 
         // Assert
@@ -495,7 +503,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
 
         // Assert
         var initialHistory = flock.History.First();
@@ -515,7 +523,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
 
         // Assert
         var initialHistory = flock.History.First();
@@ -538,7 +546,7 @@ public class FlockTests
             ValidHens,
             ValidRoosters,
             ValidChicks,
-            notes);
+            notes).Value;
 
         // Assert
         var initialHistory = flock.History.First();
@@ -556,7 +564,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
 
         // Assert
         var initialHistory = flock.History.First();
@@ -574,7 +582,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
 
         var initialHistory = flock.History.First();
         var originalHens = initialHistory.Hens;
@@ -604,7 +612,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
         var originalCreatedAt = flock.CreatedAt;
         var originalUpdatedAt = flock.UpdatedAt;
         Thread.Sleep(10);
@@ -613,9 +621,10 @@ public class FlockTests
         var newHatchDate = DateTime.UtcNow.AddDays(-60);
 
         // Act
-        flock.Update(newIdentifier, newHatchDate);
+        var updateResult = flock.Update(newIdentifier, newHatchDate);
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         flock.Identifier.Should().Be(newIdentifier);
         flock.HatchDate.Should().Be(newHatchDate);
         flock.CreatedAt.Should().Be(originalCreatedAt);
@@ -633,12 +642,13 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
 
         // Act
-        flock.Update("New Identifier", DateTime.UtcNow.AddDays(-45));
+        var updateResult = flock.Update("New Identifier", DateTime.UtcNow.AddDays(-45));
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         flock.CurrentHens.Should().Be(ValidHens);
         flock.CurrentRoosters.Should().Be(ValidRoosters);
         flock.CurrentChicks.Should().Be(ValidChicks);
@@ -659,7 +669,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
         var originalUpdatedAt = flock.UpdatedAt;
         Thread.Sleep(10);
 
@@ -682,7 +692,7 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
         flock.Archive();
         Thread.Sleep(10);
         var originalUpdatedAt = flock.UpdatedAt;
@@ -710,12 +720,13 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
 
         // Act
-        flock.UpdateComposition(15, 3, 2, "Purchase", "Bought more chickens");
+        var updateResult = flock.UpdateComposition(15, 3, 2, "Purchase", "Bought more chickens");
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         flock.History.Should().HaveCount(2, "should have initial history + new update entry");
     }
 
@@ -730,12 +741,13 @@ public class FlockTests
             ValidHatchDate,
             ValidHens,
             ValidRoosters,
-            ValidChicks);
+            ValidChicks).Value;
 
         // Act
-        flock.UpdateComposition(15, 3, 2, "Purchase", "Bought more chickens");
+        var updateResult = flock.UpdateComposition(15, 3, 2, "Purchase", "Bought more chickens");
 
         // Assert
+        updateResult.IsSuccess.Should().BeTrue();
         flock.CurrentHens.Should().Be(15);
         flock.CurrentRoosters.Should().Be(3);
         flock.CurrentChicks.Should().Be(2);
