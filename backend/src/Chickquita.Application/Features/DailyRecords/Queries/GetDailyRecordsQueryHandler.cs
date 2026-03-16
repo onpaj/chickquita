@@ -66,8 +66,7 @@ public sealed class GetDailyRecordsQueryHandler : IRequestHandler<GetDailyRecord
             if (request.FlockId.HasValue && request.StartDate.HasValue && request.EndDate.HasValue)
             {
                 // Verify the flock exists and belongs to the current tenant
-                var flock = await _flockRepository.GetByIdAsync(request.FlockId.Value);
-                if (flock == null)
+                if (!await _flockRepository.ExistsAsync(request.FlockId.Value))
                 {
                     _logger.LogWarning(
                         "GetDailyRecordsQuery: Flock not found with ID: {FlockId}",
@@ -84,8 +83,7 @@ public sealed class GetDailyRecordsQueryHandler : IRequestHandler<GetDailyRecord
             else if (request.FlockId.HasValue)
             {
                 // Verify the flock exists and belongs to the current tenant
-                var flock = await _flockRepository.GetByIdAsync(request.FlockId.Value);
-                if (flock == null)
+                if (!await _flockRepository.ExistsAsync(request.FlockId.Value))
                 {
                     _logger.LogWarning(
                         "GetDailyRecordsQuery: Flock not found with ID: {FlockId}",

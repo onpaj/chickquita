@@ -134,13 +134,12 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = null
         };
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
         var record1 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-5), 10).Value;
         var record2 = DailyRecord.Create(tenantId, flockId, DateTime.UtcNow.AddDays(-3), 12).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId)).ReturnsAsync(flock);
+        _mockFlockRepository.Setup(x => x.ExistsAsync(flockId)).ReturnsAsync(true);
         _mockDailyRecordRepository.Setup(x => x.GetByFlockIdAsync(flockId))
             .ReturnsAsync(new List<DailyRecord> { record1, record2 });
 
@@ -162,7 +161,7 @@ public class GetDailyRecordsQueryHandlerTests
         result.Value.Should().HaveCount(2);
         result.Value.Should().AllSatisfy(r => r.FlockId.Should().Be(flockId));
 
-        _mockFlockRepository.Verify(x => x.GetByIdAsync(flockId), Times.Once);
+        _mockFlockRepository.Verify(x => x.ExistsAsync(flockId), Times.Once);
         _mockDailyRecordRepository.Verify(x => x.GetByFlockIdAsync(flockId), Times.Once);
     }
 
@@ -183,13 +182,12 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = endDate
         };
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
         var record1 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(1), 10).Value;
         var record2 = DailyRecord.Create(tenantId, flockId, startDate.AddDays(3), 12).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId)).ReturnsAsync(flock);
+        _mockFlockRepository.Setup(x => x.ExistsAsync(flockId)).ReturnsAsync(true);
         _mockDailyRecordRepository.Setup(x => x.GetByFlockIdAndDateRangeAsync(flockId, startDate, endDate))
             .ReturnsAsync(new List<DailyRecord> { record1, record2 });
 
@@ -210,7 +208,7 @@ public class GetDailyRecordsQueryHandlerTests
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(2);
 
-        _mockFlockRepository.Verify(x => x.GetByIdAsync(flockId), Times.Once);
+        _mockFlockRepository.Verify(x => x.ExistsAsync(flockId), Times.Once);
         _mockDailyRecordRepository.Verify(x => x.GetByFlockIdAndDateRangeAsync(flockId, startDate, endDate), Times.Once);
     }
 
@@ -230,7 +228,6 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = null
         };
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
 
         // Create records: some before startDate (should be excluded), some after (should be included)
         var recordBeforeStart = DailyRecord.Create(tenantId, flockId, startDate.AddDays(-5), 8).Value;
@@ -239,7 +236,7 @@ public class GetDailyRecordsQueryHandlerTests
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId)).ReturnsAsync(flock);
+        _mockFlockRepository.Setup(x => x.ExistsAsync(flockId)).ReturnsAsync(true);
 
         // Repository returns all records for the flock
         _mockDailyRecordRepository.Setup(x => x.GetByFlockIdAsync(flockId))
@@ -286,7 +283,6 @@ public class GetDailyRecordsQueryHandlerTests
             EndDate = endDate
         };
 
-        var flock = Flock.Create(tenantId, coopId, "Test Flock", DateTime.UtcNow.AddDays(-30), 10, 2, 5).Value;
 
         // Create records: some before endDate (should be included), some after (should be excluded)
         var recordBeforeEnd = DailyRecord.Create(tenantId, flockId, endDate.AddDays(-2), 8).Value;
@@ -295,7 +291,7 @@ public class GetDailyRecordsQueryHandlerTests
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId)).ReturnsAsync(flock);
+        _mockFlockRepository.Setup(x => x.ExistsAsync(flockId)).ReturnsAsync(true);
 
         // Repository returns all records for the flock
         _mockDailyRecordRepository.Setup(x => x.GetByFlockIdAsync(flockId))
@@ -496,8 +492,7 @@ public class GetDailyRecordsQueryHandlerTests
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
-            .ReturnsAsync((Flock?)null);
+        _mockFlockRepository.Setup(x => x.ExistsAsync(flockId)).ReturnsAsync(false);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -508,7 +503,7 @@ public class GetDailyRecordsQueryHandlerTests
         result.Error.Code.Should().Be("Error.NotFound");
         result.Error.Message.Should().Be("Flock not found");
 
-        _mockFlockRepository.Verify(x => x.GetByIdAsync(flockId), Times.Once);
+        _mockFlockRepository.Verify(x => x.ExistsAsync(flockId), Times.Once);
         _mockDailyRecordRepository.Verify(x => x.GetByFlockIdAsync(It.IsAny<Guid>()), Times.Never);
     }
 

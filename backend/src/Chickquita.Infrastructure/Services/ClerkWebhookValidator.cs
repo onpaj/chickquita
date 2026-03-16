@@ -5,6 +5,7 @@ using Chickquita.Application.Interfaces;
 using Chickquita.Domain.Common;
 using Microsoft.Extensions.Configuration;
 using Svix;
+using Svix.Exceptions;
 
 namespace Chickquita.Infrastructure.Services;
 
@@ -67,7 +68,7 @@ public sealed class ClerkWebhookValidator : IClerkWebhookValidator
 
             return Result<ClerkWebhookDto>.Success(webhookDto);
         }
-        catch (Exception ex) when (ex.GetType().Name == "WebhookVerificationException")
+        catch (WebhookVerificationException ex)
         {
             // Signature validation failed - webhook is not authentic
             return Result<ClerkWebhookDto>.Failure(

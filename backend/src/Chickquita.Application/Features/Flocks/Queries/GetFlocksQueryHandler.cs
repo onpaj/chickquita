@@ -65,8 +65,7 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
             if (request.CoopId.HasValue)
             {
                 // Verify the coop exists and belongs to the current tenant
-                var coop = await _coopRepository.GetByIdAsync(request.CoopId.Value);
-                if (coop == null)
+                if (!await _coopRepository.ExistsAsync(request.CoopId.Value))
                 {
                     _logger.LogWarning(
                         "GetFlocksQuery: Coop not found with ID: {CoopId}",
@@ -90,10 +89,8 @@ public sealed class GetFlocksQueryHandler : IRequestHandler<GetFlocksQuery, Resu
                 tenantId.Value,
                 request.IncludeInactive);
 
-            // Map to DTOs and sort by creation date (newest first)
-            var flockDtos = _mapper.Map<List<FlockDto>>(flocks)
-                .OrderByDescending(f => f.CreatedAt)
-                .ToList();
+            // Map to DTOs — ordering is handled by the repository (CreatedAt descending)
+            var flockDtos = _mapper.Map<List<FlockDto>>(flocks);
 
             return Result<List<FlockDto>>.Success(flockDtos);
         }

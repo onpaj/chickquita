@@ -12,51 +12,50 @@ using Moq;
 namespace Chickquita.Application.Tests.Features.Flocks.Commands;
 
 /// <summary>
-/// Unit tests for ArchiveFlockCommandHandler.
-/// Tests cover successful archiving, flock not found, tenant isolation, and archived flock filtering.
+/// Unit tests for UpdateFlockCompositionCommandHandler.
+/// Tests cover happy path, flock not found, validation errors, and exception handling.
 /// </summary>
-public class ArchiveFlockCommandHandlerTests
+public class UpdateFlockCompositionCommandHandlerTests
 {
     private readonly IFixture _fixture;
     private readonly Mock<IFlockRepository> _mockFlockRepository;
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IMapper> _mockMapper;
-    private readonly Mock<ILogger<ArchiveFlockCommandHandler>> _mockLogger;
-    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
-    private readonly ArchiveFlockCommandHandler _handler;
+    private readonly Mock<ILogger<UpdateFlockCompositionCommandHandler>> _mockLogger;
+    private readonly UpdateFlockCompositionCommandHandler _handler;
 
-    public ArchiveFlockCommandHandlerTests()
+    public UpdateFlockCompositionCommandHandlerTests()
     {
         _fixture = new Fixture().Customize(new AutoMoqCustomization());
 
         _mockFlockRepository = _fixture.Freeze<Mock<IFlockRepository>>();
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
-        _mockLogger = _fixture.Freeze<Mock<ILogger<ArchiveFlockCommandHandler>>>();
-        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
-        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        _mockLogger = _fixture.Freeze<Mock<ILogger<UpdateFlockCompositionCommandHandler>>>();
 
-        _handler = new ArchiveFlockCommandHandler(
+        _handler = new UpdateFlockCompositionCommandHandler(
             _mockFlockRepository.Object,
             _mockCurrentUserService.Object,
             _mockMapper.Object,
-            _mockLogger.Object,
-            _mockUnitOfWork.Object);
+            _mockLogger.Object);
     }
 
     #region Happy Path Tests
 
     [Fact]
-    public async Task Handle_WithValidFlockId_ShouldArchiveFlockSuccessfully()
+    public async Task Handle_WithValidData_ShouldUpdateCompositionSuccessfully()
     {
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
         var flockId = Guid.NewGuid();
 
-        var command = new ArchiveFlockCommand
+        var command = new UpdateFlockCompositionCommand
         {
-            FlockId = flockId
+            FlockId = flockId,
+            Hens = 20,
+            Roosters = 5,
+            Chicks = 10
         };
 
         var existingFlock = Flock.Create(
@@ -68,14 +67,11 @@ public class ArchiveFlockCommandHandlerTests
             initialRoosters: 2,
             initialChicks: 5).Value;
 
-        Flock? capturedFlock = null;
-
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
+        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
             .ReturnsAsync(existingFlock);
         _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
-            .Callback<Flock>(f => capturedFlock = f)
             .ReturnsAsync((Flock f) => f);
 
         var expectedDto = new FlockDto
@@ -83,8 +79,10 @@ public class ArchiveFlockCommandHandlerTests
             Id = flockId,
             TenantId = tenantId,
             CoopId = coopId,
-            Identifier = "Test Flock",
-            IsActive = false
+            CurrentHens = 20,
+            CurrentRoosters = 5,
+            CurrentChicks = 10,
+            IsActive = true
         };
 
         _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
@@ -96,120 +94,112 @@ public class ArchiveFlockCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value.IsActive.Should().BeFalse();
+        result.Value.CurrentHens.Should().Be(20);
+        result.Value.CurrentRoosters.Should().Be(5);
+        result.Value.CurrentChicks.Should().Be(10);
 
-        capturedFlock.Should().NotBeNull();
-        capturedFlock!.IsActive.Should().BeFalse();
-
-        _mockFlockRepository.Verify(x => x.GetByIdWithoutHistoryAsync(flockId), Times.Once);
+        _mockFlockRepository.Verify(x => x.GetByIdAsync(flockId), Times.Once);
         _mockFlockRepository.Verify(x => x.UpdateAsync(It.IsAny<Flock>()), Times.Once);
         _mockMapper.Verify(x => x.Map<FlockDto>(It.IsAny<Flock>()), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_ShouldSetIsActiveToFalse_WithoutHardDeletingFlock()
-    {
-        // Arrange
-        var tenantId = Guid.NewGuid();
-        var coopId = Guid.NewGuid();
-
-        var existingFlock = Flock.Create(
-            tenantId,
-            coopId,
-            "Active Flock",
-            DateTime.UtcNow.AddDays(-30),
-            initialHens: 8,
-            initialRoosters: 1,
-            initialChicks: 3).Value;
-
-        var flockId = existingFlock.Id; // Use the actual flock ID
-
-        var command = new ArchiveFlockCommand
-        {
-            FlockId = flockId
-        };
-
-        Flock? capturedFlock = null;
-
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
-            .ReturnsAsync(existingFlock);
-        _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
-            .Callback<Flock>(f => capturedFlock = f)
-            .ReturnsAsync((Flock f) => f);
-
-        var expectedDto = new FlockDto { Id = flockId, IsActive = false };
-        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
-            .Returns(expectedDto);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-
-        // Verify UpdateAsync was called (soft delete), NOT DeleteAsync (hard delete)
-        _mockFlockRepository.Verify(x => x.UpdateAsync(It.IsAny<Flock>()), Times.Once);
-        _mockFlockRepository.Verify(x => x.DeleteAsync(It.IsAny<Guid>()), Times.Never);
-
-        // Verify flock data is preserved
-        capturedFlock.Should().NotBeNull();
-        capturedFlock!.Id.Should().Be(flockId);
-        capturedFlock.Identifier.Should().Be("Active Flock");
-        capturedFlock.CurrentHens.Should().Be(8);
-        capturedFlock.CurrentRoosters.Should().Be(1);
-        capturedFlock.CurrentChicks.Should().Be(3);
-        capturedFlock.IsActive.Should().BeFalse(); // Only IsActive changed
-    }
-
-    [Fact]
-    public async Task Handle_WhenFlockAlreadyArchived_ShouldBeIdempotent()
+    public async Task Handle_WithValidData_ShouldCreateFlockHistoryEntry()
     {
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
         var flockId = Guid.NewGuid();
 
-        var command = new ArchiveFlockCommand
+        var command = new UpdateFlockCompositionCommand
         {
-            FlockId = flockId
+            FlockId = flockId,
+            Hens = 15,
+            Roosters = 3,
+            Chicks = 0,
+            Notes = "Seasonal adjustment"
         };
 
         var existingFlock = Flock.Create(
             tenantId,
             coopId,
-            "Already Archived",
-            DateTime.UtcNow.AddDays(-60),
-            initialHens: 5,
-            initialRoosters: 1,
-            initialChicks: 0).Value;
+            "Test Flock",
+            DateTime.UtcNow.AddDays(-30),
+            initialHens: 10,
+            initialRoosters: 2,
+            initialChicks: 5).Value;
 
-        // Archive it first
-        existingFlock.Archive();
+        Flock? capturedFlock = null;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
+        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
             .ReturnsAsync(existingFlock);
         _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
+            .Callback<Flock>(f => capturedFlock = f)
             .ReturnsAsync((Flock f) => f);
 
-        var expectedDto = new FlockDto { Id = flockId, IsActive = false };
         _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
-            .Returns(expectedDto);
+            .Returns(new FlockDto { Id = flockId });
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.IsActive.Should().BeFalse();
+        capturedFlock.Should().NotBeNull();
+        capturedFlock!.CurrentHens.Should().Be(15);
+        capturedFlock.CurrentRoosters.Should().Be(3);
+        capturedFlock.CurrentChicks.Should().Be(0);
+        // History entry should have been created (1 initial from Create + 1 from UpdateComposition)
+        capturedFlock.History.Should().HaveCountGreaterThan(1);
+    }
+
+    [Fact]
+    public async Task Handle_WithZeroValues_ShouldUpdateSuccessfully()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var flockId = Guid.NewGuid();
+
+        var command = new UpdateFlockCompositionCommand
+        {
+            FlockId = flockId,
+            Hens = 0,
+            Roosters = 0,
+            Chicks = 0
+        };
+
+        var existingFlock = Flock.Create(
+            tenantId,
+            coopId,
+            "Test Flock",
+            DateTime.UtcNow.AddDays(-30),
+            initialHens: 5,
+            initialRoosters: 1,
+            initialChicks: 2).Value;
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
+            .ReturnsAsync(existingFlock);
+        _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
+            .ReturnsAsync((Flock f) => f);
+
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(new FlockDto { Id = flockId });
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
     }
 
     #endregion
 
-    #region Flock Existence Validation Tests
+    #region Flock Not Found Tests
 
     [Fact]
     public async Task Handle_WhenFlockDoesNotExist_ShouldReturnNotFoundError()
@@ -218,15 +208,18 @@ public class ArchiveFlockCommandHandlerTests
         var tenantId = Guid.NewGuid();
         var flockId = Guid.NewGuid();
 
-        var command = new ArchiveFlockCommand
+        var command = new UpdateFlockCompositionCommand
         {
-            FlockId = flockId
+            FlockId = flockId,
+            Hens = 10,
+            Roosters = 2,
+            Chicks = 5
         };
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
-            .ReturnsAsync((Flock?)null); // Flock not found
+        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
+            .ReturnsAsync((Flock?)null);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -237,72 +230,43 @@ public class ArchiveFlockCommandHandlerTests
         result.Error.Code.Should().Be("Error.NotFound");
         result.Error.Message.Should().Be("Flock not found");
 
-        _mockFlockRepository.Verify(x => x.GetByIdWithoutHistoryAsync(flockId), Times.Once);
+        _mockFlockRepository.Verify(x => x.GetByIdAsync(flockId), Times.Once);
         _mockFlockRepository.Verify(x => x.UpdateAsync(It.IsAny<Flock>()), Times.Never);
     }
 
     #endregion
 
-    #region Tenant Isolation Tests
+    #region Validation Error Tests
 
     [Fact]
-    public async Task Handle_WhenFlockBelongsToCurrentTenant_ShouldArchiveSuccessfully()
+    public async Task Handle_WithNegativeHens_ShouldReturnValidationError()
     {
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
         var flockId = Guid.NewGuid();
 
-        var command = new ArchiveFlockCommand
+        var command = new UpdateFlockCompositionCommand
         {
-            FlockId = flockId
+            FlockId = flockId,
+            Hens = -1,
+            Roosters = 2,
+            Chicks = 0
         };
 
         var existingFlock = Flock.Create(
-            tenantId, // Same tenant
+            tenantId,
             coopId,
-            "My Flock",
-            DateTime.UtcNow.AddDays(-60),
-            initialHens: 10,
-            initialRoosters: 2,
+            "Test Flock",
+            DateTime.UtcNow.AddDays(-30),
+            initialHens: 5,
+            initialRoosters: 1,
             initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
+        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
             .ReturnsAsync(existingFlock);
-        _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
-            .ReturnsAsync((Flock f) => f);
-
-        var expectedDto = new FlockDto { Id = flockId, IsActive = false };
-        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
-            .Returns(expectedDto);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task Handle_WhenFlockBelongsToDifferentTenant_ShouldReturnNotFoundError()
-    {
-        // Arrange
-        var currentTenantId = Guid.NewGuid();
-        var differentTenantId = Guid.NewGuid();
-        var flockId = Guid.NewGuid();
-
-        var command = new ArchiveFlockCommand
-        {
-            FlockId = flockId
-        };
-
-        // Repository returns null due to RLS/global query filter when flock belongs to different tenant
-        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
-        _mockCurrentUserService.Setup(x => x.TenantId).Returns(currentTenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
-            .ReturnsAsync((Flock?)null); // RLS filters out the flock from different tenant
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -310,55 +274,50 @@ public class ArchiveFlockCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be("Error.NotFound");
-        result.Error.Message.Should().Be("Flock not found");
+        result.Error.Code.Should().Be("Error.Validation");
 
-        _mockFlockRepository.Verify(x => x.GetByIdWithoutHistoryAsync(flockId), Times.Once);
         _mockFlockRepository.Verify(x => x.UpdateAsync(It.IsAny<Flock>()), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_ShouldOnlyAccessCurrentTenantData()
+    public async Task Handle_WithNegativeRoosters_ShouldReturnValidationError()
     {
         // Arrange
         var tenantId = Guid.NewGuid();
         var coopId = Guid.NewGuid();
         var flockId = Guid.NewGuid();
 
-        var command = new ArchiveFlockCommand
+        var command = new UpdateFlockCompositionCommand
         {
-            FlockId = flockId
+            FlockId = flockId,
+            Hens = 5,
+            Roosters = -1,
+            Chicks = 0
         };
 
         var existingFlock = Flock.Create(
             tenantId,
             coopId,
-            "My Flock",
-            DateTime.UtcNow.AddDays(-60),
-            initialHens: 10,
-            initialRoosters: 2,
+            "Test Flock",
+            DateTime.UtcNow.AddDays(-30),
+            initialHens: 5,
+            initialRoosters: 1,
             initialChicks: 0).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
+        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
             .ReturnsAsync(existingFlock);
-        _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
-            .ReturnsAsync((Flock f) => f);
-
-        var expectedDto = new FlockDto { Id = flockId, TenantId = tenantId, IsActive = false };
-        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
-            .Returns(expectedDto);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.TenantId.Should().Be(tenantId);
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Code.Should().Be("Error.Validation");
 
-        // Verify repository is called (which applies RLS/global filter)
-        _mockFlockRepository.Verify(x => x.GetByIdWithoutHistoryAsync(flockId), Times.Once);
+        _mockFlockRepository.Verify(x => x.UpdateAsync(It.IsAny<Flock>()), Times.Never);
     }
 
     #endregion
@@ -373,23 +332,26 @@ public class ArchiveFlockCommandHandlerTests
         var coopId = Guid.NewGuid();
         var flockId = Guid.NewGuid();
 
-        var command = new ArchiveFlockCommand
+        var command = new UpdateFlockCompositionCommand
         {
-            FlockId = flockId
+            FlockId = flockId,
+            Hens = 10,
+            Roosters = 2,
+            Chicks = 5
         };
 
         var existingFlock = Flock.Create(
             tenantId,
             coopId,
             "Test Flock",
-            DateTime.UtcNow.AddDays(-60),
-            initialHens: 10,
-            initialRoosters: 2,
-            initialChicks: 0).Value;
+            DateTime.UtcNow.AddDays(-30),
+            initialHens: 5,
+            initialRoosters: 1,
+            initialChicks: 2).Value;
 
         _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
         _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
-        _mockFlockRepository.Setup(x => x.GetByIdWithoutHistoryAsync(flockId))
+        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId))
             .ReturnsAsync(existingFlock);
         _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
             .ThrowsAsync(new Exception("Database connection failed"));

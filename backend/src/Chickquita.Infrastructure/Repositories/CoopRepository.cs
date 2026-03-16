@@ -48,8 +48,6 @@ public class CoopRepository : ICoopRepository
         }
 
         await _context.Coops.AddAsync(coop);
-        await _context.SaveChangesAsync();
-
         return coop;
     }
 
@@ -62,21 +60,20 @@ public class CoopRepository : ICoopRepository
         }
 
         _context.Coops.Update(coop);
-        await _context.SaveChangesAsync();
-
         return coop;
     }
 
     /// <inheritdoc />
     public async Task DeleteAsync(Guid id)
     {
-        var coop = await _context.Coops.FindAsync(id);
-        if (coop != null)
-        {
-            _context.Coops.Remove(coop);
-            await _context.SaveChangesAsync();
-        }
+        await _context.Coops
+            .Where(c => c.Id == id)
+            .ExecuteDeleteAsync();
     }
+
+    /// <inheritdoc />
+    public Task<bool> ExistsAsync(Guid id)
+        => _context.Coops.AnyAsync(c => c.Id == id);
 
     /// <inheritdoc />
     public async Task<bool> ExistsByNameAsync(string name)

@@ -17,6 +17,7 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateCoopCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateCoopCommandHandler"/> class.
@@ -29,12 +30,14 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<CreateCoopCommandHandler> logger)
+        ILogger<CreateCoopCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -73,6 +76,7 @@ public sealed class CreateCoopCommandHandler : IRequestHandler<CreateCoopCommand
 
             // Save to database
             var addedCoop = await _coopRepository.AddAsync(coop);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Created new coop with ID: {CoopId} for tenant: {TenantId}",

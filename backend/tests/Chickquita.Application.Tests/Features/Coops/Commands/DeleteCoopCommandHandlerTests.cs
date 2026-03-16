@@ -19,6 +19,7 @@ public class DeleteCoopCommandHandlerTests
     private readonly Mock<ICoopRepository> _mockCoopRepository;
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<ILogger<DeleteCoopCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly DeleteCoopCommandHandler _handler;
 
     public DeleteCoopCommandHandlerTests()
@@ -28,11 +29,14 @@ public class DeleteCoopCommandHandlerTests
         _mockCoopRepository = _fixture.Freeze<Mock<ICoopRepository>>();
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<DeleteCoopCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new DeleteCoopCommandHandler(
             _mockCoopRepository.Object,
             _mockCurrentUserService.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Empty Coop Success Tests

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Chickquita.Api.Endpoints;
+using Chickquita.Api.Tests.Helpers;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Features.DailyRecords.Commands;
 using Chickquita.Application.Interfaces;
@@ -8,7 +9,9 @@ using Chickquita.Domain.Entities;
 using Chickquita.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -952,14 +955,30 @@ public class DailyRecordsEndpointsTests : IClassFixture<WebApplicationFactory<Pr
             services.Remove(descriptor);
         }
 
-        // Use a unique database name for each test to ensure isolation
-        var databaseName = $"TestDb_{Guid.NewGuid()}";
+        // Use an open SQLite in-memory connection shared across all DbContext instances
+        // within this factory. ExecuteDeleteAsync requires a relational provider.
+        var connection = new SqliteConnection("DataSource=:memory:");
+        connection.Open();
+        services.AddSingleton(connection);
 
+        // Register DbContextOptions<ApplicationDbContext> for SQLite.
+        // AddDbContext also registers ApplicationDbContext as scoped — we replace that below.
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
         {
-            options.UseInMemoryDatabase(databaseName);
+            var conn = serviceProvider.GetRequiredService<SqliteConnection>();
+            options.UseSqlite(conn);
             options.EnableSensitiveDataLogging();
-            options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.QueryIterationFailed));
+        });
+
+        // Override the ApplicationDbContext factory to return SqliteApplicationDbContext
+        // so that OnModelCreating applies the TimeSpan? → INTEGER converter.
+        var appContextDescriptors = services.Where(d => d.ServiceType == typeof(ApplicationDbContext)).ToList();
+        foreach (var d in appContextDescriptors) services.Remove(d);
+        services.AddScoped<ApplicationDbContext>(sp =>
+        {
+            var opts = sp.GetRequiredService<DbContextOptions<ApplicationDbContext>>();
+            var currentUser = sp.GetRequiredService<ICurrentUserService>();
+            return new SqliteApplicationDbContext(opts, currentUser);
         });
 
         // Bypass authentication for tests
@@ -969,6 +988,9 @@ public class DailyRecordsEndpointsTests : IClassFixture<WebApplicationFactory<Pr
                 .RequireAssertion(_ => true)
                 .Build();
         });
+
+        // Ensure SQLite schema is created in every child factory (seeder and HTTP client).
+        services.AddTransient<IStartupFilter, DatabaseInitializerStartupFilter>();
     }
 
     private static void ReplaceCurrentUserService(IServiceCollection services, Mock<ICurrentUserService> mock)
@@ -985,6 +1007,7 @@ public class DailyRecordsEndpointsTests : IClassFixture<WebApplicationFactory<Pr
     private static async Task SeedTenant(IServiceScope scope, Guid tenantId, string clerkUserId)
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.EnsureCreatedAsync();
         var tenant = Tenant.Create(clerkUserId, $"{clerkUserId}@test.com").Value;
         typeof(Tenant).GetProperty(nameof(Tenant.Id))!.SetValue(tenant, tenantId);
         dbContext.Tenants.Add(tenant);

@@ -18,6 +18,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly ILogger<CreatePurchaseCommandHandler> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreatePurchaseCommandHandler"/> class.
@@ -32,13 +33,15 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
         ICoopRepository coopRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
-        ILogger<CreatePurchaseCommandHandler> logger)
+        ILogger<CreatePurchaseCommandHandler> logger,
+        IUnitOfWork unitOfWork)
     {
         _purchaseRepository = purchaseRepository;
         _coopRepository = coopRepository;
         _currentUserService = currentUserService;
         _mapper = mapper;
         _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     /// <summary>
@@ -60,16 +63,12 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
             var tenantId = _currentUserService.TenantId;
 
             // Validate coop reference if provided
-            if (request.CoopId.HasValue)
+            if (request.CoopId.HasValue && !await _coopRepository.ExistsAsync(request.CoopId.Value))
             {
-                var coop = await _coopRepository.GetByIdAsync(request.CoopId.Value);
-                if (coop == null)
-                {
-                    _logger.LogWarning(
-                        "CreatePurchaseCommand: Coop with ID {CoopId} not found",
-                        request.CoopId.Value);
-                    return Result<PurchaseDto>.Failure(Error.NotFound($"Coop with ID {request.CoopId.Value} not found"));
-                }
+                _logger.LogWarning(
+                    "CreatePurchaseCommand: Coop with ID {CoopId} not found",
+                    request.CoopId.Value);
+                return Result<PurchaseDto>.Failure(Error.NotFound($"Coop with ID {request.CoopId.Value} not found"));
             }
 
             // Create the purchase entity
@@ -90,6 +89,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
 
             // Save to database
             var addedPurchase = await _purchaseRepository.AddAsync(purchase);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Created new purchase with ID: {PurchaseId} for tenant: {TenantId}",

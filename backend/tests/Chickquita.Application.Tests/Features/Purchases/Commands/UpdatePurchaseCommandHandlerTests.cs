@@ -23,6 +23,7 @@ public class UpdatePurchaseCommandHandlerTests
     private readonly Mock<ICurrentUserService> _mockCurrentUserService;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<ILogger<UpdatePurchaseCommandHandler>> _mockLogger;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly UpdatePurchaseCommandHandler _handler;
 
     public UpdatePurchaseCommandHandlerTests()
@@ -34,13 +35,16 @@ public class UpdatePurchaseCommandHandlerTests
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<UpdatePurchaseCommandHandler>>>();
+        _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new UpdatePurchaseCommandHandler(
             _mockPurchaseRepository.Object,
             _mockCoopRepository.Object,
             _mockCurrentUserService.Object,
             _mockMapper.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _mockUnitOfWork.Object);
     }
 
     #region Happy Path Tests
@@ -144,10 +148,7 @@ public class UpdatePurchaseCommandHandlerTests
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
-
-        var existingCoop = Coop.Create(tenantId, "Main Coop", "North Field").Value;
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(coopId))
-            .ReturnsAsync(existingCoop);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(coopId)).ReturnsAsync(true);
 
         _mockPurchaseRepository.Setup(x => x.UpdateAsync(It.IsAny<Purchase>()))
             .ReturnsAsync(existingPurchase);
@@ -176,7 +177,7 @@ public class UpdatePurchaseCommandHandlerTests
         result.Value.Should().NotBeNull();
         result.Value.CoopId.Should().Be(coopId);
 
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(coopId), Times.Once);
+        _mockCoopRepository.Verify(x => x.ExistsAsync(coopId), Times.Once);
         _mockPurchaseRepository.Verify(x => x.UpdateAsync(It.IsAny<Purchase>()), Times.Once);
     }
 
@@ -252,8 +253,7 @@ public class UpdatePurchaseCommandHandlerTests
 
         _mockPurchaseRepository.Setup(x => x.GetByIdAsync(purchaseId))
             .ReturnsAsync(existingPurchase);
-        _mockCoopRepository.Setup(x => x.GetByIdAsync(invalidCoopId))
-            .ReturnsAsync((Coop?)null);
+        _mockCoopRepository.Setup(x => x.ExistsAsync(invalidCoopId)).ReturnsAsync(false);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -264,7 +264,7 @@ public class UpdatePurchaseCommandHandlerTests
         result.Error.Code.Should().Be("Error.NotFound");
         result.Error.Message.Should().Contain($"Coop with ID {invalidCoopId} not found");
 
-        _mockCoopRepository.Verify(x => x.GetByIdAsync(invalidCoopId), Times.Once);
+        _mockCoopRepository.Verify(x => x.ExistsAsync(invalidCoopId), Times.Once);
         _mockPurchaseRepository.Verify(x => x.UpdateAsync(It.IsAny<Purchase>()), Times.Never);
     }
 

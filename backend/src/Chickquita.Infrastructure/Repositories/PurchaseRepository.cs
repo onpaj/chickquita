@@ -155,8 +155,6 @@ public class PurchaseRepository : IPurchaseRepository
         }
 
         await _context.Purchases.AddAsync(purchase);
-        await _context.SaveChangesAsync();
-
         return purchase;
     }
 
@@ -169,19 +167,14 @@ public class PurchaseRepository : IPurchaseRepository
         }
 
         _context.Purchases.Update(purchase);
-        await _context.SaveChangesAsync();
-
         return purchase;
     }
 
     /// <inheritdoc />
     public async Task DeleteAsync(Guid id)
     {
-        var purchase = await _context.Purchases.FindAsync(id);
-        if (purchase != null)
-        {
-            _context.Purchases.Remove(purchase);
-            await _context.SaveChangesAsync();
-        }
+        await _context.Purchases
+            .Where(p => p.Id == id)
+            .ExecuteDeleteAsync();
     }
 }
