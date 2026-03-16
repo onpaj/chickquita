@@ -119,7 +119,7 @@ public class TenantInterceptorTests
         commandMock
             .Setup(c => c.ExecuteNonQueryAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
-        commandMock.Setup(c => c.CreateParameter()).Returns(paramMock.Object);
+        commandMock.Protected().Setup<DbParameter>("CreateDbParameter").Returns(paramMock.Object);
         commandMock.Protected()
             .SetupGet<DbParameterCollection>("DbParameterCollection")
             .Returns(paramCollectionMock.Object);
