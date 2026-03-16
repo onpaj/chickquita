@@ -377,6 +377,9 @@ public class DailyRecordRepositoryTests : IDisposable
         // Act
         await _repository.DeleteAsync(recordId);
 
+        // ExecuteDeleteAsync bypasses EF identity map; detach to force DB lookup
+        _dbContext.Entry(record).State = EntityState.Detached;
+
         // Assert
         var deletedRecord = await _dbContext.DailyRecords.FindAsync(recordId);
         deletedRecord.Should().BeNull();
