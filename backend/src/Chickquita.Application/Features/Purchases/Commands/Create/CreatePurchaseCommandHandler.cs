@@ -87,6 +87,7 @@ public sealed class CreatePurchaseCommandHandler : IRequestHandler<CreatePurchas
 
             // Save to database
             var addedPurchase = await _purchaseRepository.AddAsync(purchase);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Created new purchase with ID: {PurchaseId} for tenant: {TenantId}",

@@ -34,6 +34,7 @@ public class UpdateCoopCommandHandlerTests
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<UpdateCoopCommandHandler>>>();
         _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new UpdateCoopCommandHandler(
             _mockCoopRepository.Object,

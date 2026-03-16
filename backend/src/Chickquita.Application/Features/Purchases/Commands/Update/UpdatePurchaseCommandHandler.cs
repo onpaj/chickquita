@@ -107,6 +107,7 @@ public sealed class UpdatePurchaseCommandHandler : IRequestHandler<UpdatePurchas
 
             // Persist changes
             var updatedPurchase = await _purchaseRepository.UpdateAsync(purchase);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Updated purchase with ID: {PurchaseId} for tenant: {TenantId}",

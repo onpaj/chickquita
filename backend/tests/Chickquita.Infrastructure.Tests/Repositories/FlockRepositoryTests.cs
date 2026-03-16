@@ -247,4 +247,46 @@ public class FlockRepositoryTests : IDisposable
             persisted!.Identifier.Should().Be("Detached Updated");
         }
     }
+
+    [Fact]
+    public async Task DeleteAsync_RemovesFlock_WithoutLoadingEntity()
+    {
+        // Arrange: persist a flock
+        var flockId = Guid.Empty;
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            var flock = Flock.Create(_tenantId, _coopId, "TO-DELETE", DateTime.UtcNow.AddDays(-10), 5, 1, 0);
+            await repo.AddAsync(flock);
+            flockId = flock.Id;
+        }
+
+        // Act: delete via a fresh context — ExecuteDeleteAsync issues a direct DELETE WHERE
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            await repo.DeleteAsync(flockId);
+        }
+
+        // Assert: flock no longer exists
+        using (var ctx = CreateContext())
+        {
+            var repo = new FlockRepository(ctx);
+            var deleted = await repo.GetByIdWithoutHistoryAsync(flockId);
+            deleted.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public async Task DeleteAsync_DoesNotThrow_WhenFlockDoesNotExist()
+    {
+        // Arrange
+        var nonExistentId = Guid.NewGuid();
+
+        // Act & Assert — ExecuteDeleteAsync on an empty match set should be a no-op
+        using var ctx = CreateContext();
+        var repo = new FlockRepository(ctx);
+        var act = async () => await repo.DeleteAsync(nonExistentId);
+        await act.Should().NotThrowAsync();
+    }
 }

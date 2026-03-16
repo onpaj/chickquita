@@ -456,10 +456,10 @@ public class PurchaseRepositoryTests : IDisposable
 
         // Act
         await _repository.DeleteAsync(purchaseId);
-        // DeleteAsync only marks entity Deleted; SaveChanges flushes to DB
         await _dbContext.SaveChangesAsync();
 
         // Assert
+        _dbContext.ChangeTracker.Clear(); // ExecuteDeleteAsync bypasses change tracker; clear it before querying
         var deletedPurchase = await _dbContext.Purchases.FindAsync(purchaseId);
         deletedPurchase.Should().BeNull();
     }

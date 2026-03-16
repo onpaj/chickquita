@@ -35,7 +35,6 @@ public class TenantRepository : ITenantRepository
             throw new ArgumentNullException(nameof(tenant));
 
         await _context.Tenants.AddAsync(tenant);
-
         return tenant;
     }
 

@@ -39,7 +39,6 @@ public class FlockHistoryRepository : IFlockHistoryRepository
         }
 
         _context.FlockHistory.Update(historyEntry);
-
         return historyEntry;
     }
 }

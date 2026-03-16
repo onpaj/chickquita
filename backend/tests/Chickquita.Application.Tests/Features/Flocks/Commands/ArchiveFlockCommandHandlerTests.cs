@@ -34,6 +34,7 @@ public class ArchiveFlockCommandHandlerTests
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<ArchiveFlockCommandHandler>>>();
         _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new ArchiveFlockCommandHandler(
             _mockFlockRepository.Object,

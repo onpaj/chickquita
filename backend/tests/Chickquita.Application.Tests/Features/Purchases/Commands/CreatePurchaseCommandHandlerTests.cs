@@ -36,6 +36,7 @@ public class CreatePurchaseCommandHandlerTests
         _mockMapper = _fixture.Freeze<Mock<IMapper>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<CreatePurchaseCommandHandler>>>();
         _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new CreatePurchaseCommandHandler(
             _mockPurchaseRepository.Object,

@@ -30,6 +30,7 @@ public class DeletePurchaseCommandHandlerTests
         _mockCurrentUserService = _fixture.Freeze<Mock<ICurrentUserService>>();
         _mockLogger = _fixture.Freeze<Mock<ILogger<DeletePurchaseCommandHandler>>>();
         _mockUnitOfWork = _fixture.Freeze<Mock<IUnitOfWork>>();
+        _mockUnitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
         _handler = new DeletePurchaseCommandHandler(
             _mockPurchaseRepository.Object,
