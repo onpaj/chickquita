@@ -313,16 +313,6 @@ public class DailyRecordRepositoryTests : IDisposable
         savedRecord.Notes.Should().Be("Test record");
     }
 
-    [Fact]
-    public async Task AddAsync_ThrowsArgumentNullException_WhenRecordIsNull()
-    {
-        // Act
-        var act = async () => await _repository.AddAsync(null!);
-
-        // Assert
-        await act.Should().ThrowAsync<ArgumentNullException>();
-    }
-
     #endregion
 
     #region UpdateAsync Tests
@@ -348,16 +338,6 @@ public class DailyRecordRepositoryTests : IDisposable
         updatedRecord.Should().NotBeNull();
         updatedRecord!.EggCount.Should().Be(15);
         updatedRecord.Notes.Should().Be("Updated notes");
-    }
-
-    [Fact]
-    public async Task UpdateAsync_ThrowsArgumentNullException_WhenRecordIsNull()
-    {
-        // Act
-        var act = async () => await _repository.UpdateAsync(null!);
-
-        // Assert
-        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     #endregion

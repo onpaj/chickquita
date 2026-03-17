@@ -69,11 +69,6 @@ public class FlockRepository : IFlockRepository
     /// <inheritdoc />
     public async Task<Flock> AddAsync(Flock flock)
     {
-        if (flock == null)
-        {
-            throw new ArgumentNullException(nameof(flock));
-        }
-
         await _context.Flocks.AddAsync(flock);
         return flock;
     }
@@ -81,12 +76,8 @@ public class FlockRepository : IFlockRepository
     /// <inheritdoc />
     public async Task<Flock> UpdateAsync(Flock flock)
     {
-        if (flock == null)
-        {
-            throw new ArgumentNullException(nameof(flock));
-        }
-
-        if (_context.Entry(flock).State == EntityState.Detached)
+        var entry = _context.Entry(flock);
+        if (entry.State == EntityState.Detached)
         {
             // Entity was not loaded by this context (e.g. came from a previous scope).
             // Calling Update() walks the entity graph via TrackGraph and marks everything

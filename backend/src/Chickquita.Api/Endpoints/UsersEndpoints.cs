@@ -16,7 +16,12 @@ public static class UsersEndpoints
 
         group.MapGet("/me", GetCurrentUser)
             .WithName("GetCurrentUser")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get current user";
+                op.Description = "Returns the profile of the currently authenticated user.";
+                return op;
+            })
             .Produces<UserDto>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);

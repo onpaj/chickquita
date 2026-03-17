@@ -23,7 +23,12 @@ public static class DailyRecordsEndpoints
         // Also available as GET /api/flocks/{flockId}/daily-records
         dailyRecordsGroup.MapGet("", GetDailyRecords)
             .WithName("GetDailyRecords")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get all daily records";
+                op.Description = "Retrieves daily egg production records for the current tenant. Optionally filter by flock ID and/or date range.";
+                return op;
+            })
             .Produces<List<DailyRecordDto>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
@@ -31,7 +36,12 @@ public static class DailyRecordsEndpoints
         // GET /api/flocks/{flockId}/daily-records - Get all daily records for a specific flock
         flocksGroup.MapGet("/{flockId:guid}/daily-records", GetDailyRecordsByFlock)
             .WithName("GetDailyRecordsByFlock")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get daily records by flock";
+                op.Description = "Retrieves all daily egg production records for the specified flock, optionally filtered by date range.";
+                return op;
+            })
             .Produces<List<DailyRecordDto>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
@@ -39,7 +49,12 @@ public static class DailyRecordsEndpoints
         // POST /api/flocks/{flockId}/daily-records - Create a new daily record for a specific flock
         flocksGroup.MapPost("/{flockId:guid}/daily-records", CreateDailyRecord)
             .WithName("CreateDailyRecord")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Create a daily record";
+                op.Description = "Records a new daily egg collection for the specified flock.";
+                return op;
+            })
             .Produces<DailyRecordDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -48,7 +63,12 @@ public static class DailyRecordsEndpoints
         // PUT /api/daily-records/{id} - Update a daily record
         dailyRecordsGroup.MapPut("/{id:guid}", UpdateDailyRecord)
             .WithName("UpdateDailyRecord")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Update a daily record";
+                op.Description = "Updates an existing daily egg production record.";
+                return op;
+            })
             .Produces<DailyRecordDto>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -57,7 +77,12 @@ public static class DailyRecordsEndpoints
         // DELETE /api/daily-records/{id} - Delete a daily record
         dailyRecordsGroup.MapDelete("/{id:guid}", DeleteDailyRecord)
             .WithName("DeleteDailyRecord")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Delete a daily record";
+                op.Description = "Permanently deletes the specified daily egg production record.";
+                return op;
+            })
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);

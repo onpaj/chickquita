@@ -87,34 +87,6 @@ public class PurchaseRepository : IPurchaseRepository
     }
 
     /// <inheritdoc />
-    public async Task<List<Purchase>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
-    {
-        // Normalize dates to UTC date only
-        var startDateUtc = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
-        var endDateUtc = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
-
-        var tenantId = GetTenantId();
-        return await _context.Purchases
-            .Where(p => p.TenantId == tenantId)
-            .Include(p => p.Coop)
-            .Where(p => p.PurchaseDate >= startDateUtc && p.PurchaseDate <= endDateUtc)
-            .OrderByDescending(p => p.PurchaseDate)
-            .ToListAsync();
-    }
-
-    /// <inheritdoc />
-    public async Task<List<Purchase>> GetByTypeAsync(PurchaseType type)
-    {
-        var tenantId = GetTenantId();
-        return await _context.Purchases
-            .Where(p => p.TenantId == tenantId)
-            .Include(p => p.Coop)
-            .Where(p => p.Type == type)
-            .OrderByDescending(p => p.PurchaseDate)
-            .ToListAsync();
-    }
-
-    /// <inheritdoc />
     public async Task<List<string>> GetDistinctNamesAsync()
     {
         var tenantId = GetTenantId();
@@ -149,11 +121,6 @@ public class PurchaseRepository : IPurchaseRepository
     /// <inheritdoc />
     public async Task<Purchase> AddAsync(Purchase purchase)
     {
-        if (purchase == null)
-        {
-            throw new ArgumentNullException(nameof(purchase));
-        }
-
         await _context.Purchases.AddAsync(purchase);
         return purchase;
     }
@@ -161,11 +128,6 @@ public class PurchaseRepository : IPurchaseRepository
     /// <inheritdoc />
     public async Task<Purchase> UpdateAsync(Purchase purchase)
     {
-        if (purchase == null)
-        {
-            throw new ArgumentNullException(nameof(purchase));
-        }
-
         _context.Purchases.Update(purchase);
         return purchase;
     }

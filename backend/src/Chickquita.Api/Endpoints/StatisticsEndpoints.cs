@@ -23,14 +23,24 @@ public static class StatisticsEndpoints
 
         group.MapGet("/dashboard", GetDashboardStats)
             .WithName("GetDashboardStats")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get dashboard statistics";
+                op.Description = "Returns aggregated statistics for the current tenant: total coops, active flocks, total hens, and total animals.";
+                return op;
+            })
             .Produces<DashboardStatsDto>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status400BadRequest);
 
         group.MapGet("", GetStatistics)
             .WithName("GetStatistics")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get detailed statistics";
+                op.Description = "Returns detailed statistics for a given date range, including cost breakdown, production trends, cost per egg, and flock productivity. Optionally filter by coop or flock.";
+                return op;
+            })
             .Produces<StatisticsDto>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status400BadRequest);

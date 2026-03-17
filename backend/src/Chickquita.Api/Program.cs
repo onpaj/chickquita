@@ -2,7 +2,6 @@ using Chickquita.Api.Endpoints;
 using Chickquita.Api.Middleware;
 using Chickquita.Application;
 using FluentValidation;
-using MediatR;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
@@ -173,16 +172,15 @@ app.UseStaticFiles(new StaticFileOptions
         if (!app.Environment.IsDevelopment())
         {
             var path = ctx.File.PhysicalPath;
+            var ext = path != null ? Path.GetExtension(path).ToLowerInvariant() : string.Empty;
             // Cache JS, CSS, images, fonts for 30 days
-            if (path != null && (path.EndsWith(".js") || path.EndsWith(".css") ||
-                path.EndsWith(".png") || path.EndsWith(".jpg") || path.EndsWith(".jpeg") ||
-                path.EndsWith(".svg") || path.EndsWith(".gif") || path.EndsWith(".webp") ||
-                path.EndsWith(".woff") || path.EndsWith(".woff2") || path.EndsWith(".ttf") ||
-                path.EndsWith(".eot")))
+            if (ext is ".js" or ".css" or ".png" or ".jpg" or ".jpeg"
+                    or ".svg" or ".gif" or ".webp" or ".woff" or ".woff2"
+                    or ".ttf" or ".eot")
             {
                 ctx.Context.Response.Headers.CacheControl = "public,max-age=2592000"; // 30 days
             }
-            else if (path != null && path.EndsWith(".html"))
+            else if (ext == ".html")
             {
                 // Don't cache HTML files (especially index.html)
                 ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
@@ -253,16 +251,6 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
     ResponseWriter = WriteHealthCheckResponse,
     AllowCachingResponses = false
 }).AllowAnonymous();
-
-// MediatR test endpoint (can be removed after verification)
-app.MapGet("/ping", async (IMediator mediator) =>
-    {
-        var result = await mediator.Send(new Chickquita.Application.Features.System.PingQuery());
-        return Results.Ok(new { message = result });
-    })
-    .WithName("Ping")
-    .WithOpenApi()
-    .Produces<object>(200);
 
 // Map webhook endpoints
 app.MapWebhooksEndpoints();

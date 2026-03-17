@@ -23,7 +23,12 @@ public static class FlocksEndpoints
         // Also available as GET /api/coops/{coopId}/flocks
         flocksGroup.MapGet("", GetFlocks)
             .WithName("GetFlocks")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get all flocks";
+                op.Description = "Retrieves all flocks for the current tenant. Optionally filter by coop ID or include inactive/archived flocks.";
+                return op;
+            })
             .Produces<List<FlockDto>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
@@ -31,7 +36,12 @@ public static class FlocksEndpoints
         // GET /api/coops/{coopId}/flocks - Get all flocks for a specific coop
         coopsGroup.MapGet("/{coopId:guid}/flocks", GetFlocksByCoop)
             .WithName("GetFlocksByCoop")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get flocks by coop";
+                op.Description = "Retrieves all flocks belonging to the specified coop.";
+                return op;
+            })
             .Produces<List<FlockDto>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
@@ -39,7 +49,12 @@ public static class FlocksEndpoints
         // POST /api/coops/{coopId}/flocks - Create a new flock under a specific coop
         coopsGroup.MapPost("/{coopId:guid}/flocks", CreateFlock)
             .WithName("CreateFlock")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Create a new flock";
+                op.Description = "Creates a new flock under the specified coop.";
+                return op;
+            })
             .Produces<FlockDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -48,7 +63,12 @@ public static class FlocksEndpoints
         // GET /api/flocks/{id} - Get a specific flock by ID
         flocksGroup.MapGet("/{id:guid}", GetFlockById)
             .WithName("GetFlockById")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get flock by ID";
+                op.Description = "Retrieves a specific flock by its ID, including its change history.";
+                return op;
+            })
             .Produces<FlockDto>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
@@ -56,7 +76,12 @@ public static class FlocksEndpoints
         // PUT /api/flocks/{id} - Update a flock
         flocksGroup.MapPut("/{id:guid}", UpdateFlock)
             .WithName("UpdateFlock")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Update a flock";
+                op.Description = "Updates the name, breed, or other properties of an existing flock.";
+                return op;
+            })
             .Produces<FlockDto>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -65,7 +90,12 @@ public static class FlocksEndpoints
         // POST /api/flocks/{id}/archive - Archive a flock
         flocksGroup.MapPost("/{id:guid}/archive", ArchiveFlock)
             .WithName("ArchiveFlock")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Archive a flock";
+                op.Description = "Archives the specified flock, marking it as inactive.";
+                return op;
+            })
             .Produces<FlockDto>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -74,7 +104,12 @@ public static class FlocksEndpoints
         // POST /api/flocks/{id}/mature-chicks - Mature chicks into hens/roosters
         flocksGroup.MapPost("/{id:guid}/mature-chicks", MatureChicks)
             .WithName("MatureChicks")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Mature chicks";
+                op.Description = "Converts chicks in the flock to hens or roosters based on the provided quantities.";
+                return op;
+            })
             .Produces<FlockDto>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
@@ -83,7 +118,12 @@ public static class FlocksEndpoints
         // PUT /api/flocks/{id}/composition - Update flock composition (hens, roosters, chicks)
         flocksGroup.MapPut("/{id:guid}/composition", UpdateFlockComposition)
             .WithName("UpdateFlockComposition")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Update flock composition";
+                op.Description = "Updates the number of hens, roosters, and chicks in the flock.";
+                return op;
+            })
             .Produces<FlockDto>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)

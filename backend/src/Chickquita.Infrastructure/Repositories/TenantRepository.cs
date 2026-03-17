@@ -31,18 +31,12 @@ public class TenantRepository : ITenantRepository
 
     public async Task<Tenant> AddAsync(Tenant tenant)
     {
-        if (tenant == null)
-            throw new ArgumentNullException(nameof(tenant));
-
         await _context.Tenants.AddAsync(tenant);
         return tenant;
     }
 
     public async Task UpdateAsync(Tenant tenant)
     {
-        if (tenant == null)
-            throw new ArgumentNullException(nameof(tenant));
-
         _context.Tenants.Update(tenant);
     }
 
