@@ -77,11 +77,6 @@ public class DailyRecordRepository : IDailyRecordRepository
     /// <inheritdoc />
     public async Task<DailyRecord> AddAsync(DailyRecord dailyRecord)
     {
-        if (dailyRecord == null)
-        {
-            throw new ArgumentNullException(nameof(dailyRecord));
-        }
-
         await _context.DailyRecords.AddAsync(dailyRecord);
         return dailyRecord;
     }
@@ -89,11 +84,6 @@ public class DailyRecordRepository : IDailyRecordRepository
     /// <inheritdoc />
     public async Task<DailyRecord> UpdateAsync(DailyRecord dailyRecord)
     {
-        if (dailyRecord == null)
-        {
-            throw new ArgumentNullException(nameof(dailyRecord));
-        }
-
         _context.DailyRecords.Update(dailyRecord);
         return dailyRecord;
     }

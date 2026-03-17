@@ -384,16 +384,6 @@ public class PurchaseRepositoryTests : IDisposable
         savedPurchase.Notes.Should().Be("Test notes");
     }
 
-    [Fact]
-    public async Task AddAsync_ThrowsArgumentNullException_WhenPurchaseIsNull()
-    {
-        // Act
-        var act = async () => await _repository.AddAsync(null!);
-
-        // Assert
-        await act.Should().ThrowAsync<ArgumentNullException>();
-    }
-
     #endregion
 
     #region UpdateAsync Tests
@@ -426,16 +416,6 @@ public class PurchaseRepositoryTests : IDisposable
         updatedPurchase!.Name.Should().Be("Feed 2");
         updatedPurchase.Amount.Should().Be(150m);
         updatedPurchase.Notes.Should().Be("Updated notes");
-    }
-
-    [Fact]
-    public async Task UpdateAsync_ThrowsArgumentNullException_WhenPurchaseIsNull()
-    {
-        // Act
-        var act = async () => await _repository.UpdateAsync(null!);
-
-        // Assert
-        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     #endregion

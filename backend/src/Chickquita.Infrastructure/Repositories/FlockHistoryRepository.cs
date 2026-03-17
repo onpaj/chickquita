@@ -33,11 +33,6 @@ public class FlockHistoryRepository : IFlockHistoryRepository
     /// <inheritdoc />
     public async Task<FlockHistory> UpdateAsync(FlockHistory historyEntry)
     {
-        if (historyEntry == null)
-        {
-            throw new ArgumentNullException(nameof(historyEntry));
-        }
-
         _context.FlockHistory.Update(historyEntry);
         return historyEntry;
     }

@@ -149,11 +149,6 @@ public class PurchaseRepository : IPurchaseRepository
     /// <inheritdoc />
     public async Task<Purchase> AddAsync(Purchase purchase)
     {
-        if (purchase == null)
-        {
-            throw new ArgumentNullException(nameof(purchase));
-        }
-
         await _context.Purchases.AddAsync(purchase);
         return purchase;
     }
@@ -161,11 +156,6 @@ public class PurchaseRepository : IPurchaseRepository
     /// <inheritdoc />
     public async Task<Purchase> UpdateAsync(Purchase purchase)
     {
-        if (purchase == null)
-        {
-            throw new ArgumentNullException(nameof(purchase));
-        }
-
         _context.Purchases.Update(purchase);
         return purchase;
     }
