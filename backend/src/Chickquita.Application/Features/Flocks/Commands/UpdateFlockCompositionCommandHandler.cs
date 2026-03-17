@@ -9,7 +9,7 @@ namespace Chickquita.Application.Features.Flocks.Commands;
 
 /// <summary>
 /// Handler for UpdateFlockCompositionCommand that updates flock composition.
-/// Creates an immutable FlockHistory entry with reason "Manual update".
+/// Creates an immutable FlockHistory entry with the reason supplied in the command.
 /// </summary>
 public sealed class UpdateFlockCompositionCommandHandler : IRequestHandler<UpdateFlockCompositionCommand, Result<FlockDto>>
 {
@@ -76,7 +76,7 @@ public sealed class UpdateFlockCompositionCommandHandler : IRequestHandler<Updat
                 hens: request.Hens,
                 roosters: request.Roosters,
                 chicks: request.Chicks,
-                reason: "Manual update",
+                reason: request.Reason,
                 notes: request.Notes);
 
             if (compositionResult.IsFailure)

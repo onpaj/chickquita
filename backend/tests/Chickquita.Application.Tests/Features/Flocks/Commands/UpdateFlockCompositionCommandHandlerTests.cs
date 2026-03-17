@@ -159,6 +159,100 @@ public class UpdateFlockCompositionCommandHandlerTests
     }
 
     [Fact]
+    public async Task Handle_WithCustomReason_ShouldUseProvidedReason()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var flockId = Guid.NewGuid();
+
+        var command = new UpdateFlockCompositionCommand
+        {
+            FlockId = flockId,
+            Hens = 10,
+            Roosters = 2,
+            Chicks = 0,
+            Reason = "Mortality"
+        };
+
+        var existingFlock = Flock.Create(
+            tenantId,
+            coopId,
+            "Test Flock",
+            DateTime.UtcNow.AddDays(-30),
+            initialHens: 15,
+            initialRoosters: 3,
+            initialChicks: 0).Value;
+
+        Flock? capturedFlock = null;
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId)).ReturnsAsync(existingFlock);
+        _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
+            .Callback<Flock>(f => capturedFlock = f)
+            .ReturnsAsync((Flock f) => f);
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(new FlockDto { Id = flockId });
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        capturedFlock.Should().NotBeNull();
+        var latestHistory = capturedFlock!.History.OrderByDescending(h => h.ChangeDate).First();
+        latestHistory.Reason.Should().Be("Mortality");
+    }
+
+    [Fact]
+    public async Task Handle_WithDefaultReason_ShouldUseManualUpdateFallback()
+    {
+        // Arrange
+        var tenantId = Guid.NewGuid();
+        var coopId = Guid.NewGuid();
+        var flockId = Guid.NewGuid();
+
+        var command = new UpdateFlockCompositionCommand
+        {
+            FlockId = flockId,
+            Hens = 10,
+            Roosters = 2,
+            Chicks = 0
+            // Reason not set — should default to "Manual update"
+        };
+
+        var existingFlock = Flock.Create(
+            tenantId,
+            coopId,
+            "Test Flock",
+            DateTime.UtcNow.AddDays(-30),
+            initialHens: 15,
+            initialRoosters: 3,
+            initialChicks: 0).Value;
+
+        Flock? capturedFlock = null;
+
+        _mockCurrentUserService.Setup(x => x.IsAuthenticated).Returns(true);
+        _mockCurrentUserService.Setup(x => x.TenantId).Returns(tenantId);
+        _mockFlockRepository.Setup(x => x.GetByIdAsync(flockId)).ReturnsAsync(existingFlock);
+        _mockFlockRepository.Setup(x => x.UpdateAsync(It.IsAny<Flock>()))
+            .Callback<Flock>(f => capturedFlock = f)
+            .ReturnsAsync((Flock f) => f);
+        _mockMapper.Setup(x => x.Map<FlockDto>(It.IsAny<Flock>()))
+            .Returns(new FlockDto { Id = flockId });
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        capturedFlock.Should().NotBeNull();
+        var latestHistory = capturedFlock!.History.OrderByDescending(h => h.ChangeDate).First();
+        latestHistory.Reason.Should().Be("Manual update");
+    }
+
+    [Fact]
     public async Task Handle_WithZeroValues_ShouldUpdateSuccessfully()
     {
         // Arrange
