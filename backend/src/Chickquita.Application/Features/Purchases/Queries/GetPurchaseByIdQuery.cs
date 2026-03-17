@@ -1,9 +1,6 @@
-using AutoMapper;
 using Chickquita.Domain.Common;
 using Chickquita.Application.DTOs;
-using Chickquita.Application.Interfaces;
 using MediatR;
-using Microsoft.Extensions.Logging;
 
 namespace Chickquita.Application.Features.Purchases.Queries;
 
@@ -16,78 +13,4 @@ public sealed record GetPurchaseByIdQuery : IRequest<Result<PurchaseDto>>
     /// Gets or sets the purchase ID.
     /// </summary>
     public Guid Id { get; init; }
-}
-
-/// <summary>
-/// Handler for GetPurchaseByIdQuery that retrieves a single purchase.
-/// </summary>
-public sealed class GetPurchaseByIdQueryHandler : IRequestHandler<GetPurchaseByIdQuery, Result<PurchaseDto>>
-{
-    private readonly IPurchaseRepository _purchaseRepository;
-    private readonly ICurrentUserService _currentUserService;
-    private readonly IMapper _mapper;
-    private readonly ILogger<GetPurchaseByIdQueryHandler> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetPurchaseByIdQueryHandler"/> class.
-    /// </summary>
-    /// <param name="purchaseRepository">The purchase repository.</param>
-    /// <param name="currentUserService">The current user service.</param>
-    /// <param name="mapper">The AutoMapper instance.</param>
-    /// <param name="logger">The logger instance.</param>
-    public GetPurchaseByIdQueryHandler(
-        IPurchaseRepository purchaseRepository,
-        ICurrentUserService currentUserService,
-        IMapper mapper,
-        ILogger<GetPurchaseByIdQueryHandler> logger)
-    {
-        _purchaseRepository = purchaseRepository;
-        _currentUserService = currentUserService;
-        _mapper = mapper;
-        _logger = logger;
-    }
-
-    /// <summary>
-    /// Handles the GetPurchaseByIdQuery by retrieving a single purchase.
-    /// </summary>
-    /// <param name="request">The get purchase by ID query.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A result containing the purchase DTO or NOT_FOUND error.</returns>
-    public async Task<Result<PurchaseDto>> Handle(GetPurchaseByIdQuery request, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Processing GetPurchaseByIdQuery for purchase {PurchaseId}", request.Id);
-
-        try
-        {
-            var tenantId = _currentUserService.TenantId;
-
-            // Retrieve purchase by ID (tenant isolation is handled by RLS and global query filter)
-            var purchase = await _purchaseRepository.GetByIdAsync(request.Id);
-
-            if (purchase == null)
-            {
-                _logger.LogInformation("Purchase {PurchaseId} not found for tenant {TenantId}", request.Id, tenantId.Value);
-                return Result<PurchaseDto>.Failure(Error.NotFound("Purchase not found"));
-            }
-
-            _logger.LogInformation(
-                "Successfully retrieved purchase {PurchaseId} for tenant {TenantId}",
-                request.Id,
-                tenantId.Value);
-
-            var purchaseDto = _mapper.Map<PurchaseDto>(purchase);
-
-            return Result<PurchaseDto>.Success(purchaseDto);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                ex,
-                "Error occurred while retrieving purchase {PurchaseId}",
-                request.Id);
-
-            return Result<PurchaseDto>.Failure(
-                Error.Failure("An unexpected error occurred. Please try again."));
-        }
-    }
 }
