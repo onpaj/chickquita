@@ -2,7 +2,6 @@ using Chickquita.Api.Endpoints;
 using Chickquita.Api.Middleware;
 using Chickquita.Application;
 using FluentValidation;
-using MediatR;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
@@ -252,16 +251,6 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
     ResponseWriter = WriteHealthCheckResponse,
     AllowCachingResponses = false
 }).AllowAnonymous();
-
-// MediatR test endpoint (can be removed after verification)
-app.MapGet("/ping", async (IMediator mediator) =>
-    {
-        var result = await mediator.Send(new Chickquita.Application.Features.System.PingQuery());
-        return Results.Ok(new { message = result });
-    })
-    .WithName("Ping")
-    .WithOpenApi()
-    .Produces<object>(200);
 
 // Map webhook endpoints
 app.MapWebhooksEndpoints();
