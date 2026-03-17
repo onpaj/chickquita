@@ -22,7 +22,12 @@ public static class FlockHistoryEndpoints
         // GET /api/flocks/{id}/history - Get full flock change history timeline
         flocksGroup.MapGet("/{id:guid}/history", GetFlockHistory)
             .WithName("GetFlockHistory")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Get flock history";
+                op.Description = "Retrieves the full change history timeline for the specified flock.";
+                return op;
+            })
             .Produces<List<FlockHistoryDto>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
@@ -30,7 +35,12 @@ public static class FlockHistoryEndpoints
         // PATCH /api/flock-history/{id}/notes - Update notes on history record
         historyGroup.MapPatch("/{id:guid}/notes", UpdateFlockHistoryNotes)
             .WithName("UpdateFlockHistoryNotes")
-            .WithOpenApi()
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Update history entry notes";
+                op.Description = "Updates the notes field on a flock history entry.";
+                return op;
+            })
             .Produces<FlockHistoryDto>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
