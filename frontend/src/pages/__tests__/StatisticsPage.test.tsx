@@ -5,6 +5,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import StatisticsPage from '../StatisticsPage';
 
+// Mock useUserSettingsContext — Statistics coop filter is only visible in multi-coop mode
+vi.mock('@/features/settings', () => ({
+  useUserSettingsContext: () => ({ singleCoopMode: false, isLoading: false }),
+}));
+
 // Mock hooks
 const mockUseStatistics = vi.fn();
 const mockUseCoops = vi.fn();
