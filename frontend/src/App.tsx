@@ -23,6 +23,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { AppBarProvider, useAppBar } from './context/AppBarContext'
 import { useUser } from '@clerk/clerk-react'
+import { UserSettingsProvider } from './features/settings'
 
 function AppInner() {
   useApiClient()
@@ -189,7 +190,9 @@ function AppInner() {
 function App() {
   return (
     <AppBarProvider>
-      <AppInner />
+      <UserSettingsProvider>
+        <AppInner />
+      </UserSettingsProvider>
     </AppBarProvider>
   )
 }
