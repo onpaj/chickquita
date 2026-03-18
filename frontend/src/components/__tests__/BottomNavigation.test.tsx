@@ -20,6 +20,7 @@ vi.mock('@/features/settings', () => ({
 
 vi.mock('@/features/coops/hooks/useCoops', () => ({
   useCoops: () => ({ data: undefined }),
+  useEnsureDefaultCoop: () => ({ mutate: vi.fn() }),
 }));
 
 vi.mock('react-i18next', () => ({

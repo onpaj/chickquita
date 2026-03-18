@@ -17,6 +17,7 @@ const mockUseCoops = vi.fn();
 
 vi.mock('../../features/coops/hooks/useCoops', () => ({
   useCoops: () => mockUseCoops(),
+  useEnsureDefaultCoop: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 // Mock useErrorHandler hook
