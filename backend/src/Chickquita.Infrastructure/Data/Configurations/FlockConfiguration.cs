@@ -20,7 +20,8 @@ public class FlockConfiguration : IEntityTypeConfiguration<Flock>
         // Properties
         builder.Property(f => f.Id)
             .HasColumnName("id")
-            .IsRequired();
+            .IsRequired()
+            .ValueGeneratedNever();
 
         builder.Property(f => f.TenantId)
             .HasColumnName("tenant_id")
