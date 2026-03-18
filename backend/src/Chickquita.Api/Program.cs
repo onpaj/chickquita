@@ -1,8 +1,10 @@
 using Chickquita.Api.Endpoints;
 using Chickquita.Api.Middleware;
 using Chickquita.Application;
+using Chickquita.Infrastructure.Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
 using System.Text.Json;
@@ -116,6 +118,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Apply pending EF Core migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 // Intercept FluentValidation.ValidationException from the MediatR pipeline behavior
 // and return 400 Bad Request instead of 500. This applies to all endpoints globally.
