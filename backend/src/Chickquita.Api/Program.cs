@@ -276,6 +276,9 @@ app.MapStatisticsEndpoints();
 // Map purchases endpoints
 app.MapPurchasesEndpoints();
 
+// Map egg sales endpoints
+app.MapEggSalesEndpoints();
+
 // Map settings endpoints
 app.MapSettingsEndpoints();
 
