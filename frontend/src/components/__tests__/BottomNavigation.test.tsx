@@ -14,6 +14,14 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+vi.mock('@/features/settings', () => ({
+  useUserSettingsContext: () => ({ singleCoopMode: false, isLoading: false }),
+}));
+
+vi.mock('@/features/coops/hooks/useCoops', () => ({
+  useCoops: () => ({ data: undefined }),
+}));
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
