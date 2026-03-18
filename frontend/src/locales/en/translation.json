@@ -409,7 +409,12 @@
     "about": "About",
     "version": "Version",
     "members": "Farm Members",
-    "inviteMember": "Invite Member"
+    "inviteMember": "Invite Member",
+    "singleCoopMode": {
+      "label": "Simplified mode",
+      "description": "Hides coop selection and simplifies navigation",
+      "onlyOneCoopHint": "Only available with exactly one active coop"
+    }
   },
   "validation": {
     "required": "This field is required",

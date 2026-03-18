@@ -411,7 +411,12 @@
     "about": "O aplikaci",
     "version": "Verze",
     "members": "Členové farmy",
-    "inviteMember": "Pozvat člena"
+    "inviteMember": "Pozvat člena",
+    "singleCoopMode": {
+      "label": "Zjednodušený režim",
+      "description": "Skryje výběr kurníku a zjednoduší navigaci",
+      "onlyOneCoopHint": "Dostupné pouze s jedním aktivním kurníkem"
+    }
   },
   "validation": {
     "required": "Toto pole je povinné",
