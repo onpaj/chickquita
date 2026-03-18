@@ -245,7 +245,9 @@
       "fromDate": "Od data",
       "toDate": "Do data",
       "type": "Typ",
-      "flock": "Hejno"
+      "flock": "Hejno",
+      "coop": "Kurník",
+      "allCoops": "Všechny kurníky"
     },
     "summary": {
       "thisMonth": "Celkem utraceno tento měsíc"

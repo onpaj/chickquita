@@ -245,7 +245,9 @@
       "fromDate": "From Date",
       "toDate": "To Date",
       "type": "Type",
-      "flock": "Flock"
+      "flock": "Flock",
+      "coop": "Coop",
+      "allCoops": "All coops"
     },
     "summary": {
       "thisMonth": "Total Spent This Month"
