@@ -92,7 +92,9 @@
       "title": "Vítejte v Chickquita!",
       "message": "Začněte sledováním své kuřecí farmy",
       "createFirstCoop": "Vytvořte svůj první kurník",
-      "createFirstCoopDesc": "Nastavte kurník a začněte spravovat hejna"
+      "createFirstCoopDesc": "Nastavte kurník a začněte spravovat hejna",
+      "createFirstFlock": "Vytvořte své první hejno",
+      "createFirstFlockDesc": "Přidejte hejno a začněte sledovat produkci"
     }
   },
   "coops": {

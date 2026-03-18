@@ -92,7 +92,9 @@
       "title": "Welcome to Chickquita!",
       "message": "Start tracking your chicken farm",
       "createFirstCoop": "Create Your First Coop",
-      "createFirstCoopDesc": "Set up a coop to start managing your flocks"
+      "createFirstCoopDesc": "Set up a coop to start managing your flocks",
+      "createFirstFlock": "Create Your First Flock",
+      "createFirstFlockDesc": "Add a flock to start tracking production"
     }
   },
   "coops": {
