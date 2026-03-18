@@ -7,11 +7,15 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useUserSettingsContext } from '@/features/settings';
+import { useCoops } from '@/features/coops/hooks/useCoops';
 
 export function BottomNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const { singleCoopMode } = useUserSettingsContext();
+  const { data: coops } = useCoops();
 
   const getCurrentTab = () => {
     if (location.pathname.startsWith('/coops')) return 'coops';
@@ -28,7 +32,11 @@ export function BottomNavigation() {
         navigate('/dashboard');
         break;
       case 'coops':
-        navigate('/coops');
+        if (singleCoopMode && coops?.[0]) {
+          navigate(`/coops/${coops[0].id}/flocks`);
+        } else {
+          navigate('/coops');
+        }
         break;
       case 'records':
         navigate('/records/stats');
@@ -77,7 +85,7 @@ export function BottomNavigation() {
           icon={<DashboardIcon />}
         />
         <BottomNavigationAction
-          label={t('navigation.coops')}
+          label={singleCoopMode ? t('navigation.flocks') : t('navigation.coops')}
           value="coops"
           icon={<CoopsIcon />}
         />

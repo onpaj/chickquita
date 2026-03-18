@@ -36,6 +36,7 @@
   "navigation": {
     "dashboard": "Dashboard",
     "coops": "Coops",
+    "flocks": "Flocks",
     "purchases": "Purchases",
     "dailyRecords": "Daily Records",
     "statistics": "Statistics",
