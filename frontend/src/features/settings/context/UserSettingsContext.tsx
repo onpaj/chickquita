@@ -8,7 +8,7 @@ interface UserSettingsContextValue {
 }
 
 const UserSettingsContext = createContext<UserSettingsContextValue>({
-  singleCoopMode: false,
+  singleCoopMode: true,
   isLoading: true,
 });
 
@@ -18,7 +18,7 @@ export function UserSettingsProvider({ children }: { children: ReactNode }) {
   return (
     <UserSettingsContext.Provider
       value={{
-        singleCoopMode: data?.singleCoopMode ?? false,
+        singleCoopMode: data?.singleCoopMode ?? true,
         isLoading,
       }}
     >

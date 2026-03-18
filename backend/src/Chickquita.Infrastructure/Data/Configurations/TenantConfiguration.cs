@@ -37,7 +37,7 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 
         builder.Property(t => t.SingleCoopMode)
             .HasColumnName("single_coop_mode")
-            .HasDefaultValue(false)
+            .HasDefaultValue(true)
             .IsRequired();
 
         builder.HasIndex(t => t.ClerkOrgId)

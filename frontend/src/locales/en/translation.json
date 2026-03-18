@@ -416,9 +416,9 @@
     "members": "Farm Members",
     "inviteMember": "Invite Member",
     "singleCoopMode": {
-      "label": "Simplified mode",
-      "description": "Hides coop selection and simplifies navigation",
-      "onlyOneCoopHint": "Only available with exactly one active coop"
+      "label": "Multi-coop management",
+      "description": "Enables full management of multiple coops and shows coop navigation",
+      "onlyOneCoopHint": "Can only switch back to simplified mode with exactly one active coop"
     }
   },
   "validation": {

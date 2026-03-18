@@ -44,15 +44,17 @@ export function SettingsPage() {
 
   const activeCoops = coops?.filter((c) => c.isActive) ?? [];
   const canToggleSingleCoopMode = activeCoops.length === 1;
-  const singleCoopMode = settings?.singleCoopMode ?? false;
+  const singleCoopMode = settings?.singleCoopMode ?? true;
 
   const handleLanguageChange = (event: SelectChangeEvent) => {
     i18n.changeLanguage(event.target.value);
   };
 
   const handleSingleCoopModeToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!canToggleSingleCoopMode) return;
-    updateSettings({ singleCoopMode: event.target.checked });
+    // checked=true → enable multi-coop (singleCoopMode=false), always allowed
+    // checked=false → revert to single-coop (singleCoopMode=true), requires exactly 1 coop
+    if (!event.target.checked && !canToggleSingleCoopMode) return;
+    updateSettings({ singleCoopMode: !event.target.checked });
   };
 
   const handleSignOutConfirm = async () => {
@@ -102,9 +104,9 @@ export function SettingsPage() {
           <FormControlLabel
             control={
               <Switch
-                checked={singleCoopMode}
+                checked={!singleCoopMode}
                 onChange={handleSingleCoopModeToggle}
-                disabled={!canToggleSingleCoopMode || isUpdatingSettings}
+                disabled={(!singleCoopMode && !canToggleSingleCoopMode) || isUpdatingSettings}
               />
             }
             label={
@@ -118,7 +120,7 @@ export function SettingsPage() {
               </Box>
             }
           />
-          {!canToggleSingleCoopMode && (
+          {!singleCoopMode && !canToggleSingleCoopMode && (
             <FormHelperText sx={{ mt: 0.5, ml: 0 }}>
               {t('settings.singleCoopMode.onlyOneCoopHint')}
             </FormHelperText>

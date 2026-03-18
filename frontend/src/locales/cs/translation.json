@@ -418,9 +418,9 @@
     "members": "Členové farmy",
     "inviteMember": "Pozvat člena",
     "singleCoopMode": {
-      "label": "Zjednodušený režim",
-      "description": "Skryje výběr kurníku a zjednoduší navigaci",
-      "onlyOneCoopHint": "Dostupné pouze s jedním aktivním kurníkem"
+      "label": "Správa více kurníků",
+      "description": "Zapne plnou správu více kurníků a zobrazí navigaci kurníků",
+      "onlyOneCoopHint": "Zpět do zjednodušeného režimu lze přepnout pouze s jedním aktivním kurníkem"
     }
   },
   "validation": {
