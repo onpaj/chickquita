@@ -56,8 +56,8 @@
         "notAvailable": "Zatím nedostupné"
       },
       "weeklyProduction": {
-        "title": "Týdenní produkce",
-        "eggsThisWeek": "Vajec tento týden",
+        "title": "Posledních 7 dní",
+        "eggsThisWeek": "Vajec za 7 dní",
         "notAvailable": "Zatím nedostupné"
       },
       "flockStatus": {

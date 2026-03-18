@@ -56,8 +56,8 @@
         "notAvailable": "Not available yet"
       },
       "weeklyProduction": {
-        "title": "Weekly Production",
-        "eggsThisWeek": "Eggs This Week",
+        "title": "Last 7 Days",
+        "eggsThisWeek": "Eggs (last 7 days)",
         "notAvailable": "Not available yet"
       },
       "flockStatus": {
