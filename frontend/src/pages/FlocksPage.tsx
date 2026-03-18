@@ -25,9 +25,11 @@ import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useToast } from '../hooks/useToast';
 import { processApiError } from '../lib/errors';
 import type { Flock } from '../features/flocks/api/flocksApi';
+import { useUserSettingsContext } from '../features/settings';
 
 export default function FlocksPage() {
   const { t } = useTranslation();
+  const { singleCoopMode } = useUserSettingsContext();
   const { coopId } = useParams<{ coopId: string }>();
   const [includeInactive, setIncludeInactive] = useState(false);
   const { data: flocks, isLoading, error, refetch } = useFlocks(coopId!, includeInactive);
@@ -189,7 +191,7 @@ export default function FlocksPage() {
         <Typography variant="h4" component="h1" gutterBottom>
           {t('flocks.title')}
         </Typography>
-        {coop?.name && (
+        {!singleCoopMode && coop?.name && (
           <Typography variant="subtitle1" color="text.secondary" sx={{ mt: -1, mb: 1 }}>
             {coop.name}
           </Typography>
