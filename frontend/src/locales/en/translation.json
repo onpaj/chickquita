@@ -203,6 +203,7 @@
     },
     "archiving": "Archiving...",
     "archiveSuccess": "Flock archived successfully",
+    "addFirstFlock": "Add first flock",
     "archiveConfirmTitle": "Archive Flock?",
     "archiveConfirmMessage": "This flock will be archived and removed from your active list. You can reactivate it later if needed.",
     "emptyState": {

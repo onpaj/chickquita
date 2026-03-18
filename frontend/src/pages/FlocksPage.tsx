@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -31,6 +31,8 @@ export default function FlocksPage() {
   const { t } = useTranslation();
   const { singleCoopMode } = useUserSettingsContext();
   const { coopId } = useParams<{ coopId: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [includeInactive, setIncludeInactive] = useState(false);
   const { data: flocks, isLoading, error, refetch } = useFlocks(coopId!, includeInactive);
   const { data: coop } = useCoopDetail(coopId!);
@@ -42,6 +44,15 @@ export default function FlocksPage() {
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [selectedFlock, setSelectedFlock] = useState<Flock | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Auto-open create modal when navigated with ?addFlock=true
+  useEffect(() => {
+    if (searchParams.get('addFlock') === 'true') {
+      setIsCreateModalOpen(true);
+      // Remove the query param without re-rendering the whole page
+      navigate({ search: '' }, { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {

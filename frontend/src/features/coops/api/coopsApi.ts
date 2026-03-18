@@ -52,4 +52,9 @@ export const coopsApi = {
     const response = await apiClient.delete<boolean>(`/coops/${id}`);
     return response.data;
   },
+
+  ensureDefault: async (): Promise<Coop> => {
+    const response = await apiClient.post<Coop>('/coops/ensure-default');
+    return response.data;
+  },
 };

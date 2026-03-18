@@ -203,6 +203,7 @@
     },
     "archiving": "Archivuji...",
     "archiveSuccess": "Hejno bylo úspěšně archivováno",
+    "addFirstFlock": "Přidat první hejno",
     "archiveConfirmTitle": "Archivovat hejno?",
     "archiveConfirmMessage": "Toto hejno bude archivováno a odstraněno z vašeho aktivního seznamu. V případě potřeby jej můžete později znovu aktivovat.",
     "emptyState": {
