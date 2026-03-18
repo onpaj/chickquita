@@ -89,6 +89,11 @@ vi.mock('../components/BottomNavigation', () => ({
   BottomNavigation: () => <div>Bottom Navigation</div>,
 }));
 
+// Mock UserSettingsProvider (uses useQuery, needs QueryClientProvider)
+vi.mock('../features/settings', () => ({
+  UserSettingsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 // Mock shared components
 vi.mock('../shared/components', () => ({
   OfflineBanner: () => <div>Offline Banner</div>,

@@ -66,3 +66,14 @@ export function useDeleteCoop() {
     },
   });
 }
+
+export function useEnsureDefaultCoop() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: coopsApi.ensureDefault,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['coops'], refetchType: 'active' });
+    },
+  });
+}

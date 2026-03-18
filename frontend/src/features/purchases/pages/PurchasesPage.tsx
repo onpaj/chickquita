@@ -14,6 +14,10 @@ import {
   Button,
   IconButton,
   Slide,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import type { TransitionProps } from '@mui/material/transitions';
 import { forwardRef } from 'react';
@@ -32,6 +36,7 @@ import {
   dialogActionsSx,
   touchButtonSx,
 } from '@/shared/constants/modalConfig';
+import { useUserSettingsContext } from '@/features/settings';
 
 const PURCHASE_FORM_ID = 'purchase-form';
 
@@ -61,16 +66,22 @@ export function PurchasesPage() {
   const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { singleCoopMode } = useUserSettingsContext();
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPurchase, setEditingPurchase] = useState<PurchaseDto | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
 
+  // Coop filter state (only used in multi-coop mode)
+  const [selectedCoopId, setSelectedCoopId] = useState<string>('');
+
   // CRUD hooks
   const { createPurchase, isCreating } = useCreatePurchase();
   const { updatePurchase, isUpdating } = useUpdatePurchase();
   const { data: coops } = useCoops();
+
+  const effectiveCoopId = singleCoopMode ? coops?.[0]?.id : selectedCoopId;
 
   const isSubmitting = isCreating || isUpdating;
 
@@ -98,16 +109,20 @@ export function PurchasesPage() {
 
   // Handle form submit
   const handleFormSubmit = (data: CreatePurchaseDto | UpdatePurchaseDto) => {
-    if ('id' in data) {
+    const dataWithCoop = {
+      ...data,
+      coopId: data.coopId || effectiveCoopId || null,
+    };
+    if ('id' in dataWithCoop) {
       // Update existing purchase
-      updatePurchase(data, {
+      updatePurchase(dataWithCoop as UpdatePurchaseDto, {
         onSuccess: () => {
           handleModalClose();
         },
       });
     } else {
       // Create new purchase
-      createPurchase(data, {
+      createPurchase(dataWithCoop as CreatePurchaseDto, {
         onSuccess: () => {
           handleModalClose();
         },
@@ -152,6 +167,28 @@ export function PurchasesPage() {
           </Button>
         )}
       </Box>
+
+      {/* Coop selector — hidden in single-coop mode */}
+      {!singleCoopMode && (
+        <FormControl fullWidth sx={{ mb: 3 }}>
+          <InputLabel id="coop-filter-label">
+            {t('purchases.filters.coop')}
+          </InputLabel>
+          <Select
+            labelId="coop-filter-label"
+            value={selectedCoopId}
+            label={t('purchases.filters.coop')}
+            onChange={(e) => setSelectedCoopId(e.target.value)}
+          >
+            <MenuItem value="">{t('purchases.filters.allCoops')}</MenuItem>
+            {coops?.filter((c) => c.isActive).map((coop) => (
+              <MenuItem key={coop.id} value={coop.id}>
+                {coop.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
 
       {/* Purchase List */}
       <PurchaseList onEdit={handleEditClick} />
@@ -201,7 +238,7 @@ export function PurchasesPage() {
             onSubmit={handleFormSubmit}
             onCancel={handleModalClose}
             isSubmitting={isSubmitting}
-            coops={coopsForForm}
+            coops={!singleCoopMode ? coopsForForm : undefined}
             formId={PURCHASE_FORM_ID}
             onValidityChange={setIsFormValid}
           />

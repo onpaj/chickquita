@@ -36,6 +36,7 @@
   "navigation": {
     "dashboard": "Dashboard",
     "coops": "Coops",
+    "flocks": "Flocks",
     "purchases": "Purchases",
     "dailyRecords": "Daily Records",
     "statistics": "Statistics",
@@ -91,7 +92,9 @@
       "title": "Welcome to Chickquita!",
       "message": "Start tracking your chicken farm",
       "createFirstCoop": "Create Your First Coop",
-      "createFirstCoopDesc": "Set up a coop to start managing your flocks"
+      "createFirstCoopDesc": "Set up a coop to start managing your flocks",
+      "createFirstFlock": "Create Your First Flock",
+      "createFirstFlockDesc": "Add a flock to start tracking production"
     }
   },
   "coops": {
@@ -200,6 +203,7 @@
     },
     "archiving": "Archiving...",
     "archiveSuccess": "Flock archived successfully",
+    "addFirstFlock": "Add first flock",
     "archiveConfirmTitle": "Archive Flock?",
     "archiveConfirmMessage": "This flock will be archived and removed from your active list. You can reactivate it later if needed.",
     "emptyState": {
@@ -244,7 +248,9 @@
       "fromDate": "From Date",
       "toDate": "To Date",
       "type": "Type",
-      "flock": "Flock"
+      "flock": "Flock",
+      "coop": "Coop",
+      "allCoops": "All coops"
     },
     "summary": {
       "thisMonth": "Total Spent This Month"
@@ -409,7 +415,12 @@
     "about": "About",
     "version": "Version",
     "members": "Farm Members",
-    "inviteMember": "Invite Member"
+    "inviteMember": "Invite Member",
+    "singleCoopMode": {
+      "label": "Multi-coop management",
+      "description": "Enables full management of multiple coops and shows coop navigation",
+      "onlyOneCoopHint": "Can only switch back to simplified mode with exactly one active coop"
+    }
   },
   "validation": {
     "required": "This field is required",

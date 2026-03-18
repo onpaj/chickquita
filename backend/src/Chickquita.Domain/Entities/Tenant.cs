@@ -37,6 +37,12 @@ public class Tenant
     public DateTime UpdatedAt { get; private set; }
 
     /// <summary>
+    /// When true, the tenant operates in single-coop mode (simplified UI for single-coop farms).
+    /// Defaults to false.
+    /// </summary>
+    public bool SingleCoopMode { get; private set; }
+
+    /// <summary>
     /// Private constructor for EF Core.
     /// </summary>
     private Tenant() { }
@@ -77,6 +83,19 @@ public class Tenant
             return Error.Validation("Name cannot be empty.");
 
         Name = name;
+        UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Updates the tenant's settings.
+    /// </summary>
+    /// <param name="singleCoopMode">Whether to enable single-coop mode</param>
+    /// <returns>A Result indicating success</returns>
+    public Result UpdateSettings(bool singleCoopMode)
+    {
+        SingleCoopMode = singleCoopMode;
         UpdatedAt = DateTime.UtcNow;
 
         return Result.Success();

@@ -29,6 +29,7 @@ import BedIcon from '@mui/icons-material/Bed';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useTranslation } from 'react-i18next';
 import { IllustratedEmptyState, ConfirmationDialog } from '../../../shared/components';
+import { useUserSettingsContext } from '@/features/settings';
 import { formatDate } from '@/lib/dateFormat';
 import { PurchaseListSkeleton } from './PurchaseListSkeleton';
 import { usePurchases, useDeletePurchase } from '../hooks/usePurchases';
@@ -177,6 +178,7 @@ function getPurchaseTypeIcon(type: PurchaseType) {
  */
 export function PurchaseList({ onEdit }: PurchaseListProps) {
   const { t } = useTranslation();
+  const { singleCoopMode } = useUserSettingsContext();
 
   // Filter state
   const [fromDate, setFromDate] = useState<string>('');
@@ -384,7 +386,7 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                       </Typography>
                       <Typography variant="body2" color="text.secondary" component="span">
                         {purchase.quantity} {getUnitLabel(purchase.unit)}
-                        {purchase.coopId && (
+                        {!singleCoopMode && purchase.coopId && (
                           <>
                             {' · '}
                             {flockMap.get(purchase.coopId) || t('purchases.list.unknownFlock')}

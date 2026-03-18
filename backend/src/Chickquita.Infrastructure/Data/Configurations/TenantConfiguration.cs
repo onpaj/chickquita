@@ -35,6 +35,11 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasColumnType("timestamp with time zone")
             .IsRequired();
 
+        builder.Property(t => t.SingleCoopMode)
+            .HasColumnName("single_coop_mode")
+            .HasDefaultValue(true)
+            .IsRequired();
+
         builder.HasIndex(t => t.ClerkOrgId)
             .HasDatabaseName("ix_tenants_clerk_org_id")
             .IsUnique();

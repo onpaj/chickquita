@@ -36,6 +36,7 @@
   "navigation": {
     "dashboard": "Přehled",
     "coops": "Kurníky",
+    "flocks": "Hejna",
     "purchases": "Nákupy",
     "dailyRecords": "Denní záznamy",
     "statistics": "Statistiky",
@@ -91,7 +92,9 @@
       "title": "Vítejte v Chickquita!",
       "message": "Začněte sledováním své kuřecí farmy",
       "createFirstCoop": "Vytvořte svůj první kurník",
-      "createFirstCoopDesc": "Nastavte kurník a začněte spravovat hejna"
+      "createFirstCoopDesc": "Nastavte kurník a začněte spravovat hejna",
+      "createFirstFlock": "Vytvořte své první hejno",
+      "createFirstFlockDesc": "Přidejte hejno a začněte sledovat produkci"
     }
   },
   "coops": {
@@ -200,6 +203,7 @@
     },
     "archiving": "Archivuji...",
     "archiveSuccess": "Hejno bylo úspěšně archivováno",
+    "addFirstFlock": "Přidat první hejno",
     "archiveConfirmTitle": "Archivovat hejno?",
     "archiveConfirmMessage": "Toto hejno bude archivováno a odstraněno z vašeho aktivního seznamu. V případě potřeby jej můžete později znovu aktivovat.",
     "emptyState": {
@@ -244,7 +248,9 @@
       "fromDate": "Od data",
       "toDate": "Do data",
       "type": "Typ",
-      "flock": "Hejno"
+      "flock": "Hejno",
+      "coop": "Kurník",
+      "allCoops": "Všechny kurníky"
     },
     "summary": {
       "thisMonth": "Celkem utraceno tento měsíc"
@@ -411,7 +417,12 @@
     "about": "O aplikaci",
     "version": "Verze",
     "members": "Členové farmy",
-    "inviteMember": "Pozvat člena"
+    "inviteMember": "Pozvat člena",
+    "singleCoopMode": {
+      "label": "Správa více kurníků",
+      "description": "Zapne plnou správu více kurníků a zobrazí navigaci kurníků",
+      "onlyOneCoopHint": "Zpět do zjednodušeného režimu lze přepnout pouze s jedním aktivním kurníkem"
+    }
   },
   "validation": {
     "required": "Toto pole je povinné",
