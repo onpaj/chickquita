@@ -10,6 +10,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation } from 'react-i18next';
+import { Navigate } from 'react-router-dom';
 import { useCoops } from '../features/coops/hooks/useCoops';
 import { CreateCoopModal } from '../features/coops/components/CreateCoopModal';
 import { CoopCard } from '../features/coops/components/CoopCard';
@@ -17,6 +18,7 @@ import { CoopsEmptyState } from '../features/coops/components/CoopsEmptyState';
 import { CoopCardSkeleton } from '../shared/components/CoopCardSkeleton';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { processApiError } from '../lib/errors';
+import { useUserSettingsContext } from '../features/settings';
 
 export default function CoopsPage() {
   const { t } = useTranslation();
@@ -24,6 +26,7 @@ export default function CoopsPage() {
   const { handleError } = useErrorHandler();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { singleCoopMode } = useUserSettingsContext();
 
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {
@@ -36,6 +39,10 @@ export default function CoopsPage() {
       setIsRefreshing(false);
     }
   }, [refetch, handleError]);
+
+  if (singleCoopMode && coops && coops.length > 0) {
+    return <Navigate to={`/coops/${coops[0].id}/flocks`} replace />;
+  }
 
   // Sort coops by created date (newest first)
   const sortedCoops = coops
