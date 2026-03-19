@@ -186,6 +186,34 @@ public class StatisticsRepositoryTests : IDisposable
         result.AvgEggsPerDay.Should().Be(50m / 7m);
     }
 
+    [Fact]
+    public async Task GetDashboardStatsAsync_RecordAtWindowBoundary_Included()
+    {
+        var today = DateTime.UtcNow.Date;
+        var boundary = today.AddDays(-6); // first day of 7-day window
+        var rec = DailyRecord.Create(_tenantId, _flockId, boundary, 10, null).Value;
+        _dbContext.DailyRecords.Add(rec);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _repository.GetDashboardStatsAsync();
+
+        result.ThisWeekEggs.Should().Be(10);
+    }
+
+    [Fact]
+    public async Task GetDashboardStatsAsync_RecordJustOutsideWindow_NotIncluded()
+    {
+        var today = DateTime.UtcNow.Date;
+        var outside = today.AddDays(-7); // one day before window starts
+        var rec = DailyRecord.Create(_tenantId, _flockId, outside, 10, null).Value;
+        _dbContext.DailyRecords.Add(rec);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _repository.GetDashboardStatsAsync();
+
+        result.ThisWeekEggs.Should().Be(0);
+    }
+
     #endregion
 
     #region GetDashboardStatsAsync — CostPerEgg
