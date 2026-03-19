@@ -14,6 +14,9 @@ import {
   ListItemText,
   Avatar,
   Divider,
+  FormControlLabel,
+  Switch,
+  FormHelperText,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -22,6 +25,8 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from 'react-i18next';
 import { OrganizationProfile, useClerk, useOrganization, useUser } from '@clerk/clerk-react';
 import { ConfirmationDialog } from '@/shared/components';
+import { useUserSettings, useUpdateUserSettings } from '@/features/settings';
+import { useCoops } from '@/features/coops/hooks/useCoops';
 
 const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
 
@@ -33,8 +38,23 @@ export function SettingsPage() {
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
+  const { data: settings } = useUserSettings();
+  const { data: coops } = useCoops();
+  const { updateSettings, isPending: isUpdatingSettings } = useUpdateUserSettings();
+
+  const activeCoops = coops?.filter((c) => c.isActive) ?? [];
+  const canToggleSingleCoopMode = activeCoops.length === 1;
+  const singleCoopMode = settings?.singleCoopMode ?? true;
+
   const handleLanguageChange = (event: SelectChangeEvent) => {
     i18n.changeLanguage(event.target.value);
+  };
+
+  const handleSingleCoopModeToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // checked=true → enable multi-coop (singleCoopMode=false), always allowed
+    // checked=false → revert to single-coop (singleCoopMode=true), requires exactly 1 coop
+    if (!event.target.checked && !canToggleSingleCoopMode) return;
+    updateSettings({ singleCoopMode: !event.target.checked });
   };
 
   const handleSignOutConfirm = async () => {
@@ -72,6 +92,39 @@ export function SettingsPage() {
               </Select>
             </FormControl>
           </Box>
+        </CardContent>
+      </Card>
+
+      {/* Single-coop mode section */}
+      <Card elevation={1} sx={{ mt: 2 }}>
+        <CardContent>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            {t('settings.singleCoopMode.label')}
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={!singleCoopMode}
+                onChange={handleSingleCoopModeToggle}
+                disabled={(!singleCoopMode && !canToggleSingleCoopMode) || isUpdatingSettings}
+              />
+            }
+            label={
+              <Box>
+                <Typography variant="body2">
+                  {t('settings.singleCoopMode.label')}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {t('settings.singleCoopMode.description')}
+                </Typography>
+              </Box>
+            }
+          />
+          {!singleCoopMode && !canToggleSingleCoopMode && (
+            <FormHelperText sx={{ mt: 0.5, ml: 0 }}>
+              {t('settings.singleCoopMode.onlyOneCoopHint')}
+            </FormHelperText>
+          )}
         </CardContent>
       </Card>
 

@@ -3,18 +3,35 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import { EmptyDashboardIllustration } from '../../../assets/illustrations';
+import { useUserSettingsContext } from '@/features/settings';
+import { useCoops } from '@/features/coops/hooks/useCoops';
 
 /**
- * Empty state component for dashboard when user has no data
- * Encourages user to create their first coop
+ * Empty state component for dashboard when user has no data.
+ * In single-coop mode the user already has a coop, so we direct them
+ * to create their first flock instead.
  */
 export function DashboardEmptyState() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { singleCoopMode } = useUserSettingsContext();
+  const { data: coops } = useCoops();
 
-  const handleCreateCoop = () => {
-    navigate('/coops');
+  const handleCta = () => {
+    if (singleCoopMode && coops && coops.length > 0) {
+      navigate(`/coops/${coops[0].id}/flocks`);
+    } else {
+      navigate('/coops');
+    }
   };
+
+  const ctaLabel = singleCoopMode && coops && coops.length > 0
+    ? t('dashboard.emptyState.createFirstFlock')
+    : t('dashboard.emptyState.createFirstCoop');
+
+  const ctaDesc = singleCoopMode && coops && coops.length > 0
+    ? t('dashboard.emptyState.createFirstFlockDesc')
+    : t('dashboard.emptyState.createFirstCoopDesc');
 
   return (
     <Paper
@@ -55,7 +72,7 @@ export function DashboardEmptyState() {
         <Button
           variant="contained"
           size="large"
-          onClick={handleCreateCoop}
+          onClick={handleCta}
           startIcon={<AddIcon />}
           sx={{
             borderRadius: 2,
@@ -63,11 +80,11 @@ export function DashboardEmptyState() {
             py: 1.5,
           }}
         >
-          {t('dashboard.emptyState.createFirstCoop')}
+          {ctaLabel}
         </Button>
 
         <Typography variant="caption" color="text.secondary">
-          {t('dashboard.emptyState.createFirstCoopDesc')}
+          {ctaDesc}
         </Typography>
       </Box>
     </Paper>

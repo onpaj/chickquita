@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -25,10 +25,14 @@ import { useErrorHandler } from '../hooks/useErrorHandler';
 import { useToast } from '../hooks/useToast';
 import { processApiError } from '../lib/errors';
 import type { Flock } from '../features/flocks/api/flocksApi';
+import { useUserSettingsContext } from '../features/settings';
 
 export default function FlocksPage() {
   const { t } = useTranslation();
+  const { singleCoopMode } = useUserSettingsContext();
   const { coopId } = useParams<{ coopId: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [includeInactive, setIncludeInactive] = useState(false);
   const { data: flocks, isLoading, error, refetch } = useFlocks(coopId!, includeInactive);
   const { data: coop } = useCoopDetail(coopId!);
@@ -40,6 +44,15 @@ export default function FlocksPage() {
   const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
   const [selectedFlock, setSelectedFlock] = useState<Flock | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Auto-open create modal when navigated with ?addFlock=true
+  useEffect(() => {
+    if (searchParams.get('addFlock') === 'true') {
+      setIsCreateModalOpen(true);
+      // Remove the query param without re-rendering the whole page
+      navigate({ search: '' }, { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {
@@ -189,7 +202,7 @@ export default function FlocksPage() {
         <Typography variant="h4" component="h1" gutterBottom>
           {t('flocks.title')}
         </Typography>
-        {coop?.name && (
+        {!singleCoopMode && coop?.name && (
           <Typography variant="subtitle1" color="text.secondary" sx={{ mt: -1, mb: 1 }}>
             {coop.name}
           </Typography>

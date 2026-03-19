@@ -37,6 +37,7 @@ import { FlockProductivityChart } from '@/features/statistics/components/FlockPr
 import { useStatistics } from '@/features/statistics/hooks/useStatistics';
 import { useCoops } from '@/features/coops/hooks/useCoops';
 import { useFlocks } from '@/features/flocks/hooks/useFlocks';
+import { useUserSettingsContext } from '@/features/settings';
 
 /**
  * Statistics Page Component
@@ -52,6 +53,7 @@ import { useFlocks } from '@/features/flocks/hooks/useFlocks';
  */
 export default function StatisticsPage() {
   const { t, i18n } = useTranslation();
+  const { singleCoopMode } = useUserSettingsContext();
   const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Dayjs | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Dayjs | null>(null);
@@ -82,11 +84,12 @@ export default function StatisticsPage() {
 
   const { startDate, endDate } = getDateRange();
   const { data: coops } = useCoops();
-  const { data: flocks } = useFlocks(selectedCoopId, true);
+  const effectiveCoopId = singleCoopMode ? (coops?.[0]?.id ?? '') : selectedCoopId;
+  const { data: flocks } = useFlocks(effectiveCoopId, true);
   const { data: stats, isLoading, error } = useStatistics(
     startDate,
     endDate,
-    selectedCoopId || undefined,
+    effectiveCoopId || undefined,
     selectedFlockId || undefined,
   );
 
@@ -114,8 +117,8 @@ export default function StatisticsPage() {
       const flock = flocks?.find((f) => f.id === selectedFlockId);
       return flock?.identifier ?? t('statistics.filters.allFlocks');
     }
-    if (selectedCoopId) {
-      const coop = coops?.find((c) => c.id === selectedCoopId);
+    if (effectiveCoopId) {
+      const coop = coops?.find((c) => c.id === effectiveCoopId);
       return coop?.name ?? t('statistics.filters.allCoops');
     }
     return t('statistics.filters.allFlocks');
@@ -231,23 +234,25 @@ export default function StatisticsPage() {
                       gap: 2,
                     }}
                   >
-                    <FormControl fullWidth>
-                      <InputLabel>{t('statistics.filters.coop')}</InputLabel>
-                      <Select
-                        value={selectedCoopId}
-                        label={t('statistics.filters.coop')}
-                        onChange={(e) => handleCoopChange(e.target.value)}
-                      >
-                        <MenuItem value="">{t('statistics.filters.allCoops')}</MenuItem>
-                        {coops?.filter((c) => c.isActive).map((coop) => (
-                          <MenuItem key={coop.id} value={coop.id}>
-                            {coop.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    {!singleCoopMode && (
+                      <FormControl fullWidth>
+                        <InputLabel>{t('statistics.filters.coop')}</InputLabel>
+                        <Select
+                          value={selectedCoopId}
+                          label={t('statistics.filters.coop')}
+                          onChange={(e) => handleCoopChange(e.target.value)}
+                        >
+                          <MenuItem value="">{t('statistics.filters.allCoops')}</MenuItem>
+                          {coops?.filter((c) => c.isActive).map((coop) => (
+                            <MenuItem key={coop.id} value={coop.id}>
+                              {coop.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
 
-                    <FormControl fullWidth disabled={!selectedCoopId}>
+                    <FormControl fullWidth disabled={!effectiveCoopId}>
                       <InputLabel>{t('statistics.filters.flock')}</InputLabel>
                       <Select
                         value={selectedFlockId}

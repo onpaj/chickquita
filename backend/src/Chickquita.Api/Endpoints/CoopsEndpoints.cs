@@ -90,6 +90,18 @@ public static class CoopsEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPost("/ensure-default", EnsureDefaultCoop)
+            .WithName("EnsureDefaultCoop")
+            .WithOpenApi(op =>
+            {
+                op.Summary = "Ensure default coop";
+                op.Description = "Returns the first existing coop for the tenant. If no coops exist, creates one named 'Default' and returns it.";
+                return op;
+            })
+            .Produces<CoopDto>()
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
     }
 
     private static async Task<IResult> GetCoops(
@@ -153,6 +165,14 @@ public static class CoopsEndpoints
     {
         var command = new ArchiveCoopCommand { Id = id };
         var result = await mediator.Send(command);
+
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> EnsureDefaultCoop(
+        [FromServices] IMediator mediator)
+    {
+        var result = await mediator.Send(new EnsureDefaultCoopCommand());
 
         return result.ToHttpResult();
     }

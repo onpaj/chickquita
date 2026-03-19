@@ -6,12 +6,18 @@ import { BrowserRouter } from 'react-router-dom';
 import CoopsPage from '../CoopsPage';
 import type { Coop } from '../../features/coops/api/coopsApi';
 
+// Mock useUserSettingsContext — CoopsPage is a multi-coop feature, tests run with singleCoopMode off
+vi.mock('../../features/settings', () => ({
+  useUserSettingsContext: () => ({ singleCoopMode: false, isLoading: false }),
+}));
+
 // Mock the useCoops hook
 const mockRefetch = vi.fn();
 const mockUseCoops = vi.fn();
 
 vi.mock('../../features/coops/hooks/useCoops', () => ({
   useCoops: () => mockUseCoops(),
+  useEnsureDefaultCoop: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 // Mock useErrorHandler hook

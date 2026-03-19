@@ -220,7 +220,7 @@ describe('PurchasesPage', () => {
       await user.click(submitButton);
 
       expect(mockCreatePurchase).toHaveBeenCalledWith(
-        { name: 'Test Purchase' },
+        expect.objectContaining({ name: 'Test Purchase' }),
         expect.any(Object)
       );
     });

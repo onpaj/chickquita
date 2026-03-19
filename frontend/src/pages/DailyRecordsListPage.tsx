@@ -26,6 +26,7 @@ import { format, subDays } from 'date-fns';
 import { useDailyRecords } from '../features/dailyRecords/hooks/useDailyRecords';
 import { useCoops } from '../features/coops/hooks/useCoops';
 import { useAllFlocks } from '../features/flocks/hooks/useAllFlocks';
+import { useUserSettingsContext } from '../features/settings';
 import { DailyRecordCard } from '../features/dailyRecords/components/DailyRecordCard';
 import { EditDailyRecordModal } from '../features/dailyRecords/components/EditDailyRecordModal';
 import { QuickAddModal } from '../features/dailyRecords/components/QuickAddModal';
@@ -36,6 +37,7 @@ const getDefaultFilters = (): GetDailyRecordsParams => ({});
 
 export function DailyRecordsListPage() {
   const { t } = useTranslation();
+  const { singleCoopMode } = useUserSettingsContext();
   const initialFilters = useMemo(() => getDefaultFilters(), []);
   const [filters, setFilters] = useState<GetDailyRecordsParams>(getDefaultFilters);
   const [editingRecord, setEditingRecord] = useState<DailyRecordDto | null>(null);
@@ -53,7 +55,7 @@ export function DailyRecordsListPage() {
     if (dailyRecords) {
       dailyRecords.forEach((record) => {
         if (!map.has(record.flockId)) {
-          const label = record.flockCoopName
+          const label = !singleCoopMode && record.flockCoopName
             ? `${record.flockName} (${record.flockCoopName})`
             : record.flockName || record.flockId;
           map.set(record.flockId, label);
@@ -61,7 +63,7 @@ export function DailyRecordsListPage() {
       });
     }
     return map;
-  }, [dailyRecords]);
+  }, [dailyRecords, singleCoopMode]);
 
   // Get unique flock IDs from records for filter dropdown
   const availableFlockIds = useMemo(() => {

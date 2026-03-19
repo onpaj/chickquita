@@ -9,21 +9,27 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import EggIcon from '@mui/icons-material/Egg';
 import { useTranslation } from 'react-i18next';
-import { useCoops } from '../features/coops/hooks/useCoops';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { useCoops, useEnsureDefaultCoop } from '../features/coops/hooks/useCoops';
 import { CreateCoopModal } from '../features/coops/components/CreateCoopModal';
 import { CoopCard } from '../features/coops/components/CoopCard';
 import { CoopsEmptyState } from '../features/coops/components/CoopsEmptyState';
 import { CoopCardSkeleton } from '../shared/components/CoopCardSkeleton';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { processApiError } from '../lib/errors';
+import { useUserSettingsContext } from '../features/settings';
 
 export default function CoopsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: coops, isLoading, error, refetch } = useCoops();
   const { handleError } = useErrorHandler();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { singleCoopMode } = useUserSettingsContext();
+  const { mutate: ensureDefaultCoop, isPending: isEnsuringCoop } = useEnsureDefaultCoop();
 
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {
@@ -36,6 +42,21 @@ export default function CoopsPage() {
       setIsRefreshing(false);
     }
   }, [refetch, handleError]);
+
+  if (singleCoopMode && coops && coops.length > 0) {
+    return <Navigate to={`/coops/${coops[0].id}/flocks`} replace />;
+  }
+
+  const handleAddFirstFlock = () => {
+    ensureDefaultCoop(undefined, {
+      onSuccess: (coop) => {
+        navigate(`/coops/${coop.id}/flocks?addFlock=true`);
+      },
+      onError: (err) => {
+        handleError(err, handleAddFirstFlock);
+      },
+    });
+  };
 
   // Sort coops by created date (newest first)
   const sortedCoops = coops
@@ -111,7 +132,35 @@ export default function CoopsPage() {
             ))}
           </Box>
         ) : sortedCoops.length === 0 ? (
-          <CoopsEmptyState onAddClick={() => setIsModalOpen(true)} />
+          singleCoopMode ? (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '40vh',
+                textAlign: 'center',
+                gap: 2,
+              }}
+            >
+              <Typography variant="h6" color="text.secondary">
+                {t('flocks.noFlocks')}
+              </Typography>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={isEnsuringCoop ? <CircularProgress size={18} color="inherit" /> : <EggIcon />}
+                onClick={handleAddFirstFlock}
+                disabled={isEnsuringCoop}
+                sx={{ mt: 1 }}
+              >
+                {t('flocks.addFirstFlock')}
+              </Button>
+            </Box>
+          ) : (
+            <CoopsEmptyState onAddClick={() => setIsModalOpen(true)} />
+          )
         ) : (
           <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {sortedCoops.map((coop) => (
