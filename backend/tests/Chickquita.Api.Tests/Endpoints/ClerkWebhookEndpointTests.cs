@@ -1,12 +1,18 @@
 using System.Net;
 using System.Text;
+using Chickquita.Api.Tests.Helpers;
 using Chickquita.Application.DTOs;
 using Chickquita.Application.Features.Users.Commands;
 using Chickquita.Application.Interfaces;
 using Chickquita.Domain.Common;
+using Chickquita.Infrastructure.Data;
 using FluentAssertions;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
@@ -38,6 +44,8 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
         {
             builder.ConfigureServices(services =>
             {
+                ReplaceWithInMemoryDatabase(services);
+
                 // Remove existing IClerkWebhookValidator registration if any
                 var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IClerkWebhookValidator));
                 if (descriptor != null)
@@ -89,6 +97,8 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
         {
             builder.ConfigureServices(services =>
             {
+                ReplaceWithInMemoryDatabase(services);
+
                 // Remove existing registrations
                 var validatorDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IClerkWebhookValidator));
                 if (validatorDescriptor != null)
@@ -155,6 +165,8 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
         {
             builder.ConfigureServices(services =>
             {
+                ReplaceWithInMemoryDatabase(services);
+
                 // Remove existing registrations
                 var validatorDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IClerkWebhookValidator));
                 if (validatorDescriptor != null)
@@ -182,5 +194,42 @@ public class ClerkWebhookEndpointTests : IClassFixture<WebApplicationFactory<Pro
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    private static void ReplaceWithInMemoryDatabase(IServiceCollection services)
+    {
+        var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
+        if (descriptor != null)
+        {
+            services.Remove(descriptor);
+        }
+
+        var connection = new SqliteConnection("DataSource=:memory:");
+        connection.Open();
+        services.AddSingleton(connection);
+
+        services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+        {
+            var conn = serviceProvider.GetRequiredService<SqliteConnection>();
+            options.UseSqlite(conn);
+        });
+
+        var appContextDescriptors = services.Where(d => d.ServiceType == typeof(ApplicationDbContext)).ToList();
+        foreach (var d in appContextDescriptors) services.Remove(d);
+        services.AddScoped<ApplicationDbContext>(sp =>
+        {
+            var opts = sp.GetRequiredService<DbContextOptions<ApplicationDbContext>>();
+            var currentUser = sp.GetRequiredService<ICurrentUserService>();
+            return new SqliteApplicationDbContext(opts, currentUser);
+        });
+
+        services.AddAuthorization(options =>
+        {
+            options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .RequireAssertion(_ => true)
+                .Build();
+        });
+
+        services.AddTransient<IStartupFilter, DatabaseInitializerStartupFilter>();
     }
 }
