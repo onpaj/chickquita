@@ -119,11 +119,17 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Apply pending EF Core migrations automatically on startup
+// Apply pending EF Core migrations automatically on startup.
+// Guard: skip for non-relational providers (EF InMemory used in unit tests)
+// and for SQLite (used in integration tests) which can't run PostgreSQL-specific migrations.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await db.Database.MigrateAsync();
+    if (db.Database.IsRelational() &&
+        db.Database.ProviderName != "Microsoft.EntityFrameworkCore.Sqlite")
+    {
+        await db.Database.MigrateAsync();
+    }
 }
 
 // Intercept FluentValidation.ValidationException from the MediatR pipeline behavior
