@@ -50,6 +50,11 @@ public class ApplicationDbContext : DbContext
     /// </summary>
     public DbSet<Purchase> Purchases => Set<Purchase>();
 
+    /// <summary>
+    /// Egg sales for tracking revenue.
+    /// </summary>
+    public DbSet<EggSale> EggSales => Set<EggSale>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -65,6 +70,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<FlockHistory>().HasQueryFilter(h => h.TenantId == _currentUserService.TenantId);
         modelBuilder.Entity<DailyRecord>().HasQueryFilter(d => d.TenantId == _currentUserService.TenantId);
         modelBuilder.Entity<Purchase>().HasQueryFilter(p => p.TenantId == _currentUserService.TenantId);
+        modelBuilder.Entity<EggSale>().HasQueryFilter(e => e.TenantId == _currentUserService.TenantId);
     }
 
     /// <summary>
