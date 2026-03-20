@@ -18,3 +18,8 @@ export {
   useDeleteEggSale,
   useLastUsedEggPrice,
 } from './hooks/useEggSales';
+
+// Components
+export { EggSaleCard } from './components/EggSaleCard';
+export { DeleteEggSaleDialog } from './components/DeleteEggSaleDialog';
+export { EditEggSaleModal } from './components/EditEggSaleModal';
