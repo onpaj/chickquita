@@ -9,10 +9,12 @@ import { QuickAddModal } from '../QuickAddModal';
 import i18n from '../../../../lib/i18n';
 import * as useDailyRecordsHook from '../../hooks/useDailyRecords';
 import * as useErrorHandlerHook from '../../../../hooks/useErrorHandler';
+import * as useEggSalesHook from '../../../eggSales/hooks/useEggSales';
 
 // Mock the hooks
 vi.mock('../../hooks/useDailyRecords');
 vi.mock('../../../../hooks/useErrorHandler');
+vi.mock('../../../eggSales/hooks/useEggSales');
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -84,6 +86,11 @@ describe('QuickAddModal', () => {
 
     vi.spyOn(useErrorHandlerHook, 'useErrorHandler').mockReturnValue({
       handleError: mockHandleError,
+    } as any);
+
+    vi.spyOn(useEggSalesHook, 'useCreateEggSale').mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
     } as any);
   });
 
