@@ -43,6 +43,12 @@ public class Tenant
     public bool SingleCoopMode { get; private set; }
 
     /// <summary>
+    /// When true, revenue and P&amp;L tracking features are enabled (egg sales, revenue charts).
+    /// Defaults to true.
+    /// </summary>
+    public bool RevenueTrackingEnabled { get; private set; } = true;
+
+    /// <summary>
     /// Private constructor for EF Core.
     /// </summary>
     private Tenant() { }
@@ -92,10 +98,12 @@ public class Tenant
     /// Updates the tenant's settings.
     /// </summary>
     /// <param name="singleCoopMode">Whether to enable single-coop mode</param>
+    /// <param name="revenueTrackingEnabled">Whether to enable revenue and P&amp;L tracking</param>
     /// <returns>A Result indicating success</returns>
-    public Result UpdateSettings(bool singleCoopMode)
+    public Result UpdateSettings(bool singleCoopMode, bool revenueTrackingEnabled)
     {
         SingleCoopMode = singleCoopMode;
+        RevenueTrackingEnabled = revenueTrackingEnabled;
         UpdatedAt = DateTime.UtcNow;
 
         return Result.Success();

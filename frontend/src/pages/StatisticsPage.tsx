@@ -56,7 +56,7 @@ import { useUserSettingsContext } from '@/features/settings';
  */
 export default function StatisticsPage() {
   const { t, i18n } = useTranslation();
-  const { singleCoopMode } = useUserSettingsContext();
+  const { singleCoopMode, revenueTrackingEnabled } = useUserSettingsContext();
   const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Dayjs | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Dayjs | null>(null);
@@ -306,7 +306,7 @@ export default function StatisticsPage() {
               loading={isLoading}
               color="info"
             />
-            {(isLoading || (stats?.summary.totalRevenue != null)) && (
+            {revenueTrackingEnabled && (isLoading || (stats?.summary.totalRevenue != null)) && (
               <StatCard
                 icon={<TrendingUpIcon />}
                 label={t('statistics.summary.totalRevenue')}
@@ -315,7 +315,7 @@ export default function StatisticsPage() {
                 color="success"
               />
             )}
-            {(isLoading || (stats?.summary.profitLoss != null)) && (
+            {revenueTrackingEnabled && (isLoading || (stats?.summary.profitLoss != null)) && (
               <StatCard
                 icon={<ShowChartIcon />}
                 label={t('statistics.summary.profitLoss')}
@@ -378,9 +378,11 @@ export default function StatisticsPage() {
               </Paper>
 
               {/* Revenue & P&L */}
-              <Paper sx={{ p: 2, gridColumn: { md: '1 / -1' } }}>
-                <RevenuePnlChart data={stats.revenueTrend} />
-              </Paper>
+              {revenueTrackingEnabled && (
+                <Paper sx={{ p: 2, gridColumn: { md: '1 / -1' } }}>
+                  <RevenuePnlChart data={stats.revenueTrend} />
+                </Paper>
+              )}
             </Box>
           )}
 

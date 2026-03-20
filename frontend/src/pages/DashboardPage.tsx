@@ -11,6 +11,7 @@ import { EggCostWidget } from '@/features/dashboard/components/EggCostWidget';
 import { RevenuePnlWidget } from '@/features/dashboard/components/RevenuePnlWidget';
 import { QuickAddModal } from '@/features/dailyRecords/components/QuickAddModal';
 import { useAllFlocks } from '@/features/flocks/hooks/useAllFlocks';
+import { useUserSettingsContext } from '@/features/settings';
 
 /**
  * Dashboard Page Component
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const { data: stats, isLoading, error } = useDashboardStats();
   const { data: flocks = [] } = useAllFlocks();
+  const { revenueTrackingEnabled } = useUserSettingsContext();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   // Check if user has any data
@@ -94,11 +96,13 @@ export default function DashboardPage() {
               loading={isLoading}
             />
 
-            <RevenuePnlWidget
-              totalRevenue={stats?.totalRevenue}
-              profitLoss={stats?.profitLoss}
-              loading={isLoading}
-            />
+            {revenueTrackingEnabled && (
+              <RevenuePnlWidget
+                totalRevenue={stats?.totalRevenue}
+                profitLoss={stats?.profitLoss}
+                loading={isLoading}
+              />
+            )}
           </Box>
         )}
 

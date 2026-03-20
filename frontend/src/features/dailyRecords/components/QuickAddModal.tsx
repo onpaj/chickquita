@@ -33,6 +33,7 @@ import {
   FORM_FIELD_SPACING,
 } from '@/shared/constants/modalConfig';
 import { useCreateEggSale, useLastUsedEggPrice } from '@/features/eggSales';
+import { useUserSettingsContext } from '@/features/settings';
 
 const SlideUp = React.forwardRef(function SlideUp(
   props: TransitionProps & { children: React.ReactElement },
@@ -75,7 +76,9 @@ export function QuickAddModal({
   defaultFlockId,
 }: QuickAddModalProps) {
   const { t } = useTranslation();
+  const { revenueTrackingEnabled } = useUserSettingsContext();
   const [activeTab, setActiveTab] = useState(0);
+  const effectiveTab = !revenueTrackingEnabled && activeTab === 1 ? 0 : activeTab;
 
   // ── Daily record form ───────────────────────────────────────────────────
   const { mutate: createDailyRecord, isPending: isDailyRecordPending } =
@@ -369,12 +372,12 @@ export function QuickAddModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (activeTab === 0) submitDailyRecord();
+    if (effectiveTab === 0) submitDailyRecord();
     else submitSale();
   };
 
-  const isPending = activeTab === 0 ? isDailyRecordPending : isSalePending;
-  const isFormValid = activeTab === 0 ? isDailyRecordFormValid() : isSaleFormValid();
+  const isPending = effectiveTab === 0 ? isDailyRecordPending : isSalePending;
+  const isFormValid = effectiveTab === 0 ? isDailyRecordFormValid() : isSaleFormValid();
 
   return (
     <Dialog
@@ -410,12 +413,14 @@ export function QuickAddModal({
 
         <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
           <Tabs
-            value={activeTab}
+            value={effectiveTab}
             onChange={(_e, newValue: number) => setActiveTab(newValue)}
             aria-label="quick add tabs"
           >
             <Tab label={t('dailyRecords.quickAdd.tabRecord')} disabled={isPending} />
-            <Tab label={t('dailyRecords.quickAdd.tabSale')} disabled={isPending} />
+            {revenueTrackingEnabled && (
+              <Tab label={t('dailyRecords.quickAdd.tabSale')} disabled={isPending} />
+            )}
           </Tabs>
         </Box>
 
@@ -428,7 +433,7 @@ export function QuickAddModal({
           }}
         >
           {/* Daily record tab */}
-          {activeTab === 0 && (
+          {effectiveTab === 0 && (
             <Stack spacing={FORM_FIELD_SPACING}>
               <TextField
                 select
@@ -540,7 +545,7 @@ export function QuickAddModal({
           )}
 
           {/* Egg sale tab */}
-          {activeTab === 1 && (
+          {effectiveTab === 1 && (
             <Stack spacing={FORM_FIELD_SPACING}>
               <TextField
                 type="date"
