@@ -239,8 +239,8 @@ export function QuickAddModal({
 
   const [saleDate, setSaleDate] = useState<string>(todayStr);
   const [saleQuantity, setSaleQuantity] = useState<number>(1);
-  const [salePricePerUnit, setSalePricePerUnit] = useState<number>(
-    lastUsedPrice ?? 0
+  const [salePricePerUnit, setSalePricePerUnit] = useState<string>(
+    lastUsedPrice !== undefined ? String(lastUsedPrice) : ''
   );
   const [saleBuyerName, setSaleBuyerName] = useState<string>('');
   const saleNotesRef = useRef<HTMLTextAreaElement>(null);
@@ -255,7 +255,7 @@ export function QuickAddModal({
   useEffect(() => {
     if (open && lastUsedPrice !== undefined) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSalePricePerUnit(lastUsedPrice);
+      setSalePricePerUnit(String(lastUsedPrice));
     }
   }, [open, lastUsedPrice]);
 
@@ -294,7 +294,7 @@ export function QuickAddModal({
   const validateSaleForm = (): boolean => {
     const dateErr = validateSaleDate(saleDate);
     const quantityErr = validateSaleQuantity(saleQuantity);
-    const priceErr = validateSalePrice(salePricePerUnit);
+    const priceErr = validateSalePrice(parseFloat(salePricePerUnit) || 0);
     const buyerErr = validateSaleBuyerName(saleBuyerName);
     const notesErr = validateSaleNotes(saleNotesRef.current?.value ?? '');
     setSaleDateError(dateErr);
@@ -309,7 +309,7 @@ export function QuickAddModal({
     return (
       saleDate.length > 0 &&
       saleQuantity >= 1 &&
-      salePricePerUnit >= 0 &&
+      parseFloat(salePricePerUnit) >= 0 &&
       saleBuyerName.length <= MAX_BUYER_NAME_LENGTH &&
       saleNotesLength <= MAX_NOTES_LENGTH
     );
@@ -322,7 +322,7 @@ export function QuickAddModal({
       {
         date: saleDate,
         quantity: saleQuantity,
-        pricePerUnit: salePricePerUnit,
+        pricePerUnit: parseFloat(salePricePerUnit) || 0,
         buyerName: saleBuyerName.trim() || null,
         notes: notesValue.trim() || null,
       },
@@ -349,7 +349,7 @@ export function QuickAddModal({
   const resetSaleForm = () => {
     setSaleDate(new Date().toISOString().split('T')[0]);
     setSaleQuantity(1);
-    setSalePricePerUnit(lastUsedPrice ?? 0);
+    setSalePricePerUnit(lastUsedPrice !== undefined ? String(lastUsedPrice) : '');
     setSaleBuyerName('');
     if (saleNotesRef.current) saleNotesRef.current.value = '';
     setSaleNotesLength(0);
@@ -583,11 +583,10 @@ export function QuickAddModal({
                 label={t('eggSales.form.pricePerUnit')}
                 value={salePricePerUnit}
                 onChange={(e) => {
-                  const value = parseFloat(e.target.value) || 0;
-                  setSalePricePerUnit(value);
-                  if (salePriceError) setSalePriceError(validateSalePrice(value));
+                  setSalePricePerUnit(e.target.value);
+                  if (salePriceError) setSalePriceError(validateSalePrice(parseFloat(e.target.value) || 0));
                 }}
-                onBlur={() => setSalePriceError(validateSalePrice(salePricePerUnit))}
+                onBlur={() => setSalePriceError(validateSalePrice(parseFloat(salePricePerUnit) || 0))}
                 error={!!salePriceError}
                 helperText={salePriceError}
                 required
