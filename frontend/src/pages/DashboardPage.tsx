@@ -8,6 +8,7 @@ import { TodaySummaryWidget } from '@/features/dashboard/components/TodaySummary
 import { WeeklyProductionWidget } from '@/features/dashboard/components/WeeklyProductionWidget';
 import { FlockStatusWidget } from '@/features/dashboard/components/FlockStatusWidget';
 import { EggCostWidget } from '@/features/dashboard/components/EggCostWidget';
+import { RevenuePnlWidget } from '@/features/dashboard/components/RevenuePnlWidget';
 import { QuickAddModal } from '@/features/dailyRecords/components/QuickAddModal';
 import { useAllFlocks } from '@/features/flocks/hooks/useAllFlocks';
 
@@ -65,7 +66,7 @@ export default function DashboardPage() {
               gridTemplateColumns: {
                 xs: '1fr',
                 sm: 'repeat(2, 1fr)',
-                md: 'repeat(4, 1fr)',
+                md: 'repeat(3, 1fr)',
               },
               gap: 2,
             }}
@@ -90,6 +91,12 @@ export default function DashboardPage() {
               totalRoosters={stats?.totalRoosters ?? 0}
               totalChicks={stats?.totalChicks ?? 0}
               activeFlocks={stats?.activeFlocks ?? 0}
+              loading={isLoading}
+            />
+
+            <RevenuePnlWidget
+              totalRevenue={stats?.totalRevenue}
+              profitLoss={stats?.profitLoss}
               loading={isLoading}
             />
           </Box>

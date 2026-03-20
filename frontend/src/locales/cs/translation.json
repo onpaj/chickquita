@@ -73,6 +73,12 @@
         "title": "Kalkulace nákladů",
         "costPerEgg": "Cena za vejce",
         "notAvailable": "Zatím nedostupné"
+      },
+      "revenuePnl": {
+        "title": "Příjmy a zisk",
+        "profitLossLabel": "zisk/ztráta",
+        "notAvailable": "Zatím žádné prodeje",
+        "noCosts": "Bez evidovaných nákladů"
       }
     },
     "quickActions": {

@@ -79,6 +79,11 @@ public class StatisticsRepository : IStatisticsRepository
             .Where(p => p.TenantId == tenantId)
             .SumAsync(p => (double?)p.Amount) ?? 0.0);
 
+        // Query 5: all-time egg sale revenue (Quantity × PricePerUnit)
+        var totalRevenue = (decimal)(await _context.EggSales
+            .Where(es => es.TenantId == tenantId)
+            .SumAsync(es => (double?)(es.Quantity * es.PricePerUnit)) ?? 0.0);
+
         var todayEggs    = eggStats?.TodayEggs    ?? 0;
         var thisWeekEggs = eggStats?.ThisWeekEggs ?? 0;
         var totalEggs    = eggStats?.TotalEggs    ?? 0;
@@ -97,7 +102,9 @@ public class StatisticsRepository : IStatisticsRepository
             TodayEggs     = todayEggs,
             ThisWeekEggs  = thisWeekEggs,
             AvgEggsPerDay = avgEggsPerDay,
-            CostPerEgg    = costPerEgg
+            CostPerEgg    = costPerEgg,
+            TotalRevenue  = totalRevenue > 0 ? totalRevenue : (decimal?)null,
+            ProfitLoss    = totalRevenue > 0 ? totalRevenue - totalCosts : (decimal?)null
         };
     }
 

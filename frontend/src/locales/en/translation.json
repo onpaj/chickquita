@@ -73,6 +73,12 @@
         "title": "Cost Calculation",
         "costPerEgg": "Cost Per Egg",
         "notAvailable": "Not available yet"
+      },
+      "revenuePnl": {
+        "title": "Revenue & Profit",
+        "profitLossLabel": "profit/loss",
+        "notAvailable": "No sales yet",
+        "noCosts": "No costs recorded"
       }
     },
     "quickActions": {
