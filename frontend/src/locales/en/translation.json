@@ -297,6 +297,62 @@
       "consumedDateFuture": "Consumed date cannot be in the future"
     }
   },
+  "eggSales": {
+    "title": "Egg Sales",
+    "addSale": "Add Sale",
+    "createSale": "Create Sale",
+    "editSale": "Edit Sale",
+    "date": "Date",
+    "quantity": "Egg Count",
+    "pricePerUnit": "Price per egg (CZK)",
+    "buyerName": "Buyer Name",
+    "notes": "Notes",
+    "currency": "CZK",
+    "totalRevenue": "Total Revenue",
+    "filters": {
+      "fromDate": "From Date",
+      "toDate": "To Date"
+    },
+    "summary": {
+      "thisMonth": "Total Revenue This Month"
+    },
+    "list": {
+      "date": "Date",
+      "quantity": "Count",
+      "pricePerUnit": "Price/egg",
+      "total": "Total",
+      "buyer": "Buyer"
+    },
+    "emptyState": {
+      "title": "No egg sales yet",
+      "description": "Start tracking your revenue by adding your first egg sale."
+    },
+    "delete": {
+      "title": "Delete Sale?",
+      "message": "Are you sure you want to delete this egg sale?",
+      "warning": "This action cannot be undone.",
+      "success": "Sale deleted successfully",
+      "error": "Failed to delete sale"
+    },
+    "create": {
+      "success": "Sale created successfully",
+      "error": "Failed to create sale"
+    },
+    "update": {
+      "success": "Sale updated successfully",
+      "error": "Failed to update sale"
+    },
+    "form": {
+      "date": "Sale Date",
+      "quantity": "Egg Count",
+      "pricePerUnit": "Price per egg (CZK)",
+      "buyerName": "Buyer Name (optional)",
+      "notes": "Notes (optional)",
+      "dateFuture": "Sale date cannot be in the future",
+      "quantityMin": "Count must be at least 1",
+      "priceMin": "Price cannot be negative"
+    }
+  },
   "dailyRecords": {
     "title": "Daily Records",
     "addRecord": "Add Record",
