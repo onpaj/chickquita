@@ -379,7 +379,9 @@
       "collectionTime": "Collection time (UTC)"
     },
     "quickAdd": {
-      "title": "Quick Add Eggs"
+      "title": "Quick Add Eggs",
+      "tabRecord": "Record",
+      "tabSale": "Sale"
     },
     "edit": {
       "title": "Edit Daily Record",

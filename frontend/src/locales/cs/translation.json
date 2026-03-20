@@ -381,7 +381,9 @@
       "collectionTime": "Čas sběru (UTC)"
     },
     "quickAdd": {
-      "title": "Rychlý záznam vajec"
+      "title": "Rychlý záznam vajec",
+      "tabRecord": "Záznam",
+      "tabSale": "Prodej"
     },
     "edit": {
       "title": "Upravit denní záznam",
