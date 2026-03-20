@@ -126,7 +126,10 @@ public class StatisticsRepository : IStatisticsRepository
         // 4. Flock Productivity Comparison
         var flockProductivity = await GetFlockProductivityAsync(startDate, endDate, coopId, flockId);
 
-        // 5. Summary Statistics
+        // 5. Revenue Trend (monthly revenue vs. costs)
+        var revenueTrend = await GetRevenueTrendAsync(startDate, endDate);
+
+        // 6. Summary Statistics
         var totalEggs = productionTrend.Sum(p => p.Eggs);
         var totalCost = costBreakdown.Sum(c => c.Amount);
         var avgCostPerEgg = totalEggs > 0 ? totalCost / totalEggs : 0;
@@ -149,18 +152,26 @@ public class StatisticsRepository : IStatisticsRepository
             avgEggsPerDay = dayCount > 0 ? (decimal)totalEggs / dayCount : 0;
         }
 
+        var totalRevenue = revenueTrend.Any(r => r.Revenue > 0)
+            ? (decimal?)revenueTrend.Sum(r => r.Revenue)
+            : null;
+        decimal? profitLoss = totalRevenue.HasValue ? totalRevenue.Value - totalCost : null;
+
         return new StatisticsDto
         {
             CostBreakdown = costBreakdown,
             ProductionTrend = productionTrend,
             CostPerEggTrend = costPerEggTrend,
             FlockProductivity = flockProductivity,
+            RevenueTrend = revenueTrend,
             Summary = new StatisticsSummaryDto
             {
                 TotalEggs = totalEggs,
                 TotalCost = totalCost,
                 AvgCostPerEgg = avgCostPerEgg,
-                AvgEggsPerDay = avgEggsPerDay
+                AvgEggsPerDay = avgEggsPerDay,
+                TotalRevenue = totalRevenue,
+                ProfitLoss = profitLoss
             }
         };
     }
@@ -292,6 +303,54 @@ public class StatisticsRepository : IStatisticsRepository
         }
 
         return result;
+    }
+
+    private async Task<List<RevenueTrendItemDto>> GetRevenueTrendAsync(DateOnly? startDate, DateOnly? endDate)
+    {
+        var tenantId = GetTenantId();
+        var startDateTime = startDate.HasValue
+            ? DateTime.SpecifyKind(startDate.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc)
+            : (DateTime?)null;
+        var endDateTime = endDate.HasValue
+            ? DateTime.SpecifyKind(endDate.Value.ToDateTime(TimeOnly.MaxValue), DateTimeKind.Utc)
+            : (DateTime?)null;
+
+        // Fetch minimal data client-side for month grouping (EF can't translate Year+Month grouping portably)
+        var sales = await _context.EggSales
+            .Where(es => es.TenantId == tenantId)
+            .Where(es => startDateTime == null || es.Date >= startDateTime)
+            .Where(es => endDateTime == null || es.Date <= endDateTime)
+            .Select(es => new { es.Date, Revenue = es.Quantity * es.PricePerUnit })
+            .ToListAsync();
+
+        var purchases = await _context.Purchases
+            .Where(p => p.TenantId == tenantId)
+            .Where(p => startDateTime == null || p.PurchaseDate >= startDateTime)
+            .Where(p => endDateTime == null || p.PurchaseDate <= endDateTime)
+            .Select(p => new { p.PurchaseDate, p.Amount })
+            .ToListAsync();
+
+        var salesByMonth = sales
+            .GroupBy(s => new { s.Date.Year, s.Date.Month })
+            .ToDictionary(g => g.Key, g => g.Sum(s => s.Revenue));
+
+        var costsByMonth = purchases
+            .GroupBy(p => new { p.PurchaseDate.Year, p.PurchaseDate.Month })
+            .ToDictionary(g => g.Key, g => g.Sum(p => p.Amount));
+
+        var allMonths = salesByMonth.Keys
+            .Union(costsByMonth.Keys)
+            .Distinct()
+            .OrderBy(m => m.Year)
+            .ThenBy(m => m.Month)
+            .ToList();
+
+        return allMonths.Select(m => new RevenueTrendItemDto
+        {
+            Month = $"{m.Year:D4}-{m.Month:D2}",
+            Revenue = salesByMonth.GetValueOrDefault(m, 0m),
+            Costs = costsByMonth.GetValueOrDefault(m, 0m)
+        }).ToList();
     }
 
     private async Task<List<FlockProductivityItemDto>> GetFlockProductivityAsync(DateOnly? startDate, DateOnly? endDate, Guid? coopId = null, Guid? flockId = null)

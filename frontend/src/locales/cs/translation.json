@@ -507,7 +507,9 @@
     "summary": {
       "totalEggs": "Celkem vajec",
       "totalCost": "Celkové náklady",
-      "avgCostPerEgg": "Prům. cena/vejce"
+      "avgCostPerEgg": "Prům. cena/vejce",
+      "totalRevenue": "Celkové příjmy",
+      "profitLoss": "Zisk / Ztráta"
     },
     "dateRange": {
       "title": "Časové období",
@@ -552,6 +554,14 @@
       "mediumProductivity": "Střední",
       "lowProductivity": "Nízká",
       "noData": "Žádná data za vybrané období"
+    },
+    "revenuePnlChart": {
+      "title": "Příjmy a zisk/ztráta",
+      "description": "Měsíční přehled příjmů z prodeje vajec oproti nákladům",
+      "revenue": "Příjmy",
+      "costs": "Náklady",
+      "net": "Zisk/Ztráta",
+      "noData": "Žádná data o prodeji vajec za vybrané období"
     },
     "emptyState": {
       "noData": "Žádná data za vybrané období"

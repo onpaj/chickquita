@@ -26,6 +26,11 @@ public sealed class StatisticsDto
     public List<FlockProductivityItemDto> FlockProductivity { get; set; } = new();
 
     /// <summary>
+    /// Monthly revenue vs. costs trend.
+    /// </summary>
+    public List<RevenueTrendItemDto> RevenueTrend { get; set; } = new();
+
+    /// <summary>
     /// Summary statistics for the period.
     /// </summary>
     public StatisticsSummaryDto Summary { get; set; } = new();
@@ -111,6 +116,27 @@ public sealed class FlockProductivityItemDto
 }
 
 /// <summary>
+/// Monthly revenue vs. costs data point.
+/// </summary>
+public sealed class RevenueTrendItemDto
+{
+    /// <summary>
+    /// Month of the data point (YYYY-MM).
+    /// </summary>
+    public string Month { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Total egg sale revenue in this month.
+    /// </summary>
+    public decimal Revenue { get; set; }
+
+    /// <summary>
+    /// Total purchase costs in this month.
+    /// </summary>
+    public decimal Costs { get; set; }
+}
+
+/// <summary>
 /// Summary statistics for the period.
 /// </summary>
 public sealed class StatisticsSummaryDto
@@ -134,4 +160,14 @@ public sealed class StatisticsSummaryDto
     /// Average eggs per day.
     /// </summary>
     public decimal AvgEggsPerDay { get; set; }
+
+    /// <summary>
+    /// Total revenue from egg sales. Null if no sales recorded.
+    /// </summary>
+    public decimal? TotalRevenue { get; set; }
+
+    /// <summary>
+    /// Net profit/loss (revenue minus costs). Null if no sales recorded.
+    /// </summary>
+    public decimal? ProfitLoss { get; set; }
 }

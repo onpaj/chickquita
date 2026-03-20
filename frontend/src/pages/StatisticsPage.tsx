@@ -29,11 +29,14 @@ import 'dayjs/locale/en';
 import EggIcon from '@mui/icons-material/Egg';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { StatCard } from '@/shared/components';
 import { EggCostBreakdownChart } from '@/features/statistics/components/EggCostBreakdownChart';
 import { ProductionTrendChart } from '@/features/statistics/components/ProductionTrendChart';
 import { CostPerEggTrendChart } from '@/features/statistics/components/CostPerEggTrendChart';
 import { FlockProductivityChart } from '@/features/statistics/components/FlockProductivityChart';
+import { RevenuePnlChart } from '@/features/statistics/components/RevenuePnlChart';
 import { useStatistics } from '@/features/statistics/hooks/useStatistics';
 import { useCoops } from '@/features/coops/hooks/useCoops';
 import { useFlocks } from '@/features/flocks/hooks/useFlocks';
@@ -303,6 +306,24 @@ export default function StatisticsPage() {
               loading={isLoading}
               color="info"
             />
+            {(isLoading || (stats?.summary.totalRevenue != null)) && (
+              <StatCard
+                icon={<TrendingUpIcon />}
+                label={t('statistics.summary.totalRevenue')}
+                value={stats?.summary.totalRevenue != null ? `${stats.summary.totalRevenue.toFixed(2)} Kč` : '—'}
+                loading={isLoading}
+                color="success"
+              />
+            )}
+            {(isLoading || (stats?.summary.profitLoss != null)) && (
+              <StatCard
+                icon={<ShowChartIcon />}
+                label={t('statistics.summary.profitLoss')}
+                value={stats?.summary.profitLoss != null ? `${stats.summary.profitLoss.toFixed(2)} Kč` : '—'}
+                loading={isLoading}
+                color={stats?.summary.profitLoss != null && stats.summary.profitLoss >= 0 ? 'success' : 'error'}
+              />
+            )}
           </Box>
 
           {/* Error State */}
@@ -321,7 +342,7 @@ export default function StatisticsPage() {
                 gap: 3,
               }}
             >
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} variant="rectangular" height={300} />
               ))}
             </Box>
@@ -354,6 +375,11 @@ export default function StatisticsPage() {
               {/* Flock Productivity Comparison */}
               <Paper sx={{ p: 2 }}>
                 <FlockProductivityChart data={stats.flockProductivity} />
+              </Paper>
+
+              {/* Revenue & P&L */}
+              <Paper sx={{ p: 2, gridColumn: { md: '1 / -1' } }}>
+                <RevenuePnlChart data={stats.revenueTrend} />
               </Paper>
             </Box>
           )}

@@ -505,7 +505,9 @@
     "summary": {
       "totalEggs": "Total Eggs",
       "totalCost": "Total Costs",
-      "avgCostPerEgg": "Avg. Cost/Egg"
+      "avgCostPerEgg": "Avg. Cost/Egg",
+      "totalRevenue": "Total Revenue",
+      "profitLoss": "Profit / Loss"
     },
     "dateRange": {
       "title": "Time Period",
@@ -550,6 +552,14 @@
       "mediumProductivity": "Medium",
       "lowProductivity": "Low",
       "noData": "No data for selected period"
+    },
+    "revenuePnlChart": {
+      "title": "Revenue & Profit/Loss",
+      "description": "Monthly egg sale revenue vs. costs",
+      "revenue": "Revenue",
+      "costs": "Costs",
+      "net": "Net P&L",
+      "noData": "No egg sale data for the selected period"
     },
     "emptyState": {
       "noData": "No data for selected period"

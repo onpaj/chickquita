@@ -40,6 +40,15 @@ export interface FlockProductivityItem {
 }
 
 /**
+ * Monthly revenue vs. costs data point
+ */
+export interface RevenueTrendItem {
+  month: string; // YYYY-MM
+  revenue: number;
+  costs: number;
+}
+
+/**
  * Statistics API response
  */
 export interface StatisticsDto {
@@ -47,10 +56,13 @@ export interface StatisticsDto {
   productionTrend: ProductionTrendItem[];
   costPerEggTrend: CostPerEggTrendItem[];
   flockProductivity: FlockProductivityItem[];
+  revenueTrend: RevenueTrendItem[];
   summary: {
     totalEggs: number;
     totalCost: number;
     avgCostPerEgg: number;
     avgEggsPerDay: number;
+    totalRevenue: number | null;
+    profitLoss: number | null;
   };
 }
