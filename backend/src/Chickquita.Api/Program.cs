@@ -1,8 +1,10 @@
 using Chickquita.Api.Endpoints;
 using Chickquita.Api.Middleware;
 using Chickquita.Application;
+using Chickquita.Infrastructure.Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
 using System.Text.Json;
@@ -116,6 +118,19 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Apply pending EF Core migrations automatically on startup.
+// Guard: skip for non-relational providers (EF InMemory used in unit tests)
+// and for SQLite (used in integration tests) which can't run PostgreSQL-specific migrations.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    if (db.Database.IsRelational() &&
+        db.Database.ProviderName != "Microsoft.EntityFrameworkCore.Sqlite")
+    {
+        await db.Database.MigrateAsync();
+    }
+}
 
 // Intercept FluentValidation.ValidationException from the MediatR pipeline behavior
 // and return 400 Bad Request instead of 500. This applies to all endpoints globally.
