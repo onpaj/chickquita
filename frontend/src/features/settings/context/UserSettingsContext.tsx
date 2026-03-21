@@ -4,11 +4,13 @@ import { useUserSettings } from '../hooks/useUserSettings';
 
 interface UserSettingsContextValue {
   singleCoopMode: boolean;
+  currency: string;
   isLoading: boolean;
 }
 
 const UserSettingsContext = createContext<UserSettingsContextValue>({
   singleCoopMode: true,
+  currency: 'CZK',
   isLoading: true,
 });
 
@@ -19,6 +21,7 @@ export function UserSettingsProvider({ children }: { children: ReactNode }) {
     <UserSettingsContext.Provider
       value={{
         singleCoopMode: data?.singleCoopMode ?? true,
+        currency: data?.currency ?? 'CZK',
         isLoading,
       }}
     >

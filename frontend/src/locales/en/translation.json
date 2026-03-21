@@ -420,6 +420,10 @@
       "label": "Multi-coop management",
       "description": "Enables full management of multiple coops and shows coop navigation",
       "onlyOneCoopHint": "Can only switch back to simplified mode with exactly one active coop"
+    },
+    "currency": {
+      "label": "Currency",
+      "description": "Currency used for displaying prices and costs"
     }
   },
   "validation": {

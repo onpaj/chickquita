@@ -422,6 +422,10 @@
       "label": "Správa více kurníků",
       "description": "Zapne plnou správu více kurníků a zobrazí navigaci kurníků",
       "onlyOneCoopHint": "Zpět do zjednodušeného režimu lze přepnout pouze s jedním aktivním kurníkem"
+    },
+    "currency": {
+      "label": "Měna",
+      "description": "Měna používaná pro zobrazení cen a nákladů"
     }
   },
   "validation": {
