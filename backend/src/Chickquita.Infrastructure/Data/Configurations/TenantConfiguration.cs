@@ -40,6 +40,12 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasDefaultValue(true)
             .IsRequired();
 
+        builder.Property(t => t.Currency)
+            .HasColumnName("currency")
+            .HasMaxLength(10)
+            .HasDefaultValue("CZK")
+            .IsRequired();
+
         builder.HasIndex(t => t.ClerkOrgId)
             .HasDatabaseName("ix_tenants_clerk_org_id")
             .IsUnique();

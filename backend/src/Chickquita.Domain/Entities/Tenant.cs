@@ -43,6 +43,12 @@ public class Tenant
     public bool SingleCoopMode { get; private set; }
 
     /// <summary>
+    /// ISO 4217 currency code used for display across the tenant's UI (e.g. "CZK", "EUR", "USD").
+    /// Defaults to "CZK". No currency conversion is performed — this is display-only.
+    /// </summary>
+    public string Currency { get; private set; } = "CZK";
+
+    /// <summary>
     /// Private constructor for EF Core.
     /// </summary>
     private Tenant() { }
@@ -92,10 +98,12 @@ public class Tenant
     /// Updates the tenant's settings.
     /// </summary>
     /// <param name="singleCoopMode">Whether to enable single-coop mode</param>
+    /// <param name="currency">ISO 4217 currency code (e.g. "CZK", "EUR"). Defaults to "CZK" if null or empty.</param>
     /// <returns>A Result indicating success</returns>
-    public Result UpdateSettings(bool singleCoopMode)
+    public Result UpdateSettings(bool singleCoopMode, string? currency = null)
     {
         SingleCoopMode = singleCoopMode;
+        Currency = string.IsNullOrWhiteSpace(currency) ? "CZK" : currency.ToUpperInvariant();
         UpdatedAt = DateTime.UtcNow;
 
         return Result.Success();

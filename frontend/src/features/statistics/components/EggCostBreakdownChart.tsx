@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import type { PieLabelRenderProps } from 'recharts';
 import type { CostBreakdownItem } from '../types';
+import { useUserSettingsContext } from '../../settings/context/UserSettingsContext';
 
 /**
  * Egg Cost Breakdown Chart Component
@@ -37,6 +38,7 @@ interface EggCostBreakdownTooltipProps {
 
 function EggCostBreakdownTooltip({ active, payload }: EggCostBreakdownTooltipProps) {
   const { t } = useTranslation();
+  const { currency } = useUserSettingsContext();
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -53,7 +55,7 @@ function EggCostBreakdownTooltip({ active, payload }: EggCostBreakdownTooltipPro
           {t(`purchases.types.${data.type.toLowerCase()}`)}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {t('statistics.costBreakdown.amount')}: {data.amount.toFixed(2)} Kč
+          {t('statistics.costBreakdown.amount')}: {data.amount.toFixed(2)} {currency}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {data.percentage.toFixed(1)}%

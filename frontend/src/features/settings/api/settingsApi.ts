@@ -2,6 +2,7 @@ import { apiClient } from '../../../lib/apiClient';
 
 export interface TenantSettings {
   singleCoopMode: boolean;
+  currency: string;
 }
 
 export const settingsApi = {

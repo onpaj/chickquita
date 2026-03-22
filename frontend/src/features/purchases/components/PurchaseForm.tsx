@@ -20,6 +20,7 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useTranslation } from 'react-i18next';
 import { PurchaseType, QuantityUnit, type CreatePurchaseDto, type UpdatePurchaseDto, type PurchaseDto } from '../types';
+import { useUserSettingsContext } from '@/features/settings/context/UserSettingsContext';
 import { usePurchaseAutocomplete } from '../hooks/usePurchaseAutocomplete';
 import { NumericStepper } from '@/shared/components';
 import {
@@ -180,6 +181,7 @@ export function PurchaseForm({
   onValidityChange,
 }: PurchaseFormProps) {
   const { t } = useTranslation();
+  const { currency } = useUserSettingsContext();
   const [nameInput, setNameInput] = useState('');
   const { suggestions, isLoading: isLoadingSuggestions } = usePurchaseAutocomplete(nameInput);
 
@@ -411,16 +413,16 @@ export function PurchaseForm({
           control={control}
           render={({ field }) => (
             <NumericStepper
-              label={t('purchases.form.amount')}
+              label={t('purchases.form.amount', { currency })}
               value={field.value}
               onChange={field.onChange}
-              min={1}
-              max={999999}
-              step={1}
+              min={0.01}
+              max={999999.99}
+              step={0.01}
               disabled={isSubmitting}
               error={!!errors.amount}
-              helperText={errors.amount?.message ? t(errors.amount.message) : ''}
-              aria-label={t('purchases.form.amount')}
+              helperText={errors.amount?.message ? t(errors.amount.message, { currency }) : ''}
+              aria-label={t('purchases.form.amount', { currency })}
             />
           )}
         />

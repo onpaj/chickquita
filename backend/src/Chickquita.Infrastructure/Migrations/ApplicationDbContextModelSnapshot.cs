@@ -364,6 +364,13 @@ namespace Chickquita.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("CZK")
+                        .HasColumnName("currency");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
