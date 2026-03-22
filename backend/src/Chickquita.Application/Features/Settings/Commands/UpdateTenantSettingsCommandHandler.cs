@@ -63,7 +63,7 @@ public sealed class UpdateTenantSettingsCommandHandler : IRequestHandler<UpdateT
                 return Result<bool>.Failure(Error.NotFound("Tenant not found"));
             }
 
-            var updateResult = tenant.UpdateSettings(request.SingleCoopMode, request.RevenueTrackingEnabled);
+            var updateResult = tenant.UpdateSettings(request.SingleCoopMode, request.RevenueTrackingEnabled, request.Currency);
             if (updateResult.IsFailure)
                 return Result<bool>.Failure(updateResult.Error);
 
@@ -71,10 +71,11 @@ public sealed class UpdateTenantSettingsCommandHandler : IRequestHandler<UpdateT
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
-                "Updated settings for tenant {TenantId} - SingleCoopMode: {SingleCoopMode}, RevenueTrackingEnabled: {RevenueTrackingEnabled}",
+                "Updated settings for tenant {TenantId} - SingleCoopMode: {SingleCoopMode}, RevenueTrackingEnabled: {RevenueTrackingEnabled}, Currency: {Currency}",
                 tenantId.Value,
                 request.SingleCoopMode,
-                request.RevenueTrackingEnabled);
+                request.RevenueTrackingEnabled,
+                tenant.Currency);
 
             return Result<bool>.Success(true);
         }

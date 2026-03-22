@@ -5,12 +5,14 @@ import { useUserSettings } from '../hooks/useUserSettings';
 interface UserSettingsContextValue {
   singleCoopMode: boolean;
   revenueTrackingEnabled: boolean;
+  currency: string;
   isLoading: boolean;
 }
 
 const UserSettingsContext = createContext<UserSettingsContextValue>({
   singleCoopMode: true,
   revenueTrackingEnabled: true,
+  currency: 'CZK',
   isLoading: true,
 });
 
@@ -22,6 +24,7 @@ export function UserSettingsProvider({ children }: { children: ReactNode }) {
       value={{
         singleCoopMode: data?.singleCoopMode ?? true,
         revenueTrackingEnabled: data?.revenueTrackingEnabled ?? true,
+        currency: data?.currency ?? 'CZK',
         isLoading,
       }}
     >

@@ -56,7 +56,7 @@ import { useUserSettingsContext } from '@/features/settings';
  */
 export default function StatisticsPage() {
   const { t, i18n } = useTranslation();
-  const { singleCoopMode, revenueTrackingEnabled } = useUserSettingsContext();
+  const { singleCoopMode, revenueTrackingEnabled, currency } = useUserSettingsContext();
   const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Dayjs | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Dayjs | null>(null);
@@ -295,14 +295,14 @@ export default function StatisticsPage() {
             <StatCard
               icon={<AttachMoneyIcon />}
               label={t('statistics.summary.totalCost')}
-              value={stats ? `${stats.summary.totalCost.toFixed(2)} Kč` : '—'}
+              value={stats ? `${stats.summary.totalCost.toFixed(2)} ${currency}` : '—'}
               loading={isLoading}
               color="warning"
             />
             <StatCard
               icon={<TrendingDownIcon />}
               label={t('statistics.summary.avgCostPerEgg')}
-              value={stats ? `${stats.summary.avgCostPerEgg.toFixed(2)} Kč` : '—'}
+              value={stats ? `${stats.summary.avgCostPerEgg.toFixed(2)} ${currency}` : '—'}
               loading={isLoading}
               color="info"
             />

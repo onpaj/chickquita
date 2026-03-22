@@ -54,7 +54,7 @@ public static class SettingsEndpoints
         [FromBody] UpdateTenantSettingsRequest request,
         [FromServices] IMediator mediator)
     {
-        var command = new UpdateTenantSettingsCommand { SingleCoopMode = request.SingleCoopMode };
+        var command = new UpdateTenantSettingsCommand { SingleCoopMode = request.SingleCoopMode, RevenueTrackingEnabled = request.RevenueTrackingEnabled, Currency = request.Currency };
         var result = await mediator.Send(command);
 
         return result.ToHttpResult(_ => Results.NoContent());
@@ -64,4 +64,4 @@ public static class SettingsEndpoints
 /// <summary>
 /// Request body for updating tenant settings.
 /// </summary>
-public sealed record UpdateTenantSettingsRequest(bool SingleCoopMode);
+public sealed record UpdateTenantSettingsRequest(bool SingleCoopMode, bool RevenueTrackingEnabled, string? Currency);
