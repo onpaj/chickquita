@@ -43,9 +43,10 @@ public sealed class UpdateTenantSettingsCommandHandler : IRequestHandler<UpdateT
     public async Task<Result<bool>> Handle(UpdateTenantSettingsCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation(
-            "Processing UpdateTenantSettingsCommand - SingleCoopMode: {SingleCoopMode}, RevenueTrackingEnabled: {RevenueTrackingEnabled}",
+            "Processing UpdateTenantSettingsCommand - SingleCoopMode: {SingleCoopMode}, RevenueTrackingEnabled: {RevenueTrackingEnabled}, Currency: {Currency}",
             request.SingleCoopMode,
-            request.RevenueTrackingEnabled);
+            request.RevenueTrackingEnabled,
+            request.Currency);
 
         try
         {
