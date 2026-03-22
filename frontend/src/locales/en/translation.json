@@ -286,7 +286,7 @@
       "type": "Purchase Type",
       "name": "Name",
       "purchaseDate": "Purchase Date",
-      "amount": "Amount (CZK)",
+      "amount": "Amount ({{currency}})",
       "quantity": "Quantity",
       "unit": "Unit",
       "consumedDate": "Consumed Date",
@@ -436,7 +436,7 @@
     "positiveNumber": "Must be a positive number",
     "invalidNumber": "Must be a valid number",
     "invalidType": "Invalid type",
-    "maxAmount": "Maximum amount is 999999.99 CZK",
+    "maxAmount": "Maximum amount is 999999.99 {{currency}}",
     "maxQuantity": "Maximum quantity is 999999.99"
   },
   "statistics": {

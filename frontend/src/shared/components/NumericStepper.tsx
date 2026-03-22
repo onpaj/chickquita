@@ -44,17 +44,22 @@ export function NumericStepper({
   'aria-label': ariaLabel,
   inputRef,
 }: NumericStepperProps) {
+  const decimalPlaces = (step.toString().split('.')[1] ?? '').length;
+  const factor = Math.pow(10, decimalPlaces);
+
   const handleDecrement = () => {
-    const newValue = Math.max(min, value - step);
-    if (newValue !== value) {
-      onChange(newValue);
+    const newValue = Math.round((value - step) * factor) / factor;
+    const clamped = Math.max(min, newValue);
+    if (clamped !== value) {
+      onChange(clamped);
     }
   };
 
   const handleIncrement = () => {
-    const newValue = Math.min(max, value + step);
-    if (newValue !== value) {
-      onChange(newValue);
+    const newValue = Math.round((value + step) * factor) / factor;
+    const clamped = Math.min(max, newValue);
+    if (clamped !== value) {
+      onChange(clamped);
     }
   };
 
@@ -67,7 +72,7 @@ export function NumericStepper({
       return;
     }
 
-    const numericValue = parseInt(inputValue, 10);
+    const numericValue = parseFloat(inputValue);
 
     if (!isNaN(numericValue)) {
       const clampedValue = Math.max(min, Math.min(max, numericValue));
