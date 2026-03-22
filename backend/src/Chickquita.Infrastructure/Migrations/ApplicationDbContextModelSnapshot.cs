@@ -129,6 +129,61 @@ namespace Chickquita.Infrastructure.Migrations
                     b.ToTable("daily_records", (string)null);
                 });
 
+            modelBuilder.Entity("Chickquita.Domain.Entities.EggSale", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BuyerName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("buyer_name");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("notes");
+
+                    b.Property<decimal>("PricePerUnit")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("price_per_unit");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date")
+                        .HasDatabaseName("ix_egg_sales_date");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_egg_sales_tenant_id");
+
+                    b.HasIndex("TenantId", "Date")
+                        .HasDatabaseName("ix_egg_sales_tenant_id_date");
+
+                    b.ToTable("egg_sales", (string)null);
+                });
+
             modelBuilder.Entity("Chickquita.Domain.Entities.Flock", b =>
                 {
                     b.Property<Guid>("Id")
@@ -377,6 +432,12 @@ namespace Chickquita.Infrastructure.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
+                    b.Property<bool>("RevenueTrackingEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("revenue_tracking_enabled");
+
                     b.Property<bool>("SingleCoopMode")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -416,6 +477,17 @@ namespace Chickquita.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Flock");
+                });
+
+            modelBuilder.Entity("Chickquita.Domain.Entities.EggSale", b =>
+                {
+                    b.HasOne("Chickquita.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Chickquita.Domain.Entities.Flock", b =>

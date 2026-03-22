@@ -40,6 +40,11 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasDefaultValue(true)
             .IsRequired();
 
+        builder.Property(t => t.RevenueTrackingEnabled)
+            .HasColumnName("revenue_tracking_enabled")
+            .HasDefaultValue(true)
+            .IsRequired();
+
         builder.Property(t => t.Currency)
             .HasColumnName("currency")
             .HasMaxLength(10)

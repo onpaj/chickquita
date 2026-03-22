@@ -8,8 +8,10 @@ import { TodaySummaryWidget } from '@/features/dashboard/components/TodaySummary
 import { WeeklyProductionWidget } from '@/features/dashboard/components/WeeklyProductionWidget';
 import { FlockStatusWidget } from '@/features/dashboard/components/FlockStatusWidget';
 import { EggCostWidget } from '@/features/dashboard/components/EggCostWidget';
+import { RevenuePnlWidget } from '@/features/dashboard/components/RevenuePnlWidget';
 import { QuickAddModal } from '@/features/dailyRecords/components/QuickAddModal';
 import { useAllFlocks } from '@/features/flocks/hooks/useAllFlocks';
+import { useUserSettingsContext } from '@/features/settings';
 
 /**
  * Dashboard Page Component
@@ -26,6 +28,7 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const { data: stats, isLoading, error } = useDashboardStats();
   const { data: flocks = [] } = useAllFlocks();
+  const { revenueTrackingEnabled } = useUserSettingsContext();
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   // Check if user has any data
@@ -65,7 +68,7 @@ export default function DashboardPage() {
               gridTemplateColumns: {
                 xs: '1fr',
                 sm: 'repeat(2, 1fr)',
-                md: 'repeat(4, 1fr)',
+                md: 'repeat(3, 1fr)',
               },
               gap: 2,
             }}
@@ -92,6 +95,14 @@ export default function DashboardPage() {
               activeFlocks={stats?.activeFlocks ?? 0}
               loading={isLoading}
             />
+
+            {revenueTrackingEnabled && (
+              <RevenuePnlWidget
+                totalRevenue={stats?.totalRevenue}
+                profitLoss={stats?.profitLoss}
+                loading={isLoading}
+              />
+            )}
           </Box>
         )}
 

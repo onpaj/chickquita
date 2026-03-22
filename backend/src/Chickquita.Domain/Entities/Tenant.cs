@@ -43,6 +43,12 @@ public class Tenant
     public bool SingleCoopMode { get; private set; }
 
     /// <summary>
+    /// When true, revenue and P&amp;L tracking features are enabled (egg sales, revenue charts).
+    /// Defaults to true.
+    /// </summary>
+    public bool RevenueTrackingEnabled { get; private set; } = true;
+
+    /// <summary>
     /// ISO 4217 currency code used for display across the tenant's UI (e.g. "CZK", "EUR", "USD").
     /// Defaults to "CZK". No currency conversion is performed — this is display-only.
     /// </summary>
@@ -98,11 +104,13 @@ public class Tenant
     /// Updates the tenant's settings.
     /// </summary>
     /// <param name="singleCoopMode">Whether to enable single-coop mode</param>
+    /// <param name="revenueTrackingEnabled">Whether to enable revenue and P&amp;L tracking</param>
     /// <param name="currency">ISO 4217 currency code (e.g. "CZK", "EUR"). Defaults to "CZK" if null or empty.</param>
     /// <returns>A Result indicating success</returns>
-    public Result UpdateSettings(bool singleCoopMode, string? currency = null)
+    public Result UpdateSettings(bool singleCoopMode, bool revenueTrackingEnabled, string? currency = null)
     {
         SingleCoopMode = singleCoopMode;
+        RevenueTrackingEnabled = revenueTrackingEnabled;
         Currency = string.IsNullOrWhiteSpace(currency) ? "CZK" : currency.ToUpperInvariant();
         UpdatedAt = DateTime.UtcNow;
 

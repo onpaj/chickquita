@@ -14,6 +14,8 @@ export interface DashboardStats {
   thisWeekEggs: number;
   avgEggsPerDay: number;
   costPerEgg: number | null;
+  totalRevenue: number | null;
+  profitLoss: number | null;
 }
 
 /**

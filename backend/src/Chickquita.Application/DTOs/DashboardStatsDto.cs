@@ -55,4 +55,16 @@ public sealed class DashboardStatsDto
     /// Returns null when there is no production data.
     /// </summary>
     public decimal? CostPerEgg { get; set; }
+
+    /// <summary>
+    /// All-time total revenue from egg sales (sum of quantity × price per unit).
+    /// Returns null when there are no egg sales recorded.
+    /// </summary>
+    public decimal? TotalRevenue { get; set; }
+
+    /// <summary>
+    /// All-time profit/loss (total revenue minus total costs).
+    /// Returns null when there are no egg sales recorded.
+    /// </summary>
+    public decimal? ProfitLoss { get; set; }
 }

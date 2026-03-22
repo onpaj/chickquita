@@ -42,6 +42,7 @@
     "statistics": "Statistiky",
     "settings": "Nastavení",
     "records": "Záznamy",
+    "eggSales": "Prodeje vajec",
     "profile": "Profil"
   },
   "dashboard": {
@@ -72,6 +73,12 @@
         "title": "Kalkulace nákladů",
         "costPerEgg": "Cena za vejce",
         "notAvailable": "Zatím nedostupné"
+      },
+      "revenuePnl": {
+        "title": "Příjmy a zisk",
+        "profitLossLabel": "zisk/ztráta",
+        "notAvailable": "Zatím žádné prodeje",
+        "noCosts": "Bez evidovaných nákladů"
       }
     },
     "quickActions": {
@@ -297,6 +304,62 @@
       "consumedDateFuture": "Datum spotřeby nemůže být v budoucnosti"
     }
   },
+  "eggSales": {
+    "title": "Prodeje vajec",
+    "addSale": "Přidat prodej",
+    "createSale": "Vytvořit prodej",
+    "editSale": "Upravit prodej",
+    "date": "Datum",
+    "quantity": "Počet vajec",
+    "pricePerUnit": "Cena za kus (Kč)",
+    "buyerName": "Název kupce",
+    "notes": "Poznámky",
+    "currency": "Kč",
+    "totalRevenue": "Celkový příjem",
+    "filters": {
+      "fromDate": "Od data",
+      "toDate": "Do data"
+    },
+    "summary": {
+      "thisMonth": "Celkový příjem tento měsíc"
+    },
+    "list": {
+      "date": "Datum",
+      "quantity": "Počet",
+      "pricePerUnit": "Cena/ks",
+      "total": "Celkem",
+      "buyer": "Kupec"
+    },
+    "emptyState": {
+      "title": "Zatím žádné prodeje vajec",
+      "description": "Začněte sledovat příjmy přidáním prvního prodeje vajec."
+    },
+    "delete": {
+      "title": "Smazat prodej?",
+      "message": "Opravdu chcete smazat tento prodej vajec?",
+      "warning": "Tuto akci nelze vrátit zpět.",
+      "success": "Prodej byl úspěšně smazán",
+      "error": "Nepodařilo se smazat prodej"
+    },
+    "create": {
+      "success": "Prodej byl úspěšně vytvořen",
+      "error": "Nepodařilo se vytvořit prodej"
+    },
+    "update": {
+      "success": "Prodej byl úspěšně aktualizován",
+      "error": "Nepodařilo se aktualizovat prodej"
+    },
+    "form": {
+      "date": "Datum prodeje",
+      "quantity": "Počet vajec",
+      "pricePerUnit": "Cena za kus (Kč)",
+      "buyerName": "Název kupce (volitelné)",
+      "notes": "Poznámky (volitelné)",
+      "dateFuture": "Datum prodeje nemůže být v budoucnosti",
+      "quantityMin": "Počet musí být alespoň 1",
+      "priceMin": "Cena nemůže být záporná"
+    }
+  },
   "dailyRecords": {
     "title": "Denní záznamy",
     "addRecord": "Přidat záznam",
@@ -325,7 +388,9 @@
       "collectionTime": "Čas sběru (UTC)"
     },
     "quickAdd": {
-      "title": "Rychlý záznam vajec"
+      "title": "Rychlý záznam vajec",
+      "tabRecord": "Záznam",
+      "tabSale": "Prodej"
     },
     "edit": {
       "title": "Upravit denní záznam",
@@ -423,6 +488,10 @@
       "description": "Zapne plnou správu více kurníků a zobrazí navigaci kurníků",
       "onlyOneCoopHint": "Zpět do zjednodušeného režimu lze přepnout pouze s jedním aktivním kurníkem"
     },
+"revenueTracking": {
+      "label": "Sledování příjmů",
+      "description": "Zapne sledování příjmů a zisku/ztráty (prodeje vajec, grafy příjmů)"
+    },
     "currency": {
       "label": "Měna",
       "description": "Měna používaná pro zobrazení cen a nákladů"
@@ -446,7 +515,9 @@
     "summary": {
       "totalEggs": "Celkem vajec",
       "totalCost": "Celkové náklady",
-      "avgCostPerEgg": "Prům. cena/vejce"
+      "avgCostPerEgg": "Prům. cena/vejce",
+      "totalRevenue": "Celkové příjmy",
+      "profitLoss": "Zisk / Ztráta"
     },
     "dateRange": {
       "title": "Časové období",
@@ -491,6 +562,14 @@
       "mediumProductivity": "Střední",
       "lowProductivity": "Nízká",
       "noData": "Žádná data za vybrané období"
+    },
+    "revenuePnlChart": {
+      "title": "Příjmy a zisk/ztráta",
+      "description": "Měsíční přehled příjmů z prodeje vajec oproti nákladům",
+      "revenue": "Příjmy",
+      "costs": "Náklady",
+      "net": "Zisk/Ztráta",
+      "noData": "Žádná data o prodeji vajec za vybrané období"
     },
     "emptyState": {
       "noData": "Žádná data za vybrané období"

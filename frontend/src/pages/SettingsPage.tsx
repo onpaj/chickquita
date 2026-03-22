@@ -46,6 +46,7 @@ export function SettingsPage() {
   const activeCoops = coops?.filter((c) => c.isActive) ?? [];
   const canToggleSingleCoopMode = activeCoops.length === 1;
   const singleCoopMode = settings?.singleCoopMode ?? true;
+const revenueTrackingEnabled = settings?.revenueTrackingEnabled ?? true;
   const currency = settings?.currency ?? 'CZK';
 
   const handleLanguageChange = (event: SelectChangeEvent) => {
@@ -56,11 +57,15 @@ export function SettingsPage() {
     // checked=true → enable multi-coop (singleCoopMode=false), always allowed
     // checked=false → revert to single-coop (singleCoopMode=true), requires exactly 1 coop
     if (!event.target.checked && !canToggleSingleCoopMode) return;
-    updateSettings({ singleCoopMode: !event.target.checked, currency });
+updateSettings({ singleCoopMode: !event.target.checked, revenueTrackingEnabled, currency });
+  };
+
+  const handleRevenueTrackingToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateSettings({ singleCoopMode, revenueTrackingEnabled: event.target.checked, currency });
   };
 
   const handleCurrencyChange = (event: SelectChangeEvent) => {
-    updateSettings({ singleCoopMode, currency: event.target.value });
+    updateSettings({ singleCoopMode, revenueTrackingEnabled, currency: event.target.value });
   };
 
   const handleSignOutConfirm = async () => {
@@ -181,6 +186,34 @@ export function SettingsPage() {
               {t('settings.singleCoopMode.onlyOneCoopHint')}
             </FormHelperText>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Revenue tracking section */}
+      <Card elevation={1} sx={{ mt: 2 }}>
+        <CardContent>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            {t('settings.revenueTracking.label')}
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={revenueTrackingEnabled}
+                onChange={handleRevenueTrackingToggle}
+                disabled={isUpdatingSettings}
+              />
+            }
+            label={
+              <Box>
+                <Typography variant="body2">
+                  {t('settings.revenueTracking.label')}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {t('settings.revenueTracking.description')}
+                </Typography>
+              </Box>
+            }
+          />
         </CardContent>
       </Card>
 

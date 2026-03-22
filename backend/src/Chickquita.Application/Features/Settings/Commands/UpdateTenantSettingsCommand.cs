@@ -14,6 +14,11 @@ public sealed record UpdateTenantSettingsCommand : IRequest<Result<bool>>
     public bool SingleCoopMode { get; init; }
 
     /// <summary>
+    /// Gets or sets whether to enable revenue and P&amp;L tracking.
+    /// </summary>
+    public bool RevenueTrackingEnabled { get; init; }
+
+    /// <summary>
     /// Gets or sets the ISO 4217 currency code (e.g. "CZK", "EUR", "USD").
     /// Defaults to "CZK" if not provided.
     /// </summary>

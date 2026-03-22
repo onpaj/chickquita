@@ -10,6 +10,9 @@ import {
   TextField,
   IconButton,
   Slide,
+  Tabs,
+  Tab,
+  Box,
 } from '@mui/material';
 import type { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
@@ -29,6 +32,8 @@ import {
   touchInputProps,
   FORM_FIELD_SPACING,
 } from '@/shared/constants/modalConfig';
+import { useCreateEggSale, useLastUsedEggPrice } from '@/features/eggSales';
+import { useUserSettingsContext } from '@/features/settings';
 
 const SlideUp = React.forwardRef(function SlideUp(
   props: TransitionProps & { children: React.ReactElement },
@@ -46,17 +51,16 @@ interface QuickAddModalProps {
 
 const LAST_FLOCK_KEY = 'chickquita_lastUsedFlockId';
 const MAX_NOTES_LENGTH = 500;
+const MAX_BUYER_NAME_LENGTH = 100;
 
 /**
  * QuickAddModal Component
  *
- * Mobile-optimized modal for quick daily record entry with < 30 seconds target completion time.
- * Features:
- * - Auto-focus on egg count field
- * - Remembers last used flock
- * - Mobile responsive (fullScreen on mobile)
- * - Default date set to today
- * - Optional notes field
+ * Mobile-optimized modal with two tabs:
+ * - "Záznam" tab: quick daily record entry
+ * - "Prodej" tab: quick egg sale entry
+ *
+ * Target completion time: < 30 seconds per entry.
  *
  * @example
  * <QuickAddModal
@@ -72,10 +76,15 @@ export function QuickAddModal({
   defaultFlockId,
 }: QuickAddModalProps) {
   const { t } = useTranslation();
-  const { mutate: createDailyRecord, isPending } = useCreateDailyRecord();
+  const { revenueTrackingEnabled } = useUserSettingsContext();
+  const [activeTab, setActiveTab] = useState(0);
+  const effectiveTab = !revenueTrackingEnabled && activeTab === 1 ? 0 : activeTab;
+
+  // ── Daily record form ───────────────────────────────────────────────────
+  const { mutate: createDailyRecord, isPending: isDailyRecordPending } =
+    useCreateDailyRecord();
   const { handleError } = useErrorHandler();
 
-  // Get last used flock from localStorage or use provided default
   const getInitialFlockId = (): string => {
     if (defaultFlockId) return defaultFlockId;
     const savedFlockId = localStorage.getItem(LAST_FLOCK_KEY);
@@ -107,12 +116,10 @@ export function QuickAddModal({
   const eggCountRef = useRef<HTMLInputElement>(null);
   const notesRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-focus on egg count when modal opens
+  // Auto-focus on egg count when daily record tab opens
   useEffect(() => {
-    if (open) {
-      // Small delay to ensure modal is fully rendered
+    if (open && activeTab === 0) {
       const timer = setTimeout(() => {
-        // Only auto-focus if the user hasn't already started typing in a textarea
         const activeEl = document.activeElement;
         const isTextareaFocused = activeEl?.tagName === 'TEXTAREA';
         if (!isTextareaFocused) {
@@ -121,14 +128,17 @@ export function QuickAddModal({
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [open]);
+  }, [open, activeTab]);
 
   // Update flockId when modal opens
   useEffect(() => {
     if (open) {
       const savedFlockId = localStorage.getItem(LAST_FLOCK_KEY);
-      const initialFlockId = defaultFlockId ||
-        (savedFlockId && flocks.some((f) => f.id === savedFlockId) ? savedFlockId : null) ||
+      const initialFlockId =
+        defaultFlockId ||
+        (savedFlockId && flocks.some((f) => f.id === savedFlockId)
+          ? savedFlockId
+          : null) ||
         flocks[0]?.id ||
         '';
       if (initialFlockId) {
@@ -138,75 +148,46 @@ export function QuickAddModal({
     }
   }, [open, flocks, defaultFlockId]);
 
-  const handleClose = () => {
-    setFlockId(getInitialFlockId());
-    setEggCount(0);
-    setRecordDate(new Date().toISOString().split('T')[0]);
-    setCollectionTime(getCurrentUtcTime());
-    if (notesRef.current) {
-      notesRef.current.value = '';
-    }
-    setNotesLength(0);
-    setFlockIdError('');
-    setEggCountError('');
-    setRecordDateError('');
-    setNotesError('');
-    onClose();
-  };
-
   const validateFlockId = (value: string): string => {
-    if (!value) {
-      return t('validation.required');
-    }
-    if (!flocks.some((f) => f.id === value)) {
-      return t('errors.notFound');
-    }
+    if (!value) return t('validation.required');
+    if (!flocks.some((f) => f.id === value)) return t('errors.notFound');
     return '';
   };
 
   const validateEggCount = (value: number): string => {
-    if (value < 0) {
-      return t('validation.positiveNumber');
-    }
+    if (value < 0) return t('validation.positiveNumber');
     return '';
   };
 
   const validateRecordDate = (value: string): string => {
-    if (!value) {
-      return t('validation.required');
-    }
+    if (!value) return t('validation.required');
     const [year, month, day] = value.split('-').map(Number);
-    const recordDateObj = new Date(year, month - 1, day);
+    const dateObj = new Date(year, month - 1, day);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (recordDateObj > today) {
-      return t('dailyRecords.dateFutureError');
-    }
+    if (dateObj > today) return t('dailyRecords.dateFutureError');
     return '';
   };
 
   const validateNotes = (value: string): string => {
-    if (value.length > MAX_NOTES_LENGTH) {
+    if (value.length > MAX_NOTES_LENGTH)
       return t('validation.maxLength', { count: MAX_NOTES_LENGTH });
-    }
     return '';
   };
 
-  const validate = (): boolean => {
+  const validateDailyRecord = (): boolean => {
     const flockErr = validateFlockId(flockId);
     const eggErr = validateEggCount(eggCount);
     const dateErr = validateRecordDate(recordDate);
     const notesErr = validateNotes(notesRef.current?.value ?? '');
-
     setFlockIdError(flockErr);
     setEggCountError(eggErr);
     setRecordDateError(dateErr);
     setNotesError(notesErr);
-
     return !flockErr && !eggErr && !dateErr && !notesErr;
   };
 
-  const isFormValid = (): boolean => {
+  const isDailyRecordFormValid = (): boolean => {
     return (
       flockId.length > 0 &&
       flocks.some((f) => f.id === flockId) &&
@@ -216,16 +197,10 @@ export function QuickAddModal({
     );
   };
 
-  const submitRecord = () => {
-    if (!validate()) {
-      return;
-    }
-
+  const submitDailyRecord = () => {
+    if (!validateDailyRecord()) return;
     const notesValue = notesRef.current?.value ?? '';
-
-    // Save last used flock to localStorage
     localStorage.setItem(LAST_FLOCK_KEY, flockId);
-
     createDailyRecord(
       {
         flockId,
@@ -237,43 +212,172 @@ export function QuickAddModal({
         },
       },
       {
-        onSuccess: () => {
-          handleClose();
-        },
+        onSuccess: () => handleClose(),
         onError: (error: Error) => {
           const processedError = processApiError(error);
-
-          // Handle validation errors - show as field errors
           if (
             processedError.type === ErrorType.VALIDATION &&
             processedError.fieldErrors
           ) {
             processedError.fieldErrors.forEach((fieldError) => {
               const field = fieldError.field.toLowerCase();
-              if (field === 'flockid') {
-                setFlockIdError(fieldError.message);
-              } else if (field === 'eggcount') {
-                setEggCountError(fieldError.message);
-              } else if (field === 'recorddate') {
-                setRecordDateError(fieldError.message);
-              } else if (field === 'notes') {
-                setNotesError(fieldError.message);
-              }
+              if (field === 'flockid') setFlockIdError(fieldError.message);
+              else if (field === 'eggcount') setEggCountError(fieldError.message);
+              else if (field === 'recorddate') setRecordDateError(fieldError.message);
+              else if (field === 'notes') setNotesError(fieldError.message);
             });
-          }
-          // For all other errors (network, server, etc.), show toast with retry
-          else {
-            handleError(error, submitRecord);
+          } else {
+            handleError(error, submitDailyRecord);
           }
         },
       }
     );
   };
 
+  // ── Egg sale form ───────────────────────────────────────────────────────
+  const { createEggSale, isCreating: isSalePending } = useCreateEggSale();
+  const lastUsedPrice = useLastUsedEggPrice();
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const [saleDate, setSaleDate] = useState<string>(todayStr);
+  const [saleQuantity, setSaleQuantity] = useState<number>(1);
+  const [salePricePerUnit, setSalePricePerUnit] = useState<string>(
+    lastUsedPrice !== undefined ? String(lastUsedPrice) : ''
+  );
+  const [saleBuyerName, setSaleBuyerName] = useState<string>('');
+  const saleNotesRef = useRef<HTMLTextAreaElement>(null);
+  const [saleNotesLength, setSaleNotesLength] = useState<number>(0);
+  const [saleDateError, setSaleDateError] = useState('');
+  const [saleQuantityError, setSaleQuantityError] = useState('');
+  const [salePriceError, setSalePriceError] = useState('');
+  const [saleBuyerNameError, setSaleBuyerNameError] = useState('');
+  const [saleNotesError, setSaleNotesError] = useState('');
+
+  // Pre-fill price from last used when modal opens and we have a value
+  useEffect(() => {
+    if (open && lastUsedPrice !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSalePricePerUnit(String(lastUsedPrice));
+    }
+  }, [open, lastUsedPrice]);
+
+  const validateSaleDate = (value: string): string => {
+    if (!value) return t('validation.required');
+    const [year, month, day] = value.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (dateObj > today) return t('eggSales.form.dateFuture');
+    return '';
+  };
+
+  const validateSaleQuantity = (value: number): string => {
+    if (value < 1) return t('eggSales.form.quantityMin');
+    return '';
+  };
+
+  const validateSalePrice = (value: number): string => {
+    if (value < 0) return t('eggSales.form.priceMin');
+    return '';
+  };
+
+  const validateSaleBuyerName = (value: string): string => {
+    if (value.length > MAX_BUYER_NAME_LENGTH)
+      return t('validation.maxLength', { count: MAX_BUYER_NAME_LENGTH });
+    return '';
+  };
+
+  const validateSaleNotes = (value: string): string => {
+    if (value.length > MAX_NOTES_LENGTH)
+      return t('validation.maxLength', { count: MAX_NOTES_LENGTH });
+    return '';
+  };
+
+  const validateSaleForm = (): boolean => {
+    const dateErr = validateSaleDate(saleDate);
+    const quantityErr = validateSaleQuantity(saleQuantity);
+    const priceErr = validateSalePrice(parseFloat(salePricePerUnit) || 0);
+    const buyerErr = validateSaleBuyerName(saleBuyerName);
+    const notesErr = validateSaleNotes(saleNotesRef.current?.value ?? '');
+    setSaleDateError(dateErr);
+    setSaleQuantityError(quantityErr);
+    setSalePriceError(priceErr);
+    setSaleBuyerNameError(buyerErr);
+    setSaleNotesError(notesErr);
+    return !dateErr && !quantityErr && !priceErr && !buyerErr && !notesErr;
+  };
+
+  const isSaleFormValid = (): boolean => {
+    return (
+      saleDate.length > 0 &&
+      saleQuantity >= 1 &&
+      parseFloat(salePricePerUnit) >= 0 &&
+      saleBuyerName.length <= MAX_BUYER_NAME_LENGTH &&
+      saleNotesLength <= MAX_NOTES_LENGTH
+    );
+  };
+
+  const submitSale = () => {
+    if (!validateSaleForm()) return;
+    const notesValue = saleNotesRef.current?.value ?? '';
+    createEggSale(
+      {
+        date: saleDate,
+        quantity: saleQuantity,
+        pricePerUnit: parseFloat(salePricePerUnit) || 0,
+        buyerName: saleBuyerName.trim() || null,
+        notes: notesValue.trim() || null,
+      },
+      {
+        onSuccess: () => handleClose(),
+      }
+    );
+  };
+
+  // ── Shared handlers ─────────────────────────────────────────────────────
+  const resetDailyRecordForm = () => {
+    setFlockId(getInitialFlockId());
+    setEggCount(0);
+    setRecordDate(new Date().toISOString().split('T')[0]);
+    setCollectionTime(getCurrentUtcTime());
+    if (notesRef.current) notesRef.current.value = '';
+    setNotesLength(0);
+    setFlockIdError('');
+    setEggCountError('');
+    setRecordDateError('');
+    setNotesError('');
+  };
+
+  const resetSaleForm = () => {
+    setSaleDate(new Date().toISOString().split('T')[0]);
+    setSaleQuantity(1);
+    setSalePricePerUnit(lastUsedPrice !== undefined ? String(lastUsedPrice) : '');
+    setSaleBuyerName('');
+    if (saleNotesRef.current) saleNotesRef.current.value = '';
+    setSaleNotesLength(0);
+    setSaleDateError('');
+    setSaleQuantityError('');
+    setSalePriceError('');
+    setSaleBuyerNameError('');
+    setSaleNotesError('');
+  };
+
+  const handleClose = () => {
+    resetDailyRecordForm();
+    resetSaleForm();
+    setActiveTab(0);
+    onClose();
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    submitRecord();
+    if (effectiveTab === 0) submitDailyRecord();
+    else submitSale();
   };
+
+  const isPending = effectiveTab === 0 ? isDailyRecordPending : isSalePending;
+  const isFormValid = effectiveTab === 0 ? isDailyRecordFormValid() : isSaleFormValid();
 
   return (
     <Dialog
@@ -295,7 +399,7 @@ export function QuickAddModal({
         onSubmit={handleSubmit}
         style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
       >
-        <DialogTitle sx={{ ...dialogTitleSx, pr: 6 }}>
+        <DialogTitle sx={{ ...dialogTitleSx, pr: 6, pb: 0 }}>
           {t('dailyRecords.quickAdd.title')}
           <IconButton
             aria-label={t('common.close')}
@@ -306,6 +410,20 @@ export function QuickAddModal({
             <CloseIcon />
           </IconButton>
         </DialogTitle>
+
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
+          <Tabs
+            value={effectiveTab}
+            onChange={(_e, newValue: number) => setActiveTab(newValue)}
+            aria-label="quick add tabs"
+          >
+            <Tab label={t('dailyRecords.quickAdd.tabRecord')} disabled={isPending} />
+            {revenueTrackingEnabled && (
+              <Tab label={t('dailyRecords.quickAdd.tabSale')} disabled={isPending} />
+            )}
+          </Tabs>
+        </Box>
+
         <DialogContent
           dividers
           sx={{
@@ -314,127 +432,219 @@ export function QuickAddModal({
             flex: 1,
           }}
         >
-          <Stack spacing={FORM_FIELD_SPACING}>
-            <TextField
-              select
-              label={t('dailyRecords.flock')}
-              value={flockId}
-              onChange={(e) => {
-                setFlockId(e.target.value);
-                if (flockIdError) {
-                  setFlockIdError(validateFlockId(e.target.value));
-                }
-              }}
-              onBlur={() => {
-                setFlockIdError(validateFlockId(flockId));
-              }}
-              error={!!flockIdError}
-              helperText={flockIdError}
-              required
-              fullWidth
-              disabled={isPending || flocks.length === 0}
-              inputProps={touchInputProps}
-              SelectProps={{ native: true }}
-            >
-              {flocks.length === 0 ? (
-                <option value="" disabled>
-                  {t('dailyRecords.noFlocks')}
-                </option>
-              ) : (
-                flocks.map((flock) => (
-                  <option
-                    key={flock.id}
-                    value={flock.id}
-                    onClick={() => setFlockId(flock.id)}
-                  >
-                    {flock.identifier} ({flock.coopName})
+          {/* Daily record tab */}
+          {effectiveTab === 0 && (
+            <Stack spacing={FORM_FIELD_SPACING}>
+              <TextField
+                select
+                label={t('dailyRecords.flock')}
+                value={flockId}
+                onChange={(e) => {
+                  setFlockId(e.target.value);
+                  if (flockIdError) setFlockIdError(validateFlockId(e.target.value));
+                }}
+                onBlur={() => setFlockIdError(validateFlockId(flockId))}
+                error={!!flockIdError}
+                helperText={flockIdError}
+                required
+                fullWidth
+                disabled={isPending || flocks.length === 0}
+                inputProps={touchInputProps}
+                SelectProps={{ native: true }}
+              >
+                {flocks.length === 0 ? (
+                  <option value="" disabled>
+                    {t('dailyRecords.noFlocks')}
                   </option>
-                ))
-              )}
-            </TextField>
+                ) : (
+                  flocks.map((flock) => (
+                    <option
+                      key={flock.id}
+                      value={flock.id}
+                      onClick={() => setFlockId(flock.id)}
+                    >
+                      {flock.identifier} ({flock.coopName})
+                    </option>
+                  ))
+                )}
+              </TextField>
 
-            <TextField
-              type="date"
-              label={t('dailyRecords.date')}
-              value={recordDate}
-              onChange={(e) => {
-                setRecordDate(e.target.value);
-                if (recordDateError) {
-                  setRecordDateError(validateRecordDate(e.target.value));
+              <TextField
+                type="date"
+                label={t('dailyRecords.date')}
+                value={recordDate}
+                onChange={(e) => {
+                  setRecordDate(e.target.value);
+                  if (recordDateError) setRecordDateError(validateRecordDate(e.target.value));
+                }}
+                onBlur={() => setRecordDateError(validateRecordDate(recordDate))}
+                error={!!recordDateError}
+                helperText={recordDateError}
+                required
+                fullWidth
+                disabled={isPending}
+                InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  ...touchInputProps,
+                  max: new Date().toISOString().split('T')[0],
+                }}
+              />
+
+              <TextField
+                type="time"
+                label={t('dailyRecords.form.collectionTime')}
+                value={collectionTime}
+                onChange={(e) => setCollectionTime(e.target.value)}
+                fullWidth
+                disabled={isPending}
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ ...touchInputProps, step: 60 }}
+              />
+
+              <NumericStepper
+                label={t('dailyRecords.eggCount')}
+                value={eggCount}
+                onChange={(value) => {
+                  setEggCount(value);
+                  if (eggCountError) setEggCountError(validateEggCount(value));
+                }}
+                min={0}
+                max={9999}
+                disabled={isPending}
+                error={!!eggCountError}
+                helperText={eggCountError}
+                aria-label="egg count"
+                inputRef={eggCountRef}
+              />
+
+              <TextField
+                label={t('dailyRecords.notes')}
+                defaultValue=""
+                onChange={(e) => {
+                  setNotesLength(e.target.value.length);
+                  if (notesError) setNotesError(validateNotes(e.target.value));
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  setNotesLength(value.length);
+                  setNotesError(validateNotes(value));
+                }}
+                error={!!notesError}
+                helperText={
+                  notesError ||
+                  `${notesLength}/${MAX_NOTES_LENGTH} ${t('common.characters')}`
                 }
-              }}
-              onBlur={() => {
-                setRecordDateError(validateRecordDate(recordDate));
-              }}
-              error={!!recordDateError}
-              helperText={recordDateError}
-              required
-              fullWidth
-              disabled={isPending}
-              InputLabelProps={{ shrink: true }}
-              inputProps={{
-                ...touchInputProps,
-                max: new Date().toISOString().split('T')[0],
-              }}
-            />
+                fullWidth
+                disabled={isPending}
+                multiline
+                rows={2}
+                inputProps={{ ...touchInputProps }}
+                inputRef={notesRef}
+              />
+            </Stack>
+          )}
 
-            <TextField
-              type="time"
-              label={t('dailyRecords.form.collectionTime')}
-              value={collectionTime}
-              onChange={(e) => setCollectionTime(e.target.value)}
-              fullWidth
-              disabled={isPending}
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ ...touchInputProps, step: 60 }}
-            />
+          {/* Egg sale tab */}
+          {effectiveTab === 1 && (
+            <Stack spacing={FORM_FIELD_SPACING}>
+              <TextField
+                type="date"
+                label={t('eggSales.form.date')}
+                value={saleDate}
+                onChange={(e) => {
+                  setSaleDate(e.target.value);
+                  if (saleDateError) setSaleDateError(validateSaleDate(e.target.value));
+                }}
+                onBlur={() => setSaleDateError(validateSaleDate(saleDate))}
+                error={!!saleDateError}
+                helperText={saleDateError}
+                required
+                fullWidth
+                disabled={isSalePending}
+                InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  ...touchInputProps,
+                  max: new Date().toISOString().split('T')[0],
+                }}
+              />
 
-            <NumericStepper
-              label={t('dailyRecords.eggCount')}
-              value={eggCount}
-              onChange={(value) => {
-                setEggCount(value);
-                if (eggCountError) {
-                  setEggCountError(validateEggCount(value));
+              <NumericStepper
+                label={t('eggSales.form.quantity')}
+                value={saleQuantity}
+                onChange={(value) => {
+                  setSaleQuantity(value);
+                  if (saleQuantityError) setSaleQuantityError(validateSaleQuantity(value));
+                }}
+                min={1}
+                max={99999}
+                disabled={isSalePending}
+                error={!!saleQuantityError}
+                helperText={saleQuantityError}
+                aria-label="sale quantity"
+              />
+
+              <TextField
+                type="number"
+                label={t('eggSales.form.pricePerUnit')}
+                value={salePricePerUnit}
+                onChange={(e) => {
+                  setSalePricePerUnit(e.target.value);
+                  if (salePriceError) setSalePriceError(validateSalePrice(parseFloat(e.target.value) || 0));
+                }}
+                onBlur={() => setSalePriceError(validateSalePrice(parseFloat(salePricePerUnit) || 0))}
+                error={!!salePriceError}
+                helperText={salePriceError}
+                required
+                fullWidth
+                disabled={isSalePending}
+                inputProps={{ ...touchInputProps, min: 0, step: 0.01 }}
+                InputLabelProps={{ shrink: true }}
+              />
+
+              <TextField
+                label={t('eggSales.form.buyerName')}
+                value={saleBuyerName}
+                onChange={(e) => {
+                  setSaleBuyerName(e.target.value);
+                  if (saleBuyerNameError)
+                    setSaleBuyerNameError(validateSaleBuyerName(e.target.value));
+                }}
+                onBlur={() => setSaleBuyerNameError(validateSaleBuyerName(saleBuyerName))}
+                error={!!saleBuyerNameError}
+                helperText={saleBuyerNameError}
+                fullWidth
+                disabled={isSalePending}
+                inputProps={{ ...touchInputProps, maxLength: MAX_BUYER_NAME_LENGTH }}
+              />
+
+              <TextField
+                label={t('eggSales.form.notes')}
+                defaultValue=""
+                onChange={(e) => {
+                  setSaleNotesLength(e.target.value.length);
+                  if (saleNotesError) setSaleNotesError(validateSaleNotes(e.target.value));
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  setSaleNotesLength(value.length);
+                  setSaleNotesError(validateSaleNotes(value));
+                }}
+                error={!!saleNotesError}
+                helperText={
+                  saleNotesError ||
+                  `${saleNotesLength}/${MAX_NOTES_LENGTH} ${t('common.characters')}`
                 }
-              }}
-              min={0}
-              max={9999}
-              disabled={isPending}
-              error={!!eggCountError}
-              helperText={eggCountError}
-              aria-label="egg count"
-              inputRef={eggCountRef}
-            />
-
-            <TextField
-              label={t('dailyRecords.notes')}
-              defaultValue=""
-              onChange={(e) => {
-                setNotesLength(e.target.value.length);
-                if (notesError) {
-                  setNotesError(validateNotes(e.target.value));
-                }
-              }}
-              onBlur={(e) => {
-                const value = e.target.value;
-                setNotesLength(value.length);
-                setNotesError(validateNotes(value));
-              }}
-              error={!!notesError}
-              helperText={
-                notesError ||
-                `${notesLength}/${MAX_NOTES_LENGTH} ${t('common.characters')}`
-              }
-              fullWidth
-              disabled={isPending}
-              multiline
-              rows={2}
-              inputProps={{ ...touchInputProps }}
-              inputRef={notesRef}
-            />
-          </Stack>
+                fullWidth
+                disabled={isSalePending}
+                multiline
+                rows={2}
+                inputProps={{ ...touchInputProps }}
+                inputRef={saleNotesRef}
+              />
+            </Stack>
+          )}
         </DialogContent>
+
         <DialogActions sx={dialogActionsSx}>
           <Button
             variant="text"
@@ -447,7 +657,7 @@ export function QuickAddModal({
           <Button
             type="submit"
             variant="contained"
-            disabled={isPending || !isFormValid()}
+            disabled={isPending || !isFormValid}
             startIcon={
               isPending ? <CircularProgress size={20} color="inherit" /> : undefined
             }

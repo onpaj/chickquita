@@ -282,6 +282,88 @@ public class StatisticsRepositoryTests : IDisposable
 
     #endregion
 
+    #region GetDashboardStatsAsync — TotalRevenue / ProfitLoss
+
+    [Fact]
+    public async Task GetDashboardStatsAsync_WithNoSales_TotalRevenueAndProfitLossAreNull()
+    {
+        var result = await _repository.GetDashboardStatsAsync();
+
+        result.TotalRevenue.Should().BeNull();
+        result.ProfitLoss.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetDashboardStatsAsync_WithEggSales_ComputesTotalRevenue()
+    {
+        var today = DateTime.UtcNow.Date;
+        var sale1 = EggSale.Create(_tenantId, today, 100, 5.0m).Value;   // 500
+        var sale2 = EggSale.Create(_tenantId, today.AddDays(-1), 50, 4.0m).Value; // 200
+        _dbContext.EggSales.AddRange(sale1, sale2);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _repository.GetDashboardStatsAsync();
+
+        result.TotalRevenue.Should().BeApproximately(700m, 0.01m);
+    }
+
+    [Fact]
+    public async Task GetDashboardStatsAsync_WithSalesAndCosts_ComputesProfitLoss()
+    {
+        var today = DateTime.UtcNow.Date;
+        var sale = EggSale.Create(_tenantId, today, 200, 5.0m).Value; // 1000 revenue
+        _dbContext.EggSales.Add(sale);
+
+        var purchase = Purchase.Create(
+            _tenantId, "Feed", PurchaseType.Feed, 300m, 10m, QuantityUnit.Kg,
+            today, _coopId).Value;
+        _dbContext.Purchases.Add(purchase);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _repository.GetDashboardStatsAsync();
+
+        result.TotalRevenue.Should().BeApproximately(1000m, 0.01m);
+        result.ProfitLoss.Should().BeApproximately(700m, 0.01m); // 1000 - 300
+    }
+
+    [Fact]
+    public async Task GetDashboardStatsAsync_WithSalesExceedingCosts_PositiveProfitLoss()
+    {
+        var today = DateTime.UtcNow.Date;
+        var sale = EggSale.Create(_tenantId, today, 100, 10.0m).Value; // 1000 revenue
+        _dbContext.EggSales.Add(sale);
+
+        var purchase = Purchase.Create(
+            _tenantId, "Feed", PurchaseType.Feed, 400m, 20m, QuantityUnit.Kg,
+            today, _coopId).Value;
+        _dbContext.Purchases.Add(purchase);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _repository.GetDashboardStatsAsync();
+
+        result.ProfitLoss.Should().BePositive();
+    }
+
+    [Fact]
+    public async Task GetDashboardStatsAsync_WithCostsExceedingSales_NegativeProfitLoss()
+    {
+        var today = DateTime.UtcNow.Date;
+        var sale = EggSale.Create(_tenantId, today, 10, 1.0m).Value; // 10 revenue
+        _dbContext.EggSales.Add(sale);
+
+        var purchase = Purchase.Create(
+            _tenantId, "Feed", PurchaseType.Feed, 500m, 20m, QuantityUnit.Kg,
+            today, _coopId).Value;
+        _dbContext.Purchases.Add(purchase);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _repository.GetDashboardStatsAsync();
+
+        result.ProfitLoss.Should().BeNegative();
+    }
+
+    #endregion
+
     #region GetDashboardStatsAsync — tenant isolation
 
     [Fact]
