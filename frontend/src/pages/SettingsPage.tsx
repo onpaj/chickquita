@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
+import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import LogoutIcon from '@mui/icons-material/Logout';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from 'react-i18next';
@@ -45,7 +46,8 @@ export function SettingsPage() {
   const activeCoops = coops?.filter((c) => c.isActive) ?? [];
   const canToggleSingleCoopMode = activeCoops.length === 1;
   const singleCoopMode = settings?.singleCoopMode ?? true;
-  const revenueTrackingEnabled = settings?.revenueTrackingEnabled ?? true;
+const revenueTrackingEnabled = settings?.revenueTrackingEnabled ?? true;
+  const currency = settings?.currency ?? 'CZK';
 
   const handleLanguageChange = (event: SelectChangeEvent) => {
     i18n.changeLanguage(event.target.value);
@@ -55,11 +57,15 @@ export function SettingsPage() {
     // checked=true → enable multi-coop (singleCoopMode=false), always allowed
     // checked=false → revert to single-coop (singleCoopMode=true), requires exactly 1 coop
     if (!event.target.checked && !canToggleSingleCoopMode) return;
-    updateSettings({ singleCoopMode: !event.target.checked, revenueTrackingEnabled });
+updateSettings({ singleCoopMode: !event.target.checked, revenueTrackingEnabled, currency });
   };
 
   const handleRevenueTrackingToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateSettings({ singleCoopMode, revenueTrackingEnabled: event.target.checked });
+    updateSettings({ singleCoopMode, revenueTrackingEnabled: event.target.checked, currency });
+  };
+
+  const handleCurrencyChange = (event: SelectChangeEvent) => {
+    updateSettings({ singleCoopMode, revenueTrackingEnabled, currency: event.target.value });
   };
 
   const handleSignOutConfirm = async () => {
@@ -94,6 +100,56 @@ export function SettingsPage() {
               >
                 <MenuItem value="cs">Čeština</MenuItem>
                 <MenuItem value="en">English</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Currency section */}
+      <Card elevation={1} sx={{ mt: 2 }}>
+        <CardContent>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            {t('settings.currency.label')}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+            {t('settings.currency.description')}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <CurrencyExchangeIcon color="action" />
+            <FormControl fullWidth size="small">
+              <InputLabel id="currency-select-label">
+                {t('settings.currency.label')}
+              </InputLabel>
+              <Select
+                labelId="currency-select-label"
+                id="currency-select"
+                value={currency}
+                label={t('settings.currency.label')}
+                onChange={handleCurrencyChange}
+                disabled={isUpdatingSettings}
+              >
+                <MenuItem value="CZK">CZK – Česká koruna</MenuItem>
+                <MenuItem value="EUR">EUR – Euro</MenuItem>
+                <MenuItem value="USD">USD – US Dollar</MenuItem>
+                <MenuItem value="GBP">GBP – British Pound</MenuItem>
+                <MenuItem value="CHF">CHF – Swiss Franc</MenuItem>
+                <MenuItem value="PLN">PLN – Polish Zloty</MenuItem>
+                <MenuItem value="HUF">HUF – Hungarian Forint</MenuItem>
+                <MenuItem value="RON">RON – Romanian Leu</MenuItem>
+                <MenuItem value="BGN">BGN – Bulgarian Lev</MenuItem>
+                <MenuItem value="HRK">HRK – Croatian Kuna</MenuItem>
+                <MenuItem value="DKK">DKK – Danish Krone</MenuItem>
+                <MenuItem value="SEK">SEK – Swedish Krona</MenuItem>
+                <MenuItem value="NOK">NOK – Norwegian Krone</MenuItem>
+                <MenuItem value="UAH">UAH – Ukrainian Hryvnia</MenuItem>
+                <MenuItem value="RUB">RUB – Russian Ruble</MenuItem>
+                <MenuItem value="TRY">TRY – Turkish Lira</MenuItem>
+                <MenuItem value="CAD">CAD – Canadian Dollar</MenuItem>
+                <MenuItem value="AUD">AUD – Australian Dollar</MenuItem>
+                <MenuItem value="JPY">JPY – Japanese Yen</MenuItem>
+                <MenuItem value="CNY">CNY – Chinese Yuan</MenuItem>
+                <MenuItem value="INR">INR – Indian Rupee</MenuItem>
               </Select>
             </FormControl>
           </Box>

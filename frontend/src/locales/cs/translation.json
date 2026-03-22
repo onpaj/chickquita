@@ -293,7 +293,7 @@
       "type": "Typ nákupu",
       "name": "Název",
       "purchaseDate": "Datum nákupu",
-      "amount": "Částka (Kč)",
+      "amount": "Částka ({{currency}})",
       "quantity": "Množství",
       "unit": "Jednotka",
       "consumedDate": "Datum spotřeby",
@@ -488,9 +488,13 @@
       "description": "Zapne plnou správu více kurníků a zobrazí navigaci kurníků",
       "onlyOneCoopHint": "Zpět do zjednodušeného režimu lze přepnout pouze s jedním aktivním kurníkem"
     },
-    "revenueTracking": {
+"revenueTracking": {
       "label": "Sledování příjmů",
       "description": "Zapne sledování příjmů a zisku/ztráty (prodeje vajec, grafy příjmů)"
+    },
+    "currency": {
+      "label": "Měna",
+      "description": "Měna používaná pro zobrazení cen a nákladů"
     }
   },
   "validation": {
@@ -503,7 +507,7 @@
     "positiveNumber": "Musí být kladné číslo",
     "invalidNumber": "Musí být platné číslo",
     "invalidType": "Neplatný typ",
-    "maxAmount": "Maximální částka je 999999.99 Kč",
+    "maxAmount": "Maximální částka je 999999.99 {{currency}}",
     "maxQuantity": "Maximální množství je 999999.99"
   },
   "statistics": {

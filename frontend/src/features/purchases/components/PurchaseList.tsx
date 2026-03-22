@@ -178,7 +178,7 @@ function getPurchaseTypeIcon(type: PurchaseType) {
  */
 export function PurchaseList({ onEdit }: PurchaseListProps) {
   const { t } = useTranslation();
-  const { singleCoopMode } = useUserSettingsContext();
+  const { singleCoopMode, currency } = useUserSettingsContext();
 
   // Filter state
   const [fromDate, setFromDate] = useState<string>('');
@@ -317,7 +317,7 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
           </Typography>
           <Typography variant="h4" fontWeight="bold">
             <span>{monthlySummary.toFixed(2)}</span>{' '}
-            {t('purchases.currency')}
+            {currency}
           </Typography>
         </CardContent>
       </Card>
@@ -382,7 +382,7 @@ export function PurchaseList({ onEdit }: PurchaseListProps) {
                         {formatDate(purchase.purchaseDate)}
                       </Typography>
                       <Typography variant="body2" color="primary" fontWeight="bold" component="span">
-                        {purchase.amount.toFixed(2)} {t('purchases.currency')}
+                        {purchase.amount.toFixed(2)} {currency}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" component="span">
                         {purchase.quantity} {getUnitLabel(purchase.unit)}

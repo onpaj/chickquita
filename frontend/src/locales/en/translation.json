@@ -293,7 +293,7 @@
       "type": "Purchase Type",
       "name": "Name",
       "purchaseDate": "Purchase Date",
-      "amount": "Amount (CZK)",
+      "amount": "Amount ({{currency}})",
       "quantity": "Quantity",
       "unit": "Unit",
       "consumedDate": "Consumed Date",
@@ -486,9 +486,13 @@
       "description": "Enables full management of multiple coops and shows coop navigation",
       "onlyOneCoopHint": "Can only switch back to simplified mode with exactly one active coop"
     },
-    "revenueTracking": {
+"revenueTracking": {
       "label": "Revenue tracking",
       "description": "Enables revenue and profit/loss tracking (egg sales, revenue charts)"
+    },
+    "currency": {
+      "label": "Currency",
+      "description": "Currency used for displaying prices and costs"
     }
   },
   "validation": {
@@ -501,7 +505,7 @@
     "positiveNumber": "Must be a positive number",
     "invalidNumber": "Must be a valid number",
     "invalidType": "Invalid type",
-    "maxAmount": "Maximum amount is 999999.99 CZK",
+    "maxAmount": "Maximum amount is 999999.99 {{currency}}",
     "maxQuantity": "Maximum quantity is 999999.99"
   },
   "statistics": {

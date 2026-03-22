@@ -59,7 +59,7 @@ public sealed class GetTenantSettingsQueryHandler : IRequestHandler<GetTenantSet
 
             _logger.LogInformation("Retrieved settings for tenant {TenantId}", tenantId.Value);
 
-            return Result<TenantSettingsDto>.Success(new TenantSettingsDto(tenant.SingleCoopMode, tenant.RevenueTrackingEnabled));
+            return Result<TenantSettingsDto>.Success(new TenantSettingsDto(tenant.SingleCoopMode, tenant.RevenueTrackingEnabled, tenant.Currency));
         }
         catch (Exception ex)
         {

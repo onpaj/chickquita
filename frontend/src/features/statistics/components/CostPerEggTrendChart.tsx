@@ -14,6 +14,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import type { CostPerEggTrendItem } from '../types';
 import dayjs from 'dayjs';
+import { useUserSettingsContext } from '../../settings/context/UserSettingsContext';
 
 /**
  * Cost Per Egg Trend Chart Component
@@ -39,6 +40,7 @@ interface CostPerEggTrendTooltipProps {
 
 function CostPerEggTrendTooltip({ active, payload }: CostPerEggTrendTooltipProps) {
   const { t } = useTranslation();
+  const { currency } = useUserSettingsContext();
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -55,7 +57,7 @@ function CostPerEggTrendTooltip({ active, payload }: CostPerEggTrendTooltipProps
           {dayjs(data.date).format('DD MMMM YYYY')}
         </Typography>
         <Typography variant="body2" color="primary">
-          {t('statistics.costPerEggTrend.costPerEgg')}: {data.costPerEgg.toFixed(2)} Kč
+          {t('statistics.costPerEggTrend.costPerEgg')}: {data.costPerEgg.toFixed(2)} {currency}
         </Typography>
       </Box>
     );
@@ -65,6 +67,7 @@ function CostPerEggTrendTooltip({ active, payload }: CostPerEggTrendTooltipProps
 
 export function CostPerEggTrendChart({ data }: CostPerEggTrendChartProps) {
   const { t, i18n } = useTranslation();
+  const { currency } = useUserSettingsContext();
 
   // Format date for display — unambiguous, locale-aware
   const formatDate = (dateString: string) => {
@@ -142,7 +145,7 @@ export function CostPerEggTrendChart({ data }: CostPerEggTrendChartProps) {
               position: 'insideLeft',
               style: { fontSize: '12px' },
             }}
-            tickFormatter={(value) => `${value.toFixed(2)} Kč`}
+            tickFormatter={(value) => `${value.toFixed(2)} ${currency}`}
             style={{ fontSize: '12px' }}
           />
           <Tooltip content={CostPerEggTrendTooltip} />
