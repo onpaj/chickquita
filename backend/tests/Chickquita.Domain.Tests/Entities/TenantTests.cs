@@ -103,4 +103,113 @@ public class TenantTests
         updateResult.IsFailure.Should().BeTrue();
         updateResult.Error.Message.Should().Contain("Name cannot be empty");
     }
+
+    #region UpdateSettings Tests
+
+    [Fact]
+    public void Create_ShouldHaveRevenueTrackingEnabledByDefault()
+    {
+        // Arrange & Act
+        var tenant = Tenant.Create(ValidOrgId, ValidName).Value;
+
+        // Assert
+        tenant.RevenueTrackingEnabled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void UpdateSettings_WithRevenueTrackingEnabled_ShouldPersist()
+    {
+        // Arrange
+        var tenant = Tenant.Create(ValidOrgId, ValidName).Value;
+        var originalUpdatedAt = tenant.UpdatedAt;
+        Thread.Sleep(10);
+
+        // Act
+        var result = tenant.UpdateSettings(singleCoopMode: false, revenueTrackingEnabled: true, currency: "CZK");
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        tenant.RevenueTrackingEnabled.Should().BeTrue();
+        tenant.UpdatedAt.Should().BeAfter(originalUpdatedAt);
+    }
+
+    [Fact]
+    public void UpdateSettings_WithRevenueTrackingDisabled_ShouldPersist()
+    {
+        // Arrange
+        var tenant = Tenant.Create(ValidOrgId, ValidName).Value;
+        var originalUpdatedAt = tenant.UpdatedAt;
+        Thread.Sleep(10);
+
+        // Act
+        var result = tenant.UpdateSettings(singleCoopMode: false, revenueTrackingEnabled: false, currency: "CZK");
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        tenant.RevenueTrackingEnabled.Should().BeFalse();
+        tenant.UpdatedAt.Should().BeAfter(originalUpdatedAt);
+    }
+
+    [Fact]
+    public void UpdateSettings_WithSingleCoopModeEnabled_ShouldPersist()
+    {
+        // Arrange
+        var tenant = Tenant.Create(ValidOrgId, ValidName).Value;
+
+        // Act
+        var result = tenant.UpdateSettings(singleCoopMode: true, revenueTrackingEnabled: true);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        tenant.SingleCoopMode.Should().BeTrue();
+    }
+
+    [Fact]
+    public void UpdateSettings_WithValidCurrency_ShouldNormalizeToUppercase()
+    {
+        // Arrange
+        var tenant = Tenant.Create(ValidOrgId, ValidName).Value;
+
+        // Act
+        var result = tenant.UpdateSettings(singleCoopMode: false, revenueTrackingEnabled: true, currency: "eur");
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        tenant.Currency.Should().Be("EUR");
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void UpdateSettings_WithNullOrEmptyCurrency_ShouldDefaultToCZK(string? currency)
+    {
+        // Arrange
+        var tenant = Tenant.Create(ValidOrgId, ValidName).Value;
+
+        // Act
+        var result = tenant.UpdateSettings(singleCoopMode: false, revenueTrackingEnabled: true, currency: currency);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        tenant.Currency.Should().Be("CZK");
+    }
+
+    [Fact]
+    public void UpdateSettings_CanToggleRevenueTrackingMultipleTimes()
+    {
+        // Arrange
+        var tenant = Tenant.Create(ValidOrgId, ValidName).Value;
+        tenant.RevenueTrackingEnabled.Should().BeTrue(); // default
+
+        // Act & Assert — disable
+        tenant.UpdateSettings(singleCoopMode: false, revenueTrackingEnabled: false);
+        tenant.RevenueTrackingEnabled.Should().BeFalse();
+
+        // Act & Assert — re-enable
+        tenant.UpdateSettings(singleCoopMode: false, revenueTrackingEnabled: true);
+        tenant.RevenueTrackingEnabled.Should().BeTrue();
+    }
+
+    #endregion
 }
