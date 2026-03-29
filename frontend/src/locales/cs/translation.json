@@ -488,7 +488,7 @@
       "description": "Zapne plnou správu více kurníků a zobrazí navigaci kurníků",
       "onlyOneCoopHint": "Zpět do zjednodušeného režimu lze přepnout pouze s jedním aktivním kurníkem"
     },
-"revenueTracking": {
+    "revenueTracking": {
       "label": "Sledování příjmů",
       "description": "Zapne sledování příjmů a zisku/ztráty (prodeje vajec, grafy příjmů)"
     },

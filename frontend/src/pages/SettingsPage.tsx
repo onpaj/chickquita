@@ -46,7 +46,7 @@ export function SettingsPage() {
   const activeCoops = coops?.filter((c) => c.isActive) ?? [];
   const canToggleSingleCoopMode = activeCoops.length === 1;
   const singleCoopMode = settings?.singleCoopMode ?? true;
-const revenueTrackingEnabled = settings?.revenueTrackingEnabled ?? true;
+  const revenueTrackingEnabled = settings?.revenueTrackingEnabled ?? true;
   const currency = settings?.currency ?? 'CZK';
 
   const handleLanguageChange = (event: SelectChangeEvent) => {
@@ -57,7 +57,7 @@ const revenueTrackingEnabled = settings?.revenueTrackingEnabled ?? true;
     // checked=true → enable multi-coop (singleCoopMode=false), always allowed
     // checked=false → revert to single-coop (singleCoopMode=true), requires exactly 1 coop
     if (!event.target.checked && !canToggleSingleCoopMode) return;
-updateSettings({ singleCoopMode: !event.target.checked, revenueTrackingEnabled, currency });
+    updateSettings({ singleCoopMode: !event.target.checked, revenueTrackingEnabled, currency });
   };
 
   const handleRevenueTrackingToggle = (event: React.ChangeEvent<HTMLInputElement>) => {

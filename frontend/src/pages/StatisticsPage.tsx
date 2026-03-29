@@ -56,7 +56,7 @@ import { useUserSettingsContext } from '@/features/settings';
  */
 export default function StatisticsPage() {
   const { t, i18n } = useTranslation();
-const { singleCoopMode, revenueTrackingEnabled, currency } = useUserSettingsContext();
+  const { singleCoopMode, revenueTrackingEnabled, currency } = useUserSettingsContext();
   const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all' | 'custom'>('all');
   const [customStartDate, setCustomStartDate] = useState<Dayjs | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Dayjs | null>(null);
