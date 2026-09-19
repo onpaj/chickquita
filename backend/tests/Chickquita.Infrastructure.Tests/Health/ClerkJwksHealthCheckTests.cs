@@ -14,6 +14,11 @@ namespace Chickquita.Infrastructure.Tests.Health;
 /// <summary>
 /// Tests that the Clerk JWKS health check surfaces signing-key resolution failures,
 /// which otherwise let the app start "healthy" while rejecting every authenticated request.
+/// <para>
+/// Failures report <see cref="HealthStatus.Degraded"/>, not Unhealthy: the app still serves
+/// the SPA and public endpoints, and /health must keep returning 200 so a Clerk outage cannot
+/// block the CI readiness gate and stall a deployment.
+/// </para>
 /// </summary>
 public class ClerkJwksHealthCheckTests
 {
@@ -45,7 +50,7 @@ public class ClerkJwksHealthCheckTests
         var result = await sut.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(HealthStatus.Unhealthy);
+        result.Status.Should().Be(HealthStatus.Degraded);
         result.Description.Should().Contain("signing key");
     }
 
@@ -59,7 +64,7 @@ public class ClerkJwksHealthCheckTests
         var result = await sut.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(HealthStatus.Unhealthy);
+        result.Status.Should().Be(HealthStatus.Degraded);
         result.Exception.Should().BeOfType<HttpRequestException>();
     }
 
@@ -73,7 +78,7 @@ public class ClerkJwksHealthCheckTests
         var result = await sut.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(HealthStatus.Unhealthy);
+        result.Status.Should().Be(HealthStatus.Degraded);
     }
 
     private static ClerkJwksHealthCheck CreateSut(IConfigurationManager<OpenIdConnectConfiguration>? configurationManager)

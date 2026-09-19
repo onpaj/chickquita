@@ -17,6 +17,11 @@ namespace Chickquita.Infrastructure.Health;
 /// <c>401 Unauthorized</c> ("The signature key was not found") until the process is restarted.
 /// </para>
 /// <para>
+/// Failures report <c>Degraded</c> rather than <c>Unhealthy</c>: the app still serves the SPA
+/// and public endpoints, and /health must keep returning 200 so that a Clerk outage cannot
+/// fail the CI readiness gate and stall a deployment. The reason is carried in the description.
+/// </para>
+/// <para>
 /// When no signing key is resolved, the description carries enough diagnostics to tell
 /// apart the possible causes without shell access to the container: the advertised
 /// <c>jwks_uri</c>, the raw keys received, a direct fetch of the JWKS with its CDN cache
@@ -49,7 +54,7 @@ public sealed class ClerkJwksHealthCheck : IHealthCheck
         if (configurationManager is null)
         {
             _logger.LogError("JWT bearer authentication has no configuration manager; Clerk authority is not configured.");
-            return HealthCheckResult.Unhealthy(
+            return HealthCheckResult.Degraded(
                 "JWT bearer authentication is not configured with a Clerk authority.");
         }
 
@@ -72,7 +77,7 @@ public sealed class ClerkJwksHealthCheck : IHealthCheck
                 options.Authority,
                 diagnostics);
 
-            return HealthCheckResult.Unhealthy(
+            return HealthCheckResult.Degraded(
                 $"Clerk OIDC metadata for '{options.Authority}' contained no signing key. {diagnostics}");
         }
         catch (Exception ex)
@@ -82,7 +87,7 @@ public sealed class ClerkJwksHealthCheck : IHealthCheck
                 "Failed to retrieve Clerk OIDC metadata from {Authority}.",
                 options.Authority);
 
-            return HealthCheckResult.Unhealthy(
+            return HealthCheckResult.Degraded(
                 $"Failed to retrieve Clerk OIDC metadata from '{options.Authority}'.",
                 ex);
         }
