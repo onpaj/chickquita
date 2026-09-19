@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Xunit;
 
 namespace Chickquita.Api.Tests.Endpoints;
@@ -27,6 +28,18 @@ public class HealthCheckEndpointTests : IClassFixture<WebApplicationFactory<Prog
 
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseInMemoryDatabase($"HealthCheckTestDb_{Guid.NewGuid()}"));
+
+                // Drop the Clerk JWKS check: it performs a real OIDC metadata fetch, and these
+                // tests cover the endpoint contract, not Clerk connectivity. The check's own
+                // behaviour is covered by ClerkJwksHealthCheckTests.
+                services.Configure<HealthCheckServiceOptions>(options =>
+                {
+                    var clerkCheck = options.Registrations
+                        .FirstOrDefault(r => r.Name == "clerk-jwks");
+
+                    if (clerkCheck is not null)
+                        options.Registrations.Remove(clerkCheck);
+                });
             });
         });
     }
