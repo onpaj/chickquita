@@ -30,7 +30,7 @@ namespace Chickquita.Infrastructure.Health;
 /// </summary>
 public sealed class ClerkJwksHealthCheck : IHealthCheck
 {
-    private static readonly TimeSpan DiagnosticFetchTimeout = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan DiagnosticFetchTimeout = TimeSpan.FromSeconds(5);
     private const int DiagnosticBodyPreviewLength = 300;
 
     private readonly IOptionsMonitor<JwtBearerOptions> _jwtBearerOptions;
@@ -69,7 +69,7 @@ public sealed class ClerkJwksHealthCheck : IHealthCheck
                     $"Clerk JWKS resolved with {signingKeyCount} signing key(s).");
             }
 
-            var diagnostics = await DescribeMissingKeysAsync(configuration, cancellationToken);
+            var diagnostics = await DescribeMissingKeysAsync(options, configuration, cancellationToken);
 
             _logger.LogError(
                 "Clerk OIDC metadata for {Authority} resolved but contained no signing key. "
@@ -94,14 +94,26 @@ public sealed class ClerkJwksHealthCheck : IHealthCheck
     }
 
     private static async Task<string> DescribeMissingKeysAsync(
+        JwtBearerOptions options,
         OpenIdConnectConfiguration configuration,
         CancellationToken cancellationToken)
     {
         var sb = new StringBuilder();
         var rawKeys = configuration.JsonWebKeySet?.Keys ?? [];
 
-        sb.Append("jwks_uri=").Append(string.IsNullOrEmpty(configuration.JwksUri) ? "<none>" : configuration.JwksUri);
+        sb.Append("issuer=").Append(string.IsNullOrEmpty(configuration.Issuer) ? "<none>" : configuration.Issuer);
+        sb.Append("; jwks_uri=").Append(string.IsNullOrEmpty(configuration.JwksUri) ? "<none>" : configuration.JwksUri);
         sb.Append("; rawKeys=").Append(rawKeys.Count);
+
+        // The metadata document itself is what IdentityModel parsed; when jwks_uri is absent
+        // from it, no key fetch is ever attempted. Fetch it directly to see what this network
+        // identity actually receives.
+        var metadataAddress = !string.IsNullOrEmpty(options.MetadataAddress)
+            ? options.MetadataAddress
+            : $"{options.Authority?.TrimEnd('/')}/.well-known/openid-configuration";
+
+        sb.Append("; metadataAddress=").Append(metadataAddress);
+        sb.Append("; metadataFetch=").Append(await DescribeDirectFetchAsync(metadataAddress, cancellationToken));
 
         foreach (var key in rawKeys)
         {
